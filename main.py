@@ -207,20 +207,22 @@ def get_all_data():
         
     os.chdir(filepath_logs)
     for i in files:
-        print(i)
-        with io.open(i,"r",encoding="ansi") as gamelog:
-            initial = gamelog.read()
-            mtime = time.ctime(os.path.getmtime(i))
+        if ("Match_GameLog_" not in i) or (len(i) < 30):
+            pass
+        else:
+            with io.open(i,"r",encoding="ansi") as gamelog:
+                initial = gamelog.read()
+                mtime = time.ctime(os.path.getmtime(i))
 
-        parsed_data = modo.get_all_data(initial,mtime,all_decks,w)
-        
-        all_match_data.append(parsed_data[0])
-        for i in parsed_data[1]:
-            all_game_data.append(i)
-        for i in parsed_data[2]:
-            all_play_data.append(i)
-        for i in parsed_data[3]:
-            all_raw_data.append(i)
+            parsed_data = modo.get_all_data(initial,mtime,all_decks,w)
+            
+            all_match_data.append(parsed_data[0])
+            for i in parsed_data[1]:
+                all_game_data.append(i)
+            for i in parsed_data[2]:
+                all_play_data.append(i)
+            for i in parsed_data[3]:
+                all_raw_data.append(i)
 
     all_data = [all_match_data,all_game_data,all_play_data,all_raw_data]
     all_data_inverted = modo.invert_join(all_data)
@@ -245,28 +247,20 @@ def print_data(data,header):
         tree1.heading(i,text=i, command=lambda _col=i:
                       sort_column(_col,False))
     tree1.column("Match_ID",anchor="w")
-
-    #insert data in tree
-    filtered =     False
-    count =        0
-    header_index = 0
-    for i in data:
-        for key in filter_dict: #key=col header, value=item filtered on
-            if key not in header:
-                break
-            for index,j in enumerate(header):
-                if j == key:
-                    header_index = index
-                    break
-            if i[header_index] not in filter_dict[key]:
-                filtered = True
-                break
-        if filtered == False:
-            tree1.insert("","end",values=i)
-            count += 1
-        filtered = False
-    status_label.config(text="Displaying: " + str(count) + " of " + str(len(data)) + " records.")
         
+    df = modo.to_dataframe(data,header)
+    total = df.shape[0]
+    for key in filter_dict:
+        if key not in header:
+            break
+        for i in filter_dict[key]:
+            df = df[(df[key].isin(filter_dict[key]))]
+    df = df.sort_values(by=["Match_ID"],ascending=False)
+    df_rows = df.to_numpy().tolist()
+    for i in df_rows:
+        tree1.insert("","end",values=i)
+    status_label.config(text="Displaying: " + str(len(df_rows)) + " of " + str(total) + " records.")
+
 def get_lists():
     global all_decks
     
@@ -2075,7 +2069,7 @@ def exit():
 
 #create a window
 window = tk.Tk() 
-window.title("MODO Replay Tool")
+window.title("MTGO-Stats")
 window.minsize(main_window_width,main_window_height)
 window.resizable(False,False)
 
