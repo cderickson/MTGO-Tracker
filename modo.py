@@ -27,6 +27,7 @@ def match_header():
             "P2_Wins",
             "Match_Winner",
             "Format",
+            "Match_Type",
             "Date"]
 
 def game_header():
@@ -470,6 +471,7 @@ def match_data(ga,gd,pd,ad):
     match_format =  "NA"
     player_count =  len(players(ga))
     prev_string =   ""
+    match_type =    "NA"
     date =          ga[0][0:4] + "-" + ga[0][4:6] + "-" + ga[0][6:8] + "-" + ga[0][8:10] + ":" + ga[0][10:]
     if p1_roll > p2_roll:
         roll_winner = "P1"
@@ -507,6 +509,7 @@ def match_data(ga,gd,pd,ad):
                        p2_wins,
                        match_winner,
                        match_format,
+                       match_type,
                        date))
     return match_data
 

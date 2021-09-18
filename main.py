@@ -260,6 +260,7 @@ def print_data(data,header):
     for i in df_rows:
         tree1.insert("","end",values=i)
     status_label.config(text="Displaying: " + str(len(df_rows)) + " of " + str(total) + " records.")
+    button4["state"] = tk.DISABLED
 
 def get_lists():
     global all_decks
@@ -279,22 +280,31 @@ def get_formats():
     global all_data
     global all_data_inverted
   
-    for count,i in enumerate(modo.match_header()):
-        if i == "Format":
-            index = count
-            break
+    # for count,i in enumerate(modo.match_header()):
+    #     if i == "Format":
+    #         index = count
+    #         break
+    mformat_index = modo.match_header().index("Format")
+    mtype_index =   modo.match_header().index("Match_Type")
+    p1_arch_index = modo.match_header().index("P1_Arch")
+    p1_sub_index =  modo.match_header().index("P1_Subarch")
+    p2_arch_index = modo.match_header().index("P2_Arch")
+    p2_sub_index =  modo.match_header().index("P2_Subarch")
+
     n =     0
     df0 =   modo.to_dataframe(all_data[0],modo.match_header())
     total = df0[(df0.Format == "NA")].shape[0]  
     for i in all_data[0]:    # Iterate through matches.
-        if i[index] == "NA": # Match record does not have a format.
+        # Match record is missing some data.
+        if (i[p1_arch_index] == "NA") or (i[p2_arch_index] == "NA") or (i[mformat_index] == "NA") or (i[mtype_index] == "NA"):
             n += 1
             plays = []
             for j in all_data[2]: # Iterate through plays.
                 if i[0] == j[0]:  # Add Play to our List if it has a matching Match_ID
                     plays.append(j)
             df =      modo.to_dataframe(plays,modo.play_header())
-            players = df.Casting_Player.value_counts().keys().tolist()
+            #players = df.Casting_Player.value_counts().keys().tolist()
+            players = [i[modo.match_header().index("P1")],i[modo.match_header().index("P2")]]
             cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Plays")].Primary_Card.value_counts().keys().tolist()
             cards2 =  df[(df.Casting_Player == players[0]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
             cards3 =  df[(df.Casting_Player == players[1]) & (df.Action == "Plays")].Primary_Card.value_counts().keys().tolist()
@@ -303,27 +313,42 @@ def get_formats():
             cards2 = sorted(cards2,key=str.casefold)
             cards3 = sorted(cards3,key=str.casefold)
             cards4 = sorted(cards4,key=str.casefold)
-            ask_for_format(players,cards1,cards2,cards3,cards4,n,total)
-            if match_format == "Exit.":
+            ask_for_format(players,cards1,cards2,cards3,cards4,n,total,i)
+            if match_format == "Exit":
                 break
-            i[index] = match_format
+            if match_format != "Skip":
+                i[p1_arch_index] = match_format[0]
+                i[p1_sub_index] =  match_format[1]
+                i[p2_arch_index] = match_format[2]
+                i[p2_sub_index] =  match_format[3]
+                i[mformat_index] = match_format[4]
+                i[mtype_index] =   match_format[5]
+
+            # if (match_format == "Draft - Sealed") or (match_format == "Draft - Booster") or (match_format == "Cube"):
+            #     i[p1_arch_index] = "Limited"
+            #     i[p2_arch_index] = "Limited"
     if n == 0:
         status_label.config(text="No Matches with missing Format.")
     else:
         all_data_inverted = modo.invert_join(all_data)
         set_display("Matches")
 
-def ask_for_format(players,cards1,cards2,card3,cards4,n,total):
-    def close_format_window(string):
+def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
+    def close_format_window(*argv):
         global match_format
-        match_format = string
+
+        match_format = [p1_arch.get(),p1_sub.get(),p2_arch.get(),p2_sub.get(),mformat.get(),mtype.get()]
+        for i in argv:
+            match_format = i
+
+        print(match_format)
         gf.grab_release()
         gf.destroy()
              
     height = 450
     width =  650                
     gf = tk.Toplevel(window)
-    gf.title("Select Format")           
+    gf.title("Input Missing Data - " + str(n) + "/" + str(total) + " Matches.")           
     gf.minsize(width,height)
     gf.resizable(False,False)
     gf.attributes("-topmost",True)
@@ -333,7 +358,7 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total):
     gf.geometry("+%d+%d" %
                    (window.winfo_x()+(window.winfo_width()/2)-(width/2),
                     window.winfo_y()+(window.winfo_height()/2)-(height/2)))
-    message = "Please determine match format.\n" + str(n) + "/" + str(total) + " Matches."
+    message = "Date Played: " + mdata[modo.match_header().index("Date")]
     str1 = str2 = str3 = str4 = ""
     for index,i in enumerate(cards1):
         if index > 0:
@@ -355,7 +380,46 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total):
             #str4 += ", "
             str4 += "\n"
         str4 += i
-        
+    
+    def update_arch(*argv):
+        if (mformat.get() == "Draft - Sealed") or (mformat.get() == "Draft - Booster") or (mformat.get() == "Cube"):
+            arch_options = ["Limited"]
+
+            menu = p1_arch_menu["menu"]
+            menu.delete(0,"end")
+            for i in arch_options:
+                menu.add_command(label=i,command=lambda x=i: p1_arch.set(x))
+
+            menu = p2_arch_menu["menu"]
+            menu.delete(0,"end")
+            for i in arch_options:
+                menu.add_command(label=i,command=lambda x=i: p2_arch.set(x))
+            
+            p1_arch.set(arch_options[0])
+            p2_arch.set(arch_options[0])
+        elif (p1_arch.get() == "Limited"):
+            arch_options = ["NA","Aggro","Midrange","Control","Combo","Prison","Tempo"]
+
+            menu = p1_arch_menu["menu"]
+            menu.delete(0,"end")
+            for i in arch_options:
+                menu.add_command(label=i,command=lambda x=i: p1_arch.set(x))
+
+            menu = p2_arch_menu["menu"]
+            menu.delete(0,"end")
+            for i in arch_options:
+                menu.add_command(label=i,command=lambda x=i: p2_arch.set(x))
+
+            if mdata[modo.match_header().index("P1_Arch")] == "NA":
+                p1_arch.set("Select P1 Archetype")
+            else:
+                p1_arch.set(mdata[modo.match_header().index("P1_Arch")])
+
+            if mdata[modo.match_header().index("P2_Arch")] == "NA":
+                p2_arch.set("Select P2 Archetype")
+            else:
+                p2_arch.set(mdata[modo.match_header().index("P2_Arch")])
+
     top_frame = tk.Frame(gf)
     mid_frame = tk.Frame(gf)
     bot_frame1 = tk.Frame(gf)
@@ -365,8 +429,8 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total):
     bot_frame1.grid(row=2,column=0,sticky="")
     bot_frame2.grid(row=3,column=0,sticky="")
     
-    mid_frame1 = tk.LabelFrame(mid_frame,text=players[0])
-    mid_frame2 = tk.LabelFrame(mid_frame,text=players[1])
+    mid_frame1 = tk.LabelFrame(mid_frame,text="P1: " + players[0])
+    mid_frame2 = tk.LabelFrame(mid_frame,text="P2: " + players[1])
     mid_frame1.grid(row=0,column=0,sticky="nsew")
     mid_frame2.grid(row=0,column=1,sticky="nsew")
     
@@ -387,63 +451,104 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total):
     label2 = tk.Label(mid_frame1,text=str2,anchor="n",wraplength=width/2,justify="left")
     label3 = tk.Label(mid_frame2,text=str3,anchor="n",wraplength=width/2,justify="left")
     label4 = tk.Label(mid_frame2,text=str4,anchor="n",wraplength=width/2,justify="left")
-    
-    button1 = tk.Button(bot_frame1,text="Vintage",
-                         command=lambda :
-                         [close_format_window("Vintage")])
-    button2 = tk.Button(bot_frame1,text="Legacy",
-                         command=lambda :
-                         [close_format_window("Legacy")])
-    button3 = tk.Button(bot_frame1,text="Modern",
-                         command=lambda :
-                         [close_format_window("Modern")])
-    button4 = tk.Button(bot_frame1,text="Standard",
-                         command=lambda :
-                         [close_format_window("Standard")])
-    button5 = tk.Button(bot_frame1,text="Pioneer",
-                         command=lambda :
-                         [close_format_window("Pioneer")])
-    button6 = tk.Button(bot_frame2,text="Pauper",
-                         command=lambda :
-                         [close_format_window("Pauper")])
-    button7 = tk.Button(bot_frame2,text="Draft - Booster",
-                         command=lambda :
-                         [close_format_window("Draft - Booster")])
-    button8 = tk.Button(bot_frame2,text="Draft - Sealed",
-                         command=lambda :
-                         [close_format_window("Draft - Sealed")])
-    button9 = tk.Button(bot_frame2,text="Cube",
-                         command=lambda :
-                         [close_format_window("Cube")])
+    #id_message = tk.Label(bot_frame1,text="Date Played: " + mdata[modo.match_header().index("Date")])
 
-    button_skip = tk.Button(top_frame,text="Skip Match",
-                         command=lambda :
-                         [close_format_window("NA")])
-    button_exit = tk.Button(top_frame,text="Exit",
-                         command=lambda :
-                         [close_format_window("Exit.")])
-    
+    # button1 = tk.Button(bot_frame1,text="Vintage",
+    #                      command=lambda :
+    #                      [close_format_window("Vintage")])
+    # button2 = tk.Button(bot_frame1,text="Legacy",
+    #                      command=lambda :
+    #                      [close_format_window("Legacy")])
+    # button3 = tk.Button(bot_frame1,text="Modern",
+    #                      command=lambda :
+    #                      [close_format_window("Modern")])
+    # button4 = tk.Button(bot_frame1,text="Standard",
+    #                      command=lambda :
+    #                      [close_format_window("Standard")])
+    # button5 = tk.Button(bot_frame1,text="Pioneer",
+    #                      command=lambda :
+    #                      [close_format_window("Pioneer")])
+    # button6 = tk.Button(bot_frame2,text="Pauper",
+    #                      command=lambda :
+    #                      [close_format_window("Pauper")])
+    # button7 = tk.Button(bot_frame2,text="Draft - Booster",
+    #                      command=lambda :
+    #                      [close_format_window("Draft - Booster")])
+    # button8 = tk.Button(bot_frame2,text="Draft - Sealed",
+    #                      command=lambda :
+    #                      [close_format_window("Draft - Sealed")])
+    # button9 = tk.Button(bot_frame2,text="Cube",
+    #                      command=lambda :
+    #                      [close_format_window("Cube")])
+    submit_button = tk.Button(bot_frame2,text="Save Changes",command=lambda : [close_format_window()])
 
+    arch_options = ["NA","Aggro","Midrange","Control","Combo","Prison","Tempo"]
+    p1_arch = tk.StringVar()
+    p1_arch.set("Select P1 Archetype")
+    p2_arch = tk.StringVar()
+    p2_arch.set("Select P2 Archetype")
+
+    format_options = ["NA","Vintage","Legacy","Modern","Standard","Pioneer","Pauper","Draft - Booster","Draft - Sealed","Cube"]
+    mformat = tk.StringVar()
+    mformat.set("Select Format")
+
+    type_options = ["NA","League","Preliminary","Challenge"]
+    mtype = tk.StringVar()
+    mtype.set("Select Match Type")
+
+    p1_arch_menu = tk.OptionMenu(mid_frame1,p1_arch,*arch_options)
+    p1_sub =  tk.Entry(mid_frame1)
+    p2_arch_menu = tk.OptionMenu(mid_frame2,p2_arch,*arch_options)
+    p2_sub =  tk.Entry(mid_frame2)
+
+    match_format = tk.OptionMenu(bot_frame2,mformat,*format_options)
+    match_type = tk.OptionMenu(bot_frame2,mtype,*type_options)
+
+    p1_sub.insert(0,mdata[modo.match_header().index("P1_Subarch")])
+    p2_sub.insert(0,mdata[modo.match_header().index("P2_Subarch")])
+
+    if mdata[modo.match_header().index("P1_Arch")] != "NA":
+        p1_arch.set(mdata[modo.match_header().index("P1_Arch")])
+    if mdata[modo.match_header().index("P2_Arch")] != "NA":
+        p2_arch.set(mdata[modo.match_header().index("P2_Arch")])
+    if mdata[modo.match_header().index("Format")] != "NA": 
+        mformat.set(mdata[modo.match_header().index("Format")])
+    if mdata[modo.match_header().index("Match_Type")] != "NA":
+        mtype.set(mdata[modo.match_header().index("Match_Type")])
+
+    button_skip = tk.Button(top_frame,text="Skip Match",command=lambda : [close_format_window("Skip")])
+    button_exit = tk.Button(top_frame,text="Exit",command=lambda : [close_format_window("Exit")])
+    
     label1.grid(row=0,column=0,sticky="nsew",padx=5,pady=5)
     label2.grid(row=0,column=1,sticky="nsew",padx=5,pady=5)
     label3.grid(row=0,column=0,sticky="nsew",padx=5,pady=5)
     label4.grid(row=0,column=1,sticky="nsew",padx=5,pady=5)
+    p1_arch_menu.grid(row=1,column=0)
+    p1_sub.grid(row=1,column=1)
+    p2_arch_menu.grid(row=1,column=0)
+    p2_sub.grid(row=1,column=1)
+
+    match_format.grid(row=0,column=0)
+    match_type.grid(row=0,column=1)
+    submit_button.grid(row=0,column=2)
+    # button1.grid(row=0,column=0,padx=5,pady=5,sticky="nsew")
+    # button2.grid(row=0,column=1,padx=5,pady=5,sticky="nsew")
+    # button3.grid(row=0,column=2,padx=5,pady=5,sticky="nsew")
+    # button4.grid(row=0,column=3,padx=5,pady=5,sticky="nsew")
+    # button5.grid(row=0,column=4,padx=5,pady=5,sticky="nsew")
+    # button6.grid(row=0,column=0,padx=5,pady=5,sticky="nsew")
+    # button7.grid(row=0,column=1,padx=5,pady=5,sticky="nsew")
+    # button8.grid(row=0,column=2,padx=5,pady=5,sticky="nsew")
+    # button9.grid(row=0,column=3,padx=5,pady=5,sticky="nsew")
     
-    button1.grid(row=0,column=0,padx=5,pady=5,sticky="nsew")
-    button2.grid(row=0,column=1,padx=5,pady=5,sticky="nsew")
-    button3.grid(row=0,column=2,padx=5,pady=5,sticky="nsew")
-    button4.grid(row=0,column=3,padx=5,pady=5,sticky="nsew")
-    button5.grid(row=0,column=4,padx=5,pady=5,sticky="nsew")
-    button6.grid(row=0,column=0,padx=5,pady=5,sticky="nsew")
-    button7.grid(row=0,column=1,padx=5,pady=5,sticky="nsew")
-    button8.grid(row=0,column=2,padx=5,pady=5,sticky="nsew")
-    button9.grid(row=0,column=3,padx=5,pady=5,sticky="nsew")
-    
-    button_skip.grid(row=0,column=0,sticky="nsew",padx=10,pady=10)
-    label_message.grid(row=0,column=1,sticky="nsew",padx=10,pady=10)
-    button_exit.grid(row=0,column=2,sticky="nsew",padx=10,pady=10)
-    
-    gf.protocol("WM_DELETE_WINDOW", lambda : close_format_window("Exit."))
+    button_skip.grid(row=0,column=0,padx=10,pady=10)
+    label_message.grid(row=0,column=1,padx=10,pady=10)
+    button_exit.grid(row=0,column=2,padx=10,pady=10)
+    #id_message.grid(row=0,column=0)
+
+    mformat.trace("w",update_arch)
+
+    gf.protocol("WM_DELETE_WINDOW", lambda : close_format_window("Exit"))
     gf.wait_window()
     
 def tree_double(event):
@@ -914,6 +1019,179 @@ def set_filter():
     
     update_filter_text()
     filter_window.protocol("WM_DELETE_WINDOW", lambda : close_filter_window())
+
+def revise_record():
+    if tree1.focus() == "":
+        return
+
+    height = 300
+    width =  700
+    revise_window = tk.Toplevel(window)
+    revise_window.title("Revise Record")
+    revise_window.minsize(width,height)
+    revise_window.resizable(False,False)
+    revise_window.attributes("-topmost",True)
+    revise_window.grab_set()
+    revise_window.focus()
+
+    revise_window.geometry("+%d+%d" %
+                           (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+                            window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+    
+    mid_frame = tk.LabelFrame(revise_window,text="Match_ID")
+    bot_frame = tk.Frame(revise_window)
+    mid_frame.grid(row=0,column=0,sticky="nsew")
+    bot_frame.grid(row=1,column=0,sticky="")
+    
+    revise_window.grid_columnconfigure(0,weight=1)
+    revise_window.rowconfigure(0,minsize=0,weight=1)  
+    mid_frame.grid_columnconfigure(0,weight=1)
+    mid_frame.grid_columnconfigure(1,weight=1)
+    mid_frame.grid_columnconfigure(2,weight=1)
+    mid_frame.grid_columnconfigure(3,weight=1)
+    mid_frame.grid_columnconfigure(4,weight=1)
+    mid_frame.grid_columnconfigure(5,weight=1)
+
+    def update_arch(*argv):
+        if (match_format.get() == "Draft - Sealed") or (match_format.get() == "Draft - Booster") or (match_format.get() == "Cube"):
+            arch_options = ["Limited"]
+
+            menu = p1_arch_entry["menu"]
+            menu.delete(0,"end")
+            for i in arch_options:
+                menu.add_command(label=i,command=lambda x=i: p1_arch_type.set(x))
+
+            menu = p2_arch_entry["menu"]
+            menu.delete(0,"end")
+            for i in arch_options:
+                menu.add_command(label=i,command=lambda x=i: p2_arch_type.set(x))
+            p1_arch_type.set(arch_options[0])
+            p2_arch_type.set(arch_options[0])
+        elif (p1_arch_type.get() == "Limited"):
+            arch_options = ["NA","Aggro","Midrange","Control","Combo","Prison","Tempo"]
+
+            menu = p1_arch_entry["menu"]
+            menu.delete(0,"end")
+            for i in arch_options:
+                menu.add_command(label=i,command=lambda x=i: p1_arch_type.set(x))
+
+            menu = p2_arch_entry["menu"]
+            menu.delete(0,"end")
+            for i in arch_options:
+                menu.add_command(label=i,command=lambda x=i: p2_arch_type.set(x))
+
+            p1_arch_type.set(values[modo.match_header().index("P1_Arch")])
+            p2_arch_type.set(values[modo.match_header().index("P2_Arch")])
+
+    def close_revise_window():
+        revise_window.grab_release()
+        revise_window.destroy()
+
+    selected = tree1.focus()
+    values = tree1.item(selected,"values")
+    print(values)
+
+    format_options = ["NA","Vintage","Legacy","Modern","Standard","Pioneer","Pauper","Draft - Booster","Draft - Sealed","Cube"]
+    match_format = tk.StringVar()
+    match_format.set(values[13])
+
+    match_options = ["NA"]
+    match_type = tk.StringVar()
+    match_type.set(values[14])
+
+    if (values[13] == "Draft - Booster") or (values[13] == "Draft - Sealed") or (values[13] == "Cube"):
+        arch_options = ["Limited"]
+    else:
+        arch_options = ["NA","Aggro","Midrange","Control","Combo","Prison","Tempo"]
+    p1_arch_type = tk.StringVar()
+    p1_arch_type.set(values[2])
+
+    p2_arch_type = tk.StringVar()
+    p2_arch_type.set(values[5])
+
+    p1_label =           tk.Label(mid_frame,text="P1:")
+    p1_entry =           tk.Label(mid_frame,text=values[1])
+    p1_arch_label =      tk.Label(mid_frame,text="P1_Arch:")
+    p1_arch_entry =      tk.OptionMenu(mid_frame,p1_arch_type,*arch_options)
+    p1_subarch_label =   tk.Label(mid_frame,text="P1_Subarch:")
+    p1_subarch_entry =   tk.Entry(mid_frame)
+    p2_label =           tk.Label(mid_frame,text="P2:")
+    p2_entry =           tk.Label(mid_frame,text=values[4])
+    p2_arch_label =      tk.Label(mid_frame,text="P2_Arch:")
+    p2_arch_entry =      tk.OptionMenu(mid_frame,p2_arch_type,*arch_options)
+    p2_subarch_label =   tk.Label(mid_frame,text="P2_Subarch:")
+    p2_subarch_entry =   tk.Entry(mid_frame)
+    p1_roll_label =      tk.Label(mid_frame,text="P1_Roll:")
+    p1_roll_entry =      tk.Label(mid_frame,text=values[7])
+    p2_roll_label =      tk.Label(mid_frame,text="P2_Roll:")
+    p2_roll_entry =      tk.Label(mid_frame,text=values[8])
+    roll_winner_label =  tk.Label(mid_frame,text="Roll_Winner:")
+    roll_winner_entry =  tk.Label(mid_frame,text=values[9])
+    p1_wins_label =      tk.Label(mid_frame,text="P1_Wins:")
+    p1_wins_entry =      tk.Label(mid_frame,text=values[10])
+    p2_wins_label =      tk.Label(mid_frame,text="P2_Wins:")
+    p2_wins_entry =      tk.Label(mid_frame,text=values[11])
+    match_winner_label = tk.Label(mid_frame,text="Match_Winner:")
+    match_winner_entry = tk.Label(mid_frame,text=values[12])
+    format_label =       tk.Label(mid_frame,text="Format:")
+    format_entry =       tk.OptionMenu(mid_frame,match_format,*format_options)
+    match_type_label =   tk.Label(mid_frame,text="Match_Type:")
+    match_type_entry =   tk.OptionMenu(mid_frame,match_type,*match_options)
+    date_label =         tk.Label(mid_frame,text="Date:")
+    date_entry =         tk.Label(mid_frame,text=values[15])
+
+    p1_subarch_entry.insert(0,values[3])
+    p2_subarch_entry.insert(0,values[6])
+
+    button3 = tk.Button(bot_frame,text="Apply Changes",
+                        command=lambda : close_revise_window())
+    button4 = tk.Button(bot_frame,text="Cancel",
+                        command=lambda : close_revise_window())
+
+    p1_label.grid(row=1,column=0,padx=10,pady=10,sticky="w")
+    p1_entry.grid(row=1,column=1,pady=10,sticky="w")
+    p1_arch_label.grid(row=1,column=2,pady=10,sticky="w")
+    p1_arch_entry.grid(row=1,column=3,pady=10,sticky="w")
+    p1_subarch_label.grid(row=1,column=4,pady=10,sticky="w")
+    p1_subarch_entry.grid(row=1,column=5,pady=10,sticky="w")
+    p2_label.grid(row=2,column=0,padx=10,pady=10,sticky="w")
+    p2_entry.grid(row=2,column=1,pady=10,sticky="w")
+    p2_arch_label.grid(row=2,column=2,pady=10,sticky="w")
+    p2_arch_entry.grid(row=2,column=3,pady=10,sticky="w")
+    p2_subarch_label.grid(row=2,column=4,pady=10,sticky="w")
+    p2_subarch_entry.grid(row=2,column=5,pady=10,sticky="w")
+    p1_roll_label.grid(row=3,column=0,padx=10,pady=10,sticky="w")
+    p1_roll_entry.grid(row=3,column=1,pady=10,sticky="w")
+    p2_roll_label.grid(row=3,column=2,pady=10,sticky="w")
+    p2_roll_entry.grid(row=3,column=3,pady=10,sticky="w")
+    roll_winner_label.grid(row=3,column=4,pady=10,sticky="w")
+    roll_winner_entry.grid(row=3,column=5,pady=10,sticky="w")
+    p1_wins_label.grid(row=4,column=0,padx=10,pady=10,sticky="w")
+    p1_wins_entry.grid(row=4,column=1,pady=10,sticky="w")
+    p2_wins_label.grid(row=4,column=2,pady=10,sticky="w")
+    p2_wins_entry.grid(row=4,column=3,pady=10,sticky="w")
+    match_winner_label.grid(row=4,column=4,pady=10,sticky="w")
+    match_winner_entry.grid(row=4,column=5,pady=10,sticky="w")
+    format_label.grid(row=5,column=0,padx=10,pady=10,sticky="w")
+    format_entry.grid(row=5,column=1,pady=10,sticky="w")
+    match_type_label.grid(row=5,column=2,pady=10,sticky="w")
+    match_type_entry.grid(row=5,column=3,pady=10,sticky="w")
+    date_label.grid(row=6,column=0,padx=10,pady=10,sticky="w")
+    date_entry.grid(row=6,column=1,pady=10,sticky="w")
+
+    button3.grid(row=0,column=0,padx=10,pady=10)
+    button4.grid(row=0,column=1,padx=10,pady=10)
+
+    mid_frame["text"] = "Match_ID: " + values[0]
+
+    match_format.trace("w",update_arch)
+
+    revise_window.protocol("WM_DELETE_WINDOW", lambda : close_revise_window())
+
+def activate_revise(event):
+    if tree1.identify_region(event.x,event.y) == "heading":
+        return
+    button4["state"] = tk.NORMAL
 
 def import_window():
     height = 300
@@ -2093,6 +2371,8 @@ button7 = tk.Button(left_frame,text="Filter",state=tk.DISABLED,
                      command=lambda : set_filter())
 button8 = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,
                      command=lambda : [clear_filter(),set_display(display)])
+button4 = tk.Button(left_frame,text="Revise Record",state=tk.DISABLED,
+                     command=lambda : [revise_record()])
 button9 = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,
                      command=lambda : [get_stats()])
 back_button = tk.Button(left_frame,text="Back",
@@ -2144,7 +2424,7 @@ export_menu.add_command(label="Set Default Export Folder",command=lambda : set_d
 data_menu = tk.Menu(menu_bar,tearoff=False)
 menu_bar.add_cascade(label="Data",menu=data_menu)
 
-data_menu.add_command(label="Input Missing Format Data",command=lambda : get_formats())
+data_menu.add_command(label="Input Missing Match Data",command=lambda : get_formats())
 data_menu.add_command(label="Input Missing Game_Winner Data",command=lambda : get_winners())
 data_menu.add_separator()
 data_menu.add_command(label="Set Default 'Hero'",command=lambda : set_default_hero(),state=tk.DISABLED)
@@ -2157,13 +2437,15 @@ button2.grid(row=1,column=0,sticky="ew",padx=5,pady=5)
 button3.grid(row=2,column=0,sticky="ew",padx=5,pady=5)
 button7.grid(row=6,column=0,sticky="ew",padx=5,pady=(50,5))
 button8.grid(row=7,column=0,sticky="ew",padx=5,pady=5)
-button9.grid(row=8,column=0,sticky="ew",padx=5,pady=50)
+button4.grid(row=8,column=0,sticky="ew",padx=5,pady=5)
+button9.grid(row=9,column=0,sticky="ew",padx=5,pady=50)
 back_button.grid(row=12,column=0,sticky="ew",padx=5,pady=5)
 
 tree1 = ttk.Treeview(text_frame,show="tree")
 tree1.place(relheight=1, relwidth=1)
 tree1.bind("<Double-1>",tree_double)
-    
+tree1.bind("<ButtonRelease-1>",activate_revise)
+
 tree_scrollx = tk.Scrollbar(text_frame,orient="horizontal",command=tree1.xview)
 tree_scrolly = tk.Scrollbar(text_frame,orient="vertical",command=tree1.yview)
 tree1.configure(xscrollcommand=tree_scrollx.set,yscrollcommand=tree_scrolly.set)
