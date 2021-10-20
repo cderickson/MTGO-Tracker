@@ -1,5 +1,13 @@
+Add ability to change single entries manually
+Add Archetype functionality
+
 Statistics
 	Add ability to input date range and see win rate, filtered by format/format and deck
+	Add tab for cards played/cast vs winrate
+		Filter for card (text input)
+		Filter for format
+		Filter for game_num
+		Filter for play/draw	
 
 Import
 	Track files that have been previously imported
