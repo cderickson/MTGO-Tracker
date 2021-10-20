@@ -29,6 +29,7 @@ main_window_width = 1725
 main_window_height= 750
 hero =              ""
 parsed_file_list =  []
+new_import =        False
 
 def save_window():
     height = 100
@@ -48,11 +49,14 @@ def save_window():
         save_settings()
 
         os.chdir(filepath_root + r"\save")
-        files = ["matches.csv","games.csv","plays.csv","rawdata.csv"]
+        files = ["matches.csv","games.csv","plays.csv","rawdata.csv","parsedfiles.csv"]
 
         for index,i in enumerate(files):
             if index == 3:
                 df = pd.DataFrame(all_data[index])
+                df.to_csv(i,header=False,index=False)
+            elif index == 4:
+                df = pd.DataFrame(parsed_file_list)
                 df.to_csv(i,header=False,index=False)
             else:
                 df = modo.to_dataframe(all_data[index],all_headers[index])
@@ -97,6 +101,7 @@ def startup():
     global hero
     global all_data
     global all_data_inverted
+    global parsed_file_list
 
     with io.open("modo-config.txt","r",encoding="ansi") as config:
         initial = config.read()
@@ -109,7 +114,7 @@ def startup():
         hero =           settings[4].split("=>")[1]
 
     os.chdir(filepath_root + r"\save")
-    files = ["matches.csv","games.csv","plays.csv","rawdata.csv"]
+    files = ["matches.csv","games.csv","plays.csv","rawdata.csv","parsedfiles.csv"]
 
     all_headers[0] = modo.match_header()
     all_headers[1] = modo.game_header()
@@ -127,10 +132,18 @@ def startup():
             for i in df_rows:
                 while "" in i:
                     i.remove("")
+        elif index == 4:
+            try:
+                df = pd.read_csv(i,header=None,na_filter=False)
+            except pd.errors.EmptyDataError:
+                df = pd.DataFrame()   
         else:
             df = pd.read_csv(i,header=0,na_filter=False)
             df_rows = df.to_numpy().tolist()
-        all_data[index] = df_rows
+        if index == 4:
+            parsed_file_list = df[0].tolist()
+        else:
+            all_data[index] = df_rows
 
     all_data_inverted = modo.invert_join(all_data)
 
@@ -199,11 +212,10 @@ def get_all_data():
     global all_data_inverted
     global all_headers
     global data_loaded
-    all_match_data = []
-    all_game_data =  []
-    all_play_data =  []
-    all_raw_data =   []
-    w =              [window.winfo_x(),window.winfo_y(),window.winfo_width(),window.winfo_height()]
+    global parsed_file_list
+    global new_import
+    w = [window.winfo_x(),window.winfo_y(),window.winfo_width(),window.winfo_height()]
+    count = 0
     
     for (root,dirs,files) in os.walk(filepath_logs):
         None
@@ -212,31 +224,36 @@ def get_all_data():
     for i in files:
         if ("Match_GameLog_" not in i) or (len(i) < 30):
             pass
+        elif (i in parsed_file_list):
+            pass
         else:
             with io.open(i,"r",encoding="ansi") as gamelog:
                 initial = gamelog.read()
                 mtime = time.ctime(os.path.getmtime(i))
 
             parsed_data = modo.get_all_data(initial,mtime,all_decks,w)
-            
-            all_match_data.append(parsed_data[0])
+            parsed_file_list.append(i)
+            count += 1
+
+            all_data[0].append(parsed_data[0])
             for i in parsed_data[1]:
-                all_game_data.append(i)
+                all_data[1].append(i)
             for i in parsed_data[2]:
-                all_play_data.append(i)
+                all_data[2].append(i)
             for i in parsed_data[3]:
-                all_raw_data.append(i)
+                all_data[3].append(i)
 
-    all_data = [all_match_data,all_game_data,all_play_data,all_raw_data]
     all_data_inverted = modo.invert_join(all_data)
-    
-    status_label.config(text="Imported " + str(len(all_data[0])) + " matches.")
 
+    status_label.config(text="Imported " + str(count) + " new matches.")
+
+    new_import = True
     button7["state"] = tk.NORMAL
     button8["state"] = tk.NORMAL
     data_loaded = True
     
 def print_data(data,header):
+    global new_import
 
     #clear existing data in tree
     tree1.delete(*tree1.get_children())
@@ -265,7 +282,11 @@ def print_data(data,header):
     df_rows = df.to_numpy().tolist()
     for i in df_rows:
         tree1.insert("","end",values=i)
-    status_label.config(text="Displaying: " + str(len(df_rows)) + " of " + str(total) + " records.")
+
+    if new_import == True:
+        new_import = False
+    else:
+        status_label.config(text="Displaying: " + str(len(df_rows)) + " of " + str(total) + " records.")
     button4["state"] = tk.DISABLED
 
 def get_lists():
