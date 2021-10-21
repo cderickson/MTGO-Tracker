@@ -8,3 +8,6 @@ Record Revision
 	Apply to all functionality
 		Format
 		Match_Type
+
+Plays
+	Remove "Chooses"/"Discards"??
