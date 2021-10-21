@@ -84,14 +84,103 @@ def save_window():
     bot_frame.grid_rowconfigure(1,weight=1)
 
     label1 = tk.Label(mid_frame,text="This will overwrite any previously saved data.\nAre you sure you want to save?",wraplength=width)
-    button1 = tk.Button(bot_frame,text="Save",command=lambda : save())
-    button2 = tk.Button(bot_frame,text="Cancel",command=lambda : close_save_window())
+    button_save = tk.Button(bot_frame,text="Save",command=lambda : save())
+    button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close_save_window())
     
     label1.grid(row=0,column=0,sticky="nsew")       
-    button1.grid(row=0,column=0,padx=5,pady=5)
-    button2.grid(row=0,column=1,padx=5,pady=5)
+    button_save.grid(row=0,column=0,padx=5,pady=5)
+    button_close.grid(row=0,column=1,padx=5,pady=5)
     
     save_window.protocol("WM_DELETE_WINDOW", lambda : close_save_window())
+
+def clear_window():
+    height = 100
+    width =  300
+    clear_window = tk.Toplevel(window)
+    clear_window.title("Clear Saved Data")
+    clear_window.minsize(width,height)
+    clear_window.resizable(False,False)
+    clear_window.grab_set()
+    clear_window.focus()
+
+    clear_window.geometry("+%d+%d" % 
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+
+    def clear():
+        global all_data
+        global all_data_inverted
+        global all_decks
+        global display
+        global filter_dict
+        global data_loaded
+        global filter_changed
+        global prev_display
+        global uaw
+        global parsed_file_list
+        global new_import
+
+        all_data =          [[],[],[],[]]
+        all_data_inverted = [[],[],[],[]]
+        all_decks =         []
+        display =           ""
+        filter_dict =       {}
+        data_loaded =       False
+        filter_changed =    False
+        prev_display =      ""
+        uaw =               "NA"
+        parsed_file_list =  []
+        new_import =        False
+
+        button1["state"] = tk.DISABLED
+        button2["state"] = tk.DISABLED
+        button3["state"] = tk.DISABLED
+        button7["state"] = tk.DISABLED
+        button8["state"] = tk.DISABLED
+        button4["state"] = tk.DISABLED
+        button9["state"] = tk.DISABLED
+        back_button["state"] = tk.DISABLED
+        
+        text_frame.config(text="Dataframe")
+
+        data_menu.entryconfig("Set Default 'Hero'",state=tk.DISABLED)
+        file_menu.entryconfig("Clear Loaded Data",state=tk.DISABLED)
+        file_menu.entryconfig("Save Data",state=tk.DISABLED)
+
+        #clear existing data in tree
+        tree1.delete(*tree1.get_children())
+        tree1["show"] = "tree"
+
+        status_label.config(text="Previously loaded data has been cleared.")
+        close_clear_window()
+
+    def close_clear_window():
+        clear_window.grab_release()
+        clear_window.destroy()
+
+    mid_frame = tk.LabelFrame(clear_window,text="")
+    bot_frame = tk.Frame(clear_window)
+
+    mid_frame.grid(row=0,column=0,sticky="nsew")
+    bot_frame.grid(row=1,column=0,sticky="")
+
+    clear_window.grid_columnconfigure(0,weight=1)
+    clear_window.rowconfigure(0,weight=1)
+    mid_frame.grid_columnconfigure(0,weight=1)
+    mid_frame.grid_rowconfigure(0,weight=1) 
+    bot_frame.grid_columnconfigure(0,weight=1)
+    bot_frame.grid_rowconfigure(0,weight=1)
+    bot_frame.grid_rowconfigure(1,weight=1)
+
+    label1 = tk.Label(mid_frame,text="This will clear loaded data without saving.\nAre you sure you want to continue?",wraplength=width)
+    button_clear = tk.Button(bot_frame,text="Clear",command=lambda : clear())
+    button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close_clear_window())
+    
+    label1.grid(row=0,column=0,sticky="nsew")       
+    button_clear.grid(row=0,column=0,padx=5,pady=5)
+    button_close.grid(row=0,column=1,padx=5,pady=5)
+    
+    clear_window.protocol("WM_DELETE_WINDOW", lambda : close_clear_window())
 
 def startup():
     global filepath_root
@@ -102,6 +191,7 @@ def startup():
     global all_data
     global all_data_inverted
     global parsed_file_list
+    global data_loaded
 
     with io.open("modo-config.txt","r",encoding="ansi") as config:
         initial = config.read()
@@ -155,6 +245,7 @@ def startup():
 
     set_display("Matches")
     data_menu.entryconfig("Set Default 'Hero'",state=tk.NORMAL)
+    file_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
     file_menu.entryconfig("Save Data",state=tk.NORMAL)
 
 def save_settings():
@@ -169,6 +260,9 @@ def save_settings():
 def set_display(d,*argv):
     global display
     global prev_display
+
+    if data_loaded == False:
+        return
 
     if display != d:
         prev_display = display
@@ -248,10 +342,13 @@ def get_all_data():
     status_label.config(text="Imported " + str(count) + " new matches.")
 
     new_import = True
-    button7["state"] = tk.NORMAL
-    button8["state"] = tk.NORMAL
-    data_loaded = True
-    
+
+    if len(all_data[0]) != 0:
+        button7["state"] = tk.NORMAL
+        button8["state"] = tk.NORMAL
+        data_loaded = True
+    print(len(all_data[0]))
+
 def print_data(data,header):
     global new_import
 
@@ -1108,8 +1205,12 @@ def revise_record():
             for i in arch_options:
                 menu.add_command(label=i,command=lambda x=i: p2_arch_type.set(x))
 
-            p1_arch_type.set(values[modo.match_header().index("P1_Arch")])
-            p2_arch_type.set(values[modo.match_header().index("P2_Arch")])
+            if values[modo.match_header().index("P1_Arch")] == "Limited":
+                p1_arch_type.set(arch_options[0])
+                p2_arch_type.set(arch_options[0])
+            else:
+                p1_arch_type.set(values[modo.match_header().index("P1_Arch")])
+                p2_arch_type.set(values[modo.match_header().index("P2_Arch")])
 
     def close_revise_window():
         values[2] = p1_arch_type.get()
@@ -1118,7 +1219,6 @@ def revise_record():
         values[6] = p2_subarch_entry.get()
         values[13] = match_format.get()
         values[14] = match_type.get()
-        print(values)
 
         for count,i in enumerate(all_data[0]):
             if i[0] == values[0]:
@@ -1131,13 +1231,15 @@ def revise_record():
                 all_data_inverted = modo.invert_join(all_data)
                 set_display("Matches")
                 break
-
         revise_window.grab_release()
         revise_window.destroy()
 
+    def close_without_saving():
+        revise_window.grab_release()
+        revise_window.destroy()       
+
     selected = tree1.focus()
     values = list(tree1.item(selected,"values"))
-    print(values)
 
     format_options = ["NA","Vintage","Legacy","Modern","Standard","Pioneer","Pauper","Draft - Booster","Draft - Sealed","Cube"]
     match_format = tk.StringVar()
@@ -1194,7 +1296,7 @@ def revise_record():
     button3 = tk.Button(bot_frame,text="Apply Changes",
                         command=lambda : close_revise_window())
     button4 = tk.Button(bot_frame,text="Cancel",
-                        command=lambda : close_revise_window())
+                        command=lambda : close_without_saving())
 
     p1_label.grid(row=1,column=0,padx=10,pady=10,sticky="w")
     p1_entry.grid(row=1,column=1,pady=10,sticky="w")
@@ -1234,13 +1336,14 @@ def revise_record():
 
     match_format.trace("w",update_arch)
 
-    revise_window.protocol("WM_DELETE_WINDOW", lambda : close_revise_window())
+    revise_window.protocol("WM_DELETE_WINDOW", lambda : close_without_saving())
 
 def activate_revise(event):
-    print(display)
     if tree1.identify_region(event.x,event.y) == "heading":
         return
-    if (display == "Games") or (display == "Plays"):
+    if display != "Matches":
+        return
+    if data_loaded == False:
         return
     button4["state"] = tk.NORMAL
 
@@ -1286,8 +1389,10 @@ def import_window():
         get_all_data()
         clear_filter()
         set_display("Matches")
-        data_menu.entryconfig("Set Default 'Hero'",state=tk.NORMAL)
-        file_menu.entryconfig("Save Data",state=tk.NORMAL)
+        if data_loaded != False:
+            data_menu.entryconfig("Set Default 'Hero'",state=tk.NORMAL)
+            file_menu.entryconfig("Save Data",state=tk.NORMAL)
+            file_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
         filepath_decks = fp_decks
         filepath_logs = fp_logs
         close_import_window()
@@ -2268,9 +2373,9 @@ def get_stats():
 
         fig = plt.figure(figsize=(5,4),dpi=100)
         plt.plot(g1_list[0],g1_list[1])
-        plt.title("Win Rate Over Time:\n"+mformat)
+        plt.title("Match Wins Over .500:\n"+mformat)
         plt.xlabel("Matches Played")
-        plt.ylabel("Win%")
+        plt.ylabel("Match Wins Over .500")
 
         canvas = FigureCanvasTkAgg(fig,mid_frame5)
         canvas.draw()
@@ -2284,9 +2389,9 @@ def get_stats():
 
             fig = plt.figure(figsize=(5,4),dpi=100)
             plt.plot(g2_list[0],g2_list[1])
-            plt.title("Win Rate Over Time:\n"+mformat+": "+deck)
+            plt.title("Match Wins Over .500:\n"+mformat+": "+deck)
             plt.xlabel("Matches Played")
-            plt.ylabel("Win")
+            plt.ylabel("Match Wins Over .500")
 
             canvas2 = FigureCanvasTkAgg(fig,mid_frame6)
             canvas2.draw()
@@ -2614,6 +2719,7 @@ file_menu = tk.Menu(menu_bar,tearoff=False)
 menu_bar.add_cascade(label="File",menu=file_menu)
 
 file_menu.add_command(label="Load MTGO Game Logs",command=lambda : import_window())
+file_menu.add_command(label="Clear Loaded Data",command=lambda : clear_window(),state=tk.DISABLED)
 file_menu.add_command(label="Save Data",command=lambda : save_window(),state=tk.DISABLED)
 file_menu.add_separator()
 file_menu.add_command(label="Exit",command=lambda : exit())
