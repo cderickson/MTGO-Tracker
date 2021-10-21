@@ -1,7 +1,5 @@
 Statistics
 	Add ability to input date range and see win rate, filtered by format/format and deck
-	Card Data: Add sorting on headers
-	Match Stats: Add Match Type under Format Performance
 
 Importing
 	Add ability to delete existing save data

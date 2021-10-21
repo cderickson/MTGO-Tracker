@@ -287,11 +287,9 @@ def set_display(d,*argv):
         print_data(all_data[0],all_headers[0])
     elif d == "Games":
         set_bb_state(True)
-        #button4["state"] = tk.DISABLED
         print_data(all_data[1],all_headers[1])
     elif d == "Plays":
         set_bb_state(True)
-        #button4["state"] = tk.DISABLED
         print_data(all_data[2],all_headers[2])
     print(filter_dict)
     
@@ -347,7 +345,6 @@ def get_all_data():
         button7["state"] = tk.NORMAL
         button8["state"] = tk.NORMAL
         data_loaded = True
-    print(len(all_data[0]))
 
 def print_data(data,header):
     global new_import
@@ -361,8 +358,10 @@ def print_data(data,header):
     #insert column headers into tree
     for i in tree1["column"]:
         tree1.column(i,anchor="center",stretch=False,width=100)
-        tree1.heading(i,text=i, command=lambda _col=i:
-                      sort_column(_col,False))
+        if (i == "Turns") or (i == "Play_Num") or (i == "Turn_Num") or (i == "Cards_Drawn") or (i == "Attackers"):
+            tree1.heading(i,text=i,command=lambda _col=i: sort_column_int(_col,False,tree1))
+        else:
+            tree1.heading(i,text=i,command=lambda _col=i: sort_column(_col,False,tree1))
     tree1.column("Match_ID",anchor="w")
         
     df = modo.to_dataframe(data,header)
@@ -989,7 +988,10 @@ def set_default_import():
     
     import_window.protocol("WM_DELETE_WINDOW", lambda : close_import_window())   
 
-def sort_column(col, reverse):
+def tree_tuple_to_int(tuple):
+    return (int(tuple[0]),tuple[1])
+
+def sort_column(col,reverse,tree1):
     l = []
     for k in tree1.get_children(''):
         l.append((tree1.set(k, col), k))
@@ -1000,9 +1002,21 @@ def sort_column(col, reverse):
         tree1.move(k, '', index)
 
     # reverse sort next time
-    tree1.heading(col, text=col, command=lambda _col=col: 
-                 sort_column(_col, not reverse))
-    
+    tree1.heading(col,text=col,command=lambda _col=col: sort_column(_col,not reverse,tree1))
+
+def sort_column_int(col,reverse,tree1):
+    l = []
+    for k in tree1.get_children(''):
+        l.append((tree1.set(k, col), k))
+    l.sort(reverse=reverse,key=tree_tuple_to_int)
+
+    # rearrange items in sorted positions
+    for index, (val, k) in enumerate(l):
+        tree1.move(k, '', index)
+
+    # reverse sort next time
+    tree1.heading(col,text=col,command=lambda _col=col: sort_column_int(_col,not reverse,tree1))
+
 def add_filter_setting(index, key):
     global filter_dict
     global filter_changed
@@ -1566,7 +1580,6 @@ def get_stats():
     stats_window.title("Statistics - Match Data")
     stats_window.minsize(width,height)
     stats_window.resizable(False,False)
-    #stats_window.attributes("-topmost",True)
     window.withdraw()
     stats_window.focus()
 
@@ -1662,30 +1675,43 @@ def get_stats():
         mid_frame3.grid(row=1,column=0,sticky="nsew")
         mid_frame4.grid(row=1,column=1,sticky="nsew")
 
-        hero_n =            df0_i[df0_i.P1 == hero].shape[0] # Matches played by hero
+        hero_n =         df0_i[df0_i.P1 == hero].shape[0] # Matches played by hero
         
-        formats_played =    df0_i[df0_i.P1 == hero].Format.value_counts().keys().tolist()
-        format_counts =     df0_i[df0_i.P1 == hero].Format.value_counts().tolist()
-        format_wins =       [df0_i[(df0_i.P1 == hero) & (df0_i.Match_Winner == "P1")].shape[0]] #adding overall in L[0]
-        format_losses =     [df0_i[(df0_i.P1 == hero) & (df0_i.Match_Winner == "P2")].shape[0]] #adding overall in L[0]
-        format_wr =         [to_percent( format_wins[0]/(format_wins[0]+format_losses[0]) )]    #adding overall in L[0]
-        format_counts.insert(0,hero_n)
-                         
+        formats_played = df0_i[df0_i.P1 == hero].Format.value_counts().keys().tolist()
+        format_wins =    [df0_i[(df0_i.P1 == hero) & (df0_i.Match_Winner == "P1")].shape[0]] #adding overall in L[0]
+        format_losses =  [df0_i[(df0_i.P1 == hero) & (df0_i.Match_Winner == "P2")].shape[0]] #adding overall in L[0]
+        format_wr =      [to_percent( format_wins[0]/(format_wins[0]+format_losses[0]) ) + "%"]    #adding overall in L[0]
+
         for i in formats_played:
             wins  =  df0_i[(df0_i.P1 == hero) & (df0_i.Format == i) & (df0_i.Match_Winner == "P1")].shape[0]
             losses = df0_i[(df0_i.P1 == hero) & (df0_i.Format == i) & (df0_i.Match_Winner == "P2")].shape[0]
             format_wins.append(str(wins))
             format_losses.append(str(losses))
-            format_wr.append(to_percent(wins/(wins+losses)))
-        formats_played.insert(0,"Overall")
-        
-        roll_1_mean =       round(df0["P1_Roll"].mean(),2)
-        roll_2_mean =       round(df0["P2_Roll"].mean(),2)
-        p1_roll_wr =        to_percent((df0[df0.Roll_Winner == "P1"].shape[0])/df0.shape[0])
-        p2_roll_wr =        to_percent((df0[df0.Roll_Winner == "P2"].shape[0])/df0.shape[0])
-        rolls_won =         df0_i[(df0_i.P1 == hero) & (df0_i.Roll_Winner == "P1")].shape[0] 
-        roll_labels =       ["Roll 1 Mean","Roll 2 Mean","Roll 1 Win%","Roll 2 Win%","","Hero Roll Win%"]
-        roll_values =       [roll_1_mean,roll_2_mean,p1_roll_wr+"%",p2_roll_wr+"%","",to_percent(rolls_won/hero_n)+"%"]
+            format_wr.append(to_percent(wins/(wins+losses)) + "%")
+        formats_played.insert(0,"Match Format")
+
+        formats_played.extend(["","Match Type"])
+        format_wins.extend(["",format_wins[0]])
+        format_losses.extend(["",format_losses[0]])
+        format_wr.extend(["",format_wr[0]])
+
+        matchtypes_played = df0_i[df0_i.P1 == hero].Match_Type.value_counts().keys().tolist()
+        matchtypes_counts = df0_i[df0_i.P1 == hero].Format.value_counts().tolist()
+        for index,i in enumerate(matchtypes_played):
+            mt_wins  =  df0_i[(df0_i.P1 == hero) & (df0_i.Match_Type == i) & (df0_i.Match_Winner == "P1")].shape[0]
+            mt_losses = df0_i[(df0_i.P1 == hero) & (df0_i.Match_Type == i) & (df0_i.Match_Winner == "P2")].shape[0]
+            formats_played.append(i)
+            format_wins.append(mt_wins)
+            format_losses.append(mt_losses)
+            format_wr.append(to_percent(mt_wins/(mt_wins+mt_losses)) + "%")
+
+        roll_1_mean = round(df0["P1_Roll"].mean(),2)
+        roll_2_mean = round(df0["P2_Roll"].mean(),2)
+        p1_roll_wr =  to_percent((df0[df0.Roll_Winner == "P1"].shape[0])/df0.shape[0])
+        p2_roll_wr =  to_percent((df0[df0.Roll_Winner == "P2"].shape[0])/df0.shape[0])
+        rolls_won =   df0_i[(df0_i.P1 == hero) & (df0_i.Roll_Winner == "P1")].shape[0] 
+        roll_labels = ["Roll 1 Mean","Roll 2 Mean","Roll 1 Win%","Roll 2 Win%","","Hero Roll Win%"]
+        roll_values = [roll_1_mean,roll_2_mean,p1_roll_wr+"%",p2_roll_wr+"%","",to_percent(rolls_won/hero_n)+"%"]
 
         df0_i_f = df0_i[(df0_i.P1 == hero)]
         if mformat != "All Formats":
@@ -1736,29 +1762,31 @@ def get_stats():
             else:
                 tree1.insert("","end",values=[roll_labels[i],roll_values[i]])
 
-        mid_frame2["text"] = "Format Performance"
+        mid_frame2["text"] = "Overall Performance"
         tree2.tag_configure("colored",background="#cccccc")
         tree2.delete(*tree2.get_children())
-        tree2["column"] = ["Format","Wins","Losses","Match Win%"]
+        tree2["column"] = ["Description","Wins","Losses","Match Win%"]
         for i in tree2["column"]:
             tree2.column(i,minwidth=20,stretch=True,width=20)
             tree2.heading(i,text=i)
         tree2.column("Wins",anchor="center")
         tree2.column("Losses",anchor="center")
         tree2.column("Match Win%",anchor="center")
-        tagged = False
         for i in range(len(formats_played)):
-            tagged = not tagged
+            if (formats_played[i] == "Match Format") or (formats_played[i] == "Match Type"):
+                tagged = True
+            else:
+                tagged = False
             if tagged == True:
                 tree2.insert("","end",values=[formats_played[i],
                                               format_wins[i],
                                               format_losses[i],
-                                              format_wr[i]+"%"],tags=("colored",))
+                                              format_wr[i]],tags=("colored",))
             else:
                 tree2.insert("","end",values=[formats_played[i],
                                               format_wins[i],
                                               format_losses[i],
-                                              format_wr[i]+"%"])
+                                              format_wr[i]])
 
         if (deck != "All Decks") or (opp_deck != "All Opp. Decks"):
             mid_frame3["text"] = deck + " vs. " + opp_deck + " - " + mformat
@@ -2063,7 +2091,6 @@ def get_stats():
         df2_hero =      df2_merge[(df2_merge.Casting_Player == hero)]
         
         formats_played = df2_hero.Format.value_counts().keys().tolist()
-        format_counts =  df2_hero.Format.value_counts().tolist()
         hero_n = df1_i[(df1_i.P1 == hero)].shape[0]
         formats =    []
         index_list = []
@@ -2399,20 +2426,46 @@ def get_stats():
     
     def card_stats(hero,mformat,deck,opp_deck,s_type):
         clear_frames()
-        def tree_skip(event):
-            if tree1.identify_region(event.x,event.y) == "separator":
-                return "break"
-            if tree1.identify_region(event.x,event.y) == "heading":
-                return "break"
+        def tree_tuple_to_mixed(tuple):
+            return int(tuple[0].split(" - ")[0])
+        def tree_tuple_to_float(tuple):
+            return float(tuple[0])
         def tree_setup(*argv):
             for i in argv:
                 i.place(relheight=1, relwidth=1)
-                i.bind("<Button-1>",tree_skip)
-                i.bind("<Enter>",tree_skip)
-                i.bind("<ButtonRelease-1>",tree_skip)
-                i.bind("<Motion>",tree_skip)          
-        tree1 = ttk.Treeview(mid_frame7,show="headings",selectmode="none",padding=10)
-        tree2 = ttk.Treeview(mid_frame8,show="headings",selectmode="none",padding=10)
+        def sort_column(col,reverse,tree1):
+            l = []
+            for k in tree1.get_children(''):
+                l.append((tree1.set(k, col), k))
+            l.sort(reverse=reverse)
+            # rearrange items in sorted positions
+            for index, (val, k) in enumerate(l):
+                tree1.move(k, '', index)
+            # reverse sort next time
+            tree1.heading(col,text=col,command=lambda _col=col: sort_column(_col,not reverse,tree1))
+        def sort_column_float(col,reverse,tree1):
+            l = []
+            for k in tree1.get_children(''):
+                l.append((tree1.set(k, col), k))
+            l.sort(reverse=reverse,key=tree_tuple_to_float)
+            # rearrange items in sorted positions
+            for index, (val, k) in enumerate(l):
+                tree1.move(k, '', index)
+            # reverse sort next time
+            tree1.heading(col,text=col,command=lambda _col=col: sort_column_float(_col,not reverse,tree1))
+        def sort_column_mixed(col,reverse,tree1):
+            l = []
+            for k in tree1.get_children(''):
+                l.append((tree1.set(k, col), k))
+            l.sort(reverse=reverse,key=tree_tuple_to_mixed)
+            # rearrange items in sorted positions
+            for index, (val, k) in enumerate(l):
+                tree1.move(k, '', index)
+            # reverse sort next time
+            tree1.heading(col,text=col,command=lambda _col=col: sort_column_mixed(_col,not reverse,tree1))
+
+        tree1 = ttk.Treeview(mid_frame7,show="headings",padding=10)
+        tree2 = ttk.Treeview(mid_frame8,show="headings",padding=10)
         tree_setup(tree1,tree2)
         mid_frame.grid_rowconfigure(0,weight=1)
         mid_frame.grid_rowconfigure(1,weight=0)
@@ -2498,23 +2551,20 @@ def get_stats():
         tree1["column"] = ["Card","Games Cast","Game Win%","Delta"]
         for i in tree1["column"]:
             tree1.column(i,minwidth=20,stretch=True,width=20)
-            tree1.heading(i,text=i)
+            if (i == "Game Win%") or (i == "Delta"):
+                tree1.heading(i,text=i,command=lambda _col=i: sort_column_float(_col,False,tree1))
+            elif (i == "Games Cast"):
+                tree1.heading(i,text=i,command=lambda _col=i: sort_column_mixed(_col,False,tree1))
+            else:
+                tree1.heading(i,text=i,command=lambda _col=i: sort_column(_col,False,tree1))
         for i in range(1,len(tree1["column"])):
             tree1.column(i,anchor="center")
         tagged = False
         for i in list_pre:
-            tagged = not tagged
-            if tagged == True:
-                tree1.insert("","end",values=[i[0],
-                                              i[1]+" - ("+to_percent(int(i[1])/n_pre)+"%)",
-                                              i[3],
-                                              round(float(i[3])-wr_pre,2)],
-                                              tags=("colored",))
-            else:
-                tree1.insert("","end",values=[i[0],
-                                              i[1]+" - ("+to_percent(int(i[1])/n_pre)+"%)",
-                                              i[3],
-                                              round(float(i[3])-wr_pre,2)])
+            tree1.insert("","end",values=[i[0],
+                                          i[1]+" - ("+to_percent(int(i[1])/n_pre)+"%)",
+                                          i[3],
+                                          round(float(i[3])-wr_pre,2)])
 
         mid_frame8["text"] = "Post-Sideboard - " + str(n_post) + " Games"
         tree2.tag_configure("colored",background="#cccccc")
@@ -2522,23 +2572,19 @@ def get_stats():
         tree2["column"] = ["Card","Games Cast","Game Win%","Delta"]
         for i in tree2["column"]:
             tree2.column(i,minwidth=20,stretch=True,width=20)
-            tree2.heading(i,text=i)
+            if (i == "Game Win%") or (i == "Delta"):
+                tree2.heading(i,text=i,command=lambda _col=i: sort_column_float(_col,False,tree2))
+            elif (i == "Games Cast"):
+                tree2.heading(i,text=i,command=lambda _col=i: sort_column_mixed(_col,False,tree2))
+            else:
+                tree2.heading(i,text=i,command=lambda _col=i: sort_column(_col,False,tree2))
         for i in range(1,len(tree2["column"])):
             tree2.column(i,anchor="center")
-        tagged = False
         for i in list_post:
-            tagged = not tagged
-            if tagged == True:
-                tree2.insert("","end",values=[i[0],
-                                              i[1]+" - ("+to_percent(int(i[1])/n_post)+"%)",
-                                              i[3],
-                                              round(float(i[3])-wr_post,2)],
-                                              tags=("colored",))
-            else:
-                tree2.insert("","end",values=[i[0],
-                                              i[1]+" - ("+to_percent(int(i[1])/n_post)+"%)",
-                                              i[3],
-                                              round(float(i[3])-wr_post,2)])
+            tree2.insert("","end",values=[i[0],
+                                          i[1]+" - ("+to_percent(int(i[1])/n_post)+"%)",
+                                          i[3],
+                                          round(float(i[3])-wr_post,2)])
                                                      
     def to_percent(fl):
         return str(int(fl*100))
@@ -2668,7 +2714,9 @@ def get_stats():
     mformat.trace("w",update_format)
     s_type.trace("w",update_s_type)
 
-    player.set(hero)    
+    player.set(hero)
+    load_data()
+
     stats_window.protocol("WM_DELETE_WINDOW", lambda : close_stats_window())
 
 def exit():
