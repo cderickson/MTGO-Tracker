@@ -6,9 +6,5 @@ Importing
 
 Record Revision
 	Apply to all functionality
-		P1_Arch
-		P1_Subarch
-		P2_Arch
-		P2_Subarch
 		Format
 		Match_Type
