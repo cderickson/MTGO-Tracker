@@ -30,6 +30,7 @@ main_window_height= 750
 hero =              ""
 parsed_file_list =  []
 new_import =        False
+field =             ""
 
 def save_window():
     height = 100
@@ -1253,6 +1254,7 @@ def revise_record():
         revise_window.destroy()       
 
     selected = tree1.focus()
+    print(selected)
     values = list(tree1.item(selected,"values"))
 
     format_options = ["NA","Vintage","Legacy","Modern","Standard","Pioneer","Pauper","Draft - Booster","Draft - Sealed","Cube"]
@@ -1352,6 +1354,172 @@ def revise_record():
 
     revise_window.protocol("WM_DELETE_WINDOW", lambda : close_without_saving())
 
+def revise_record_multi():
+    if tree1.focus() == "":
+        return
+
+    height = 175
+    width =  300
+    revise_window = tk.Toplevel(window)
+    revise_window.title("Revise Multiple Records")
+    revise_window.minsize(width,height)
+    revise_window.resizable(False,False)
+    revise_window.attributes("-topmost",True)
+    revise_window.grab_set()
+    revise_window.focus()
+
+    revise_window.geometry("+%d+%d" %
+                           (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+                            window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+    
+    top_frame = tk.Frame(revise_window)
+    mid_frame = tk.LabelFrame(revise_window)
+    bot_frame = tk.Frame(revise_window)
+    top_frame.grid(row=0,column=0,sticky="")
+    mid_frame.grid(row=1,column=0,sticky="nsew")
+    bot_frame.grid(row=2,column=0,sticky="")
+    
+    revise_window.grid_columnconfigure(0,weight=1)
+    revise_window.rowconfigure(1,minsize=0,weight=1)  
+    mid_frame.grid_columnconfigure(0,weight=1)
+    mid_frame.grid_columnconfigure(1,weight=1)
+
+    def field_updated(*argv):
+        global field
+        field = field_val.get()
+
+        if field == "P1 Deck":
+            p1_arch_label.grid(row=1,column=0,padx=(25,0),pady=10,sticky="e")
+            p1_arch_entry.grid(row=1,column=1,padx=(25,50),pady=5,sticky="ew")
+            p1_subarch_label.grid(row=2,column=0,padx=(25,0),pady=5,sticky="e")
+            p1_subarch_entry.grid(row=2,column=1,padx=(25,50),pady=5,sticky="ew")
+            p2_arch_label.grid_forget()
+            p2_arch_entry.grid_forget()
+            p2_subarch_label.grid_forget()
+            p2_subarch_entry.grid_forget()
+            format_label.grid_forget()
+            format_entry.grid_forget()
+            match_type_label.grid_forget()
+            match_type_entry.grid_forget()
+        elif field == "P2 Deck":
+            p1_arch_label.grid_forget()
+            p1_arch_entry.grid_forget()
+            p1_subarch_label.grid_forget()
+            p1_subarch_entry.grid_forget()
+            p2_arch_label.grid(row=1,column=0,padx=(25,0),pady=10,sticky="e")
+            p2_arch_entry.grid(row=1,column=1,padx=(25,50),pady=5,sticky="ew")
+            p2_subarch_label.grid(row=2,column=0,padx=(25,0),pady=5,sticky="e")
+            p2_subarch_entry.grid(row=2,column=1,padx=(25,50),pady=5,sticky="ew")
+            format_label.grid_forget()
+            format_entry.grid_forget()
+            match_type_label.grid_forget()
+            match_type_entry.grid_forget()
+        elif field == "Format":
+            p1_arch_label.grid_forget()
+            p1_arch_entry.grid_forget()
+            p1_subarch_label.grid_forget()
+            p1_subarch_entry.grid_forget()
+            p2_arch_label.grid_forget()
+            p2_arch_entry.grid_forget()
+            p2_subarch_label.grid_forget()
+            p2_subarch_entry.grid_forget()
+            format_label.grid(row=1,column=0,padx=(25,0),pady=(25,),sticky="e")
+            format_entry.grid(row=1,column=1,padx=(25,50),pady=(20,),sticky="ew")
+            match_type_label.grid_forget()
+            match_type_entry.grid_forget()
+        elif field == "Match Type":
+            p1_arch_label.grid_forget()
+            p1_arch_entry.grid_forget()
+            p1_subarch_label.grid_forget()
+            p1_subarch_entry.grid_forget()
+            p2_arch_label.grid_forget()
+            p2_arch_entry.grid_forget()
+            p2_subarch_label.grid_forget()
+            p2_subarch_entry.grid_forget()
+            format_label.grid_forget()
+            format_entry.grid_forget()
+            match_type_label.grid(row=1,column=0,padx=(25,0),pady=(25,),sticky="e")
+            match_type_entry.grid(row=1,column=1,padx=(25,50),pady=(20,),sticky="ew")
+
+    def close_revise_window():
+        for i in selected:
+            values = list(tree1.item(i,"values"))
+            for j in all_data[0]:
+                if values[0] == j[0]:
+                    if field == "P1 Deck":
+                        j[2] = p1_arch_type.get()
+                        j[3] = p1_subarch_entry.get()
+                    elif field == "P2 Deck":
+                        j[5] = p2_arch_type.get()
+                        j[6] = p2_subarch_entry.get()
+                    elif field == "Format":
+                        j[13] = match_format.get()
+                    elif field == "Match Type":
+                        j[14] = match_type.get() 
+                    break
+        all_data_inverted = modo.invert_join(all_data)
+        set_display("Matches")
+        revise_window.grab_release()
+        revise_window.destroy()
+
+    def close_without_saving():
+        revise_window.grab_release()
+        revise_window.destroy()       
+
+    selected = tree1.selection()
+
+    format_options = ["NA","Vintage","Legacy","Modern","Standard","Pioneer","Pauper","Draft - Booster","Draft - Sealed","Cube"]
+    match_format = tk.StringVar()
+    match_format.set(format_options[0])
+
+    match_options = ["NA","League","Preliminary","Challenge"]
+    match_type = tk.StringVar()
+    match_type.set(match_options[0])
+
+    field_options = ["P1 Deck","P2 Deck","Format","Match Type"]
+    field_val = tk.StringVar()
+    if field == "":
+        field_val.set(field_options[0])
+    else:
+        field_val.set(field)
+
+    field_menu = tk.OptionMenu(top_frame,field_val,*field_options)
+    field_menu.grid(row=0,column=0,pady=10,sticky="")
+
+    arch_options = ["NA","Aggro","Midrange","Control","Combo","Prison","Tempo","Limited"]
+
+    p1_arch_type = tk.StringVar()
+    p1_arch_type.set(arch_options[0])
+
+    p2_arch_type = tk.StringVar()
+    p2_arch_type.set(arch_options[0])
+
+    p1_arch_label =      tk.Label(mid_frame,text="P1_Arch:")
+    p1_arch_entry =      tk.OptionMenu(mid_frame,p1_arch_type,*arch_options)
+    p1_subarch_label =   tk.Label(mid_frame,text="P1_Subarch:")
+    p1_subarch_entry =   tk.Entry(mid_frame)
+    p2_arch_label =      tk.Label(mid_frame,text="P2_Arch:")
+    p2_arch_entry =      tk.OptionMenu(mid_frame,p2_arch_type,*arch_options)
+    p2_subarch_label =   tk.Label(mid_frame,text="P2_Subarch:")
+    p2_subarch_entry =   tk.Entry(mid_frame)
+    format_label =       tk.Label(mid_frame,text="Format:")
+    format_entry =       tk.OptionMenu(mid_frame,match_format,*format_options)
+    match_type_label =   tk.Label(mid_frame,text="Match_Type:")
+    match_type_entry =   tk.OptionMenu(mid_frame,match_type,*match_options)
+
+    button3 = tk.Button(bot_frame,text="Apply to All",
+                        command=lambda : close_revise_window())
+    button4 = tk.Button(bot_frame,text="Cancel",
+                        command=lambda : close_without_saving())
+
+    button3.grid(row=0,column=0,padx=10,pady=10)
+    button4.grid(row=0,column=1,padx=10,pady=10)
+
+    field_val.trace("w",field_updated)
+
+    field_updated()
+    revise_window.protocol("WM_DELETE_WINDOW", lambda : close_without_saving())
+
 def activate_revise(event):
     if tree1.identify_region(event.x,event.y) == "heading":
         return
@@ -1360,6 +1528,13 @@ def activate_revise(event):
     if data_loaded == False:
         return
     button4["state"] = tk.NORMAL
+    print(tree1.selection())
+
+def revise_button():
+    if len(tree1.selection()) > 1:
+        revise_record_multi()
+    else:
+        revise_record()
 
 def import_window():
     height = 300
@@ -2749,8 +2924,8 @@ button7 = tk.Button(left_frame,text="Filter",state=tk.DISABLED,
                      command=lambda : set_filter())
 button8 = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,
                      command=lambda : [clear_filter(),set_display(display)])
-button4 = tk.Button(left_frame,text="Revise Record",state=tk.DISABLED,
-                     command=lambda : [revise_record()])
+button4 = tk.Button(left_frame,text="Revise Record(s)",state=tk.DISABLED,
+                     command=lambda : [revise_button()])
 button9 = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,
                      command=lambda : [get_stats()])
 back_button = tk.Button(left_frame,text="Back",

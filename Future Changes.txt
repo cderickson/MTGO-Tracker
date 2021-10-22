@@ -4,10 +4,5 @@ Statistics
 Importing
 	Add ability to delete existing save data
 
-Record Revision
-	Apply to all functionality
-		Format
-		Match_Type
-
 Plays
 	Remove "Chooses"/"Discards"??
