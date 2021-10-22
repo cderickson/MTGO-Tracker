@@ -94,6 +94,50 @@ def save_window():
     
     save_window.protocol("WM_DELETE_WINDOW", lambda : close_save_window())
 
+def clear_loaded():
+    global all_data
+    global all_data_inverted
+    global all_decks
+    global display
+    global filter_dict
+    global data_loaded
+    global filter_changed
+    global prev_display
+    global uaw
+    global parsed_file_list
+    global new_import
+
+    all_data =          [[],[],[],[]]
+    all_data_inverted = [[],[],[],[]]
+    all_decks =         []
+    display =           ""
+    filter_dict =       {}
+    data_loaded =       False
+    filter_changed =    False
+    prev_display =      ""
+    uaw =               "NA"
+    parsed_file_list =  []
+    new_import =        False
+
+    button1["state"] = tk.DISABLED
+    button2["state"] = tk.DISABLED
+    button3["state"] = tk.DISABLED
+    button7["state"] = tk.DISABLED
+    button8["state"] = tk.DISABLED
+    button4["state"] = tk.DISABLED
+    button9["state"] = tk.DISABLED
+    back_button["state"] = tk.DISABLED
+    
+    text_frame.config(text="Dataframe")
+
+    data_menu.entryconfig("Set Default 'Hero'",state=tk.DISABLED)
+    data_menu.entryconfig("Clear Loaded Data",state=tk.DISABLED)
+    file_menu.entryconfig("Save Data",state=tk.DISABLED)
+
+    #clear existing data in tree
+    tree1.delete(*tree1.get_children())
+    tree1["show"] = "tree"
+
 def clear_window():
     height = 100
     width =  300
@@ -109,49 +153,7 @@ def clear_window():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def clear():
-        global all_data
-        global all_data_inverted
-        global all_decks
-        global display
-        global filter_dict
-        global data_loaded
-        global filter_changed
-        global prev_display
-        global uaw
-        global parsed_file_list
-        global new_import
-
-        all_data =          [[],[],[],[]]
-        all_data_inverted = [[],[],[],[]]
-        all_decks =         []
-        display =           ""
-        filter_dict =       {}
-        data_loaded =       False
-        filter_changed =    False
-        prev_display =      ""
-        uaw =               "NA"
-        parsed_file_list =  []
-        new_import =        False
-
-        button1["state"] = tk.DISABLED
-        button2["state"] = tk.DISABLED
-        button3["state"] = tk.DISABLED
-        button7["state"] = tk.DISABLED
-        button8["state"] = tk.DISABLED
-        button4["state"] = tk.DISABLED
-        button9["state"] = tk.DISABLED
-        back_button["state"] = tk.DISABLED
-        
-        text_frame.config(text="Dataframe")
-
-        data_menu.entryconfig("Set Default 'Hero'",state=tk.DISABLED)
-        file_menu.entryconfig("Clear Loaded Data",state=tk.DISABLED)
-        file_menu.entryconfig("Save Data",state=tk.DISABLED)
-
-        #clear existing data in tree
-        tree1.delete(*tree1.get_children())
-        tree1["show"] = "tree"
-
+        clear_loaded()
         status_label.config(text="Previously loaded data has been cleared.")
         close_clear_window()
 
@@ -183,6 +185,113 @@ def clear_window():
     
     clear_window.protocol("WM_DELETE_WINDOW", lambda : close_clear_window())
 
+def load_saved_window():
+    height = 100
+    width =  300
+    load_saved_window = tk.Toplevel(window)
+    load_saved_window.title("Clear Saved Data")
+    load_saved_window.minsize(width,height)
+    load_saved_window.resizable(False,False)
+    load_saved_window.grab_set()
+    load_saved_window.focus()
+
+    load_saved_window.geometry("+%d+%d" % 
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+
+    def load():
+        startup()
+        close_load_window()
+
+    def close_load_window():
+        load_saved_window.grab_release()
+        load_saved_window.destroy()
+
+    mid_frame = tk.LabelFrame(load_saved_window,text="")
+    bot_frame = tk.Frame(load_saved_window)
+
+    mid_frame.grid(row=0,column=0,sticky="nsew")
+    bot_frame.grid(row=1,column=0,sticky="")
+
+    load_saved_window.grid_columnconfigure(0,weight=1)
+    load_saved_window.rowconfigure(0,weight=1)
+    mid_frame.grid_columnconfigure(0,weight=1)
+    mid_frame.grid_rowconfigure(0,weight=1) 
+    bot_frame.grid_columnconfigure(0,weight=1)
+    bot_frame.grid_rowconfigure(0,weight=1)
+    bot_frame.grid_rowconfigure(1,weight=1)
+
+    label1 = tk.Label(mid_frame,text="This will clear your current session.\nAre you sure you want to continue?",wraplength=width)
+    button_load = tk.Button(bot_frame,text="Load",command=lambda : load())
+    button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close_load_window())
+    
+    label1.grid(row=0,column=0,sticky="nsew")       
+    button_load.grid(row=0,column=0,padx=5,pady=5)
+    button_close.grid(row=0,column=1,padx=5,pady=5)
+    
+    load_saved_window.protocol("WM_DELETE_WINDOW", lambda : close_load_window())
+
+def delete_session():
+    height = 100
+    width =  300
+    del_window = tk.Toplevel(window)
+    del_window.title("Delete Saved Session")
+    del_window.minsize(width,height)
+    del_window.resizable(False,False)
+    del_window.grab_set()
+    del_window.focus()
+
+    del_window.geometry("+%d+%d" % 
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+
+    files = ["games.csv","matches.csv","plays.csv","rawdata.csv","parsedfiles.csv"]
+
+    def del_session():
+        os.chdir(filepath_root + r"\save")   
+
+        session_exists = False
+        for i in files:
+            if os.path.exists(i):
+                session_exists = True
+                os.remove(i)
+
+        if session_exists == True:
+            status_label.config(text="Saved session data has been deleted.")
+        else:
+            status_label.config(text="No saved session data was found.")
+
+        os.chdir(filepath_root)
+        close_del_window()
+
+    def close_del_window():
+        del_window.grab_release()
+        del_window.destroy()
+
+    mid_frame = tk.LabelFrame(del_window,text="")
+    bot_frame = tk.Frame(del_window)
+
+    mid_frame.grid(row=0,column=0,sticky="nsew")
+    bot_frame.grid(row=1,column=0,sticky="")
+
+    del_window.grid_columnconfigure(0,weight=1)
+    del_window.rowconfigure(0,weight=1)
+    mid_frame.grid_columnconfigure(0,weight=1)
+    mid_frame.grid_rowconfigure(0,weight=1) 
+    bot_frame.grid_columnconfigure(0,weight=1)
+    bot_frame.grid_rowconfigure(0,weight=1)
+    bot_frame.grid_rowconfigure(1,weight=1)
+
+    label1 = tk.Label(mid_frame,text="This will delete your previous saved session.\nAre you sure you want to continue?",wraplength=width)
+    button_del = tk.Button(bot_frame,text="Delete Saved Session",command=lambda : del_session())
+    button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close_del_window())
+    
+    label1.grid(row=0,column=0,sticky="nsew")       
+    button_del.grid(row=0,column=0,padx=5,pady=5)
+    button_close.grid(row=0,column=1,padx=5,pady=5)
+    
+    del_window.protocol("WM_DELETE_WINDOW", lambda : close_del_window())
+
 def startup():
     global filepath_root
     global filepath_export
@@ -213,6 +322,7 @@ def startup():
 
     for index,i in enumerate(files):
         if os.path.isfile(i) == False:
+            status_label.config(text="No session data to load. Import your MTGO GameLog files to get started.")
             return
         if index == 3:
             try:
@@ -246,8 +356,9 @@ def startup():
 
     set_display("Matches")
     data_menu.entryconfig("Set Default 'Hero'",state=tk.NORMAL)
-    file_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
+    data_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
     file_menu.entryconfig("Save Data",state=tk.NORMAL)
+    os.chdir(filepath_root)
 
 def save_settings():
     os.chdir(filepath_root)
@@ -292,7 +403,6 @@ def set_display(d,*argv):
     elif d == "Plays":
         set_bb_state(True)
         print_data(all_data[2],all_headers[2])
-    print(filter_dict)
     
 def set_bb_state(state):
     if state:
@@ -309,7 +419,7 @@ def get_all_data():
     global new_import
     w = [window.winfo_x(),window.winfo_y(),window.winfo_width(),window.winfo_height()]
     count = 0
-    
+
     for (root,dirs,files) in os.walk(filepath_logs):
         None
         
@@ -323,7 +433,6 @@ def get_all_data():
             with io.open(i,"r",encoding="ansi") as gamelog:
                 initial = gamelog.read()
                 mtime = time.ctime(os.path.getmtime(i))
-
             parsed_data = modo.get_all_data(initial,mtime,all_decks,w)
             parsed_file_list.append(i)
             count += 1
@@ -337,15 +446,14 @@ def get_all_data():
                 all_data[3].append(i)
 
     all_data_inverted = modo.invert_join(all_data)
-
     status_label.config(text="Imported " + str(count) + " new matches.")
-
     new_import = True
 
     if len(all_data[0]) != 0:
         button7["state"] = tk.NORMAL
         button8["state"] = tk.NORMAL
         data_loaded = True
+    os.chdir(filepath_root)
 
 def print_data(data,header):
     global new_import
@@ -460,12 +568,9 @@ def get_formats():
 def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
     def close_format_window(*argv):
         global match_format
-
         match_format = [p1_arch.get(),p1_sub.get(),p2_arch.get(),p2_sub.get(),mformat.get(),mtype.get()]
         for i in argv:
             match_format = i
-
-        print(match_format)
         gf.grab_release()
         gf.destroy()
              
@@ -765,9 +870,7 @@ def export(file_type,data_type,inverted):
 
     if file_type == "CSV":
         for i in range(len(file_names)):
-            print(file_names)
             with open(filepath_export+"/"+file_names[i],"w",encoding="UTF8",newline="") as file:
-                print(file)
                 writer = csv.writer(file)
                 if data_type == 3:
                     writer.writerow(headers[i])
@@ -900,14 +1003,10 @@ def set_default_export():
     else:
         label1 = tk.Label(mid_frame,text=filepath_export,wraplength=width,justify="left")
     button1 = tk.Button(mid_frame,text="Set Default Export Folder",command=lambda : get_export_path())
-    #label2 = tk.Label(mid_frame,text=filepath_logs,wraplength=width,justify="left")
-    #button2 = tk.Button(mid_frame,text="Get Logs Folder",command=lambda : [get_logs_path(),update_path_labels()])
     button3 = tk.Button(bot_frame,text="Save",command=lambda : save_path())
     
-    label1.grid(row=0,column=0,pady=(40,5))
+    label1.grid(row=0,column=0,pady=(75,5))
     button1.grid(row=1,column=0,pady=0)
-    #label2.grid(row=2,column=0,pady=5)
-    #button2.grid(row=3,column=0,pady=0)
     button3.grid(row=4,column=0,pady=5)
     
     export_window.protocol("WM_DELETE_WINDOW", lambda : close_export_window())
@@ -1040,7 +1139,6 @@ def add_filter_setting(index, key):
         else:
             filter_dict[index] = [key]
         filter_changed = True
-    print(filter_dict)
     
 def clear_filter():
     global filter_changed
@@ -1119,7 +1217,6 @@ def set_filter():
     elif display == "Plays":
         for index, i in enumerate(all_headers[2]):
             col_dict[i] = index
-    print(col_dict)
     col_dict.pop("Match_ID")
     
     col_options = list(col_dict.keys())
@@ -1254,7 +1351,6 @@ def revise_record():
         revise_window.destroy()       
 
     selected = tree1.focus()
-    print(selected)
     values = list(tree1.item(selected,"values"))
 
     format_options = ["NA","Vintage","Legacy","Modern","Standard","Pioneer","Pauper","Draft - Booster","Draft - Sealed","Cube"]
@@ -1528,7 +1624,6 @@ def activate_revise(event):
     if data_loaded == False:
         return
     button4["state"] = tk.NORMAL
-    print(tree1.selection())
 
 def revise_button():
     if len(tree1.selection()) > 1:
@@ -1554,21 +1649,27 @@ def import_window():
         fp_decks = filedialog.askdirectory()  
         if (fp_decks is None) or (fp_decks == ""):
             label1.config(text="No Default Decklists Folder")
+            button3["state"] = tk.DISABLED
         else:
             label1.config(text=fp_decks)
-        label3["text"] = ""
+            if label2["text"] != "No Default Game Logs Folder":
+                button3["state"] = tk.NORMAL
 
     def get_logs_path():
         fp_logs = filedialog.askdirectory()  
         if (fp_logs is None) or (fp_logs == ""):
             label2.config(text="No Default Game Logs Folder")
+            button3["state"] = tk.DISABLED
         else:
             label2.config(text=fp_logs)
-        label3["text"] = ""
+            if label1["text"] != "No Default Decklists Folder":
+                button3["state"] = tk.NORMAL
 
     def import_data():
         global filepath_decks
         global filepath_logs
+
+        clear_loaded()
         if (label1["text"] == "No Default Decklists Folder") or (label2["text"]  == "No Default Game Logs Folder"):
             label3["text"] = "Decks and/or Game Logs Folder Location not set."
             return
@@ -1581,7 +1682,7 @@ def import_window():
         if data_loaded != False:
             data_menu.entryconfig("Set Default 'Hero'",state=tk.NORMAL)
             file_menu.entryconfig("Save Data",state=tk.NORMAL)
-            file_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
+            data_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
         filepath_decks = fp_decks
         filepath_logs = fp_logs
         close_import_window()
@@ -1605,23 +1706,27 @@ def import_window():
     button1 = tk.Button(mid_frame,text="Get Decks Folder",command=lambda : get_decks_path())
     button2 = tk.Button(mid_frame,text="Get Logs Folder",command=lambda : get_logs_path())
     button3 = tk.Button(bot_frame,text="Import", command=lambda : import_data())
+    button4 = tk.Button(bot_frame,text="Cancel", command=lambda : close_import_window())
     if (filepath_decks is None) or (filepath_decks == ""):
         label1 = tk.Label(mid_frame,text="No Default Decklists Folder",wraplength=width,justify="left")
+        button3["state"] = tk.DISABLED
     else:
         label1 = tk.Label(mid_frame,text=filepath_decks,wraplength=width,justify="left")
     if (filepath_logs is None) or (filepath_logs == ""):
         label2 = tk.Label(mid_frame,text="No Default Game Logs Folder",wraplength=width,justify="left")
+        button3["state"] = tk.DISABLED
     else:
         label2 = tk.Label(mid_frame,text=filepath_logs,wraplength=width,justify="left")
-    label3 = tk.Label(mid_frame,text="",wraplength=width,justify="left")
+    label3 = tk.Label(mid_frame,text="CAUTION: This will overwrite your current session.",wraplength=width,pady=(20,),justify="left")
 
     label1.grid(row=0,column=0,pady=(40,5))
     button1.grid(row=1,column=0,pady=0)
     label2.grid(row=2,column=0,pady=5)
     button2.grid(row=3,column=0,pady=0)
     label3.grid(row=4,column=0,pady=5)
-    button3.grid(row=5,column=0,pady=5)
-    
+    button3.grid(row=0,column=0,padx=10,pady=10)
+    button4.grid(row=0,column=1,padx=10,pady=10)
+
     import_window.protocol("WM_DELETE_WINDOW", lambda : close_import_window())
 
 def get_winners():
@@ -2688,8 +2793,6 @@ def get_stats():
         wins_post = df_merge_post.drop_duplicates("Game_ID").Won_Game.sum()
         wr_pre = round((wins_pre/n_pre)*100,2).item()
         wr_post = round((wins_post/n_post)*100,2).item()
-        print(wr_pre)
-        print(wr_post)
 
         df_merge_pre = df_merge_pre[(df_merge_pre.Casting_Player == hero) & (df_merge_pre.Action.isin(["Plays","Casts"]))]
         df_merge_pre.drop(df_merge_pre.columns.difference(["Game_ID","Game_Num","P1_Subarch","P2_Subarch","Primary_Card","Won_Game"]),axis=1,inplace=True)
@@ -2942,7 +3045,7 @@ file_menu = tk.Menu(menu_bar,tearoff=False)
 menu_bar.add_cascade(label="File",menu=file_menu)
 
 file_menu.add_command(label="Load MTGO Game Logs",command=lambda : import_window())
-file_menu.add_command(label="Clear Loaded Data",command=lambda : clear_window(),state=tk.DISABLED)
+file_menu.add_command(label="Load Saved Data",command=lambda : load_saved_window())
 file_menu.add_command(label="Save Data",command=lambda : save_window(),state=tk.DISABLED)
 file_menu.add_separator()
 file_menu.add_command(label="Exit",command=lambda : exit())
@@ -2983,6 +3086,9 @@ data_menu.add_command(label="Input Missing Game_Winner Data",command=lambda : ge
 data_menu.add_separator()
 data_menu.add_command(label="Set Default 'Hero'",command=lambda : set_default_hero(),state=tk.DISABLED)
 data_menu.add_command(label="Set Default Import Folders",command=lambda : set_default_import())
+data_menu.add_separator()
+data_menu.add_command(label="Clear Loaded Data",command=lambda : clear_window(),state=tk.DISABLED)
+data_menu.add_command(label="Delete Saved Session",command=lambda : delete_session())
 
 window.config(menu=menu_bar)
 
@@ -3000,10 +3106,8 @@ tree1.place(relheight=1, relwidth=1)
 tree1.bind("<Double-1>",tree_double)
 tree1.bind("<ButtonRelease-1>",activate_revise)
 
-tree_scrollx = tk.Scrollbar(text_frame,orient="horizontal",command=tree1.xview)
 tree_scrolly = tk.Scrollbar(text_frame,orient="vertical",command=tree1.yview)
-tree1.configure(xscrollcommand=tree_scrollx.set,yscrollcommand=tree_scrolly.set)
-tree_scrollx.pack(side="bottom",fill="x")
+tree1.configure(yscrollcommand=tree_scrolly.set)
 tree_scrolly.pack(side="right",fill="y")
 
 s = ttk.Style()
