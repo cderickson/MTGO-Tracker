@@ -7,3 +7,6 @@ Plays
 Hero Information
 	Update tables when Hero variable is set
 	Move Hero to P1 and update default and inverted databases appropriately
+
+Filter
+	Sorts caps before lower case

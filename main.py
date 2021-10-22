@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 pd.options.mode.chained_assignment = None
+from tkcalendar import DateEntry
 
 all_data =          [[],[],[],[]]
 all_data_inverted = [[],[],[],[]]
@@ -200,6 +201,7 @@ def load_saved_window():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def load():
+        clear_filter()
         startup()
         close_load_window()
 
@@ -479,7 +481,21 @@ def print_data(data,header):
         if key not in header:
             break
         for i in filter_dict[key]:
-            df = df[(df[key].isin(filter_dict[key]))]
+            for j in filter_dict[key]:
+                if j[1:].isnumeric():
+                    value = int(j[1:])
+                else:
+                    value = j[1:]
+                if j[0] == "=":
+                    if key == "Date":
+                        print(value[0:10])
+                        df = df[(df[key].str.contains(value[0:10]))]
+                    else:
+                        df = df[(df[key] == value)]
+                elif j[0] == ">":
+                    df = df[(df[key] > value)]
+                elif j[0] == "<":
+                    df = df[(df[key] < value)]
     if (display == "Matches") or (display == "Games"):
         df = df.sort_values(by=["Match_ID"],ascending=False)
     elif display == "Plays":
@@ -789,11 +805,11 @@ def tree_double(event):
         return None
     
     clear_filter()
-    add_filter_setting("Match_ID",tree1.item(tree1.focus(),"values")[0])
+    add_filter_setting("Match_ID",tree1.item(tree1.focus(),"values")[0],"=")
     if display == "Matches":
         set_display("Games",True)
     elif display == "Games":
-        add_filter_setting("Game_Num",tree1.item(tree1.focus(),"values")[3])
+        add_filter_setting("Game_Num",tree1.item(tree1.focus(),"values")[3],"=")
         set_display("Plays",True)
 
 def bb_clicked():
@@ -802,7 +818,7 @@ def bb_clicked():
     if "Match_ID" in filter_dict:
         match_id = filter_dict["Match_ID"][0]
         clear_filter()
-        add_filter_setting("Match_ID",match_id)
+        add_filter_setting("Match_ID",match_id,"=")
     else:
         clear_filter()
     if display == "Games":
@@ -1117,7 +1133,7 @@ def sort_column_int(col,reverse,tree1):
     # reverse sort next time
     tree1.heading(col,text=col,command=lambda _col=col: sort_column_int(_col,not reverse,tree1))
 
-def add_filter_setting(index, key):
+def add_filter_setting(index,key,op):
     global filter_dict
     global filter_changed
     
@@ -1127,17 +1143,11 @@ def add_filter_setting(index, key):
     if index in filter_dict:
         l = filter_dict[index]
         if key not in l:
-            if key.isnumeric():
-                l.append(int(key))
-            else:
-                l.append(key)
+            l.append(op + key)
             filter_dict[index] = l
             filter_changed = True
     else:
-        if key.isnumeric():
-            filter_dict[index] = [int(key)]
-        else:
-            filter_dict[index] = [key]
+        filter_dict[index] = [op + key]
         filter_changed = True
     
 def clear_filter():
@@ -1152,13 +1162,12 @@ def set_filter():
     filter_window.title("Set Filters")
     filter_window.minsize(width,height)
     filter_window.resizable(False,False)
-    filter_window.attributes("-topmost",True)
     filter_window.grab_set()
     filter_window.focus()
 
     filter_window.geometry("+%d+%d" %
-                           (window.winfo_x()+(window.winfo_width()/2)-(width/2),
-                            window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
     
     top_frame = tk.Frame(filter_window)
     mid_frame = tk.LabelFrame(filter_window,text="Filters")
@@ -1172,18 +1181,40 @@ def set_filter():
     mid_frame.grid_columnconfigure(0,weight=1)
     
     def update_keys(*argv):
-        index = col_dict[col.get()]
-        
-        key_options = []
-        for i in tree1.get_children():
-            key_options.append(tree1.set(i,index))
-        key_options = sorted(list(set(key_options)))
+        if col.get() == "Date":
+            drop_key.grid_forget()
+            date.grid(row=0,column=3,padx=10,pady=10)
+        else:
+            drop_key.grid(row=0,column=3,padx=10,pady=10)
+            date.grid_forget()
 
-        key.set("None Selected")       
-        menu = drop_key["menu"]
-        menu.delete(0,"end")
-        for i in key_options:
-            menu.add_command(label=i,command=lambda x=i: key.set(x))
+            index = col_dict[col.get()]
+            
+            key_options = []
+            for i in tree1.get_children():
+                key_options.append(tree1.set(i,index))
+            key_options = sorted(list(set(key_options)))
+
+            key.set("None Selected")       
+            menu = drop_key["menu"]
+            menu.delete(0,"end")
+            for i in key_options:
+                menu.add_command(label=i,command=lambda x=i: key.set(x))
+
+    def add():
+        o = op.get()
+        c = col.get()
+        if c == "Date":
+            if o == ">":
+                k = date.get() + "-00:00"
+            elif o == "<":
+                k = date.get() + "-23:59"
+            elif o == "=":
+                k = date.get() + "-12:00"
+        else:
+            k = key.get()
+        add_filter_setting(c,k,o)
+        update_filter_text()
 
     def apply_filter():
         set_display(display)
@@ -1233,14 +1264,19 @@ def set_filter():
     if len(key_options) == 0:
         key_options = ["None Selected"]
     
+    operators = ["=",">","<"]
+    op = tk.StringVar()
+    op.set(operators[0])
+
     drop_col = tk.OptionMenu(top_frame,col,*col_options)
+    op_menu  = tk.OptionMenu(top_frame,op,*operators)
     drop_key = tk.OptionMenu(top_frame,key,*key_options)
+    date     = DateEntry(top_frame,date_pattern="y-mm-dd",width=10,year=2021,month=10,day=22,font="Helvetica 12",state="readonly")
 
     button1 = tk.Button(top_frame,text="Clear",
                         command=lambda : [clear_filter(),update_filter_text()])
     button2 = tk.Button(top_frame,text="Add",
-                        command=lambda : [add_filter_setting(col.get(),key.get()),
-                                           update_filter_text()])
+                        command=lambda : add())
     button3 = tk.Button(bot_frame,text="Apply Filter",
                         command=lambda : close_filter_window())
     label1 = tk.Label(mid_frame,text="",wraplength=width,justify="left")
@@ -1249,11 +1285,14 @@ def set_filter():
 
     button1.grid(row=0,column=0,padx=10,pady=10)
     drop_col.grid(row=0,column=1,padx=10,pady=10)
-    drop_key.grid(row=0,column=2,padx=10,pady=10)
-    button2.grid(row=0,column=3,padx=10,pady=10)
+    op_menu.grid(row=0,column=2,padx=10,pady=10)
+    drop_key.grid(row=0,column=3,padx=10,pady=10)
+    date.grid(row=0,column=3,padx=10,pady=10)
+    button2.grid(row=0,column=4,padx=10,pady=10)
     label1.grid(row=0,column=0,sticky="w")
     button3.grid(row=0,column=0,padx=10,pady=10)
-    
+
+    update_keys()
     update_filter_text()
     filter_window.protocol("WM_DELETE_WINDOW", lambda : close_filter_window())
 
