@@ -2,4 +2,8 @@ Statistics
 	Add ability to input date range and see win rate, filtered by format/format and deck
 
 Plays
-	Remove "Chooses"/"Discards"??
+	Remove "Chooses"/"Discards"?? Might not be relevant information
+
+Hero Information
+	Update tables when Hero variable is set
+	Move Hero to P1 and update default and inverted databases appropriately
