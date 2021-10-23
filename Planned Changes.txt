@@ -1,7 +1,3 @@
-Statistics
-	Check how stats panel interacts with empty date ranges
-		Might have 'divide by 0' errors
-
 Plays
 	Remove "Chooses"/"Discards"?? Might not be relevant information
 

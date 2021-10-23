@@ -2015,14 +2015,17 @@ def get_stats():
         formats_played = df0_i_f.Format.value_counts().keys().tolist()
         format_wins =    [df0_i_f[(df0_i_f.Match_Winner == "P1")].shape[0]] #adding overall in L[0]
         format_losses =  [df0_i_f[(df0_i_f.Match_Winner == "P2")].shape[0]] #adding overall in L[0]
-        format_wr =      [to_percent( format_wins[0]/(format_wins[0]+format_losses[0]) ) + "%"]    #adding overall in L[0]
+        if (format_wins[0] + format_losses[0]) == 0:
+            format_wr = ["0.0%"]
+        else:
+            format_wr = [to_percent(format_wins[0]/(format_wins[0]+format_losses[0]),1) + "%"]    #adding overall in L[0]
 
         for i in formats_played:
             wins  =  df0_i_f[(df0_i_f.Format == i) & (df0_i_f.Match_Winner == "P1")].shape[0]
             losses = df0_i_f[(df0_i_f.Format == i) & (df0_i_f.Match_Winner == "P2")].shape[0]
             format_wins.append(str(wins))
             format_losses.append(str(losses))
-            format_wr.append(to_percent(wins/(wins+losses)) + "%")
+            format_wr.append(to_percent(wins/(wins+losses),1) + "%")
         formats_played.insert(0,"Match Format")
 
         formats_played.extend(["","Match Type"])
@@ -2038,15 +2041,15 @@ def get_stats():
             formats_played.append(i)
             format_wins.append(mt_wins)
             format_losses.append(mt_losses)
-            format_wr.append(to_percent(mt_wins/(mt_wins+mt_losses)) + "%")
+            format_wr.append(to_percent(mt_wins/(mt_wins+mt_losses),1) + "%")
 
         roll_1_mean = round(df0["P1_Roll"].mean(),2)
         roll_2_mean = round(df0["P2_Roll"].mean(),2)
-        p1_roll_wr =  to_percent((df0[df0.Roll_Winner == "P1"].shape[0])/df0.shape[0])
-        p2_roll_wr =  to_percent((df0[df0.Roll_Winner == "P2"].shape[0])/df0.shape[0])
+        p1_roll_wr =  to_percent((df0[df0.Roll_Winner == "P1"].shape[0])/df0.shape[0],1)
+        p2_roll_wr =  to_percent((df0[df0.Roll_Winner == "P2"].shape[0])/df0.shape[0],1)
         rolls_won =   df0_i[(df0_i.P1 == hero) & (df0_i.Roll_Winner == "P1")].shape[0] 
         roll_labels = ["Roll 1 Mean","Roll 2 Mean","Roll 1 Win%","Roll 2 Win%","","Hero Roll Win%"]
-        roll_values = [roll_1_mean,roll_2_mean,p1_roll_wr+"%",p2_roll_wr+"%","",to_percent(rolls_won/hero_n)+"%"]
+        roll_values = [roll_1_mean,roll_2_mean,p1_roll_wr+"%",p2_roll_wr+"%","",to_percent(rolls_won/hero_n,1)+"%"]
 
         if mformat != "All Formats":
             df0_i_f = df0_i_f[(df0_i_f.Format == mformat)]
@@ -2066,7 +2069,7 @@ def get_stats():
             if total == 0:
                 meta_deck_wr.append([wins,losses,"0"])
             else:
-                meta_deck_wr.append([wins,losses,to_percent(wins/total)])
+                meta_deck_wr.append([wins,losses,to_percent(wins/total,1)])
                 
         hero_deck_wr = []
         hero_decks =        df0_i_f.P1_Subarch.value_counts().keys().tolist()
@@ -2078,7 +2081,7 @@ def get_stats():
             if total == 0:
                 hero_deck_wr.append([wins,losses,"0"])
             else:
-                hero_deck_wr.append([wins,losses,to_percent(wins/total)])        
+                hero_deck_wr.append([wins,losses,to_percent(wins/total,1)])        
 
         mid_frame1["text"] = "Die Rolls"
         tree1.tag_configure("colored",background="#cccccc")
@@ -2135,19 +2138,21 @@ def get_stats():
         for i in range(1,len(tree3["column"])):
             tree3.column(i,anchor="center")
         tagged = False
+        if len(hero_decks) == 0:
+            tree3.insert("","end",values=["No Games Found."],tags=('colored',))
         for i in range(10):
             if i >= len(hero_decks):
                 break
             tagged = not tagged
             if tagged == True:
                 tree3.insert("","end",values=[hero_decks[i],
-                                              (str(hero_deck_counts[i])+" - ("+to_percent(hero_deck_counts[i]/filtered_n)+"%)"),
+                                              (str(hero_deck_counts[i])+" - ("+to_percent(hero_deck_counts[i]/filtered_n,0)+"%)"),
                                               hero_deck_wr[i][0],
                                               hero_deck_wr[i][1],
                                               (hero_deck_wr[i][2]+"%")],tags=("colored",))
             else:
                 tree3.insert("","end",values=[hero_decks[i],
-                                              (str(hero_deck_counts[i])+" - ("+to_percent(hero_deck_counts[i]/filtered_n)+"%)"),
+                                              (str(hero_deck_counts[i])+" - ("+to_percent(hero_deck_counts[i]/filtered_n,0)+"%)"),
                                               hero_deck_wr[i][0],
                                               hero_deck_wr[i][1],
                                               (hero_deck_wr[i][2]+"%")])
@@ -2164,19 +2169,21 @@ def get_stats():
         for i in range(1,len(tree4["column"])):
             tree4.column(i,anchor="center")
         tagged = False
+        if len(meta_decks) == 0:
+            tree4.insert("","end",values=["No Games Found."],tags=('colored',))
         for i in range(10):
             if i >= len(meta_decks):
                 break
             tagged = not tagged
             if tagged == True:
                 tree4.insert("","end",values=[meta_decks[i],
-                                              (str(meta_deck_counts[i])+" - ("+to_percent(meta_deck_counts[i]/filtered_n)+"%)"),
+                                              (str(meta_deck_counts[i])+" - ("+to_percent(meta_deck_counts[i]/filtered_n,0)+"%)"),
                                               meta_deck_wr[i][0],
                                               meta_deck_wr[i][1],
                                               (meta_deck_wr[i][2]+"%")],tags=("colored",))
             else:
                 tree4.insert("","end",values=[meta_decks[i],
-                                              (str(meta_deck_counts[i])+" - ("+to_percent(meta_deck_counts[i]/filtered_n)+"%)"),
+                                              (str(meta_deck_counts[i])+" - ("+to_percent(meta_deck_counts[i]/filtered_n,0)+"%)"),
                                               meta_deck_wr[i][0],
                                               meta_deck_wr[i][1],
                                               (meta_deck_wr[i][2]+"%")])
@@ -2258,7 +2265,7 @@ def get_stats():
             if (wins+losses) == 0:
                 win_rate = "0"
             else:
-                win_rate = to_percent(wins/(wins+losses))
+                win_rate = to_percent(wins/(wins+losses),1)
             if total_n == 0:
                 hero_mull_rate =0.0
                 opp_mull_rate = 0.0
@@ -2282,9 +2289,9 @@ def get_stats():
                 wins =    i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck) & (i.Game_Winner == "P1")].shape[0]
                 losses =  i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck) & (i.Game_Winner == "P2")].shape[0]
                 if (wins+losses) == 0:
-                    win_rate = "0"
+                    win_rate = "0.0"
                 else:
-                    win_rate = to_percent(wins/(wins+losses))
+                    win_rate = to_percent(wins/(wins+losses),1)
                 if total_n == 0:
                     hero_mull_rate =0.0
                     opp_mull_rate = 0.0
@@ -2308,9 +2315,9 @@ def get_stats():
                 wins =    i[(i.P1_Subarch == deck) & (i.Game_Winner == "P1")].shape[0]
                 losses =  i[(i.P1_Subarch == deck) & (i.Game_Winner == "P2")].shape[0]
                 if (wins+losses) == 0:
-                    win_rate = "0"
+                    win_rate = "0.0"
                 else:
-                    win_rate = to_percent(wins/(wins+losses))
+                    win_rate = to_percent(wins/(wins+losses),1)
                 if total_n == 0:
                     hero_mull_rate =0.0
                     opp_mull_rate = 0.0
@@ -2334,9 +2341,9 @@ def get_stats():
                 wins =    i[(i.P2_Subarch == opp_deck) & (i.Game_Winner == "P1")].shape[0]
                 losses =  i[(i.P2_Subarch == opp_deck) & (i.Game_Winner == "P2")].shape[0]
                 if (wins+losses) == 0:
-                    win_rate = "0"
+                    win_rate = "0.0"
                 else:
-                    win_rate = to_percent(wins/(wins+losses))
+                    win_rate = to_percent(wins/(wins+losses),1)
                 if total_n == 0:
                     hero_mull_rate =0.0
                     opp_mull_rate = 0.0
@@ -2509,7 +2516,8 @@ def get_stats():
             index_list3.append("Total")
             index_list3.append("Per Game")
         tuples = zip(*sorted(zip(hero_decks_n,hero_decks),reverse=True))
-        hero_decks_n, hero_decks = [list(tuple) for tuple in tuples]
+        if len(hero_decks_n) > 1:
+            hero_decks_n, hero_decks = [list(tuple) for tuple in tuples]
         for i in range(len(hero_decks)):
             decks3.append(hero_decks[i])
             decks3.append(str(hero_decks_n[i])+" Games")
@@ -2559,7 +2567,8 @@ def get_stats():
             index_list4.append("Total")
             index_list4.append("Per Game")
         tuples = zip(*sorted(zip(opp_decks_n,opp_decks),reverse=True))
-        opp_decks_n, opp_decks = [list(tuple) for tuple in tuples]        
+        if len(opp_decks_n) > 1:
+            opp_decks_n, opp_decks = [list(tuple) for tuple in tuples]        
         for i in range(len(opp_decks)):
             decks4.append(opp_decks[i])
             decks4.append(str(opp_decks_n[i])+" Games")
@@ -2607,6 +2616,8 @@ def get_stats():
             tree1.column(i,anchor="center")
         tagged = True
         count = 0
+        if len(formats) == 0:
+            tree1.insert("","end",values=["No Games Found."],tags=('colored',))
         for i in range(len(formats)):
             if tagged == True:
                 tree1.insert("","end",values=[formats[i]]+[index_list[i]]+tree1_data[i],tags=('colored',))
@@ -2628,6 +2639,8 @@ def get_stats():
         for i in range(len(tree2["column"])):
             tree2.column(i,anchor="center")
         tagged = True
+        if len(turn_list) == 0:
+            tree2.insert("","end",values=["No Games Found."],tags=('colored',))
         for i in range(len(turn_list)):
             if tagged == True:
                 tree2.insert("","end",values=index_list2[i]+tree2_data[i],tags=('colored',))
@@ -2647,6 +2660,8 @@ def get_stats():
             tree3.column(i,anchor="center")
         tagged = True
         count = 0
+        if len(decks3) == 0:
+            tree3.insert("","end",values=["No Games Found."],tags=('colored',))
         for i in range(len(decks3)):
             if i > 13:
                 break
@@ -2671,6 +2686,8 @@ def get_stats():
             tree4.column(i,anchor="center")
         tagged = True
         count = 0
+        if len(decks4) == 0:
+            tree4.insert("","end",values=["No Games Found."],tags=('colored',))
         for i in range(len(decks4)):
             if i > 13:
                 break
@@ -2784,7 +2801,10 @@ def get_stats():
             tree1.heading(col,text=col,command=lambda _col=col: sort_column(_col,not reverse,tree1))
         def sort_column_float(col,reverse,tree1):
             def tree_tuple_to_float(tuple):
+                if tuple[0] == "":
+                    return ""
                 return float(tuple[0])
+
             l = []
             for k in tree1.get_children(''):
                 l.append((tree1.set(k, col), k))
@@ -2796,7 +2816,10 @@ def get_stats():
             tree1.heading(col,text=col,command=lambda _col=col: sort_column_float(_col,not reverse,tree1))
         def sort_column_mixed(col,reverse,tree1):
             def tree_tuple_to_mixed(tuple):
+                if tuple[0] == "":
+                    return ""
                 return int(tuple[0].split(" - ")[0])
+
             l = []
             for k in tree1.get_children(''):
                 l.append((tree1.set(k, col), k))
@@ -2854,8 +2877,14 @@ def get_stats():
         n_post = len(list(df_merge_post.Game_ID.value_counts()))
         wins_pre =  df_merge_pre.drop_duplicates("Game_ID").Won_Game.sum()
         wins_post = df_merge_post.drop_duplicates("Game_ID").Won_Game.sum()
-        wr_pre = round((wins_pre/n_pre)*100,2).item()
-        wr_post = round((wins_post/n_post)*100,2).item()
+        if n_pre == 0:
+            wr_pre = 0.0
+        else:
+            wr_pre = round((wins_pre/n_pre)*100,1).item()
+        if n_post == 0:
+            wr_post = 0.0
+        else:
+            wr_post = round((wins_post/n_post)*100,1).item()
 
         df_merge_pre = df_merge_pre[(df_merge_pre.Casting_Player == hero) & (df_merge_pre.Action.isin(["Plays","Casts"]))]
         df_merge_pre.drop(df_merge_pre.columns.difference(["Game_ID","Game_Num","P1_Subarch","P2_Subarch","Primary_Card","Won_Game"]),axis=1,inplace=True)
@@ -2870,14 +2899,14 @@ def get_stats():
         games_won_pre =    df_merge_pre.groupby(["Primary_Card"]).Won_Game.sum().tolist()
         games_wr_pre = []
         for i in range(len(games_played_pre)):
-            games_wr_pre.append(round((int(games_won_pre[i])/int(games_played_pre[i]))*100,2))
+            games_wr_pre.append(round((int(games_won_pre[i])/int(games_played_pre[i]))*100,1))
 
         cards_played_post = list(df_merge_post.groupby(["Primary_Card"]).groups.keys())
         games_played_post = df_merge_post.groupby(["Primary_Card"]).Game_ID.size().tolist()
         games_won_post =    df_merge_post.groupby(["Primary_Card"]).Won_Game.sum().tolist()
         games_wr_post = []
         for i in range(len(games_played_post)):
-            games_wr_post.append(round((int(games_won_post[i])/int(games_played_post[i]))*100,2))
+            games_wr_post.append(round((int(games_won_post[i])/int(games_played_post[i]))*100,1))
 
         # Create lists of data to be inserted into trees.
         list_pre =  np.array([cards_played_pre,games_played_pre,games_won_pre,games_wr_pre]).T.tolist()
@@ -2901,11 +2930,13 @@ def get_stats():
         for i in range(1,len(tree1["column"])):
             tree1.column(i,anchor="center")
         tagged = False
+        if len(list_pre) == 0:
+            tree1.insert("","end",values=["No Games Found."],tags=('colored',))
         for i in list_pre:
             tree1.insert("","end",values=[i[0],
-                                          i[1]+" - ("+to_percent(int(i[1])/n_pre)+"%)",
+                                          i[1]+" - ("+to_percent(int(i[1])/n_pre,0)+"%)",
                                           i[3],
-                                          round(float(i[3])-wr_pre,2)])
+                                          round(float(i[3])-wr_pre,1)])
 
         mid_frame8["text"] = "Post-Sideboard - " + str(n_post) + " Games"
         tree2.tag_configure("colored",background="#cccccc")
@@ -2921,16 +2952,21 @@ def get_stats():
                 tree2.heading(i,text=i,command=lambda _col=i: sort_column(_col,False,tree2))
         for i in range(1,len(tree2["column"])):
             tree2.column(i,anchor="center")
+        if len(list_post) == 0:
+            tree2.insert("","end",values=["No Games Found."],tags=('colored',))
         for i in list_post:
             tree2.insert("","end",values=[i[0],
-                                          i[1]+" - ("+to_percent(int(i[1])/n_post)+"%)",
+                                          i[1]+" - ("+to_percent(int(i[1])/n_post,0)+"%)",
                                           i[3],
-                                          round(float(i[3])-wr_post,2)])
+                                          round(float(i[3])-wr_post,1)])
                                                 
-    def to_percent(fl):
+    def to_percent(fl,n):
         if fl == 0:
-            return "0"
-        return str(int(fl*100))
+            return "0.0"
+        if n == 0:
+            return str(int(fl*100))
+        else:
+            return str(round(fl*100,n))
     
     def update_hero(*argv):
         hero = player.get()
