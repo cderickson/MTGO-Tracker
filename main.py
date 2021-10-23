@@ -66,6 +66,7 @@ def save_window():
                 df.to_csv(i,header=True,index=False)
 
         status_label.config(text="Save complete. Data will be loaded automatically on next startup.")
+        os.chdir(filepath_root)
         close_save_window()
 
     def close_save_window():
@@ -475,28 +476,34 @@ def print_data(data,header):
         else:
             tree1.heading(i,text=i,command=lambda _col=i: sort_column(_col,False,tree1))
     tree1.column("Match_ID",anchor="w")
-        
-    df = modo.to_dataframe(data,header)
+    
+    if (hero != "") & (display == "Matches"):
+        df = modo.to_dataframe(all_data_inverted[0],all_headers[0])
+        df = df[(df.P1 == hero)]
+    elif (hero != "") & (display == "Games"):
+        df = modo.to_dataframe(all_data_inverted[1],all_headers[1])
+        df = df[(df.P1 == hero)]
+    else:
+        df = modo.to_dataframe(data,header)
     total = df.shape[0]
     for key in filter_dict:
         if key not in header:
             break
         for i in filter_dict[key]:
-            for j in filter_dict[key]:
-                if j[2:].isnumeric():
-                    value = int(j[2:])
+            if i[2:].isnumeric():
+                value = int(i[2:])
+            else:
+                value = i[2:]
+            if i[0] == "=":
+                if key == "Date":
+                    print(value[0:10])
+                    df = df[(df[key].str.contains(value[0:10]))]
                 else:
-                    value = j[2:]
-                if j[0] == "=":
-                    if key == "Date":
-                        print(value[0:10])
-                        df = df[(df[key].str.contains(value[0:10]))]
-                    else:
-                        df = df[(df[key] == value)]
-                elif j[0] == ">":
-                    df = df[(df[key] > value)]
-                elif j[0] == "<":
-                    df = df[(df[key] < value)]
+                    df = df[(df[key] == value)]
+            elif i[0] == ">":
+                df = df[(df[key] > value)]
+            elif i[0] == "<":
+                df = df[(df[key] < value)]
     if (display == "Matches") or (display == "Games"):
         df = df.sort_values(by=["Match_ID"],ascending=False)
     elif display == "Plays":
@@ -850,11 +857,13 @@ def export(file_type,data_type,inverted):
     if filepath_export is None:
         return
 
-    if inverted:
+    if (hero != "") or (inverted == True):
         data_to_write = all_data_inverted
     else:
         data_to_write = all_data
 
+    # Outputting filtered data.
+    # Create Dataframe and apply filters.
     if data_type == 4:
         if display == "Matches":
             df_filtered = modo.to_dataframe(data_to_write[0],all_headers[0])
@@ -868,10 +877,41 @@ def export(file_type,data_type,inverted):
             df_filtered = modo.to_dataframe(data_to_write[2],all_headers[2])
             headers = all_headers[2]
             file_names = ["plays"]
+        if hero != "":
+            df_filtered = df_filtered[(df_filtered.P1 == hero)]
         for key in filter_dict:
-            for value in filter_dict[key]:
-                df_filtered = df_filtered[df_filtered[key] == value]
+            if key not in headers:
+                break
+            for i in filter_dict[key]:
+                if i[2:].isnumeric():
+                    value = int(i[2:])
+                else:
+                    value = i[2:]
+                if i[0] == "=":
+                    if key == "Date":
+                        df_filtered = df_filtered[(df_filtered[key].str.contains(value[0:10]))]
+                    else:
+                        df_filtered = df_filtered[(df_filtered[key] == value)]
+                elif i[0] == ">":
+                    df_filtered = df_filtered[(df_filtered[key] > value)]
+                elif i[0] == "<":
+                    df_filtered = df_filtered[(df_filtered[key] < value)]
+    elif data_type == 3:
+        df_filtered_0 = modo.to_dataframe(data_to_write[0],all_headers[0])
+        df_filtered_1 = modo.to_dataframe(data_to_write[1],all_headers[1])
+        df_filtered_2 = modo.to_dataframe(data_to_write[2],all_headers[2])
+        if (hero != "") & (inverted == False):
+            df_filtered_0 = df_filtered_0[(df_filtered_0.P1 == hero)]
+            df_filtered_1 = df_filtered_1[(df_filtered_1.P1 == hero)]
+        df_list = [df_filtered_0,df_filtered_1,df_filtered_2]
+    elif data_type == 2:
+        df_filtered = modo.to_dataframe(data_to_write[data_type],all_headers[data_type])     
+    elif data_type < 2:
+        df_filtered = modo.to_dataframe(data_to_write[data_type],all_headers[data_type])
+        if (hero != "") & (inverted == False):
+            df_filtered = df_filtered[(df_filtered.P1 == hero)]
 
+    # Create List of applicable file names.
     all_file_names = ["matches","games","plays"]
     if data_type == 3:
         headers = all_headers
@@ -891,7 +931,8 @@ def export(file_type,data_type,inverted):
                 writer = csv.writer(file)
                 if data_type == 3:
                     writer.writerow(headers[i])
-                    for row in data_to_write[i]:
+                    df_rows = df_list[i].to_numpy().tolist()
+                    for row in df_rows:
                         writer.writerow(row)
                 elif data_type == 4:
                     writer.writerow(headers)
@@ -900,17 +941,18 @@ def export(file_type,data_type,inverted):
                         writer.writerow(row)
                 else:
                     writer.writerow(headers[i])
-                    for row in data_to_write[data_type]:
+                    df_rows = df_filtered.to_numpy().tolist()
+                    for row in df_rows:
                         writer.writerow(row)
     elif file_type == "Excel":
         for i in range(len(file_names)):
             f = filepath_export+"/"+file_names[i]
             if data_type == 3:
-                df = modo.to_dataframe(data_to_write[i],headers[i])
+                df = df_list[i]
             elif data_type == 4:
                 df = df_filtered
             else:
-                df = modo.to_dataframe(data_to_write[data_type],headers[i])
+                df = df_filtered
             df.to_excel(f,index=False)
     filepath_export = fp
 
@@ -934,11 +976,15 @@ def set_default_hero():
             hero = ""
             save_settings()
             status_label.config(text="Cleared Setting: Hero")
+            if display != "Plays":
+                set_display(display)
             close_hero_window()
         elif entry.get() in hero_options:
             hero = entry.get()
             save_settings()
             status_label.config(text="Updated Hero to " + hero + ".")
+            if display != "Plays":
+                set_display(display)
             close_hero_window()
         else:
             label2["text"] = "Not found."
@@ -3175,22 +3221,26 @@ menu_bar.add_cascade(label="Export",menu=export_menu)
 
 export_csv = tk.Menu(export_menu,tearoff=False)
 export_csv.add_command(label="Match History",command=lambda : export("CSV",0,False))
-export_csv.add_command(label="Match History (Inverse Join)",command=lambda : export("CSV",0,True))
 export_csv.add_command(label="Game History",command=lambda : export("CSV",1,False))
-export_csv.add_command(label="Game History (Inverse Join)",command=lambda : export("CSV",1,True))
 export_csv.add_command(label="Play History",command=lambda : export("CSV",2,False))
 export_csv.add_command(label="All Data (3 Files)",command=lambda : export("CSV",3,False))
+export_csv.add_separator()
+export_csv.add_command(label="Match History (Inverse Join)",command=lambda : export("CSV",0,True))
+export_csv.add_command(label="Game History (Inverse Join)",command=lambda : export("CSV",1,True))
 export_csv.add_command(label="All Data (Inverse Join)",command=lambda : export("CSV",3,True))
+export_csv.add_separator()
 export_csv.add_command(label="Currently Displayed Data (with Filters)",command=lambda : export("CSV",4,False))
 
 export_excel = tk.Menu(export_menu,tearoff=False)
 export_excel.add_command(label="Match History",command=lambda : export("Excel",0,False))
-export_excel.add_command(label="Match History (Inverse Join)",command=lambda : export("Excel",0,True))
 export_excel.add_command(label="Game History",command=lambda : export("Excel",1,False))
-export_excel.add_command(label="Game History (Inverse Join)",command=lambda : export("Excel",1,True))
 export_excel.add_command(label="Play History",command=lambda : export("Excel",2,False))
 export_excel.add_command(label="All Data (3 Files)",command=lambda : export("Excel",3,False))
+export_excel.add_separator()
+export_excel.add_command(label="Match History (Inverse Join)",command=lambda : export("Excel",0,True))
+export_excel.add_command(label="Game History (Inverse Join)",command=lambda : export("Excel",1,True))
 export_excel.add_command(label="All Data (Inverse Join)",command=lambda : export("Excel",3,True))
+export_excel.add_separator()
 export_excel.add_command(label="Currently Displayed Data (with Filters)",command=lambda : export("Excel",4,False))
 
 export_menu.add_cascade(label="Export to CSV",menu=export_csv)

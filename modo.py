@@ -66,26 +66,17 @@ def play_header():
             "Active_Player",
             "Nonactive_Player"]
 
-def get_arch(subarch):
-    #input:  string
-    #output: string
+# def get_arch(subarch):
+#     #input:  string
+#     #output: string
 
-    arch_dict = {"Izzet Delver":"Tempo",
-                 "Death and Taxes":"Prison",
-                 "Snow Miracles":"Control",
-                 "Apr":"04",
-                 "May":"05",
-                 "Jun":"06",
-                 "Jul":"07",
-                 "Aug":"08",
-                 "Sep":"09",
-                 "Oct":"10",
-                 "Nov":"11",
-                 "Dec":"12"}    
-    if subarch in arch_dict:
-        return arch_dict[subarch]
-    else:
-        return "ROGUE"
+#     arch_dict = {"Izzet Delver":"Tempo",
+#                  "Death and Taxes":"Prison",
+#                  "Snow Miracles":"Control",}    
+#     if subarch in arch_dict:
+#         return arch_dict[subarch]
+#     else:
+#         return "ROGUE"
 
 def transpose(data):
     #input:  list[rows]
