@@ -11,6 +11,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 pd.options.mode.chained_assignment = None
 from tkcalendar import DateEntry
+import datetime
 
 all_data =          [[],[],[],[]]
 all_data_inverted = [[],[],[],[]]
@@ -460,13 +461,13 @@ def get_all_data():
 def print_data(data,header):
     global new_import
 
-    #clear existing data in tree
+    # Clear existing data in tree
     tree1.delete(*tree1.get_children())
 
     tree1["column"] = header
     tree1["show"] = "headings"
 
-    #insert column headers into tree
+    # Insert column headers into tree
     for i in tree1["column"]:
         tree1.column(i,anchor="center",stretch=False,width=100)
         if (i == "Turns") or (i == "Play_Num") or (i == "Turn_Num") or (i == "Cards_Drawn") or (i == "Attackers"):
@@ -482,10 +483,10 @@ def print_data(data,header):
             break
         for i in filter_dict[key]:
             for j in filter_dict[key]:
-                if j[1:].isnumeric():
-                    value = int(j[1:])
+                if j[2:].isnumeric():
+                    value = int(j[2:])
                 else:
-                    value = j[1:]
+                    value = j[2:]
                 if j[0] == "=":
                     if key == "Date":
                         print(value[0:10])
@@ -929,14 +930,22 @@ def set_default_hero():
 
     def set_hero():
         global hero
-        if entry.get() in hero_options:
+        if entry.get() == "":
+            hero = ""
+            save_settings()
+            status_label.config(text="Cleared Setting: Hero")
+            close_hero_window()
+        elif entry.get() in hero_options:
             hero = entry.get()
             save_settings()
             status_label.config(text="Updated Hero to " + hero + ".")
             close_hero_window()
         else:
             label2["text"] = "Not found."
-        
+
+    def clear_hero():
+        entry.delete(0,"end")
+
     def close_hero_window():
         hero_window.grab_release()
         hero_window.destroy()
@@ -962,12 +971,14 @@ def set_default_hero():
     entry.insert(0,hero)
     label2 = tk.Label(mid_frame,text="",wraplength=width,justify="left")
     button1 = tk.Button(bot_frame,text="Save",command=lambda : set_hero())
-    
+    button2 = tk.Button(bot_frame,text="Clear",command=lambda : clear_hero())
+
     label1.grid(row=0,column=0,pady=(10,5))       
     entry.grid(row=1,column=0)    
     label2.grid(row=2,column=0,pady=(10,5))
-    button1.grid(row=4,column=0,pady=5)
-    
+    button1.grid(row=4,column=0,padx=10,pady=10)
+    button2.grid(row=4,column=1,padx=10,pady=10)
+
     hero_window.protocol("WM_DELETE_WINDOW", lambda : close_hero_window())
 
 def set_default_export():
@@ -1104,33 +1115,36 @@ def set_default_import():
     
     import_window.protocol("WM_DELETE_WINDOW", lambda : close_import_window())   
 
-def tree_tuple_to_int(tuple):
-    return (int(tuple[0]),tuple[1])
-
 def sort_column(col,reverse,tree1):
+    def tuple_casefold(t):
+        return (t[0].casefold(),t[1])
+
     l = []
     for k in tree1.get_children(''):
         l.append((tree1.set(k, col), k))
-    l.sort(reverse=reverse)
+    l.sort(reverse=reverse,key=tuple_casefold)
 
-    # rearrange items in sorted positions
+    # Rearrange items in sorted positions
     for index, (val, k) in enumerate(l):
         tree1.move(k, '', index)
 
-    # reverse sort next time
+    # Reverse sort next time
     tree1.heading(col,text=col,command=lambda _col=col: sort_column(_col,not reverse,tree1))
 
 def sort_column_int(col,reverse,tree1):
+    def tree_tuple_to_int(t):
+        return (int(t[0]),t[1])
+
     l = []
     for k in tree1.get_children(''):
         l.append((tree1.set(k, col), k))
     l.sort(reverse=reverse,key=tree_tuple_to_int)
 
-    # rearrange items in sorted positions
+    # Rearrange items in sorted positions
     for index, (val, k) in enumerate(l):
         tree1.move(k, '', index)
 
-    # reverse sort next time
+    # Reverse sort next time
     tree1.heading(col,text=col,command=lambda _col=col: sort_column_int(_col,not reverse,tree1))
 
 def add_filter_setting(index,key,op):
@@ -1143,11 +1157,11 @@ def add_filter_setting(index,key,op):
     if index in filter_dict:
         l = filter_dict[index]
         if key not in l:
-            l.append(op + key)
+            l.append(op + " " + key)
             filter_dict[index] = l
             filter_changed = True
     else:
-        filter_dict[index] = [op + key]
+        filter_dict[index] = [op + " " + key]
         filter_changed = True
     
 def clear_filter():
@@ -1193,8 +1207,7 @@ def set_filter():
             key_options = []
             for i in tree1.get_children():
                 key_options.append(tree1.set(i,index))
-            key_options = sorted(list(set(key_options)))
-
+            key_options = sorted(list(set(key_options)),key=str.casefold)
             key.set("None Selected")       
             menu = drop_key["menu"]
             menu.delete(0,"end")
@@ -1268,17 +1281,18 @@ def set_filter():
     op = tk.StringVar()
     op.set(operators[0])
 
+    today = datetime.date.today()
+
     drop_col = tk.OptionMenu(top_frame,col,*col_options)
     op_menu  = tk.OptionMenu(top_frame,op,*operators)
     drop_key = tk.OptionMenu(top_frame,key,*key_options)
-    date     = DateEntry(top_frame,date_pattern="y-mm-dd",width=10,year=2021,month=10,day=22,font="Helvetica 12",state="readonly")
+    date = DateEntry(top_frame,date_pattern="y-mm-dd",width=10,
+        year=today.year,month=today.month,day=today.day,
+        font="Helvetica 12",state="readonly")
 
-    button1 = tk.Button(top_frame,text="Clear",
-                        command=lambda : [clear_filter(),update_filter_text()])
-    button2 = tk.Button(top_frame,text="Add",
-                        command=lambda : add())
-    button3 = tk.Button(bot_frame,text="Apply Filter",
-                        command=lambda : close_filter_window())
+    button1 = tk.Button(top_frame,text="Clear",command=lambda : [clear_filter(),update_filter_text()])
+    button2 = tk.Button(top_frame,text="Add",command=lambda : add())
+    button3 = tk.Button(bot_frame,text="Apply Filter",command=lambda : close_filter_window())
     label1 = tk.Label(mid_frame,text="",wraplength=width,justify="left")
     
     col.trace("w",update_keys)
@@ -1966,7 +1980,7 @@ def get_stats():
         mid_frame7.grid_remove()
         mid_frame8.grid_remove()
 
-    def match_stats(hero,mformat,deck,opp_deck,s_type):
+    def match_stats(hero,mformat,deck,opp_deck,date_range,s_type):
         clear_frames()
         def tree_skip(event):
             if tree1.identify_region(event.x,event.y) == "separator":
@@ -1994,16 +2008,18 @@ def get_stats():
         mid_frame3.grid(row=1,column=0,sticky="nsew")
         mid_frame4.grid(row=1,column=1,sticky="nsew")
 
-        hero_n =         df0_i[df0_i.P1 == hero].shape[0] # Matches played by hero
-        
-        formats_played = df0_i[df0_i.P1 == hero].Format.value_counts().keys().tolist()
-        format_wins =    [df0_i[(df0_i.P1 == hero) & (df0_i.Match_Winner == "P1")].shape[0]] #adding overall in L[0]
-        format_losses =  [df0_i[(df0_i.P1 == hero) & (df0_i.Match_Winner == "P2")].shape[0]] #adding overall in L[0]
+        df0_i_f =        df0_i[(df0_i.P1 == hero)]
+        hero_n =         df0_i_f.shape[0] # Matches played by hero
+        df0_i_f =        df0_i_f[(df0_i_f.Date > date_range[0]) & (df0_i_f.Date < date_range[1])]
+
+        formats_played = df0_i_f.Format.value_counts().keys().tolist()
+        format_wins =    [df0_i_f[(df0_i_f.Match_Winner == "P1")].shape[0]] #adding overall in L[0]
+        format_losses =  [df0_i_f[(df0_i_f.Match_Winner == "P2")].shape[0]] #adding overall in L[0]
         format_wr =      [to_percent( format_wins[0]/(format_wins[0]+format_losses[0]) ) + "%"]    #adding overall in L[0]
 
         for i in formats_played:
-            wins  =  df0_i[(df0_i.P1 == hero) & (df0_i.Format == i) & (df0_i.Match_Winner == "P1")].shape[0]
-            losses = df0_i[(df0_i.P1 == hero) & (df0_i.Format == i) & (df0_i.Match_Winner == "P2")].shape[0]
+            wins  =  df0_i_f[(df0_i_f.Format == i) & (df0_i_f.Match_Winner == "P1")].shape[0]
+            losses = df0_i_f[(df0_i_f.Format == i) & (df0_i_f.Match_Winner == "P2")].shape[0]
             format_wins.append(str(wins))
             format_losses.append(str(losses))
             format_wr.append(to_percent(wins/(wins+losses)) + "%")
@@ -2014,11 +2030,11 @@ def get_stats():
         format_losses.extend(["",format_losses[0]])
         format_wr.extend(["",format_wr[0]])
 
-        matchtypes_played = df0_i[df0_i.P1 == hero].Match_Type.value_counts().keys().tolist()
-        matchtypes_counts = df0_i[df0_i.P1 == hero].Format.value_counts().tolist()
+        matchtypes_played = df0_i_f.Match_Type.value_counts().keys().tolist()
+        matchtypes_counts = df0_i_f.Format.value_counts().tolist()
         for index,i in enumerate(matchtypes_played):
-            mt_wins  =  df0_i[(df0_i.P1 == hero) & (df0_i.Match_Type == i) & (df0_i.Match_Winner == "P1")].shape[0]
-            mt_losses = df0_i[(df0_i.P1 == hero) & (df0_i.Match_Type == i) & (df0_i.Match_Winner == "P2")].shape[0]
+            mt_wins  =  df0_i_f[(df0_i_f.Match_Type == i) & (df0_i_f.Match_Winner == "P1")].shape[0]
+            mt_losses = df0_i_f[(df0_i_f.Match_Type == i) & (df0_i_f.Match_Winner == "P2")].shape[0]
             formats_played.append(i)
             format_wins.append(mt_wins)
             format_losses.append(mt_losses)
@@ -2032,7 +2048,6 @@ def get_stats():
         roll_labels = ["Roll 1 Mean","Roll 2 Mean","Roll 1 Win%","Roll 2 Win%","","Hero Roll Win%"]
         roll_values = [roll_1_mean,roll_2_mean,p1_roll_wr+"%",p2_roll_wr+"%","",to_percent(rolls_won/hero_n)+"%"]
 
-        df0_i_f = df0_i[(df0_i.P1 == hero)]
         if mformat != "All Formats":
             df0_i_f = df0_i_f[(df0_i_f.Format == mformat)]
         if deck != "All Decks":
@@ -2166,7 +2181,7 @@ def get_stats():
                                               meta_deck_wr[i][1],
                                               (meta_deck_wr[i][2]+"%")])
 
-    def game_stats(hero,mformat,deck,opp_deck,s_type):
+    def game_stats(hero,mformat,deck,opp_deck,date_range,s_type):
         clear_frames()
         def tree_skip(event):
             if tree1.identify_region(event.x,event.y) == "separator":
@@ -2199,6 +2214,7 @@ def get_stats():
                                    how="inner",
                                    left_on=["Match_ID","P1","P2"],
                                    right_on=["Match_ID","P1","P2"])
+        df1_i_merge     = df1_i_merge[(df1_i_merge.Date > date_range[0]) & (df1_i_merge.Date < date_range[1])]
         df1_i_hero      = df1_i_merge[df1_i_merge.P1 == hero]
         df1_i_hero_p    = df1_i_hero[df1_i_hero.On_Play == "P1"]
         df1_i_hero_d    = df1_i_hero[df1_i_hero.On_Play == "P2"]
@@ -2369,7 +2385,7 @@ def get_stats():
                         tagged = not tagged
                         count = 0
 
-    def play_stats(hero,mformat,deck,opp_deck,s_type):
+    def play_stats(hero,mformat,deck,opp_deck,date_range,s_type):
         clear_frames()
         def tree_skip(event):
             if tree1.identify_region(event.x,event.y) == "separator":
@@ -2402,15 +2418,16 @@ def get_stats():
                                  how="inner",
                                  left_on=["Match_ID","P1","P2"],
                                  right_on=["Match_ID","P1","P2"])       
-        df2_merge =     pd.merge(df0,
+        df2_merge   =   pd.merge(df0,
                                  df2,
                                  how="inner",
                                  left_on=["Match_ID"],
                                  right_on=["Match_ID"])
-        df2_hero =      df2_merge[(df2_merge.Casting_Player == hero)]
+        df1_i_merge   = df1_i_merge[(df1_i_merge.Date > date_range[0]) & (df1_i_merge.Date < date_range[1])]
+        df2_merge     = df2_merge[(df2_merge.Date > date_range[0]) & (df2_merge.Date < date_range[1])]
+        df2_hero      = df2_merge[(df2_merge.Casting_Player == hero)]
         
         formats_played = df2_hero.Format.value_counts().keys().tolist()
-        hero_n = df1_i[(df1_i.P1 == hero)].shape[0]
         formats =    []
         index_list = []
         for i in formats_played:
@@ -2465,11 +2482,12 @@ def get_stats():
                                total_actions])
             index_list2.append(["Turn "+str(i)])
 
-        df2_i_merge =     pd.merge(df0_i,
-                                   df2,
-                                   how="inner",
-                                   left_on=["Match_ID"],
-                                   right_on=["Match_ID"])
+        df2_i_merge = pd.merge(df0_i,
+                               df2,
+                               how="inner",
+                               left_on=["Match_ID"],
+                               right_on=["Match_ID"])
+        df2_i_merge =  df2_i_merge[(df2_i_merge.Date > date_range[0]) & (df2_i_merge.Date < date_range[1])]
         df2_i_m_hero = df2_i_merge[(df2_i_merge.P1 == hero)]
    
         decks3 =        []
@@ -2512,12 +2530,15 @@ def get_stats():
                                trig_count,
                                attack_count,
                                draw_count])
-            tree3_data.append([round(play_count/games_played,1),
-                               round(cast_count/games_played,1),
-                               round(act_count/games_played,1),
-                               round(trig_count/games_played,1),
-                               round(attack_count/games_played,1),
-                               round(draw_count/games_played,1)])
+            if games_played == 0:
+                tree3_data.append([0.0,0.0,0.0,0.0,0.0,0.0])
+            else:
+                tree3_data.append([round(play_count/games_played,1),
+                                   round(cast_count/games_played,1),
+                                   round(act_count/games_played,1),
+                                   round(trig_count/games_played,1),
+                                   round(attack_count/games_played,1),
+                                   round(draw_count/games_played,1)])
         
         decks4 = []
         index_list4 = []
@@ -2559,12 +2580,15 @@ def get_stats():
                                trig_count,
                                attack_count,
                                draw_count])
-            tree4_data.append([round(play_count/games_played,1),
-                               round(cast_count/games_played,1),
-                               round(act_count/games_played,1),
-                               round(trig_count/games_played,1),
-                               round(attack_count/games_played,1),
-                               round(draw_count/games_played,1)])
+            if games_played == 0:
+                tree4_data.append([0.0,0.0,0.0,0.0,0.0,0.0])
+            else:
+                tree4_data.append([round(play_count/games_played,1),
+                                   round(cast_count/games_played,1),
+                                   round(act_count/games_played,1),
+                                   round(trig_count/games_played,1),
+                                   round(attack_count/games_played,1),
+                                   round(draw_count/games_played,1)])
 
         frame_labels = ["Play Data By Format",
                         "Play Data By Turn: " + hero + ", " + mformat,
@@ -2659,7 +2683,7 @@ def get_stats():
                 tagged = not tagged
                 count = 0
     
-    def time_stats(hero,mformat,deck,opp_deck,s_type):
+    def time_stats(hero,mformat,deck,opp_deck,date_range,s_type):
         clear_frames()
         mid_frame.grid_rowconfigure(0,weight=1)
         mid_frame.grid_rowconfigure(1,weight=0)
@@ -2742,13 +2766,9 @@ def get_stats():
             canvas2 = FigureCanvasTkAgg(fig,mid_frame6)
             canvas2.draw()
             canvas2.get_tk_widget().grid(row=0,column=0,sticky="")
-    
-    def card_stats(hero,mformat,deck,opp_deck,s_type):
+
+    def card_stats(hero,mformat,deck,opp_deck,date_range,s_type):
         clear_frames()
-        def tree_tuple_to_mixed(tuple):
-            return int(tuple[0].split(" - ")[0])
-        def tree_tuple_to_float(tuple):
-            return float(tuple[0])
         def tree_setup(*argv):
             for i in argv:
                 i.place(relheight=1, relwidth=1)
@@ -2763,6 +2783,8 @@ def get_stats():
             # reverse sort next time
             tree1.heading(col,text=col,command=lambda _col=col: sort_column(_col,not reverse,tree1))
         def sort_column_float(col,reverse,tree1):
+            def tree_tuple_to_float(tuple):
+                return float(tuple[0])
             l = []
             for k in tree1.get_children(''):
                 l.append((tree1.set(k, col), k))
@@ -2773,6 +2795,8 @@ def get_stats():
             # reverse sort next time
             tree1.heading(col,text=col,command=lambda _col=col: sort_column_float(_col,not reverse,tree1))
         def sort_column_mixed(col,reverse,tree1):
+            def tree_tuple_to_mixed(tuple):
+                return int(tuple[0].split(" - ")[0])
             l = []
             for k in tree1.get_children(''):
                 l.append((tree1.set(k, col), k))
@@ -2811,7 +2835,7 @@ def get_stats():
                             how="inner",
                             left_on=["Match_ID","P1","P2"],
                             right_on=["Match_ID","P1","P2"])
-        df_merge = df_merge[(df_merge.Game_Winner != "NA")]
+        df_merge = df_merge[(df_merge.Game_Winner != "NA") & (df_merge.Date > date_range[0]) & (df_merge.Date < date_range[1])]
         if mformat != "All Formats":
             df_merge = df_merge[(df_merge.Format == mformat)]
         if deck != "All Decks":
@@ -2902,8 +2926,10 @@ def get_stats():
                                           i[1]+" - ("+to_percent(int(i[1])/n_post)+"%)",
                                           i[3],
                                           round(float(i[3])-wr_post,2)])
-                                                     
+                                                
     def to_percent(fl):
+        if fl == 0:
+            return "0"
         return str(int(fl*100))
     
     def update_hero(*argv):
@@ -2930,7 +2956,7 @@ def get_stats():
         update_deck_menu()
         update_opp_deck_menu()
 
-    def update_deck_menu(*argv):  
+    def update_deck_menu(*argv):
         if mformat.get() == "All Formats":
             decks_played = df0_i[(df0_i.P1 == player.get())].P1_Subarch.value_counts().keys().tolist()
         else:
@@ -2973,16 +2999,21 @@ def get_stats():
             menu_4["state"]   = tk.NORMAL
 
     def load_data():
+        if date_entry_1.get() < date_entry_2.get():
+            dr = [date_entry_1.get() + "-00:00",date_entry_2.get() + "-23:59"]
+        else:
+            dr = [date_entry_1.get() + "-00:00",date_entry_2.get() + "-23:59"]
+
         if s_type.get() == "Match Stats":
-            match_stats(player.get(),mformat.get(),deck.get(),opp_deck.get(),s_type.get())
+            match_stats(player.get(),mformat.get(),deck.get(),opp_deck.get(),dr,s_type.get())
         elif s_type.get() == "Game Stats":
-            game_stats(player.get(),mformat.get(),deck.get(),opp_deck.get(),s_type.get())
+            game_stats(player.get(),mformat.get(),deck.get(),opp_deck.get(),dr,s_type.get())
         elif s_type.get() == "Play Stats":
-            play_stats(player.get(),mformat.get(),deck.get(),opp_deck.get(),s_type.get())
+            play_stats(player.get(),mformat.get(),deck.get(),opp_deck.get(),dr,s_type.get())
         elif s_type.get() == "Time Data":
-            time_stats(player.get(),mformat.get(),deck.get(),opp_deck.get(),s_type.get())
+            time_stats(player.get(),mformat.get(),deck.get(),opp_deck.get(),dr,s_type.get())
         elif s_type.get() == "Card Data":
-            card_stats(player.get(),mformat.get(),deck.get(),opp_deck.get(),s_type.get())      
+            card_stats(player.get(),mformat.get(),deck.get(),opp_deck.get(),dr,s_type.get())      
         
     def close_stats_window():
         window.deiconify()
@@ -2991,6 +3022,9 @@ def get_stats():
     p1_options = df0_i.P1.tolist()
     p1_options = sorted(list(set(p1_options)),key=str.casefold)
     
+    date_min = df0.Date.min()
+    today = datetime.date.today()
+
     format_options = [""]
     decks_played = [""]
     opp_decks_played = [""]
@@ -3012,6 +3046,12 @@ def get_stats():
     menu_3 = tk.OptionMenu(top_frame,deck,*decks_played)
     menu_4 = tk.OptionMenu(top_frame,opp_deck,*opp_decks_played)
     menu_5 = tk.OptionMenu(top_frame,s_type,*stat_types)
+    date_entry_1 = DateEntry(top_frame,date_pattern="y-mm-dd",width=10,
+        year=int(date_min[0:4]),month=int(date_min[5:7]),day=int(date_min[8:10]),
+        font="Helvetica 12",state="readonly")
+    date_entry_2 = DateEntry(top_frame,date_pattern="y-mm-dd",width=10,
+        year=today.year,month=today.month,day=today.day,
+        font="Helvetica 12",state="readonly")
     button_1 = tk.Button(top_frame,text="GO",state=tk.DISABLED,command=lambda : load_data())
     
     menu_1["state"] = tk.DISABLED
@@ -3025,14 +3065,19 @@ def get_stats():
     menu_3.grid(row=0,column=2,padx=10,pady=10)
     menu_4.grid(row=0,column=3,padx=10,pady=10)
     menu_5.grid(row=0,column=4,padx=10,pady=10)
-    button_1.grid(row=0,column=5,padx=10,pady=10)
+    date_entry_1.grid(row=0,column=5,padx=10,pady=10)
+    date_entry_2.grid(row=0,column=6,padx=10,pady=10)
+    button_1.grid(row=0,column=7,padx=10,pady=10)
     
     player.trace("w",update_hero)
     mformat.trace("w",update_format)
     s_type.trace("w",update_s_type)
 
-    player.set(hero)
-    load_data()
+    if hero != "":
+        player.set(hero)
+        load_data()
+    else:
+        menu_1["state"] = tk.NORMAL
 
     stats_window.protocol("WM_DELETE_WINDOW", lambda : close_stats_window())
 
