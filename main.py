@@ -12,6 +12,7 @@ import numpy as np
 pd.options.mode.chained_assignment = None
 from tkcalendar import DateEntry
 import datetime
+import itertools
 
 all_data =          [[],[],[],[]]
 all_data_inverted = [[],[],[],[]]
@@ -1639,7 +1640,7 @@ def revise_record_multi():
     def close_revise_window():
         for i in selected:
             values = list(tree1.item(i,"values"))
-            for j in all_data[0]:
+            for j in itertools.chain(*[all_data[0],all_data_inverted[0]]):
                 if values[0] == j[0]:
                     if field == "P1 Deck":
                         j[2] = p1_arch_type.get()
@@ -1651,8 +1652,6 @@ def revise_record_multi():
                         j[13] = match_format.get()
                     elif field == "Match Type":
                         j[14] = match_type.get() 
-                    break
-        all_data_inverted = modo.invert_join(all_data)
         set_display("Matches")
         revise_window.grab_release()
         revise_window.destroy()
