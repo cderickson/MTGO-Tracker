@@ -66,18 +66,6 @@ def play_header():
             "Active_Player",
             "Nonactive_Player"]
 
-# def get_arch(subarch):
-#     #input:  string
-#     #output: string
-
-#     arch_dict = {"Izzet Delver":"Tempo",
-#                  "Death and Taxes":"Prison",
-#                  "Snow Miracles":"Control",}    
-#     if subarch in arch_dict:
-#         return arch_dict[subarch]
-#     else:
-#         return "ROGUE"
-
 def transpose(data):
     #input:  list[rows]
     #output: list[cols]
@@ -330,21 +318,30 @@ def cards_played(plays,*argv):
 
     return set(cards_played)
 
-def closest_list(cards_played,alldecks):
-    #input:  set[cards],list[string,string,set[cards]]
-    #output: string
+def closest_list(cards_played,ad,mm_yyyy):
+    #input:  set[cards],dict{list[string,string,set[cards]]}
+    #output: [string, string]
     
+    if mm_yyyy in ad:
+        alldecks = ad.get(mm_yyyy)
+        if alldecks == []:
+            return ["Unknown","NA"]
+    else:
+        return ["Unknown","NA"]
+
     sim_dict = {}
+    format_dict = {}
     for i in alldecks:
         sim = len(cards_played.intersection(i[2]))/len(i[2])
         sim = int(sim * 100)
-        sim_dict[i[1]] = sim
+        sim_dict[i[0]] = sim
+
+        format_dict[i[0]] = i[1]
 
     if max(sim_dict.values()) > 20:
-        return max(sim_dict,key=sim_dict.get)
+        return [max(sim_dict,key=sim_dict.get),format_dict.get(max(sim_dict,key=sim_dict.get))]
     else:
-        return "Unknown"
-    #return max(sim_dict,key=sim_dict.get) + " " + str(max(sim_dict.values()))
+        return ["Unknown","NA"]
 
 def replace_pname(tstring,plist,pdict):
     #input:  string,list,dict
@@ -360,7 +357,8 @@ def parse_list(filename,init):
     #output: [string,string,set{maindeck+sideboard}]
 
     initial = init.split("\n")
-    name = filename.split(".txt")[0].split("Deck - ")[1]
+    d_format = filename.split(".txt")[0].split(" - ")[0]
+    name = filename.split(".txt")[0].split(" - ")[1]
     maindeck = []
     sideboard = []
     card_count = 0
@@ -383,7 +381,7 @@ def parse_list(filename,init):
                 sideboard.append(card)
                 card_count -= 1
                 
-    return [get_arch(name),name,set(maindeck)]
+    return [name,d_format,set(maindeck)]
 
 def game_actions(init,time):
     #input:  string,string
@@ -444,7 +442,7 @@ def game_actions(init,time):
     return gameactions
 
 def match_data(ga,gd,pd,ad):
-    #input:  [gameactions],[gamedata],[playdata],alldecks
+    #input:  [gameactions],[gamedata],[playdata],{alldecks}
     #output: list[match_att]
 
     match_data =    []
@@ -483,9 +481,14 @@ def match_data(ga,gd,pd,ad):
     else:
         match_winner = "NA"
 
-    p1_subarch = closest_list(cards_played(pd,p1),ad)
-    p2_subarch = closest_list(cards_played(pd,p2),ad)
-    
+    # mm_yyyy = ga[0][4:6] + "-" + ga[0][0:4]
+    # p1_deck_data = closest_list(cards_played(pd,p1),ad,mm_yyyy)
+    # p2_deck_data = closest_list(cards_played(pd,p2),ad,mm_yyyy)
+    # p1_subarch = p1_deck_data[0]
+    # p2_subarch = p2_deck_data[0]
+    # if p1_deck_data[1] == p2_deck_data[1]:
+    #     match_format = p1_deck_data[1]
+
     match_data.extend((match_id,
                        p1,
                        p1_arch,

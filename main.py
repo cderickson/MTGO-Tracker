@@ -17,7 +17,7 @@ import itertools
 all_data =          [[],[],[],[]]
 all_data_inverted = [[],[],[],[]]
 all_headers =       [[],[],[]]
-all_decks =         []
+all_decks =         {}
 display =           ""
 filter_dict =       {}
 filepath_root =     ""
@@ -113,7 +113,7 @@ def clear_loaded():
 
     all_data =          [[],[],[],[]]
     all_data_inverted = [[],[],[],[]]
-    all_decks =         []
+    all_decks.clear()
     display =           ""
     filter_dict =       {}
     data_loaded =       False
@@ -137,6 +137,9 @@ def clear_loaded():
     data_menu.entryconfig("Set Default 'Hero'",state=tk.DISABLED)
     data_menu.entryconfig("Clear Loaded Data",state=tk.DISABLED)
     file_menu.entryconfig("Save Data",state=tk.DISABLED)
+    data_menu.entryconfig("Input Missing Match Data",state=tk.DISABLED)
+    data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.DISABLED)
+    data_menu.entryconfig("Update P1/P2 Subarch and Format Columns",state=tk.DISABLED)
 
     #clear existing data in tree
     tree1.delete(*tree1.get_children())
@@ -363,6 +366,10 @@ def startup():
     data_menu.entryconfig("Set Default 'Hero'",state=tk.NORMAL)
     data_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
     file_menu.entryconfig("Save Data",state=tk.NORMAL)
+    data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
+    data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
+    data_menu.entryconfig("Update P1/P2 Subarch and Format Columns",state=tk.NORMAL)
+
     os.chdir(filepath_root)
 
 def save_settings():
@@ -450,7 +457,7 @@ def get_all_data():
             for i in parsed_data[3]:
                 all_data[3].append(i)
 
-    all_data_inverted = modo.invert_join(all_data)
+    deck_data_guess()
     status_label.config(text="Imported " + str(count) + " new matches.")
     new_import = True
 
@@ -522,16 +529,32 @@ def print_data(data,header):
 def get_lists():
     global all_decks
     
-    for (root,dirs,files) in os.walk(filepath_decks):
-        None
+    # for (root,dirs,files) in os.walk(filepath_decks):
+    #     None
+
+    # os.chdir(filepath_decks)
+    # for i in files:
+    #     with io.open(i,"r",encoding="ansi") as decklist:
+    #         initial = decklist.read()
+
+    #     deck = modo.parse_list(i,initial)
+    #     all_decks.append(deck)
+    # os.chdir(filepath_root)
 
     os.chdir(filepath_decks)
-    for i in files:
-        with io.open(i,"r",encoding="ansi") as decklist:
-            initial = decklist.read()
+    folders = os.listdir()
+    for i in folders:
+        os.chdir(filepath_decks + "/" + i)
+        files = os.listdir()
+        month_decks = []
+        for j in files:
+            with io.open(j,"r",encoding="ansi") as decklist:
+                initial = decklist.read()
 
-        deck = modo.parse_list(i,initial)
-        all_decks.append(deck)
+            deck = modo.parse_list(j,initial)
+            month_decks.append(deck)
+        all_decks[i] = month_decks
+    os.chdir(filepath_root)
 
 def get_formats():
     global all_data
@@ -560,7 +583,6 @@ def get_formats():
                 if i[0] == j[0]:  # Add Play to our List if it has a matching Match_ID
                     plays.append(j)
             df =      modo.to_dataframe(plays,modo.play_header())
-            #players = df.Casting_Player.value_counts().keys().tolist()
             players = [i[modo.match_header().index("P1")],i[modo.match_header().index("P2")]]
             cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Plays")].Primary_Card.value_counts().keys().tolist()
             cards2 =  df[(df.Casting_Player == players[0]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
@@ -571,31 +593,111 @@ def get_formats():
             cards3 = sorted(cards3,key=str.casefold)
             cards4 = sorted(cards4,key=str.casefold)
             ask_for_format(players,cards1,cards2,cards3,cards4,n,total,i)
-            if match_format == "Exit":
+            if missing_data == "Exit":
                 break
-            if match_format != "Skip":
-                i[p1_arch_index] = match_format[0]
-                i[p1_sub_index] =  match_format[1]
-                i[p2_arch_index] = match_format[2]
-                i[p2_sub_index] =  match_format[3]
-                i[mformat_index] = match_format[4]
-                i[mtype_index] =   match_format[5]
+            if missing_data != "Skip":
+                i[p1_arch_index] = missing_data[0]
+                i[p1_sub_index] =  missing_data[1]
+                i[p2_arch_index] = missing_data[2]
+                i[p2_sub_index] =  missing_data[3]
+                i[mformat_index] = missing_data[4]
+                i[mtype_index] =   missing_data[5]
 
-            # if (match_format == "Draft - Sealed") or (match_format == "Draft - Booster") or (match_format == "Cube"):
-            #     i[p1_arch_index] = "Limited"
-            #     i[p2_arch_index] = "Limited"
     if n == 0:
         status_label.config(text="No Matches with missing Format.")
     else:
         all_data_inverted = modo.invert_join(all_data)
         set_display("Matches")
 
+def deck_data_guess():
+    global all_decks
+    global all_data_inverted
+    all_decks.clear()
+
+    get_lists()
+
+    date_index = modo.match_header().index("Date")
+    p1_sa_index = modo.match_header().index("P1_Subarch")
+    p2_sa_index = modo.match_header().index("P2_Subarch")
+    format_index = modo.match_header().index("Format")
+
+    df2 = modo.to_dataframe(all_data[2],modo.play_header())
+    for i in all_data[0]:
+        mm_yyyy = i[date_index][5:7] + "-" + i[date_index][0:4]
+        players = [i[modo.match_header().index("P1")],i[modo.match_header().index("P2")]]
+        cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
+        cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
+        p1_data = modo.closest_list(set(cards1),all_decks,mm_yyyy)
+        p2_data = modo.closest_list(set(cards2),all_decks,mm_yyyy)
+
+        i[p1_sa_index] = p1_data[0]
+        i[p2_sa_index] = p2_data[0]
+        if p1_data[1] == p2_data[1]:
+            i[format_index] = p1_data[1]
+    all_data_inverted = modo.invert_join(all_data)
+
+def rerun_decks_window():
+    height = 100
+    width =  300
+    rerun_decks_window = tk.Toplevel(window)
+    rerun_decks_window.title("Clear Saved Data")
+    rerun_decks_window.minsize(width,height)
+    rerun_decks_window.resizable(False,False)
+    rerun_decks_window.grab_set()
+    rerun_decks_window.focus()
+
+    rerun_decks_window.geometry("+%d+%d" % 
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+
+    def submit():
+        deck_data_guess()
+        set_display("Matches")
+        status_label.config(text="Updated best guesses in the P1_Subarch, P2_Subarch, and Format columns for each match.")
+        close()
+
+    def close():
+        rerun_decks_window.grab_release()
+        rerun_decks_window.destroy()
+
+    mid_frame = tk.LabelFrame(rerun_decks_window,text="")
+    bot_frame = tk.Frame(rerun_decks_window)
+
+    mid_frame.grid(row=0,column=0,sticky="nsew")
+    bot_frame.grid(row=1,column=0,sticky="")
+
+    rerun_decks_window.grid_columnconfigure(0,weight=1)
+    rerun_decks_window.rowconfigure(0,weight=1)
+    mid_frame.grid_columnconfigure(0,weight=1)
+    mid_frame.grid_rowconfigure(0,weight=1) 
+    bot_frame.grid_columnconfigure(0,weight=1)
+    bot_frame.grid_rowconfigure(0,weight=1)
+    bot_frame.grid_rowconfigure(1,weight=1)
+
+    label1 = tk.Label(mid_frame,text="This will overwrite the P1_Subarch, P2_Subarch, and Format columns in the Match table.\n\nAre you sure you want to continue?",wraplength=width)
+    button_load = tk.Button(bot_frame,text="Apply",command=lambda : submit())
+    button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close())
+    
+    label1.grid(row=0,column=0,padx=5,pady=5,sticky="nsew")       
+    button_load.grid(row=0,column=0,padx=5,pady=5)
+    button_close.grid(row=0,column=1,padx=5,pady=5)
+    
+    rerun_decks_window.protocol("WM_DELETE_WINDOW", lambda : close())
+
 def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
     def close_format_window(*argv):
-        global match_format
-        match_format = [p1_arch.get(),p1_sub.get(),p2_arch.get(),p2_sub.get(),mformat.get(),mtype.get()]
+        global missing_data
+        missing_data = [p1_arch.get(),p1_sub.get(),p2_arch.get(),p2_sub.get(),mformat.get(),mtype.get()]
+        if missing_data[0] == "Select P1 Archetype":
+            missing_data[0] = "NA"
+        if missing_data[2] == "Select P2 Archetype":
+            missing_data[2] = "NA"
+        if missing_data[4] == "Select Format":
+            missing_data[4] = "NA"
+        if missing_data[5] == "Select Match Type":
+            missing_data[5] = "NA"         
         for i in argv:
-            match_format = i
+            missing_data = i
         gf.grab_release()
         gf.destroy()
              
@@ -705,35 +807,7 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
     label2 = tk.Label(mid_frame1,text=str2,anchor="n",wraplength=width/2,justify="left")
     label3 = tk.Label(mid_frame2,text=str3,anchor="n",wraplength=width/2,justify="left")
     label4 = tk.Label(mid_frame2,text=str4,anchor="n",wraplength=width/2,justify="left")
-    #id_message = tk.Label(bot_frame1,text="Date Played: " + mdata[modo.match_header().index("Date")])
 
-    # button1 = tk.Button(bot_frame1,text="Vintage",
-    #                      command=lambda :
-    #                      [close_format_window("Vintage")])
-    # button2 = tk.Button(bot_frame1,text="Legacy",
-    #                      command=lambda :
-    #                      [close_format_window("Legacy")])
-    # button3 = tk.Button(bot_frame1,text="Modern",
-    #                      command=lambda :
-    #                      [close_format_window("Modern")])
-    # button4 = tk.Button(bot_frame1,text="Standard",
-    #                      command=lambda :
-    #                      [close_format_window("Standard")])
-    # button5 = tk.Button(bot_frame1,text="Pioneer",
-    #                      command=lambda :
-    #                      [close_format_window("Pioneer")])
-    # button6 = tk.Button(bot_frame2,text="Pauper",
-    #                      command=lambda :
-    #                      [close_format_window("Pauper")])
-    # button7 = tk.Button(bot_frame2,text="Draft - Booster",
-    #                      command=lambda :
-    #                      [close_format_window("Draft - Booster")])
-    # button8 = tk.Button(bot_frame2,text="Draft - Sealed",
-    #                      command=lambda :
-    #                      [close_format_window("Draft - Sealed")])
-    # button9 = tk.Button(bot_frame2,text="Cube",
-    #                      command=lambda :
-    #                      [close_format_window("Cube")])
     submit_button = tk.Button(bot_frame2,text="Save Changes",command=lambda : [close_format_window()])
 
     arch_options = ["NA","Aggro","Midrange","Control","Combo","Prison","Tempo"]
@@ -782,23 +856,13 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
     p2_arch_menu.grid(row=1,column=0)
     p2_sub.grid(row=1,column=1)
 
-    match_format.grid(row=0,column=0)
-    match_type.grid(row=0,column=1)
-    submit_button.grid(row=0,column=2)
-    # button1.grid(row=0,column=0,padx=5,pady=5,sticky="nsew")
-    # button2.grid(row=0,column=1,padx=5,pady=5,sticky="nsew")
-    # button3.grid(row=0,column=2,padx=5,pady=5,sticky="nsew")
-    # button4.grid(row=0,column=3,padx=5,pady=5,sticky="nsew")
-    # button5.grid(row=0,column=4,padx=5,pady=5,sticky="nsew")
-    # button6.grid(row=0,column=0,padx=5,pady=5,sticky="nsew")
-    # button7.grid(row=0,column=1,padx=5,pady=5,sticky="nsew")
-    # button8.grid(row=0,column=2,padx=5,pady=5,sticky="nsew")
-    # button9.grid(row=0,column=3,padx=5,pady=5,sticky="nsew")
+    match_format.grid(row=0,column=0,padx=10,pady=10)
+    match_type.grid(row=0,column=1,padx=10,pady=10)
+    submit_button.grid(row=0,column=2,padx=10,pady=10)
     
     button_skip.grid(row=0,column=0,padx=10,pady=10)
     label_message.grid(row=0,column=1,padx=10,pady=10)
     button_exit.grid(row=0,column=2,padx=10,pady=10)
-    #id_message.grid(row=0,column=0)
 
     mformat.trace("w",update_arch)
 
@@ -1781,6 +1845,9 @@ def import_window():
             data_menu.entryconfig("Set Default 'Hero'",state=tk.NORMAL)
             file_menu.entryconfig("Save Data",state=tk.NORMAL)
             data_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
+            data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
+            data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
+            data_menu.entryconfig("Update P1/P2 Subarch and Format Columns",state=tk.NORMAL)
         filepath_decks = fp_decks
         filepath_logs = fp_logs
         close_import_window()
@@ -1831,24 +1898,6 @@ def get_winners():
     global all_data
     global all_data_inverted
     global uaw
-
-    # def build_ga_list(match_id,game_num):
-    #     df = modo.to_dataframe(all_data[2],all_headers[2])
-    #     df = df[(df.Match_ID == match_id) & (df.Game_Num == game_num)].tail(15)
-    #     for i in df.iterrows():
-    #         if row["Action"] == "Play":
-    #             action = "plays"
-    #         elif row["Action"] == "Casts":
-    #             action = "casts"
-    #         elif row["Action"] == "Draws":
-    #             action = "draws"
-    #         elif row["Action"] == "Discards":
-    #             action = "discards"
-    #         elif row["Action"] == "Activated Ability":
-    #             action = "activates"
-    #         elif row["Action"] == "Triggers":
-    #             action = "triggers"
-    #         ga = "Turn "+row["Turn_Num"]+": "+row["Casting_Player"]+" "+row["Action"]
 
     gw_index = modo.game_header().index("Game_Winner")
     p1_index = modo.game_header().index("P1")
@@ -3250,8 +3299,9 @@ export_menu.add_command(label="Set Default Export Folder",command=lambda : set_d
 data_menu = tk.Menu(menu_bar,tearoff=False)
 menu_bar.add_cascade(label="Data",menu=data_menu)
 
-data_menu.add_command(label="Input Missing Match Data",command=lambda : get_formats())
-data_menu.add_command(label="Input Missing Game_Winner Data",command=lambda : get_winners())
+data_menu.add_command(label="Input Missing Match Data",command=lambda : get_formats(),state=tk.DISABLED)
+data_menu.add_command(label="Input Missing Game_Winner Data",command=lambda : get_winners(),state=tk.DISABLED)
+data_menu.add_command(label="Update P1/P2 Subarch and Format Columns",command=lambda : rerun_decks_window(),state=tk.DISABLED)
 data_menu.add_separator()
 data_menu.add_command(label="Set Default 'Hero'",command=lambda : set_default_hero(),state=tk.DISABLED)
 data_menu.add_command(label="Set Default Import Folders",command=lambda : set_default_import())
