@@ -743,11 +743,11 @@ def play_data(ga):
             else:
                 non_active_player = p1
         elif is_play(i):
-            play_num += 1
             if curr_list[1] == "plays":
                 casting_player = curr_list[0]
                 primary_card = get_cards(i)[0]
-                action = curr_list[1].capitalize()
+                #action = curr_list[1].capitalize()
+                action = "Land Drop"
             elif curr_list[1] == "casts":
                 casting_player = curr_list[0]
                 primary_card = get_cards(i)[0]
@@ -768,11 +768,13 @@ def play_data(ga):
                 action = curr_list[1].capitalize()
                 cardsdrawn = cards_drawn(curr_list[2])
             elif curr_list[1] == "chooses":
-                casting_player = curr_list[0]
-                action = curr_list[1].capitalize()
+                # casting_player = curr_list[0]
+                # action = curr_list[1].capitalize()
+                continue
             elif curr_list[1] == "discards":
-                casting_player = curr_list[0]
-                action = curr_list[1].capitalize()
+                # casting_player = curr_list[0]
+                # action = curr_list[1].capitalize()
+                continue
             elif i.find("is being attacked by") != -1:
                 casting_player = active_player
                 action = "Attacks"
@@ -807,6 +809,7 @@ def play_data(ga):
                     elif casting_player == p2:
                         self_target = player_is_target(i.split("targeting")[1],p2)
                         opp_target = player_is_target(i.split("targeting")[1],p1)
+            play_num += 1
             play_data.extend((match_id,
                               game_num,
                               play_num,
