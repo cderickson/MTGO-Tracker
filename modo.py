@@ -9,7 +9,52 @@ window = []
 def user_assigned_winner(player):
     global uaw
     uaw = player
-    
+
+def limited_formats():
+    return ["Draft - Booster",
+            "Draft - Sealed",
+            "Cube"]
+
+def con_formats():
+    return ["Vintage",
+            "Legacy",
+            "Modern",
+            "Standard",
+            "Pioneer",
+            "Pauper"]
+
+def match_types():
+    return ["League",
+            "Preliminary",
+            "Challenge"]
+
+def archetypes():
+    return ["Aggro",
+            "Midrange",
+            "Control",
+            "Combo",
+            "Prison",
+            "Tempo",
+            "Ramp"]
+
+def cube_formats():
+    return ["Cube-Other",
+            "Vintage Cube",
+            "Legacy Cube",
+            "Modern Cube"]
+
+def draft_formats():
+    return ["MIDx3",
+            "MM3x3",
+            "MM2x3",
+            "UMAx3"]
+
+def sealed_formats():
+    return ["MIDx6",
+            "MM3x6",
+            "MM2x6",
+            "UMAx6"]
+
 def match_header():
     #output: list[match_attrs]
 
@@ -27,6 +72,7 @@ def match_header():
             "P2_Wins",
             "Match_Winner",
             "Format",
+            "Limited_Format",
             "Match_Type",
             "Date"]
 
@@ -458,6 +504,7 @@ def match_data(ga,gd,pd,ad):
     p2_wins =       0
     match_winner =  ""
     match_format =  "NA"
+    lim_format =    "NA"
     player_count =  len(players(ga))
     prev_string =   ""
     match_type =    "NA"
@@ -503,6 +550,7 @@ def match_data(ga,gd,pd,ad):
                        p2_wins,
                        match_winner,
                        match_format,
+                       lim_format,
                        match_type,
                        date))
     return match_data

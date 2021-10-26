@@ -14,6 +14,11 @@ from tkcalendar import DateEntry
 import datetime
 import itertools
 
+# To add a column to a database:
+# Add the column to appropriate modo.XXXX_header() function.
+# Add the column to appropriate modo.XXXX_data() function.
+# Any saved data will have to be deleted and reloaded.
+
 all_data =          [[],[],[],[]]
 all_data_inverted = [[],[],[],[]]
 all_headers =       [[],[],[]]
@@ -28,7 +33,7 @@ data_loaded =       False
 filter_changed =    False
 prev_display =      ""
 uaw =               "NA"
-main_window_width = 1725
+main_window_width = 1750
 main_window_height= 750
 hero =              ""
 parsed_file_list =  []
@@ -469,6 +474,8 @@ def get_all_data():
 
 def print_data(data,header):
     global new_import
+    small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num"]
+
 
     # Clear existing data in tree
     tree1.delete(*tree1.get_children())
@@ -478,7 +485,10 @@ def print_data(data,header):
 
     # Insert column headers into tree
     for i in tree1["column"]:
-        tree1.column(i,anchor="center",stretch=False,width=100)
+        if i in small_headers:
+            tree1.column(i,anchor="center",stretch=False,width=75)
+        else:
+            tree1.column(i,anchor="center",stretch=False,width=100)
         if (i == "Turns") or (i == "Play_Num") or (i == "Turn_Num") or (i == "Cards_Drawn") or (i == "Attackers"):
             tree1.heading(i,text=i,command=lambda _col=i: sort_column_int(_col,False,tree1))
         else:
@@ -560,11 +570,8 @@ def get_formats():
     global all_data
     global all_data_inverted
   
-    # for count,i in enumerate(modo.match_header()):
-    #     if i == "Format":
-    #         index = count
-    #         break
     mformat_index = modo.match_header().index("Format")
+    lformat_index = modo.match_header().index("Limited_Format")
     mtype_index =   modo.match_header().index("Match_Type")
     p1_arch_index = modo.match_header().index("P1_Arch")
     p1_sub_index =  modo.match_header().index("P1_Subarch")
@@ -576,7 +583,8 @@ def get_formats():
     total = df0[(df0.Format == "NA")].shape[0]  
     for i in all_data[0]:    # Iterate through matches.
         # Match record is missing some data.
-        if (i[p1_arch_index] == "NA") or (i[p2_arch_index] == "NA") or (i[mformat_index] == "NA") or (i[mtype_index] == "NA"):
+        if (i[p1_arch_index] == "NA") or (i[p2_arch_index] == "NA") or (i[mformat_index] == "NA") or (i[mtype_index] == "NA") or \
+           ((i[lformat_index] == "NA") & (i[lformat_index] == "NA")): 
             n += 1
             plays = []
             for j in all_data[2]: # Iterate through plays.
@@ -584,9 +592,9 @@ def get_formats():
                     plays.append(j)
             df =      modo.to_dataframe(plays,modo.play_header())
             players = [i[modo.match_header().index("P1")],i[modo.match_header().index("P2")]]
-            cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Plays")].Primary_Card.value_counts().keys().tolist()
+            cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
             cards2 =  df[(df.Casting_Player == players[0]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
-            cards3 =  df[(df.Casting_Player == players[1]) & (df.Action == "Plays")].Primary_Card.value_counts().keys().tolist()
+            cards3 =  df[(df.Casting_Player == players[1]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
             cards4 =  df[(df.Casting_Player == players[1]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
             cards1 = sorted(cards1,key=str.casefold)
             cards2 = sorted(cards2,key=str.casefold)
@@ -601,10 +609,11 @@ def get_formats():
                 i[p2_arch_index] = missing_data[2]
                 i[p2_sub_index] =  missing_data[3]
                 i[mformat_index] = missing_data[4]
-                i[mtype_index] =   missing_data[5]
+                i[lformat_index] = missing_data[5]
+                i[mtype_index] =   missing_data[6]
 
     if n == 0:
-        status_label.config(text="No Matches with missing Format.")
+        status_label.config(text="No Matches with missing data.")
     else:
         all_data_inverted = modo.invert_join(all_data)
         set_display("Matches")
@@ -687,15 +696,17 @@ def rerun_decks_window():
 def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
     def close_format_window(*argv):
         global missing_data
-        missing_data = [p1_arch.get(),p1_sub.get(),p2_arch.get(),p2_sub.get(),mformat.get(),mtype.get()]
+        missing_data = [p1_arch.get(),p1_sub.get(),p2_arch.get(),p2_sub.get(),mformat.get(),dformat.get(),mtype.get()]
         if missing_data[0] == "Select P1 Archetype":
             missing_data[0] = "NA"
         if missing_data[2] == "Select P2 Archetype":
             missing_data[2] = "NA"
         if missing_data[4] == "Select Format":
             missing_data[4] = "NA"
-        if missing_data[5] == "Select Match Type":
-            missing_data[5] = "NA"         
+        if missing_data[5] == "Select Limited Format":
+            missing_data[5] = "NA"
+        if missing_data[6] == "Select Match Type":
+            missing_data[6] = "NA"         
         for i in argv:
             missing_data = i
         gf.grab_release()
@@ -712,33 +723,30 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
     gf.focus()
 
     gf.geometry("+%d+%d" %
-                   (window.winfo_x()+(window.winfo_width()/2)-(width/2),
-                    window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
     message = "Date Played: " + mdata[modo.match_header().index("Date")]
     str1 = str2 = str3 = str4 = ""
     for index,i in enumerate(cards1):
         if index > 0:
-            #str1 += ", "
             str1 += "\n"
         str1 += i
     for index,i in enumerate(cards2):
         if index > 0:
-            #str2 += ", "
             str2 += "\n"
         str2 += i
     for index,i in enumerate(card3):
         if index > 0:
-            #str3 += ", "
             str3 += "\n"
         str3 += i
     for index,i in enumerate(cards4):
         if index > 0:
-            #str4 += ", "
             str4 += "\n"
         str4 += i
     
     def update_arch(*argv):
-        if (mformat.get() == "Draft - Sealed") or (mformat.get() == "Draft - Booster") or (mformat.get() == "Cube"):
+        if mformat.get() in modo.limited_formats():
+            draft_format["state"] = tk.NORMAL
             arch_options = ["Limited"]
 
             menu = p1_arch_menu["menu"]
@@ -750,11 +758,26 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
             menu.delete(0,"end")
             for i in arch_options:
                 menu.add_command(label=i,command=lambda x=i: p2_arch.set(x))
-            
+
+            menu = draft_format["menu"]
+            menu.delete(0,"end")
+            if mformat.get() == "Cube":
+                for i in modo.cube_formats():
+                    menu.add_command(label=i,command=lambda x=i: dformat.set(x))
+            elif mformat.get() == "Draft - Booster":
+                for i in modo.draft_formats():
+                    menu.add_command(label=i,command=lambda x=i: dformat.set(x))
+            elif mformat.get() == "Draft - Sealed":
+                for i in modo.sealed_formats():
+                    menu.add_command(label=i,command=lambda x=i: dformat.set(x))            
+
             p1_arch.set(arch_options[0])
             p2_arch.set(arch_options[0])
+            dformat.set("Select Limited Format")
         elif (p1_arch.get() == "Limited"):
-            arch_options = ["NA","Aggro","Midrange","Control","Combo","Prison","Tempo"]
+            draft_format["state"] = tk.DISABLED
+            dformat.set("Select Limited Format")
+            arch_options = ["NA"] + modo.archetypes()
 
             menu = p1_arch_menu["menu"]
             menu.delete(0,"end")
@@ -810,19 +833,41 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
 
     submit_button = tk.Button(bot_frame2,text="Save Changes",command=lambda : [close_format_window()])
 
-    arch_options = ["NA","Aggro","Midrange","Control","Combo","Prison","Tempo"]
+    arch_options = ["NA"] + modo.archetypes()
     p1_arch = tk.StringVar()
     p1_arch.set("Select P1 Archetype")
     p2_arch = tk.StringVar()
     p2_arch.set("Select P2 Archetype")
 
-    format_options = ["NA","Vintage","Legacy","Modern","Standard","Pioneer","Pauper","Draft - Booster","Draft - Sealed","Cube"]
+    format_options = ["NA"] + modo.con_formats() + modo.limited_formats()
     mformat = tk.StringVar()
     mformat.set("Select Format")
 
-    type_options = ["NA","League","Preliminary","Challenge"]
+    type_options = ["NA"] + modo.match_types()
     mtype = tk.StringVar()
     mtype.set("Select Match Type")
+
+    draft_format_options = ["NA"] + modo.draft_formats()
+    dformat = tk.StringVar()
+    dformat.set("Select Limited Format")
+
+    if mdata[modo.match_header().index("P1_Arch")] != "NA":
+        p1_arch.set(mdata[modo.match_header().index("P1_Arch")])
+    if mdata[modo.match_header().index("P2_Arch")] != "NA":
+        p2_arch.set(mdata[modo.match_header().index("P2_Arch")])
+    if mdata[modo.match_header().index("Format")] != "NA": 
+        mformat.set(mdata[modo.match_header().index("Format")])
+    if mdata[modo.match_header().index("Limited_Format")] != "NA":
+        dformat.set(mdata[modo.match_header().index("Limited_Format")])
+    if mdata[modo.match_header().index("Match_Type")] != "NA":
+        mtype.set(mdata[modo.match_header().index("Match_Type")])
+    
+    if dformat.get() == "Cube":
+        draft_format_options = modo.cube_formats()
+    elif dformat.get() == "Draft - Booster":
+        draft_format_options = modo.draft_formats()
+    elif dformat.get() == "Draft - Sealed":
+        draft_format_options = modo.sealed_formats()
 
     p1_arch_menu = tk.OptionMenu(mid_frame1,p1_arch,*arch_options)
     p1_sub =  tk.Entry(mid_frame1)
@@ -831,18 +876,9 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
 
     match_format = tk.OptionMenu(bot_frame2,mformat,*format_options)
     match_type = tk.OptionMenu(bot_frame2,mtype,*type_options)
-
+    draft_format = tk.OptionMenu(bot_frame2,dformat,*draft_format_options)
     p1_sub.insert(0,mdata[modo.match_header().index("P1_Subarch")])
     p2_sub.insert(0,mdata[modo.match_header().index("P2_Subarch")])
-
-    if mdata[modo.match_header().index("P1_Arch")] != "NA":
-        p1_arch.set(mdata[modo.match_header().index("P1_Arch")])
-    if mdata[modo.match_header().index("P2_Arch")] != "NA":
-        p2_arch.set(mdata[modo.match_header().index("P2_Arch")])
-    if mdata[modo.match_header().index("Format")] != "NA": 
-        mformat.set(mdata[modo.match_header().index("Format")])
-    if mdata[modo.match_header().index("Match_Type")] != "NA":
-        mtype.set(mdata[modo.match_header().index("Match_Type")])
 
     button_skip = tk.Button(top_frame,text="Skip Match",command=lambda : [close_format_window("Skip")])
     button_exit = tk.Button(top_frame,text="Exit",command=lambda : [close_format_window("Exit")])
@@ -855,14 +891,18 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
     p1_sub.grid(row=1,column=1)
     p2_arch_menu.grid(row=1,column=0)
     p2_sub.grid(row=1,column=1)
-
-    match_format.grid(row=0,column=0,padx=10,pady=10)
-    match_type.grid(row=0,column=1,padx=10,pady=10)
-    submit_button.grid(row=0,column=2,padx=10,pady=10)
-    
+  
     button_skip.grid(row=0,column=0,padx=10,pady=10)
     label_message.grid(row=0,column=1,padx=10,pady=10)
     button_exit.grid(row=0,column=2,padx=10,pady=10)
+
+    match_format.grid(row=0,column=0,padx=10,pady=10)
+    draft_format.grid(row=0,column=1,padx=10,pady=10)
+    match_type.grid(row=0,column=2,padx=10,pady=10)
+    submit_button.grid(row=0,column=3,padx=10,pady=10)
+
+    if mformat.get() not in modo.limited_formats():
+        draft_format["state"] = tk.DISABLED
 
     mformat.trace("w",update_arch)
 
@@ -1436,8 +1476,8 @@ def revise_record():
     revise_window.focus()
 
     revise_window.geometry("+%d+%d" %
-                           (window.winfo_x()+(window.winfo_width()/2)-(width/2),
-                            window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
     
     mid_frame = tk.LabelFrame(revise_window,text="Match_ID")
     bot_frame = tk.Frame(revise_window)
@@ -1454,8 +1494,9 @@ def revise_record():
     mid_frame.grid_columnconfigure(5,weight=1)
 
     def update_arch(*argv):
-        if (match_format.get() == "Draft - Sealed") or (match_format.get() == "Draft - Booster") or (match_format.get() == "Cube"):
+        if match_format.get() in modo.limited_formats():
             arch_options = ["Limited"]
+            draft_type_entry["state"] = tk.NORMAL
 
             menu = p1_arch_entry["menu"]
             menu.delete(0,"end")
@@ -1466,10 +1507,25 @@ def revise_record():
             menu.delete(0,"end")
             for i in arch_options:
                 menu.add_command(label=i,command=lambda x=i: p2_arch_type.set(x))
+
+            menu = draft_type_entry["menu"]
+            menu.delete(0,"end")
+            if match_format.get() == "Cube":
+                for i in modo.cube_formats():
+                    menu.add_command(label=i,command=lambda x=i: limited_format.set(x))
+            elif match_format.get() == "Draft - Booster":
+                for i in modo.draft_formats():
+                    menu.add_command(label=i,command=lambda x=i: limited_format.set(x))
+            elif match_format.get() == "Draft - Sealed":
+                for i in modo.sealed_formats():
+                    menu.add_command(label=i,command=lambda x=i: limited_format.set(x))
+
             p1_arch_type.set(arch_options[0])
             p2_arch_type.set(arch_options[0])
         elif (p1_arch_type.get() == "Limited"):
-            arch_options = ["NA","Aggro","Midrange","Control","Combo","Prison","Tempo"]
+            arch_options = ["NA"] + modo.archetypes()
+            limited_format.set("NA")
+            draft_type_entry["state"] = tk.DISABLED
 
             menu = p1_arch_entry["menu"]
             menu.delete(0,"end")
@@ -1489,21 +1545,17 @@ def revise_record():
                 p2_arch_type.set(values[modo.match_header().index("P2_Arch")])
 
     def close_revise_window():
-        values[2] = p1_arch_type.get()
-        values[3] = p1_subarch_entry.get()
-        values[5] = p2_arch_type.get()
-        values[6] = p2_subarch_entry.get()
-        values[13] = match_format.get()
-        values[14] = match_type.get()
+        global all_data_inverted
 
         for count,i in enumerate(all_data[0]):
             if i[0] == values[0]:
-                i[2] = values[2]
-                i[3] = values[3]
-                i[5] = values[5]
-                i[6] = values[6]
-                i[13] = values[13]
-                i[14] = values[14]
+                i[modo.match_header().index("P1_Arch")] = p1_arch_type.get()
+                i[modo.match_header().index("P1_Subarch")] = p1_subarch_entry.get()
+                i[modo.match_header().index("P2_Arch")] = p2_arch_type.get()
+                i[modo.match_header().index("P2_Subarch")] = p2_subarch_entry.get()
+                i[modo.match_header().index("Format")] = match_format.get()
+                i[modo.match_header().index("Limited_Format")] = limited_format.get()
+                i[modo.match_header().index("Match_Type")] = match_type.get()
                 all_data_inverted = modo.invert_join(all_data)
                 set_display("Matches")
                 break
@@ -1517,18 +1569,30 @@ def revise_record():
     selected = tree1.focus()
     values = list(tree1.item(selected,"values"))
 
-    format_options = ["NA","Vintage","Legacy","Modern","Standard","Pioneer","Pauper","Draft - Booster","Draft - Sealed","Cube"]
+    format_options = ["NA"] + modo.con_formats() + modo.limited_formats()
     match_format = tk.StringVar()
-    match_format.set(values[13])
+    match_format.set(values[modo.match_header().index("Format")])
 
-    match_options = ["NA","League","Preliminary","Challenge"]
+    if match_format.get() == "Cube":
+        limited_options = modo.cube_formats()
+    elif match_format.get() == "Draft - Booster":
+        limited_options = modo.draft_formats()
+    elif match_format.get() == "Draft - Sealed":
+        limited_options = modo.sealed_formats()
+    else:
+        limited_options = ["NA"]
+
+    limited_format = tk.StringVar()
+    limited_format.set(values[modo.match_header().index("Limited_Format")])
+
+    match_options = ["NA"] + modo.match_types()
     match_type = tk.StringVar()
-    match_type.set(values[14])
+    match_type.set(values[modo.match_header().index("Match_Type")])
 
-    if (values[13] == "Draft - Booster") or (values[13] == "Draft - Sealed") or (values[13] == "Cube"):
+    if values[13] in modo.limited_formats():
         arch_options = ["Limited"]
     else:
-        arch_options = ["NA","Aggro","Midrange","Control","Combo","Prison","Tempo"]
+        arch_options = modo.archetypes()
     p1_arch_type = tk.StringVar()
     p1_arch_type.set(values[2])
 
@@ -1561,13 +1625,15 @@ def revise_record():
     match_winner_entry = tk.Label(mid_frame,text=values[12])
     format_label =       tk.Label(mid_frame,text="Format:")
     format_entry =       tk.OptionMenu(mid_frame,match_format,*format_options)
+    draft_type_label =   tk.Label(mid_frame,text="Limited_Format:")
+    draft_type_entry =   tk.OptionMenu(mid_frame,limited_format,*limited_options)
     match_type_label =   tk.Label(mid_frame,text="Match_Type:")
     match_type_entry =   tk.OptionMenu(mid_frame,match_type,*match_options)
     date_label =         tk.Label(mid_frame,text="Date:")
     date_entry =         tk.Label(mid_frame,text=values[15])
 
-    p1_subarch_entry.insert(0,values[3])
-    p2_subarch_entry.insert(0,values[6])
+    p1_subarch_entry.insert(0,values[modo.match_header().index("P1_Subarch")])
+    p2_subarch_entry.insert(0,values[modo.match_header().index("P2_Subarch")])
 
     button3 = tk.Button(bot_frame,text="Apply Changes",
                         command=lambda : close_revise_window())
@@ -1600,8 +1666,10 @@ def revise_record():
     match_winner_entry.grid(row=4,column=5,pady=10,sticky="w")
     format_label.grid(row=5,column=0,padx=10,pady=10,sticky="w")
     format_entry.grid(row=5,column=1,pady=10,sticky="w")
-    match_type_label.grid(row=5,column=2,pady=10,sticky="w")
-    match_type_entry.grid(row=5,column=3,pady=10,sticky="w")
+    draft_type_label.grid(row=5,column=2,pady=10,sticky="w")
+    draft_type_entry.grid(row=5,column=3,pady=10,sticky="w")
+    match_type_label.grid(row=5,column=4,pady=10,sticky="w")
+    match_type_entry.grid(row=5,column=5,pady=10,sticky="w")
     date_label.grid(row=6,column=0,padx=10,pady=10,sticky="w")
     date_entry.grid(row=6,column=1,pady=10,sticky="w")
 
@@ -1609,6 +1677,8 @@ def revise_record():
     button4.grid(row=0,column=1,padx=10,pady=10)
 
     mid_frame["text"] = "Match_ID: " + values[0]
+    if match_format.get() not in modo.limited_formats():
+        draft_type_entry["state"] = tk.DISABLED
 
     match_format.trace("w",update_arch)
 
@@ -1629,8 +1699,8 @@ def revise_record_multi():
     revise_window.focus()
 
     revise_window.geometry("+%d+%d" %
-                           (window.winfo_x()+(window.winfo_width()/2)-(width/2),
-                            window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
     
     top_frame = tk.Frame(revise_window)
     mid_frame = tk.LabelFrame(revise_window)
@@ -1659,6 +1729,8 @@ def revise_record_multi():
             p2_subarch_entry.grid_forget()
             format_label.grid_forget()
             format_entry.grid_forget()
+            lim_format_label.grid_forget()
+            lim_format_entry.grid_forget()
             match_type_label.grid_forget()
             match_type_entry.grid_forget()
         elif field == "P2 Deck":
@@ -1672,6 +1744,8 @@ def revise_record_multi():
             p2_subarch_entry.grid(row=2,column=1,padx=(25,50),pady=5,sticky="ew")
             format_label.grid_forget()
             format_entry.grid_forget()
+            lim_format_label.grid_forget()
+            lim_format_entry.grid_forget()
             match_type_label.grid_forget()
             match_type_entry.grid_forget()
         elif field == "Format":
@@ -1683,8 +1757,10 @@ def revise_record_multi():
             p2_arch_entry.grid_forget()
             p2_subarch_label.grid_forget()
             p2_subarch_entry.grid_forget()
-            format_label.grid(row=1,column=0,padx=(25,0),pady=(25,),sticky="e")
-            format_entry.grid(row=1,column=1,padx=(25,50),pady=(20,),sticky="ew")
+            format_label.grid(row=1,column=0,padx=(25,0),pady=10,sticky="e")
+            format_entry.grid(row=1,column=1,padx=(25,50),pady=5,sticky="ew")
+            lim_format_label.grid(row=2,column=0,padx=(25,0),pady=5,sticky="e")
+            lim_format_entry.grid(row=2,column=1,padx=(25,50),pady=5,sticky="ew")
             match_type_label.grid_forget()
             match_type_entry.grid_forget()
         elif field == "Match Type":
@@ -1698,8 +1774,30 @@ def revise_record_multi():
             p2_subarch_entry.grid_forget()
             format_label.grid_forget()
             format_entry.grid_forget()
+            lim_format_label.grid_forget()
+            lim_format_entry.grid_forget()
             match_type_label.grid(row=1,column=0,padx=(25,0),pady=(25,),sticky="e")
             match_type_entry.grid(row=1,column=1,padx=(25,50),pady=(20,),sticky="ew")
+
+    def format_updated(*argv):
+        if match_format.get() in modo.limited_formats():
+            lim_format_entry["state"] = tk.NORMAL
+            lim_format.set("NA")
+
+            menu = lim_format_entry["menu"]
+            menu.delete(0,"end")
+            if match_format.get() == "Cube":
+                for i in modo.cube_formats():
+                    menu.add_command(label=i,command=lambda x=i: lim_format.set(x))
+            elif match_format.get() == "Draft - Booster":
+                for i in modo.draft_formats():
+                    menu.add_command(label=i,command=lambda x=i: lim_format.set(x))
+            elif match_format.get() == "Draft - Sealed":
+                for i in modo.sealed_formats():
+                    menu.add_command(label=i,command=lambda x=i: lim_format.set(x))    
+        else:
+            lim_format.set("NA")
+            lim_format_entry["state"] = tk.DISABLED
 
     def close_revise_window():
         for i in selected:
@@ -1707,15 +1805,16 @@ def revise_record_multi():
             for j in itertools.chain(*[all_data[0],all_data_inverted[0]]):
                 if values[0] == j[0]:
                     if field == "P1 Deck":
-                        j[2] = p1_arch_type.get()
-                        j[3] = p1_subarch_entry.get()
+                        j[modo.match_header().index("P1_Arch")] = p1_arch_type.get()
+                        j[modo.match_header().index("P1_Subarch")] = p1_subarch_entry.get()
                     elif field == "P2 Deck":
-                        j[5] = p2_arch_type.get()
-                        j[6] = p2_subarch_entry.get()
+                        j[modo.match_header().index("P2_Arch")] = p2_arch_type.get()
+                        j[modo.match_header().index("P2_Subarch")] = p2_subarch_entry.get()
                     elif field == "Format":
-                        j[13] = match_format.get()
+                        j[modo.match_header().index("Format")] = match_format.get()
+                        j[modo.match_header().index("Limited_Format")] = lim_format.get()
                     elif field == "Match Type":
-                        j[14] = match_type.get() 
+                        j[modo.match_header().index("Match_Type")] = match_type.get() 
         set_display("Matches")
         revise_window.grab_release()
         revise_window.destroy()
@@ -1726,11 +1825,15 @@ def revise_record_multi():
 
     selected = tree1.selection()
 
-    format_options = ["NA","Vintage","Legacy","Modern","Standard","Pioneer","Pauper","Draft - Booster","Draft - Sealed","Cube"]
+    format_options = ["NA"] + modo.con_formats() + modo.limited_formats()
     match_format = tk.StringVar()
     match_format.set(format_options[0])
 
-    match_options = ["NA","League","Preliminary","Challenge"]
+    limited_options = ["NA"]
+    lim_format = tk.StringVar()
+    lim_format.set(limited_options[0])
+
+    match_options = ["NA"] + modo.match_types()
     match_type = tk.StringVar()
     match_type.set(match_options[0])
 
@@ -1744,7 +1847,7 @@ def revise_record_multi():
     field_menu = tk.OptionMenu(top_frame,field_val,*field_options)
     field_menu.grid(row=0,column=0,pady=10,sticky="")
 
-    arch_options = ["NA","Aggro","Midrange","Control","Combo","Prison","Tempo","Limited"]
+    arch_options = ["NA"] + modo.archetypes()
 
     p1_arch_type = tk.StringVar()
     p1_arch_type.set(arch_options[0])
@@ -1762,6 +1865,8 @@ def revise_record_multi():
     p2_subarch_entry =   tk.Entry(mid_frame)
     format_label =       tk.Label(mid_frame,text="Format:")
     format_entry =       tk.OptionMenu(mid_frame,match_format,*format_options)
+    lim_format_label =   tk.Label(mid_frame,text="Limited_Format:")
+    lim_format_entry =   tk.OptionMenu(mid_frame,lim_format,*limited_options)
     match_type_label =   tk.Label(mid_frame,text="Match_Type:")
     match_type_entry =   tk.OptionMenu(mid_frame,match_type,*match_options)
 
@@ -1770,10 +1875,12 @@ def revise_record_multi():
     button4 = tk.Button(bot_frame,text="Cancel",
                         command=lambda : close_without_saving())
 
+    lim_format_entry["state"] = tk.DISABLED
     button3.grid(row=0,column=0,padx=10,pady=10)
     button4.grid(row=0,column=1,padx=10,pady=10)
 
     field_val.trace("w",field_updated)
+    match_format.trace("w",format_updated)
 
     field_updated()
     revise_window.protocol("WM_DELETE_WINDOW", lambda : close_without_saving())
