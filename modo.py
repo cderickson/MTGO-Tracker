@@ -11,8 +11,8 @@ def user_assigned_winner(player):
     uaw = player
 
 def limited_formats():
-    return ["Draft - Booster",
-            "Draft - Sealed",
+    return ["Booster Draft",
+            "Sealed Deck",
             "Cube"]
 
 def con_formats():
