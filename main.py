@@ -438,34 +438,31 @@ def get_all_data():
     w = [window.winfo_x(),window.winfo_y(),window.winfo_width(),window.winfo_height()]
     count = 0
 
-    for (root,dirs,files) in os.walk(filepath_logs):
-        None
-
     new_data = [[],[],[],[]]
     os.chdir(filepath_logs)
-    for i in files:
-        if ("Match_GameLog_" not in i) or (len(i) < 30):
-            #print("not a game log file")
-            pass
-        elif (i in parsed_file_list):
-            #print("in parse file list")
-            pass
-        else:
-            #print("parsing " + i)
-            with io.open(i,"r",encoding="ansi") as gamelog:
-                initial = gamelog.read()
-                mtime = time.ctime(os.path.getmtime(i))
-            parsed_data = modo.get_all_data(initial,mtime,all_decks,w)
-            parsed_file_list.append(i)
-            count += 1
+    n = 0
+    for (root,dirs,files) in os.walk(filepath_logs):
+        for i in files:
+            if ("Match_GameLog_" not in i) or (len(i) < 30):
+                pass
+            elif (i in parsed_file_list):
+                pass
+            else:
+                os.chdir(root)
+                with io.open(i,"r",encoding="ansi") as gamelog:
+                    initial = gamelog.read()
+                    mtime = time.ctime(os.path.getmtime(i))
+                parsed_data = modo.get_all_data(initial,mtime,all_decks,w)
+                parsed_file_list.append(i)
+                count += 1
 
-            new_data[0].append(parsed_data[0])
-            for i in parsed_data[1]:
-                new_data[1].append(i)
-            for i in parsed_data[2]:
-                new_data[2].append(i)
-            for i in parsed_data[3]:
-                new_data[3].append(i)
+                new_data[0].append(parsed_data[0])
+                for i in parsed_data[1]:
+                    new_data[1].append(i)
+                for i in parsed_data[2]:
+                    new_data[2].append(i)
+                for i in parsed_data[3]:
+                    new_data[3].append(i)
 
     deck_data_guess(new_data,True)
 
@@ -1199,10 +1196,12 @@ def set_default_export():
         label1 = tk.Label(mid_frame,text=filepath_export,wraplength=width,justify="left")
     button1 = tk.Button(mid_frame,text="Set Default Export Folder",command=lambda : get_export_path())
     button3 = tk.Button(bot_frame,text="Save",command=lambda : save_path())
+    button4 = tk.Button(bot_frame,text="Cancel",command=lambda : close_export_window())
     
     label1.grid(row=0,column=0,pady=(75,5))
     button1.grid(row=1,column=0,pady=0)
-    button3.grid(row=4,column=0,pady=5)
+    button3.grid(row=4,column=0,padx=10,pady=10)
+    button4.grid(row=4,column=1,padx=10,pady=10)
     
     export_window.protocol("WM_DELETE_WINDOW", lambda : close_export_window())
 
@@ -1274,12 +1273,14 @@ def set_default_import():
         label2 = tk.Label(mid_frame,text=filepath_logs,wraplength=width,justify="left")
     button2 = tk.Button(mid_frame,text="Get Game Logs Folder",command=lambda : get_logs_path())
     button3 = tk.Button(bot_frame,text="Save",command=lambda : save_path())
-    
+    button4 = tk.Button(bot_frame,text="Cancel",command=lambda : close_import_window())
+
     label1.grid(row=0,column=0,pady=(40,5))
     button1.grid(row=1,column=0,pady=0)
     label2.grid(row=2,column=0,pady=5)
     button2.grid(row=3,column=0,pady=0)
-    button3.grid(row=4,column=0,pady=5)
+    button3.grid(row=4,column=0,padx=10,pady=10)
+    button4.grid(row=4,column=1,padx=10,pady=10)
     
     import_window.protocol("WM_DELETE_WINDOW", lambda : close_import_window())   
 
@@ -3016,9 +3017,11 @@ def get_stats():
 
         fig = plt.figure(figsize=(5,4),dpi=100)
         plt.plot(g1_list[0],g1_list[1])
-        plt.title("Match Wins Over .500:\n"+mformat)
+        #plt.title("Match Wins Over .500:\n"+mformat)
+        plt.title("Win Rate Over Time:\n"+mformat)
         plt.xlabel("Matches Played")
-        plt.ylabel("Match Wins Over .500")
+        #plt.ylabel("Match Wins Over .500")
+        plt.ylabel("Winning Percentage")
 
         canvas = FigureCanvasTkAgg(fig,mid_frame5)
         canvas.draw()
@@ -3032,9 +3035,11 @@ def get_stats():
 
             fig = plt.figure(figsize=(5,4),dpi=100)
             plt.plot(g2_list[0],g2_list[1])
-            plt.title("Match Wins Over .500:\n"+mformat+": "+deck)
+            #plt.title("Match Wins Over .500:\n"+mformat+": "+deck)
+            plt.title("Win Rate Over Time:\n"+mformat)
             plt.xlabel("Matches Played")
-            plt.ylabel("Match Wins Over .500")
+            #plt.ylabel("Match Wins Over .500")
+            plt.ylabel("Winning Percentage")
 
             canvas2 = FigureCanvasTkAgg(fig,mid_frame6)
             canvas2.draw()
