@@ -375,17 +375,18 @@ def closest_list(cards_played,ad,mm_yyyy):
     else:
         return ["Unknown","NA"]
 
-    sim_dict = {}
-    format_dict = {}
+    sim_list = []
     for i in alldecks:
-        sim = len(cards_played.intersection(i[2]))/len(i[2])
-        sim = int(sim * 100)
-        sim_dict[i[0]] = sim
+        if len(i[2]) == 0:
+            sim = 0
+        else:
+            sim = len(cards_played.intersection(i[2]))/len(i[2])
+        sim = round((sim * 100),3)
+        sim_list.append(sim)
 
-        format_dict[i[0]] = i[1]
-
-    if max(sim_dict.values()) > 20:
-        return [max(sim_dict,key=sim_dict.get),format_dict.get(max(sim_dict,key=sim_dict.get))]
+    index = sim_list.index(max(sim_list))
+    if max(sim_list) > 20:
+        return [alldecks[index][0],alldecks[index][1]]
     else:
         return ["Unknown","NA"]
 
