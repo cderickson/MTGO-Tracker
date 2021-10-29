@@ -542,18 +542,6 @@ def print_data(data,header):
 def get_lists():
     global all_decks
     
-    # for (root,dirs,files) in os.walk(filepath_decks):
-    #     None
-
-    # os.chdir(filepath_decks)
-    # for i in files:
-    #     with io.open(i,"r",encoding="ansi") as decklist:
-    #         initial = decklist.read()
-
-    #     deck = modo.parse_list(i,initial)
-    #     all_decks.append(deck)
-    # os.chdir(filepath_root)
-
     os.chdir(filepath_decks)
     folders = os.listdir()
     for i in folders:
