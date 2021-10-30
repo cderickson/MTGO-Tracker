@@ -19,24 +19,28 @@ import itertools
 # Add the column to appropriate modo.XXXX_data() function.
 # Any saved data will have to be deleted and reloaded.
 
+# Saved data.
 all_data =          [[],[],[],[]]
 all_data_inverted = [[],[],[],[]]
 all_headers =       [[],[],[]]
 all_decks =         {}
-display =           ""
+parsed_file_list =  []
+
+# Settings imported/saved in modo-config.txt file.
 filter_dict =       {}
 filepath_root =     ""
 filepath_export =   ""
 filepath_decks =    ""
 filepath_logs =     ""
+hero =              ""
+
+display =           ""
 data_loaded =       False
 filter_changed =    False
 prev_display =      ""
 uaw =               "NA"
 main_window_width = 1750
 main_window_height= 750
-hero =              ""
-parsed_file_list =  []
 new_import =        False
 field =             ""
 
@@ -326,7 +330,7 @@ def startup():
         filepath_logs =  settings[3].split("=>")[1]
         hero =           settings[4].split("=>")[1]
 
-    os.chdir(filepath_root + r"\save")
+    os.chdir(filepath_root + "\\" + "save")
     files = ["matches.csv","games.csv","plays.csv","rawdata.csv","parsedfiles.csv"]
 
     all_headers[0] = modo.match_header()
@@ -918,7 +922,11 @@ def tree_double(event):
         return None
     if display == "Plays":
         return None
-    
+    if tree1.identify_region(event.x,event.y) == "separator":
+        return None
+    if tree1.identify_region(event.x,event.y) == "heading":
+        return None    
+        
     clear_filter()
     add_filter_setting("Match_ID",tree1.item(tree1.focus(),"values")[0],"=")
     if display == "Matches":
@@ -941,17 +949,19 @@ def bb_clicked():
     elif display == "Plays":
         set_display("Games")
 
-def get_decks_path():
-    global filepath_decks
-    filepath_decks = filedialog.askdirectory()
-    save_settings()
-    status_label.config(text="Updated folder location. Click 'Import' to update data.")
+# def get_decks_path():
+#     global filepath_decks
+#     filepath_decks = filedialog.askdirectory()
+#     filepath_decks = os.path.normpath(filepath_decks)
+#     save_settings()
+#     status_label.config(text="Updated folder location. Click 'Import' to update data.")
     
-def get_logs_path():
-    global filepath_logs
-    filepath_logs = filedialog.askdirectory()
-    save_settings()
-    status_label.config(text="Updated folder location. Click 'Import' to update data.")
+# def get_logs_path():
+#     global filepath_logs
+#     filepath_logs = filedialog.askdirectory()
+#     filepath_logs = os.path.normpath(filepath_logs)
+#     save_settings()
+#     status_label.config(text="Updated folder location. Click 'Import' to update data.")
 
 def export(file_type,data_type,inverted):
     #file_type: string, "CSV" or "Excel"
@@ -961,6 +971,7 @@ def export(file_type,data_type,inverted):
     fp = filepath_export
     if (filepath_export is None) or (filepath_export == ""):
         filepath_export = filedialog.askdirectory()
+        filepath_export = os.path.normpath(filepath_export)
     if filepath_export is None:
         return
 
@@ -1150,6 +1161,7 @@ def set_default_export():
 
     def get_export_path():
         fp = filedialog.askdirectory()  
+        fp = os.path.normpath(fp)
         if (fp is None) or (fp == ""):
             label1.config(text="No Default Export Folder")
         else:
@@ -1208,14 +1220,16 @@ def set_default_import():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def get_decks_path():
-        fp = filedialog.askdirectory()  
+        fp = filedialog.askdirectory()
+        fp = os.path.normpath(fp)
         if (fp is None) or (fp == ""):
             label1.config(text="No Default Decklists Folder")
         else:
             label1.config(text=fp)
 
     def get_logs_path():
-        fp = filedialog.askdirectory()  
+        fp = filedialog.askdirectory() 
+        fp = os.path.normpath(fp) 
         if (fp is None) or (fp == ""):
             label2.config(text="No Default Game Logs Folder")
         else:
@@ -1552,16 +1566,21 @@ def revise_record():
 
     def close_revise_window():
         global all_data_inverted
-
         for count,i in enumerate(all_data[0]):
             if i[0] == values[0]:
-                i[modo.match_header().index("P1_Arch")] = p1_arch_type.get()
-                i[modo.match_header().index("P1_Subarch")] = p1_subarch_entry.get()
-                i[modo.match_header().index("P2_Arch")] = p2_arch_type.get()
-                i[modo.match_header().index("P2_Subarch")] = p2_subarch_entry.get()
+                if i[modo.match_header().index("P1")] == values[modo.match_header().index("P1")]:
+                    i[modo.match_header().index("P1_Arch")] = p1_arch_type.get()
+                    i[modo.match_header().index("P1_Subarch")] = p1_subarch_entry.get()
+                    i[modo.match_header().index("P2_Arch")] = p2_arch_type.get()
+                    i[modo.match_header().index("P2_Subarch")] = p2_subarch_entry.get()
+                else:
+                    i[modo.match_header().index("P1_Arch")] = p2_arch_type.get()
+                    i[modo.match_header().index("P1_Subarch")] = p2_subarch_entry.get()
+                    i[modo.match_header().index("P2_Arch")] = p1_arch_type.get()
+                    i[modo.match_header().index("P2_Subarch")] = p1_subarch_entry.get()
                 i[modo.match_header().index("Format")] = match_format.get()
                 i[modo.match_header().index("Limited_Format")] = limited_format.get()
-                i[modo.match_header().index("Match_Type")] = match_type.get()
+                i[modo.match_header().index("Match_Type")] = match_type.get()                   
                 all_data_inverted = modo.invert_join(all_data)
                 set_display("Matches")
                 break
@@ -1595,40 +1614,40 @@ def revise_record():
     match_type = tk.StringVar()
     match_type.set(values[modo.match_header().index("Match_Type")])
 
-    if values[13] in modo.limited_formats():
+    if values[modo.match_header().index("Format")] in modo.limited_formats():
         arch_options = ["Limited"]
     else:
         arch_options = modo.archetypes()
     p1_arch_type = tk.StringVar()
-    p1_arch_type.set(values[2])
+    p1_arch_type.set(values[modo.match_header().index("P1_Arch")])
 
     p2_arch_type = tk.StringVar()
-    p2_arch_type.set(values[5])
+    p2_arch_type.set(values[modo.match_header().index("P2_Arch")])
 
     p1_label =           tk.Label(mid_frame,text="P1:")
-    p1_entry =           tk.Label(mid_frame,text=values[1])
+    p1_entry =           tk.Label(mid_frame,text=values[modo.match_header().index("P1")])
     p1_arch_label =      tk.Label(mid_frame,text="P1_Arch:")
     p1_arch_entry =      tk.OptionMenu(mid_frame,p1_arch_type,*arch_options)
     p1_subarch_label =   tk.Label(mid_frame,text="P1_Subarch:")
     p1_subarch_entry =   tk.Entry(mid_frame)
     p2_label =           tk.Label(mid_frame,text="P2:")
-    p2_entry =           tk.Label(mid_frame,text=values[4])
+    p2_entry =           tk.Label(mid_frame,text=values[modo.match_header().index("P2")])
     p2_arch_label =      tk.Label(mid_frame,text="P2_Arch:")
     p2_arch_entry =      tk.OptionMenu(mid_frame,p2_arch_type,*arch_options)
     p2_subarch_label =   tk.Label(mid_frame,text="P2_Subarch:")
     p2_subarch_entry =   tk.Entry(mid_frame)
     p1_roll_label =      tk.Label(mid_frame,text="P1_Roll:")
-    p1_roll_entry =      tk.Label(mid_frame,text=values[7])
+    p1_roll_entry =      tk.Label(mid_frame,text=values[modo.match_header().index("P1_Roll")])
     p2_roll_label =      tk.Label(mid_frame,text="P2_Roll:")
-    p2_roll_entry =      tk.Label(mid_frame,text=values[8])
+    p2_roll_entry =      tk.Label(mid_frame,text=values[modo.match_header().index("P2_Roll")])
     roll_winner_label =  tk.Label(mid_frame,text="Roll_Winner:")
-    roll_winner_entry =  tk.Label(mid_frame,text=values[9])
+    roll_winner_entry =  tk.Label(mid_frame,text=values[modo.match_header().index("Roll_Winner")])
     p1_wins_label =      tk.Label(mid_frame,text="P1_Wins:")
-    p1_wins_entry =      tk.Label(mid_frame,text=values[10])
+    p1_wins_entry =      tk.Label(mid_frame,text=values[modo.match_header().index("P1_Wins")])
     p2_wins_label =      tk.Label(mid_frame,text="P2_Wins:")
-    p2_wins_entry =      tk.Label(mid_frame,text=values[11])
+    p2_wins_entry =      tk.Label(mid_frame,text=values[modo.match_header().index("P2_Wins")])
     match_winner_label = tk.Label(mid_frame,text="Match_Winner:")
-    match_winner_entry = tk.Label(mid_frame,text=values[12])
+    match_winner_entry = tk.Label(mid_frame,text=values[modo.match_header().index("Match_Winner")])
     format_label =       tk.Label(mid_frame,text="Format:")
     format_entry =       tk.OptionMenu(mid_frame,match_format,*format_options)
     draft_type_label =   tk.Label(mid_frame,text="Limited_Format:")
@@ -1636,7 +1655,7 @@ def revise_record():
     match_type_label =   tk.Label(mid_frame,text="Match_Type:")
     match_type_entry =   tk.OptionMenu(mid_frame,match_type,*match_options)
     date_label =         tk.Label(mid_frame,text="Date:")
-    date_entry =         tk.Label(mid_frame,text=values[15])
+    date_entry =         tk.Label(mid_frame,text=values[modo.match_header().index("Date")])
 
     p1_subarch_entry.insert(0,values[modo.match_header().index("P1_Subarch")])
     p2_subarch_entry.insert(0,values[modo.match_header().index("P2_Subarch")])
@@ -1922,6 +1941,7 @@ def import_window():
 
     def get_decks_path():
         fp_decks = filedialog.askdirectory()  
+        fp_decks = os.path.normpath(fp_decks)
         if (fp_decks is None) or (fp_decks == ""):
             label1.config(text="No Default Decklists Folder")
             button3["state"] = tk.DISABLED
@@ -1931,7 +1951,8 @@ def import_window():
                 button3["state"] = tk.NORMAL
 
     def get_logs_path():
-        fp_logs = filedialog.askdirectory()  
+        fp_logs = filedialog.askdirectory()
+        fp_logs = os.path.normpath(fp_logs) 
         if (fp_logs is None) or (fp_logs == ""):
             label2.config(text="No Default Game Logs Folder")
             button3["state"] = tk.DISABLED
