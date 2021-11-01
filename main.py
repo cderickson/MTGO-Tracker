@@ -20,14 +20,14 @@ import pickle
 # Add the column to appropriate modo.XXXX_data() function.
 # Any saved data will have to be deleted and reloaded.
 
-# Saved data.
+# Saved data:
 all_data =          [[],[],[],[]]
 all_data_inverted = [[],[],[],[]]
 all_headers =       [[],[],[]]
 all_decks =         {}
 parsed_file_list =  []
 
-# Settings imported/saved in modo-config.txt file.
+# Settings imported/saved in modo-config.txt file:
 filter_dict =       {}
 filepath_root =     ""
 filepath_export =   ""
@@ -141,7 +141,7 @@ def clear_loaded():
     file_menu.entryconfig("Save Data",state=tk.DISABLED)
     data_menu.entryconfig("Input Missing Match Data",state=tk.DISABLED)
     data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.DISABLED)
-    data_menu.entryconfig("Update P1/P2 Subarch and Format Columns",state=tk.DISABLED)
+    data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.DISABLED)
 
     #clear existing data in tree
     tree1.delete(*tree1.get_children())
@@ -350,7 +350,7 @@ def startup():
     file_menu.entryconfig("Save Data",state=tk.NORMAL)
     data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
     data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
-    data_menu.entryconfig("Update P1/P2 Subarch Columns",state=tk.NORMAL)
+    data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
 
     os.chdir(filepath_root)
 
@@ -440,7 +440,14 @@ def get_all_data():
                 for i in parsed_data[3]:
                     new_data[3].append(i)
 
-    deck_data_guess(new_data,rerun=False,update_all=True)
+    #deck_data_guess(new_data,rerun=False,update_all=True)
+    new_data_inverted = modo.invert_join(new_data)
+    for index,i in enumerate(new_data):
+        for j in new_data[index]:
+            all_data[index].append(j)
+    for index,i in enumerate(new_data_inverted):
+        for j in new_data_inverted[index]:
+            all_data_inverted[index].append(j)
 
     status_label.config(text="Imported " + str(count) + " new matches.")
     new_import = True
@@ -622,19 +629,22 @@ def deck_data_guess(data,rerun,update_all):
                 p2_data = modo.closest_list(set(cards2),all_decks,mm_yyyy)
                 i[p2_sa_index] = p2_data[0]
 
-    # Database already exists. Revised database will replace the currently existing one.
-    if rerun == True:
-        all_data = data
-        all_data_inverted = modo.invert_join(data)
-    # Data will be appended to currently loaded data.
-    else:
-        new_data_inverted = modo.invert_join(data)
-        for index,i in enumerate(data):
-            for j in data[index]:
-                all_data[index].append(j)
-        for index,i in enumerate(new_data_inverted):
-            for j in new_data_inverted[index]:
-                all_data_inverted[index].append(j)
+    all_data = data
+    all_data_inverted = modo.invert_join(data)
+
+    # # Database already exists. Revised database will replace the currently existing one.
+    # if rerun == True:
+    #     all_data = data
+    #     all_data_inverted = modo.invert_join(data)
+    # # Data will be appended to currently loaded data.
+    # else:
+    #     new_data_inverted = modo.invert_join(data)
+    #     for index,i in enumerate(data):
+    #         for j in data[index]:
+    #             all_data[index].append(j)
+    #     for index,i in enumerate(new_data_inverted):
+    #         for j in new_data_inverted[index]:
+    #             all_data_inverted[index].append(j)
 
 def rerun_decks_window():
     height = 100
@@ -680,7 +690,7 @@ def rerun_decks_window():
     bot_frame.grid_rowconfigure(0,weight=1)
     bot_frame.grid_rowconfigure(1,weight=1)
 
-    label1 = tk.Label(mid_frame,text="Apply best guess P1/P2_Subarch to all Matches or Unknowns only?",wraplength=width)
+    label1 = tk.Label(mid_frame,text="Apply best guess P1/P2_Subarch to all Matches or Unknown/NA only?",wraplength=width)
     button_apply_all = tk.Button(bot_frame,text="Apply to All",command=lambda : apply_to_all())
     button_apply_unknown = tk.Button(bot_frame,text="Apply to Unknowns",command=lambda : apply_to_unknowns())
     button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close())
@@ -1115,12 +1125,14 @@ def set_default_hero():
     label2 = tk.Label(mid_frame,text="",wraplength=width,justify="left")
     button1 = tk.Button(bot_frame,text="Save",command=lambda : set_hero())
     button2 = tk.Button(bot_frame,text="Clear",command=lambda : clear_hero())
+    button3 = tk.Button(bot_frame,text="Cancel",command=lambda : close_hero_window())
 
     label1.grid(row=0,column=0,pady=(10,5))       
     entry.grid(row=1,column=0)    
     label2.grid(row=2,column=0,pady=(10,5))
     button1.grid(row=4,column=0,padx=10,pady=10)
     button2.grid(row=4,column=1,padx=10,pady=10)
+    button3.grid(row=4,column=2,padx=10,pady=10)
 
     hero_window.protocol("WM_DELETE_WINDOW", lambda : close_hero_window())
 
@@ -1958,7 +1970,7 @@ def import_window():
             data_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
             data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
             data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
-            data_menu.entryconfig("Update P1/P2 Subarch Columns",state=tk.NORMAL)
+            data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
         filepath_decks = fp_decks
         filepath_logs = fp_logs
         close_import_window()
@@ -3468,6 +3480,7 @@ file_menu = tk.Menu(menu_bar,tearoff=False)
 menu_bar.add_cascade(label="File",menu=file_menu)
 
 file_menu.add_command(label="Load MTGO Game Logs",command=lambda : import_window())
+file_menu.add_separator()
 file_menu.add_command(label="Load Saved Data",command=lambda : load_saved_window())
 file_menu.add_command(label="Save Data",command=lambda : save_window(),state=tk.DISABLED)
 file_menu.add_separator()
@@ -3510,7 +3523,7 @@ menu_bar.add_cascade(label="Data",menu=data_menu)
 
 data_menu.add_command(label="Input Missing Match Data",command=lambda : get_formats(),state=tk.DISABLED)
 data_menu.add_command(label="Input Missing Game_Winner Data",command=lambda : get_winners(),state=tk.DISABLED)
-data_menu.add_command(label="Update P1/P2 Subarch Columns",command=lambda : rerun_decks_window(),state=tk.DISABLED)
+data_menu.add_command(label="Apply Best Guess for Deck Names",command=lambda : rerun_decks_window(),state=tk.DISABLED)
 data_menu.add_separator()
 data_menu.add_command(label="Set Default 'Hero'",command=lambda : set_default_hero(),state=tk.DISABLED)
 data_menu.add_command(label="Set Default Import Folders",command=lambda : set_default_import())
