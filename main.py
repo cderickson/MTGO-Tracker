@@ -13,6 +13,7 @@ pd.options.mode.chained_assignment = None
 from tkcalendar import DateEntry
 import datetime
 import itertools
+import pickle
 
 # To add a column to a database:
 # Add the column to appropriate modo.XXXX_header() function.
@@ -64,16 +65,8 @@ def save_window():
         os.chdir(filepath_root + r"\save")
         files = ["matches.csv","games.csv","plays.csv","rawdata.csv","parsedfiles.csv"]
 
-        for index,i in enumerate(files):
-            if index == 3:
-                df = pd.DataFrame(all_data[index])
-                df.to_csv(i,header=False,index=False)
-            elif index == 4:
-                df = pd.DataFrame(parsed_file_list)
-                df.to_csv(i,header=False,index=False)
-            else:
-                df = modo.to_dataframe(all_data[index],all_headers[index])
-                df.to_csv(i,header=True,index=False)
+        pickle.dump(all_data,open("all_data.p","wb"))
+        pickle.dump(parsed_file_list,open("parsed_file_list.p","wb"))
 
         status_label.config(text="Save complete. Data will be loaded automatically on next startup.")
         os.chdir(filepath_root)
@@ -262,10 +255,10 @@ def delete_session():
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
-    files = ["games.csv","matches.csv","plays.csv","rawdata.csv","parsedfiles.csv"]
+    files = ["all_data.p","parsed_file_list.p"]
 
     def del_session():
-        os.chdir(filepath_root + r"\save")   
+        os.chdir(filepath_root + "\\" + "save")   
 
         session_exists = False
         for i in files:
@@ -337,32 +330,11 @@ def startup():
     all_headers[1] = modo.game_header()
     all_headers[2] = modo.play_header()
 
-    for index,i in enumerate(files):
-        if os.path.isfile(i) == False:
-            status_label.config(text="No session data to load. Import your MTGO GameLog files to get started.")
-            return
-        if index == 3:
-            try:
-                df = pd.read_csv(i,header=None,na_filter=False)
-            except pd.errors.EmptyDataError:
-                df = pd.DataFrame()
-            df_rows = df.to_numpy().tolist()
-            for i in df_rows:
-                while "" in i:
-                    i.remove("")
-        elif index == 4:
-            #print("reading parsedfiles")
-            try:
-                df = pd.read_csv(i,header=None,na_filter=False)
-            except pd.errors.EmptyDataError:
-                df = pd.DataFrame()   
-        else:
-            df = pd.read_csv(i,header=0,na_filter=False)
-            df_rows = df.to_numpy().tolist()
-        if index == 4:
-            parsed_file_list = df[0].tolist()
-        else:
-            all_data[index] = df_rows
+    if (os.path.isfile("all_data.p") == False) or (os.path.isfile("parsed_file_list.p") == False):
+        status_label.config(text="No session data to load. Import your MTGO GameLog files to get started.")
+        return
+    all_data = pickle.load(open("all_data.p","rb"))
+    parsed_file_list = pickle.load(open("parsed_file_list.p","rb"))
 
     all_data_inverted = modo.invert_join(all_data)
 
@@ -378,7 +350,7 @@ def startup():
     file_menu.entryconfig("Save Data",state=tk.NORMAL)
     data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
     data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
-    data_menu.entryconfig("Update P1/P2 Subarch and Format Columns",state=tk.NORMAL)
+    data_menu.entryconfig("Update P1/P2 Subarch Columns",state=tk.NORMAL)
 
     os.chdir(filepath_root)
 
@@ -468,7 +440,7 @@ def get_all_data():
                 for i in parsed_data[3]:
                     new_data[3].append(i)
 
-    deck_data_guess(new_data,True)
+    deck_data_guess(new_data,rerun=False,update_all=True)
 
     status_label.config(text="Imported " + str(count) + " new matches.")
     new_import = True
@@ -612,7 +584,7 @@ def get_formats():
         all_data_inverted = modo.invert_join(all_data)
         set_display("Matches")
 
-def deck_data_guess(data,new):
+def deck_data_guess(data,rerun,update_all):
     global all_decks
     global all_data
     global all_data_inverted
@@ -624,22 +596,38 @@ def deck_data_guess(data,new):
     p1_sa_index = modo.match_header().index("P1_Subarch")
     p2_sa_index = modo.match_header().index("P2_Subarch")
     format_index = modo.match_header().index("Format")
-
     df2 = modo.to_dataframe(data[2],modo.play_header())
     for i in data[0]:
         mm_yyyy = i[date_index][5:7] + "-" + i[date_index][0:4]
         players = [i[modo.match_header().index("P1")],i[modo.match_header().index("P2")]]
-        cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-        cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-        p1_data = modo.closest_list(set(cards1),all_decks,mm_yyyy)
-        p2_data = modo.closest_list(set(cards2),all_decks,mm_yyyy)
+        
+        # Update P1_Subarch, P2_Subarch for all Matches.
+        if update_all == True:
+            cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
+            cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
+            p1_data = modo.closest_list(set(cards1),all_decks,mm_yyyy)
+            p2_data = modo.closest_list(set(cards2),all_decks,mm_yyyy)
+            i[p1_sa_index] = p1_data[0]
+            i[p2_sa_index] = p2_data[0]
+            if p1_data[1] == p2_data[1]:
+                i[format_index] = p1_data[1]
+        # Update P1_Subarch, P2_Subarch only if equal to "Unknown".
+        if update_all == False:
+            if (i[p1_sa_index] == "Unknown") or (i[p1_sa_index] == "NA"):
+                cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
+                p1_data = modo.closest_list(set(cards1),all_decks,mm_yyyy)
+                i[p1_sa_index] = p1_data[0]
+            if (i[p2_sa_index] == "Unknown") or (i[p2_sa_index] == "NA"):
+                cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
+                p2_data = modo.closest_list(set(cards2),all_decks,mm_yyyy)
+                i[p2_sa_index] = p2_data[0]
 
-        i[p1_sa_index] = p1_data[0]
-        i[p2_sa_index] = p2_data[0]
-        if p1_data[1] == p2_data[1]:
-            i[format_index] = p1_data[1]
-
-    if new == True:
+    # Database already exists. Revised database will replace the currently existing one.
+    if rerun == True:
+        all_data = data
+        all_data_inverted = modo.invert_join(data)
+    # Data will be appended to currently loaded data.
+    else:
         new_data_inverted = modo.invert_join(data)
         for index,i in enumerate(data):
             for j in data[index]:
@@ -647,15 +635,12 @@ def deck_data_guess(data,new):
         for index,i in enumerate(new_data_inverted):
             for j in new_data_inverted[index]:
                 all_data_inverted[index].append(j)
-    else:
-        all_data = data
-        all_data_inverted = modo.invert_join(data)
 
 def rerun_decks_window():
     height = 100
     width =  300
     rerun_decks_window = tk.Toplevel(window)
-    rerun_decks_window.title("Clear Saved Data")
+    rerun_decks_window.title("Best Guess Deck")
     rerun_decks_window.minsize(width,height)
     rerun_decks_window.resizable(False,False)
     rerun_decks_window.grab_set()
@@ -665,10 +650,16 @@ def rerun_decks_window():
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
-    def submit():
-        deck_data_guess(all_data,False)
+    def apply_to_all():
+        deck_data_guess(all_data,rerun=True,update_all=True)
         set_display("Matches")
-        status_label.config(text="Updated best guesses in the P1_Subarch, P2_Subarch, and Format columns for each match.")
+        status_label.config(text="Updated the P1_Subarch, P2_Subarch, Format columns for each match.")
+        close()
+
+    def apply_to_unknowns():
+        deck_data_guess(all_data,rerun=True,update_all=False)
+        set_display("Matches")
+        status_label.config(text="Updated Unknowns in the P1_Subarch, P2_Subarch columns.")
         close()
 
     def close():
@@ -689,13 +680,15 @@ def rerun_decks_window():
     bot_frame.grid_rowconfigure(0,weight=1)
     bot_frame.grid_rowconfigure(1,weight=1)
 
-    label1 = tk.Label(mid_frame,text="This will overwrite the P1_Subarch, P2_Subarch, and Format columns in the Match table.\n\nAre you sure you want to continue?",wraplength=width)
-    button_load = tk.Button(bot_frame,text="Apply",command=lambda : submit())
+    label1 = tk.Label(mid_frame,text="Apply best guess P1/P2_Subarch to all Matches or Unknowns only?",wraplength=width)
+    button_apply_all = tk.Button(bot_frame,text="Apply to All",command=lambda : apply_to_all())
+    button_apply_unknown = tk.Button(bot_frame,text="Apply to Unknowns",command=lambda : apply_to_unknowns())
     button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close())
     
-    label1.grid(row=0,column=0,padx=5,pady=5,sticky="nsew")       
-    button_load.grid(row=0,column=0,padx=5,pady=5)
-    button_close.grid(row=0,column=1,padx=5,pady=5)
+    label1.grid(row=0,column=0,padx=10,pady=10,sticky="nsew")       
+    button_apply_all.grid(row=0,column=0,padx=10,pady=10)
+    button_apply_unknown.grid(row=0,column=1,padx=10,pady=10)
+    button_close.grid(row=0,column=2,padx=10,pady=10)
     
     rerun_decks_window.protocol("WM_DELETE_WINDOW", lambda : close())
 
@@ -948,20 +941,6 @@ def bb_clicked():
         set_display("Matches")
     elif display == "Plays":
         set_display("Games")
-
-# def get_decks_path():
-#     global filepath_decks
-#     filepath_decks = filedialog.askdirectory()
-#     filepath_decks = os.path.normpath(filepath_decks)
-#     save_settings()
-#     status_label.config(text="Updated folder location. Click 'Import' to update data.")
-    
-# def get_logs_path():
-#     global filepath_logs
-#     filepath_logs = filedialog.askdirectory()
-#     filepath_logs = os.path.normpath(filepath_logs)
-#     save_settings()
-#     status_label.config(text="Updated folder location. Click 'Import' to update data.")
 
 def export(file_type,data_type,inverted):
     #file_type: string, "CSV" or "Excel"
@@ -1979,7 +1958,7 @@ def import_window():
             data_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
             data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
             data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
-            data_menu.entryconfig("Update P1/P2 Subarch and Format Columns",state=tk.NORMAL)
+            data_menu.entryconfig("Update P1/P2 Subarch Columns",state=tk.NORMAL)
         filepath_decks = fp_decks
         filepath_logs = fp_logs
         close_import_window()
@@ -3531,7 +3510,7 @@ menu_bar.add_cascade(label="Data",menu=data_menu)
 
 data_menu.add_command(label="Input Missing Match Data",command=lambda : get_formats(),state=tk.DISABLED)
 data_menu.add_command(label="Input Missing Game_Winner Data",command=lambda : get_winners(),state=tk.DISABLED)
-data_menu.add_command(label="Update P1/P2 Subarch and Format Columns",command=lambda : rerun_decks_window(),state=tk.DISABLED)
+data_menu.add_command(label="Update P1/P2 Subarch Columns",command=lambda : rerun_decks_window(),state=tk.DISABLED)
 data_menu.add_separator()
 data_menu.add_command(label="Set Default 'Hero'",command=lambda : set_default_hero(),state=tk.DISABLED)
 data_menu.add_command(label="Set Default Import Folders",command=lambda : set_default_import())
@@ -3572,6 +3551,6 @@ startup()
 
 window.protocol("WM_DELETE_WINDOW", lambda : exit())
 
-#event loop: listens for events (keypress, etc.)
-#blocks code after from running until window is closed
+# Event loop: listens for events (keypress, etc.)
+# Blocks code after from running until window is closed.
 window.mainloop()
