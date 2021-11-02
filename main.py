@@ -62,8 +62,7 @@ def save_window():
     def save():
         save_settings()
 
-        os.chdir(filepath_root + r"\save")
-        files = ["matches.csv","games.csv","plays.csv","rawdata.csv","parsedfiles.csv"]
+        os.chdir(filepath_root + "\\" + "save")
 
         pickle.dump(all_data,open("all_data.p","wb"))
         pickle.dump(parsed_file_list,open("parsed_file_list.p","wb"))
@@ -313,18 +312,18 @@ def startup():
     global parsed_file_list
     global data_loaded
 
-    with io.open("modo-config.txt","r",encoding="ansi") as config:
-        initial = config.read()
-
-        settings =       initial.split("\n")
-        filepath_root =  os.getcwd()
-        filepath_export =settings[1].split("=>")[1]
-        filepath_decks = settings[2].split("=>")[1]
-        filepath_logs =  settings[3].split("=>")[1]
-        hero =           settings[4].split("=>")[1]
-
+    filepath_root = os.getcwd()
+    if os.path.isdir("save") == False:
+        os.mkdir(filepath_root + "\\" + "save")
     os.chdir(filepath_root + "\\" + "save")
-    files = ["matches.csv","games.csv","plays.csv","rawdata.csv","parsedfiles.csv"]
+
+    if os.path.isfile("settings.p"):
+        settings = pickle.load(open("settings.p","rb"))
+        filepath_root =   settings[0]
+        filepath_export = settings[1]
+        filepath_decks =  settings[2]
+        filepath_logs =   settings[3]
+        hero =            settings[4]
 
     all_headers[0] = modo.match_header()
     all_headers[1] = modo.game_header()
@@ -355,13 +354,10 @@ def startup():
     os.chdir(filepath_root)
 
 def save_settings():
-    os.chdir(filepath_root)
-    with io.open("modo-config.txt","w",encoding="ansi") as config:
-        config.write("filepath_root=>" + filepath_root + "\n")
-        config.write("filepath_export=>" + filepath_export + "\n")
-        config.write("filepath_decks=>" + filepath_decks + "\n")
-        config.write("filepath_logs=>" + filepath_logs + "\n")
-        config.write("hero=>" + hero)
+    os.chdir(filepath_root + "\\" + "save")
+    settings = [filepath_root,filepath_export,filepath_decks,filepath_logs,hero]
+
+    pickle.dump(settings,open("settings.p","wb"))
 
 def set_display(d,*argv):
     global display
@@ -647,8 +643,8 @@ def deck_data_guess(data,rerun,update_all):
     #             all_data_inverted[index].append(j)
 
 def rerun_decks_window():
-    height = 100
-    width =  300
+    height = 300
+    width =  400
     rerun_decks_window = tk.Toplevel(window)
     rerun_decks_window.title("Best Guess Deck")
     rerun_decks_window.minsize(width,height)
@@ -661,41 +657,74 @@ def rerun_decks_window():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def apply_to_all():
+        global filepath_decks
+        if (label1["text"] == "No Default Decklists Folder"):
+            label3["text"] = "Decks and/or Game Logs Folder Location not set."
+            return
+        filepath_decks = label1["text"]
+
         deck_data_guess(all_data,rerun=True,update_all=True)
         set_display("Matches")
         status_label.config(text="Updated the P1_Subarch, P2_Subarch, Format columns for each match.")
         close()
 
     def apply_to_unknowns():
+        global filepath_decks
+        if (label1["text"] == "No Default Decklists Folder"):
+            label3["text"] = "Decks and/or Game Logs Folder Location not set."
+            return
+        filepath_decks = label1["text"]
+
         deck_data_guess(all_data,rerun=True,update_all=False)
         set_display("Matches")
         status_label.config(text="Updated Unknowns in the P1_Subarch, P2_Subarch columns.")
         close()
 
+    def get_decks_path():
+        fp_decks = filedialog.askdirectory()  
+        fp_decks = os.path.normpath(fp_decks)
+        if (fp_decks is None) or (fp_decks == "") or (fp_decks == "."):
+            label1.config(text="No Default Decklists Folder")
+            button_apply_all["state"] = tk.DISABLED
+            button_apply_unknown["state"] = tk.DISABLED
+        else:
+            label1.config(text=fp_decks)
+            button_apply_all["state"] = tk.NORMAL
+            button_apply_unknown["state"] = tk.NORMAL
+
     def close():
         rerun_decks_window.grab_release()
         rerun_decks_window.destroy()
 
-    mid_frame = tk.LabelFrame(rerun_decks_window,text="")
+    mid_frame = tk.LabelFrame(rerun_decks_window,text="Folder Path")
     bot_frame = tk.Frame(rerun_decks_window)
-
     mid_frame.grid(row=0,column=0,sticky="nsew")
     bot_frame.grid(row=1,column=0,sticky="")
 
     rerun_decks_window.grid_columnconfigure(0,weight=1)
     rerun_decks_window.rowconfigure(0,weight=1)
     mid_frame.grid_columnconfigure(0,weight=1)
-    mid_frame.grid_rowconfigure(0,weight=1) 
     bot_frame.grid_columnconfigure(0,weight=1)
     bot_frame.grid_rowconfigure(0,weight=1)
     bot_frame.grid_rowconfigure(1,weight=1)
 
-    label1 = tk.Label(mid_frame,text="Apply best guess P1/P2_Subarch to all Matches or Unknown/NA only?",wraplength=width)
+    button1 = tk.Button(mid_frame,text="Get Decks Folder",command=lambda : get_decks_path())
+    label3 = tk.Label(mid_frame,text="This will apply best guesses in the P1_Subarch and P2_Subarch columns, overwriting where applicable.\n\n Apply to all Matches or Unknown/NA only?",wraplength=width)
     button_apply_all = tk.Button(bot_frame,text="Apply to All",command=lambda : apply_to_all())
     button_apply_unknown = tk.Button(bot_frame,text="Apply to Unknowns",command=lambda : apply_to_unknowns())
     button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close())
-    
-    label1.grid(row=0,column=0,padx=10,pady=10,sticky="nsew")       
+
+    fp_decks = filepath_decks
+    if (filepath_decks is None) or (filepath_decks == ""):
+        label1 = tk.Label(mid_frame,text="No Default Decklists Folder",wraplength=width,justify="left")
+        button_apply_all["state"] = tk.DISABLED
+        button_apply_unknown["state"] = tk.DISABLED
+    else:
+        label1 = tk.Label(mid_frame,text=filepath_decks,wraplength=width,justify="left")
+
+    label1.grid(row=0,column=0,pady=(40,5))
+    button1.grid(row=1,column=0,pady=0)    
+    label3.grid(row=2,column=0,padx=10,pady=40,sticky="nsew")       
     button_apply_all.grid(row=0,column=0,padx=10,pady=10)
     button_apply_unknown.grid(row=0,column=1,padx=10,pady=10)
     button_close.grid(row=0,column=2,padx=10,pady=10)
@@ -1930,36 +1959,22 @@ def import_window():
                            (window.winfo_x()+(window.winfo_width()/2)-(width/2),
                             window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
-    def get_decks_path():
-        fp_decks = filedialog.askdirectory()  
-        fp_decks = os.path.normpath(fp_decks)
-        if (fp_decks is None) or (fp_decks == ""):
-            label1.config(text="No Default Decklists Folder")
-            button3["state"] = tk.DISABLED
-        else:
-            label1.config(text=fp_decks)
-            if label2["text"] != "No Default Game Logs Folder":
-                button3["state"] = tk.NORMAL
-
     def get_logs_path():
         fp_logs = filedialog.askdirectory()
         fp_logs = os.path.normpath(fp_logs) 
-        if (fp_logs is None) or (fp_logs == ""):
+        if (fp_logs is None) or (fp_logs == "") or (fp_logs == "."):
             label2.config(text="No Default Game Logs Folder")
             button3["state"] = tk.DISABLED
         else:
             label2.config(text=fp_logs)
-            if label1["text"] != "No Default Decklists Folder":
-                button3["state"] = tk.NORMAL
+            button3["state"] = tk.NORMAL
 
     def import_data():
-        global filepath_decks
         global filepath_logs
 
-        if (label1["text"] == "No Default Decklists Folder") or (label2["text"]  == "No Default Game Logs Folder"):
+        if (label2["text"]  == "No Default Game Logs Folder"):
             label3["text"] = "Decks and/or Game Logs Folder Location not set."
             return
-        filepath_decks = label1["text"]
         filepath_logs = label2["text"]
         get_all_data()
         clear_filter()
@@ -1971,7 +1986,6 @@ def import_window():
             data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
             data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
             data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
-        filepath_decks = fp_decks
         filepath_logs = fp_logs
         close_import_window()
 
@@ -1979,7 +1993,6 @@ def import_window():
         import_window.grab_release()
         import_window.destroy()
     
-    fp_decks = filepath_decks
     fp_logs = filepath_logs
 
     mid_frame = tk.LabelFrame(import_window,text="Folder Paths")
@@ -1991,15 +2004,9 @@ def import_window():
     import_window.rowconfigure(1,minsize=0,weight=1)  
     mid_frame.grid_columnconfigure(0,weight=1)
 
-    button1 = tk.Button(mid_frame,text="Get Decks Folder",command=lambda : get_decks_path())
     button2 = tk.Button(mid_frame,text="Get Logs Folder",command=lambda : get_logs_path())
     button3 = tk.Button(bot_frame,text="Import", command=lambda : import_data())
     button4 = tk.Button(bot_frame,text="Cancel", command=lambda : close_import_window())
-    if (filepath_decks is None) or (filepath_decks == ""):
-        label1 = tk.Label(mid_frame,text="No Default Decklists Folder",wraplength=width,justify="left")
-        button3["state"] = tk.DISABLED
-    else:
-        label1 = tk.Label(mid_frame,text=filepath_decks,wraplength=width,justify="left")
     if (filepath_logs is None) or (filepath_logs == ""):
         label2 = tk.Label(mid_frame,text="No Default Game Logs Folder",wraplength=width,justify="left")
         button3["state"] = tk.DISABLED
@@ -2007,11 +2014,9 @@ def import_window():
         label2 = tk.Label(mid_frame,text=filepath_logs,wraplength=width,justify="left")
     label3 = tk.Label(mid_frame,text="CAUTION: This will overwrite your current session.",wraplength=width,pady=(20,),justify="left")
 
-    label1.grid(row=0,column=0,pady=(40,5))
-    button1.grid(row=1,column=0,pady=0)
-    label2.grid(row=2,column=0,pady=5)
-    button2.grid(row=3,column=0,pady=0)
-    label3.grid(row=4,column=0,pady=5)
+    label2.grid(row=0,column=0,pady=(60,5))
+    button2.grid(row=1,column=0,pady=0)
+    label3.grid(row=2,column=0,pady=5)
     button3.grid(row=0,column=0,padx=10,pady=10)
     button4.grid(row=0,column=1,padx=10,pady=10)
 
