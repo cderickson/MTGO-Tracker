@@ -3444,6 +3444,7 @@ def exit():
 #create a window
 window = tk.Tk() 
 window.title("MTGO-Stats")
+window.iconbitmap("icon.ico")
 window.minsize(main_window_width,main_window_height)
 window.resizable(False,False)
 
