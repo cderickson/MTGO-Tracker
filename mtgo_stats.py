@@ -367,8 +367,8 @@ def startup():
 def save_settings():
     os.chdir(filepath_root + "\\" + "save")
     settings = [filepath_root,filepath_export,filepath_decks,filepath_logs,hero]
-
     pickle.dump(settings,open("settings.p","wb"))
+    os.chdir(filepath_root)
 
 def set_display(d,*argv):
     global display
