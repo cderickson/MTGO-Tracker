@@ -50,6 +50,7 @@ def save_window():
     width =  300
     save_window = tk.Toplevel(window)
     save_window.title("Save Data")
+    save_window.iconbitmap("icon.ico")
     save_window.minsize(width,height)
     save_window.resizable(False,False)
     save_window.grab_set()
@@ -65,6 +66,7 @@ def save_window():
         os.chdir(filepath_root + "\\" + "save")
 
         pickle.dump(all_data,open("all_data.p","wb"))
+        pickle.dump(all_decks,open("all_decks.p","wb"))
         pickle.dump(parsed_file_list,open("parsed_file_list.p","wb"))
 
         status_label.config(text="Save complete. Data will be loaded automatically on next startup.")
@@ -151,6 +153,7 @@ def clear_window():
     width =  300
     clear_window = tk.Toplevel(window)
     clear_window.title("Clear Saved Data")
+    clear_window.iconbitmap("icon.ico")
     clear_window.minsize(width,height)
     clear_window.resizable(False,False)
     clear_window.grab_set()
@@ -198,6 +201,7 @@ def load_saved_window():
     width =  300
     load_saved_window = tk.Toplevel(window)
     load_saved_window.title("Clear Saved Data")
+    load_saved_window.iconbitmap("icon.ico")
     load_saved_window.minsize(width,height)
     load_saved_window.resizable(False,False)
     load_saved_window.grab_set()
@@ -245,6 +249,7 @@ def delete_session():
     width =  300
     del_window = tk.Toplevel(window)
     del_window.title("Delete Saved Session")
+    del_window.iconbitmap("icon.ico")
     del_window.minsize(width,height)
     del_window.resizable(False,False)
     del_window.grab_set()
@@ -254,7 +259,7 @@ def delete_session():
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
-    files = ["all_data.p","parsed_file_list.p"]
+    files = ["all_data.p","parsed_file_list.p","all_decks.p","settings.p"]
 
     def del_session():
         os.chdir(filepath_root + "\\" + "save")   
@@ -309,10 +314,14 @@ def startup():
     global hero
     global all_data
     global all_data_inverted
+    global all_decks
     global parsed_file_list
     global data_loaded
 
     filepath_root = os.getcwd()
+    if os.path.isdir("lists") == False:
+        os.mkdir(filepath_root + "\\" + "lists")
+    filepath_decks = filepath_root + "\\" + "lists"
     if os.path.isdir("save") == False:
         os.mkdir(filepath_root + "\\" + "save")
     os.chdir(filepath_root + "\\" + "save")
@@ -329,10 +338,12 @@ def startup():
     all_headers[1] = modo.game_header()
     all_headers[2] = modo.play_header()
 
-    if (os.path.isfile("all_data.p") == False) or (os.path.isfile("parsed_file_list.p") == False):
+    if (os.path.isfile("all_data.p") == False) or (os.path.isfile("parsed_file_list.p") == False) or (os.path.isfile("all_decks.p") == False):
         status_label.config(text="No session data to load. Import your MTGO GameLog files to get started.")
+        os.chdir(filepath_root)
         return
     all_data = pickle.load(open("all_data.p","rb"))
+    all_decks = pickle.load(open("all_decks.p","rb"))
     parsed_file_list = pickle.load(open("parsed_file_list.p","rb"))
 
     all_data_inverted = modo.invert_join(all_data)
@@ -457,7 +468,6 @@ def get_all_data():
 def print_data(data,header):
     global new_import
     small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num"]
-
 
     # Clear existing data in tree
     tree1.delete(*tree1.get_children())
@@ -588,12 +598,12 @@ def get_formats():
         set_display("Matches")
 
 def deck_data_guess(data,rerun,update_all):
-    global all_decks
+    #global all_decks
     global all_data
     global all_data_inverted
-    all_decks.clear()
+    #all_decks.clear()
 
-    get_lists()
+    #get_lists()
 
     date_index = modo.match_header().index("Date")
     p1_sa_index = modo.match_header().index("P1_Subarch")
@@ -614,7 +624,7 @@ def deck_data_guess(data,rerun,update_all):
             i[p2_sa_index] = p2_data[0]
             if p1_data[1] == p2_data[1]:
                 i[format_index] = p1_data[1]
-        # Update P1_Subarch, P2_Subarch only if equal to "Unknown".
+        # Update P1_Subarch, P2_Subarch only if equal to "Unknown" or "NA".
         if update_all == False:
             if (i[p1_sa_index] == "Unknown") or (i[p1_sa_index] == "NA"):
                 cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
@@ -628,25 +638,12 @@ def deck_data_guess(data,rerun,update_all):
     all_data = data
     all_data_inverted = modo.invert_join(data)
 
-    # # Database already exists. Revised database will replace the currently existing one.
-    # if rerun == True:
-    #     all_data = data
-    #     all_data_inverted = modo.invert_join(data)
-    # # Data will be appended to currently loaded data.
-    # else:
-    #     new_data_inverted = modo.invert_join(data)
-    #     for index,i in enumerate(data):
-    #         for j in data[index]:
-    #             all_data[index].append(j)
-    #     for index,i in enumerate(new_data_inverted):
-    #         for j in new_data_inverted[index]:
-    #             all_data_inverted[index].append(j)
-
 def rerun_decks_window():
     height = 300
     width =  400
     rerun_decks_window = tk.Toplevel(window)
-    rerun_decks_window.title("Best Guess Deck")
+    rerun_decks_window.title("Best Guess Deck Names")
+    rerun_decks_window.iconbitmap("icon.ico")
     rerun_decks_window.minsize(width,height)
     rerun_decks_window.resizable(False,False)
     rerun_decks_window.grab_set()
@@ -657,24 +654,12 @@ def rerun_decks_window():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def apply_to_all():
-        global filepath_decks
-        if (label1["text"] == "No Default Decklists Folder"):
-            label3["text"] = "Decks and/or Game Logs Folder Location not set."
-            return
-        filepath_decks = label1["text"]
-
         deck_data_guess(all_data,rerun=True,update_all=True)
         set_display("Matches")
         status_label.config(text="Updated the P1_Subarch, P2_Subarch, Format columns for each match.")
         close()
 
     def apply_to_unknowns():
-        global filepath_decks
-        if (label1["text"] == "No Default Decklists Folder"):
-            label3["text"] = "Decks and/or Game Logs Folder Location not set."
-            return
-        filepath_decks = label1["text"]
-
         deck_data_guess(all_data,rerun=True,update_all=False)
         set_display("Matches")
         status_label.config(text="Updated Unknowns in the P1_Subarch, P2_Subarch columns.")
@@ -691,12 +676,40 @@ def rerun_decks_window():
             label1.config(text=fp_decks)
             button_apply_all["state"] = tk.NORMAL
             button_apply_unknown["state"] = tk.NORMAL
+        button2["state"] = tk.NORMAL
+
+    def import_decks():
+        global all_decks
+        global filepath_decks
+        
+        if (label1["text"] == "No Default Decklists Folder"):
+            label3["text"] = "Decks and/or Game Logs Folder Location not set."
+            return
+        filepath_decks = label1["text"]
+
+        all_decks.clear()
+
+        get_lists()
+        if len(all_decks) == 0:
+            label2["text"] = "Sample decklists loaded: NONE"
+            button_apply_all["state"] = tk.DISABLED
+            button_apply_unknown["state"] = tk.DISABLED
+        elif len(all_decks) == 1:
+            label2["text"] = "Sample decklists loaded: " + list(all_decks.keys())[0]
+            button_apply_all["state"] = tk.NORMAL
+            button_apply_unknown["state"] = tk.NORMAL
+        else:
+            label2["text"] = "Sample decklists loaded: " + list(all_decks.keys())[0] + " to " + list(all_decks.keys())[-1]
+            button_apply_all["state"] = tk.NORMAL
+            button_apply_unknown["state"] = tk.NORMAL
+
+        button2["state"] = tk.DISABLED
 
     def close():
         rerun_decks_window.grab_release()
         rerun_decks_window.destroy()
 
-    mid_frame = tk.LabelFrame(rerun_decks_window,text="Folder Path")
+    mid_frame = tk.LabelFrame(rerun_decks_window)
     bot_frame = tk.Frame(rerun_decks_window)
     mid_frame.grid(row=0,column=0,sticky="nsew")
     bot_frame.grid(row=1,column=0,sticky="")
@@ -708,27 +721,43 @@ def rerun_decks_window():
     bot_frame.grid_rowconfigure(0,weight=1)
     bot_frame.grid_rowconfigure(1,weight=1)
 
-    button1 = tk.Button(mid_frame,text="Get Decks Folder",command=lambda : get_decks_path())
+    #button1 = tk.Button(mid_frame,text="Get Decks Folder",command=lambda : get_decks_path())
+    button2 = tk.Button(mid_frame,text="Import Sample Decklists",command=lambda : import_decks())
+    label2 = tk.Label(mid_frame,text="",wraplength=width)
     label3 = tk.Label(mid_frame,text="This will apply best guesses in the P1_Subarch and P2_Subarch columns, overwriting where applicable.\n\n Apply to all Matches or Unknown/NA only?",wraplength=width)
     button_apply_all = tk.Button(bot_frame,text="Apply to All",command=lambda : apply_to_all())
     button_apply_unknown = tk.Button(bot_frame,text="Apply to Unknowns",command=lambda : apply_to_unknowns())
     button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close())
 
+    if len(all_decks) == 0:
+        label2["text"] = "Sample decklists loaded: NONE"
+    elif len(all_decks) == 1:
+        label2["text"] = "Sample decklists loaded: " + list(all_decks.keys())[0]
+    else:
+        label2["text"] = "Sample decklists loaded: " + list(all_decks.keys())[0] + " to " + list(all_decks.keys())[-1]
+
     fp_decks = filepath_decks
-    if (filepath_decks is None) or (filepath_decks == ""):
+    if (filepath_decks is None) or (filepath_decks == "") or (filepath_decks == "."):
         label1 = tk.Label(mid_frame,text="No Default Decklists Folder",wraplength=width,justify="left")
         button_apply_all["state"] = tk.DISABLED
         button_apply_unknown["state"] = tk.DISABLED
     else:
         label1 = tk.Label(mid_frame,text=filepath_decks,wraplength=width,justify="left")
 
-    label1.grid(row=0,column=0,pady=(40,5))
-    button1.grid(row=1,column=0,pady=0)    
-    label3.grid(row=2,column=0,padx=10,pady=40,sticky="nsew")       
+    #label1.grid(row=0,column=0,pady=(25,5))
+    #button1.grid(row=1,column=0,padx=75,pady=5,sticky="w")
+    #button2.grid(row=1,column=0,padx=75,pady=5,sticky="e")
+    label2.grid(row=1,column=0,padx=10,pady=(45,0),sticky="nsew")
+    button2.grid(row=2,column=0,padx=10,pady=5) 
+    label3.grid(row=3,column=0,padx=10,pady=(45,5),sticky="nsew")       
     button_apply_all.grid(row=0,column=0,padx=10,pady=10)
     button_apply_unknown.grid(row=0,column=1,padx=10,pady=10)
-    button_close.grid(row=0,column=2,padx=10,pady=10)
-    
+    button_close.grid(row=0,column=2,padx=10,pady=10)   
+
+    if len(all_decks) == 0:
+        button_apply_all["state"] = tk.DISABLED
+        button_apply_unknown["state"] = tk.DISABLED
+
     rerun_decks_window.protocol("WM_DELETE_WINDOW", lambda : close())
 
 def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
@@ -753,7 +782,8 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
     height = 450
     width =  650                
     gf = tk.Toplevel(window)
-    gf.title("Input Missing Data - " + str(n) + "/" + str(total) + " Matches.")           
+    gf.title("Input Missing Data - " + str(n) + "/" + str(total) + " Matches.")
+    gf.iconbitmap("icon.ico")        
     gf.minsize(width,height)
     gf.resizable(False,False)
     gf.attributes("-topmost",True)
@@ -1097,6 +1127,7 @@ def set_default_hero():
     width =  200
     hero_window = tk.Toplevel(window)
     hero_window.title("Set Default 'Hero'")
+    hero_window.iconbitmap("icon.ico")
     hero_window.minsize(width,height)
     hero_window.resizable(False,False)
     hero_window.grab_set()
@@ -1170,6 +1201,7 @@ def set_default_export():
     width =  400
     export_window = tk.Toplevel(window)
     export_window.title("Set Default Export Folder")
+    export_window.iconbitmap("icon.ico")
     export_window.minsize(width,height)
     export_window.resizable(False,False)
     export_window.grab_set()
@@ -1182,7 +1214,7 @@ def set_default_export():
     def get_export_path():
         fp = filedialog.askdirectory()  
         fp = os.path.normpath(fp)
-        if (fp is None) or (fp == ""):
+        if (fp is None) or (fp == "") or (fp == "."):
             label1.config(text="No Default Export Folder")
         else:
             label1.config(text=fp)
@@ -1230,6 +1262,7 @@ def set_default_import():
     width =  400
     import_window = tk.Toplevel(window)
     import_window.title("Set Default Export Folder")
+    import_window.iconbitmap("icon.ico")
     import_window.minsize(width,height)
     import_window.resizable(False,False)
     import_window.grab_set()
@@ -1242,7 +1275,7 @@ def set_default_import():
     def get_decks_path():
         fp = filedialog.askdirectory()
         fp = os.path.normpath(fp)
-        if (fp is None) or (fp == ""):
+        if (fp is None) or (fp == "") or (fp == "."):
             label1.config(text="No Default Decklists Folder")
         else:
             label1.config(text=fp)
@@ -1250,7 +1283,7 @@ def set_default_import():
     def get_logs_path():
         fp = filedialog.askdirectory() 
         fp = os.path.normpath(fp) 
-        if (fp is None) or (fp == ""):
+        if (fp is None) or (fp == "") or (fp == "."):
             label2.config(text="No Default Game Logs Folder")
         else:
             label2.config(text=fp)
@@ -1283,13 +1316,13 @@ def set_default_import():
     import_window.rowconfigure(1,minsize=0,weight=1)  
     mid_frame.grid_columnconfigure(0,weight=1)
 
-    if (filepath_decks is None) or (filepath_decks == ""):
+    if (filepath_decks is None) or (filepath_decks == "") or (filepath_decks == "."):
         label1 = tk.Label(mid_frame,text="No Default Decklists Folder",wraplength=width,justify="left")
     else:
         label1 = tk.Label(mid_frame,text=filepath_decks,wraplength=width,justify="left")
     button1 = tk.Button(mid_frame,text="Set Default Decklists Folder",command=lambda : get_decks_path())
 
-    if (filepath_logs is None) or (filepath_logs == ""):
+    if (filepath_logs is None) or (filepath_logs == "") or (filepath_decks == "."):
         label2 = tk.Label(mid_frame,text="No Default Game Logs Folder",wraplength=width,justify="left")
     else:
         label2 = tk.Label(mid_frame,text=filepath_logs,wraplength=width,justify="left")
@@ -1304,6 +1337,8 @@ def set_default_import():
     button3.grid(row=4,column=0,padx=10,pady=10)
     button4.grid(row=4,column=1,padx=10,pady=10)
     
+    button1["state"] = tk.DISABLED
+
     import_window.protocol("WM_DELETE_WINDOW", lambda : close_import_window())   
 
 def sort_column(col,reverse,tree1):
@@ -1365,6 +1400,7 @@ def set_filter():
     width =  400
     filter_window = tk.Toplevel(window)
     filter_window.title("Set Filters")
+    filter_window.iconbitmap("icon.ico")
     filter_window.minsize(width,height)
     filter_window.resizable(False,False)
     filter_window.grab_set()
@@ -1509,6 +1545,7 @@ def revise_record():
     width =  700
     revise_window = tk.Toplevel(window)
     revise_window.title("Revise Record")
+    revise_window.iconbitmap("icon.ico")
     revise_window.minsize(width,height)
     revise_window.resizable(False,False)
     revise_window.attributes("-topmost",True)
@@ -1737,6 +1774,7 @@ def revise_record_multi():
     width =  300
     revise_window = tk.Toplevel(window)
     revise_window.title("Revise Multiple Records")
+    revise_window.iconbitmap("icon.ico")
     revise_window.minsize(width,height)
     revise_window.resizable(False,False)
     revise_window.attributes("-topmost",True)
@@ -1950,6 +1988,7 @@ def import_window():
     width =  400
     import_window = tk.Toplevel(window)
     import_window.title("Import Data")
+    import_window.iconbitmap("icon.ico")
     import_window.minsize(width,height)
     import_window.resizable(False,False)
     import_window.grab_set()
@@ -1986,7 +2025,8 @@ def import_window():
             data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
             data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
             data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
-        filepath_logs = fp_logs
+        # This will revert filepath_logs to original setting.
+        #filepath_logs = fp_logs
         close_import_window()
 
     def close_import_window():
@@ -1995,7 +2035,7 @@ def import_window():
     
     fp_logs = filepath_logs
 
-    mid_frame = tk.LabelFrame(import_window,text="Folder Paths")
+    mid_frame = tk.LabelFrame(import_window,text="Folder Path")
     bot_frame = tk.Frame(import_window)
     mid_frame.grid(row=1,column=0,sticky="nsew")
     bot_frame.grid(row=2,column=0,sticky="")
@@ -2012,7 +2052,8 @@ def import_window():
         button3["state"] = tk.DISABLED
     else:
         label2 = tk.Label(mid_frame,text=filepath_logs,wraplength=width,justify="left")
-    label3 = tk.Label(mid_frame,text="CAUTION: This will overwrite your current session.",wraplength=width,pady=(20,),justify="left")
+    #label3 = tk.Label(mid_frame,text="CAUTION: This will overwrite your current session.",wraplength=width,pady=(20,),justify="left")
+    label3 = tk.Label(mid_frame,text="Select folder containing your MTGO GameLog files.",wraplength=width,pady=(20,),justify="left")
 
     label2.grid(row=0,column=0,pady=(60,5))
     button2.grid(row=1,column=0,pady=0)
@@ -2072,6 +2113,7 @@ def ask_for_winner(ga_list,p1,p2,n,total):
         
     gw = tk.Toplevel()
     gw.title("Select Game Winner")
+    gw.iconbitmap("icon.ico")
     height = 400
     width = 700
     gw.minsize(width,height)
@@ -2133,6 +2175,7 @@ def get_stats():
     height = main_window_height
     stats_window = tk.Toplevel(window)
     stats_window.title("Statistics - Match Data")
+    stats_window.iconbitmap("icon.ico")
     stats_window.minsize(width,height)
     stats_window.resizable(False,False)
     window.withdraw()
@@ -2203,6 +2246,7 @@ def get_stats():
         mid_frame8.grid_remove()
 
     def match_stats(hero,mformat,lformat,deck,opp_deck,date_range,s_type):
+        stats_window.title("Statistics - Match Data")
         clear_frames()
         def tree_skip(event):
             if tree1.identify_region(event.x,event.y) == "separator":
@@ -2433,6 +2477,7 @@ def get_stats():
                                               (meta_deck_wr[i][2]+"%")])
 
     def game_stats(hero,mformat,lformat,deck,opp_deck,date_range,s_type):
+        stats_window.title("Statistics - Game Data")
         clear_frames()
         def tree_skip(event):
             if tree1.identify_region(event.x,event.y) == "separator":
@@ -2650,6 +2695,7 @@ def get_stats():
                         count = 0
 
     def play_stats(hero,mformat,lformat,deck,opp_deck,date_range,s_type):
+        stats_window.title("Statistics - Play Data")
         clear_frames()
         def tree_skip(event):
             if tree1.identify_region(event.x,event.y) == "separator":
@@ -2961,6 +3007,7 @@ def get_stats():
                 count = 0
     
     def time_stats(hero,mformat,lformat,deck,opp_deck,date_range,s_type):
+        stats_window.title("Statistics - Time Data")
         clear_frames()
         mid_frame.grid_rowconfigure(0,weight=1)
         mid_frame.grid_rowconfigure(1,weight=0)
@@ -3051,6 +3098,7 @@ def get_stats():
             canvas2.get_tk_widget().grid(row=0,column=0,sticky="")
 
     def card_stats(hero,mformat,lformat,deck,opp_deck,date_range,s_type):
+        stats_window.title("Statistics - Card Data")
         clear_frames()
         def tree_setup(*argv):
             for i in argv:
@@ -3441,7 +3489,6 @@ def exit():
     save_settings()
     window.destroy()
 
-#create a window
 window = tk.Tk() 
 window.title("MTGO-Stats")
 window.iconbitmap("icon.ico")
