@@ -6,6 +6,12 @@ import copy
 uaw = None
 test = False
 window = []
+
+# To add a column to a database:
+# Add the column to appropriate modo.XXXX_header() function.
+# Add the column to appropriate modo.XXXX_data() function.
+# Any saved data will have to be deleted and reloaded.
+
 def user_assigned_winner(player):
     global uaw
     uaw = player
@@ -21,12 +27,26 @@ def con_formats():
             "Modern",
             "Standard",
             "Pioneer",
-            "Pauper"]
+            "Pauper",
+            "Other Constructed"]
 
 def match_types():
     return ["League",
             "Preliminary",
-            "Challenge"]
+            "Challenge",
+            "Premier",
+            "2-Man",
+            "Practice",
+            "Open Play BO1"]
+
+def match_type_booster():
+    return ["Draft League",
+            "Swiss Draft",
+            "Elimination Draft"]
+
+def match_type_sealed():
+    return ["Friendly Sealed League",
+            "Competitive Sealed League"]  
 
 def archetypes():
     return ["Aggro",

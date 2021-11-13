@@ -15,11 +15,6 @@ import datetime
 import itertools
 import pickle
 
-# To add a column to a database:
-# Add the column to appropriate modo.XXXX_header() function.
-# Add the column to appropriate modo.XXXX_data() function.
-# Any saved data will have to be deleted and reloaded.
-
 # Saved data:
 all_data =          [[],[],[],[]]
 all_data_inverted = [[],[],[],[]]
@@ -813,6 +808,21 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
         str4 += i
     
     def update_arch(*argv):
+        menu = match_type["menu"]
+        menu.delete(0,"end")
+        if mformat.get() == "NA":
+            for i in ["NA"] + modo.match_types() + modo.match_type_booster() + modo.match_type_sealed():
+                menu.add_command(label=i,command=lambda x=i: mtype.set(x))
+        elif mformat.get() in modo.con_formats():
+            for i in ["NA"] + modo.match_types():
+                menu.add_command(label=i,command=lambda x=i: mtype.set(x))
+        elif (mformat.get() == "Cube") or (mformat.get() == "Booster Draft"):
+            for i in ["NA"] + modo.match_type_booster():
+                menu.add_command(label=i,command=lambda x=i: mtype.set(x))
+        elif mformat.get() == "Sealed Deck":
+            for i in ["NA"] + modo.match_type_sealed():
+                menu.add_command(label=i,command=lambda x=i: mtype.set(x))
+
         if mformat.get() in modo.limited_formats():
             draft_format["state"] = tk.NORMAL
             arch_options = ["Limited"]
@@ -911,11 +921,11 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
     mformat = tk.StringVar()
     mformat.set("Select Format")
 
-    type_options = ["NA"] + modo.match_types()
+    type_options = ["NA"]
     mtype = tk.StringVar()
     mtype.set("Select Match Type")
 
-    draft_format_options = ["NA"] + modo.draft_formats()
+    draft_format_options = ["NA"]
     dformat = tk.StringVar()
     dformat.set("Select Limited Format")
 
@@ -930,12 +940,19 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
     if mdata[modo.match_header().index("Match_Type")] != "NA":
         mtype.set(mdata[modo.match_header().index("Match_Type")])
     
-    if dformat.get() == "Cube":
-        draft_format_options = modo.cube_formats()
-    elif dformat.get() == "Booster Draft":
-        draft_format_options = modo.draft_formats()
-    elif dformat.get() == "Sealed Deck":
-        draft_format_options = modo.sealed_formats()
+    if mformat.get() == "Cube":
+        draft_format_options += modo.cube_formats()
+        type_options += modo.match_type_booster()
+    elif mformat.get() == "Booster Draft":
+        draft_format_options += modo.draft_formats()
+        type_options += modo.match_type_booster()
+    elif mformat.get() == "Sealed Deck":
+        draft_format_options += modo.sealed_formats()
+        type_options += modo.match_type_sealed()
+    elif mformat.get() in modo.con_formats():
+        type_options += modo.match_types()
+    elif mformat.get() == "Select Format":
+        type_options += modo.match_types() + modo.match_type_booster() + modo.match_type_sealed()
 
     p1_arch_menu = tk.OptionMenu(mid_frame1,p1_arch,*arch_options)
     p1_sub =  tk.Entry(mid_frame1)
@@ -1571,6 +1588,21 @@ def revise_record():
     mid_frame.grid_columnconfigure(5,weight=1)
 
     def update_arch(*argv):
+        menu = match_type_entry["menu"]
+        menu.delete(0,"end")
+        if match_format.get() == "NA":
+            for i in ["NA"] + modo.match_types() + modo.match_type_booster() + modo.match_type_sealed():
+                menu.add_command(label=i,command=lambda x=i: match_type.set(x))
+        elif match_format.get() in modo.con_formats():
+            for i in ["NA"] + modo.match_types():
+                menu.add_command(label=i,command=lambda x=i: match_type.set(x))
+        elif (match_format.get() == "Cube") or (match_format.get() == "Booster Draft"):
+            for i in ["NA"] + modo.match_type_booster():
+                menu.add_command(label=i,command=lambda x=i: match_type.set(x))
+        elif match_format.get() == "Sealed Deck":
+            for i in ["NA"] + modo.match_type_sealed():
+                menu.add_command(label=i,command=lambda x=i: match_type.set(x))
+
         if match_format.get() in modo.limited_formats():
             arch_options = ["Limited"]
             draft_type_entry["state"] = tk.NORMAL
@@ -1588,13 +1620,13 @@ def revise_record():
             menu = draft_type_entry["menu"]
             menu.delete(0,"end")
             if match_format.get() == "Cube":
-                for i in modo.cube_formats():
+                for i in ["NA"] + modo.cube_formats():
                     menu.add_command(label=i,command=lambda x=i: limited_format.set(x))
             elif match_format.get() == "Booster Draft":
-                for i in modo.draft_formats():
+                for i in ["NA"] + modo.draft_formats():
                     menu.add_command(label=i,command=lambda x=i: limited_format.set(x))
             elif match_format.get() == "Sealed Deck":
-                for i in modo.sealed_formats():
+                for i in ["NA"] + modo.sealed_formats():
                     menu.add_command(label=i,command=lambda x=i: limited_format.set(x))
 
             p1_arch_type.set(arch_options[0])
@@ -1657,17 +1689,23 @@ def revise_record():
 
     if match_format.get() == "Cube":
         limited_options = modo.cube_formats()
+        match_options = ["NA"] + modo.match_type_booster()
     elif match_format.get() == "Booster Draft":
         limited_options = modo.draft_formats()
+        match_options = ["NA"] + modo.match_type_booster()
     elif match_format.get() == "Sealed Deck":
         limited_options = modo.sealed_formats()
-    else:
+        match_options = ["NA"] + modo.match_type_sealed()
+    elif match_format.get() in modo.con_formats():
         limited_options = ["NA"]
+        match_options = ["NA"] + modo.match_types()
+    elif match_format.get() == "NA":
+        limited_options = ["NA"]
+        match_options = ["NA"] + modo.match_types() + modo.match_type_booster() + modo.match_type_sealed()
 
     limited_format = tk.StringVar()
     limited_format.set(values[modo.match_header().index("Limited_Format")])
 
-    match_options = ["NA"] + modo.match_types()
     match_type = tk.StringVar()
     match_type.set(values[modo.match_header().index("Match_Type")])
 
@@ -1907,6 +1945,16 @@ def revise_record_multi():
         revise_window.destroy()       
 
     selected = tree1.selection()
+    format_index = modo.match_header().index("Format")
+    sel_formats = {"constructed":False,"booster":False,"sealed":False}
+    for i in selected:
+        format_i = list(tree1.item(i,"values"))[format_index]
+        if format_i in modo.con_formats():
+            sel_formats["constructed"] = True
+        elif (format_i == "Booster Draft") or (format_i == "Cube"):
+            sel_formats["booster"] = True
+        elif format_i == "Sealed Deck":
+            sel_formats["sealed"] = True
 
     format_options = ["NA"] + modo.con_formats() + modo.limited_formats()
     match_format = tk.StringVar()
@@ -1916,7 +1964,15 @@ def revise_record_multi():
     lim_format = tk.StringVar()
     lim_format.set(limited_options[0])
 
-    match_options = ["NA"] + modo.match_types()
+    match_options = ["NA"]
+    if (sel_formats["constructed"] == True) and (sel_formats["booster"] == False) and (sel_formats["sealed"] == False):
+        match_options += modo.match_types()
+    elif (sel_formats["constructed"] == False) and (sel_formats["booster"] == True) and (sel_formats["sealed"] == False):
+        match_options += modo.match_type_booster()
+    elif (sel_formats["constructed"] == False) and (sel_formats["booster"] == False) and (sel_formats["sealed"] == True):
+        match_options += modo.match_type_sealed()
+    elif (sel_formats["constructed"] == False) and (sel_formats["booster"] == False) and (sel_formats["sealed"] == False):
+        match_options += modo.match_types() + modo.match_type_booster() + modo.match_type_sealed()
     match_type = tk.StringVar()
     match_type.set(match_options[0])
 
