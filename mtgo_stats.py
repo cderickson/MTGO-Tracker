@@ -50,7 +50,7 @@ def save_window():
     width =  300
     save_window = tk.Toplevel(window)
     save_window.title("Save Data")
-    save_window.iconbitmap("icon.ico")
+    save_window.iconbitmap(save_window,"icon.ico")
     save_window.minsize(width,height)
     save_window.resizable(False,False)
     save_window.grab_set()
@@ -153,7 +153,7 @@ def clear_window():
     width =  300
     clear_window = tk.Toplevel(window)
     clear_window.title("Clear Saved Data")
-    clear_window.iconbitmap("icon.ico")
+    clear_window.iconbitmap(clear_window,"icon.ico")
     clear_window.minsize(width,height)
     clear_window.resizable(False,False)
     clear_window.grab_set()
@@ -201,7 +201,7 @@ def load_saved_window():
     width =  300
     load_saved_window = tk.Toplevel(window)
     load_saved_window.title("Clear Saved Data")
-    load_saved_window.iconbitmap("icon.ico")
+    load_saved_window.iconbitmap(load_saved_window,"icon.ico")
     load_saved_window.minsize(width,height)
     load_saved_window.resizable(False,False)
     load_saved_window.grab_set()
@@ -249,7 +249,7 @@ def delete_session():
     width =  300
     del_window = tk.Toplevel(window)
     del_window.title("Delete Saved Session")
-    del_window.iconbitmap("icon.ico")
+    del_window.iconbitmap(del_window,"icon.ico")
     del_window.minsize(width,height)
     del_window.resizable(False,False)
     del_window.grab_set()
@@ -643,7 +643,7 @@ def rerun_decks_window():
     width =  400
     rerun_decks_window = tk.Toplevel(window)
     rerun_decks_window.title("Best Guess Deck Names")
-    rerun_decks_window.iconbitmap("icon.ico")
+    rerun_decks_window.iconbitmap(rerun_decks_window,"icon.ico")
     rerun_decks_window.minsize(width,height)
     rerun_decks_window.resizable(False,False)
     rerun_decks_window.grab_set()
@@ -783,7 +783,7 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
     width =  650                
     gf = tk.Toplevel(window)
     gf.title("Input Missing Data - " + str(n) + "/" + str(total) + " Matches.")
-    gf.iconbitmap("icon.ico")        
+    gf.iconbitmap(gf,"icon.ico")        
     gf.minsize(width,height)
     gf.resizable(False,False)
     gf.attributes("-topmost",True)
@@ -1127,7 +1127,7 @@ def set_default_hero():
     width =  200
     hero_window = tk.Toplevel(window)
     hero_window.title("Set Default 'Hero'")
-    hero_window.iconbitmap("icon.ico")
+    hero_window.iconbitmap(hero_window,"icon.ico")
     hero_window.minsize(width,height)
     hero_window.resizable(False,False)
     hero_window.grab_set()
@@ -1201,7 +1201,7 @@ def set_default_export():
     width =  400
     export_window = tk.Toplevel(window)
     export_window.title("Set Default Export Folder")
-    export_window.iconbitmap("icon.ico")
+    export_window.iconbitmap(export_window,"icon.ico")
     export_window.minsize(width,height)
     export_window.resizable(False,False)
     export_window.grab_set()
@@ -1262,7 +1262,7 @@ def set_default_import():
     width =  400
     import_window = tk.Toplevel(window)
     import_window.title("Set Default Export Folder")
-    import_window.iconbitmap("icon.ico")
+    import_window.iconbitmap(import_window,"icon.ico")
     import_window.minsize(width,height)
     import_window.resizable(False,False)
     import_window.grab_set()
@@ -1400,7 +1400,7 @@ def set_filter():
     width =  400
     filter_window = tk.Toplevel(window)
     filter_window.title("Set Filters")
-    filter_window.iconbitmap("icon.ico")
+    filter_window.iconbitmap(filter_window,"icon.ico")
     filter_window.minsize(width,height)
     filter_window.resizable(False,False)
     filter_window.grab_set()
@@ -1545,7 +1545,7 @@ def revise_record():
     width =  700
     revise_window = tk.Toplevel(window)
     revise_window.title("Revise Record")
-    revise_window.iconbitmap("icon.ico")
+    revise_window.iconbitmap(revise_window,"icon.ico")
     revise_window.minsize(width,height)
     revise_window.resizable(False,False)
     revise_window.attributes("-topmost",True)
@@ -1774,7 +1774,7 @@ def revise_record_multi():
     width =  300
     revise_window = tk.Toplevel(window)
     revise_window.title("Revise Multiple Records")
-    revise_window.iconbitmap("icon.ico")
+    revise_window.iconbitmap(revise_window,"icon.ico")
     revise_window.minsize(width,height)
     revise_window.resizable(False,False)
     revise_window.attributes("-topmost",True)
@@ -1988,7 +1988,7 @@ def import_window():
     width =  400
     import_window = tk.Toplevel(window)
     import_window.title("Import Data")
-    import_window.iconbitmap("icon.ico")
+    import_window.iconbitmap(import_window,"icon.ico")
     import_window.minsize(width,height)
     import_window.resizable(False,False)
     import_window.grab_set()
@@ -2113,7 +2113,7 @@ def ask_for_winner(ga_list,p1,p2,n,total):
         
     gw = tk.Toplevel()
     gw.title("Select Game Winner")
-    gw.iconbitmap("icon.ico")
+    gw.iconbitmap(gw,"icon.ico")
     height = 400
     width = 700
     gw.minsize(width,height)
@@ -2175,7 +2175,7 @@ def get_stats():
     height = main_window_height
     stats_window = tk.Toplevel(window)
     stats_window.title("Statistics - Match Data")
-    stats_window.iconbitmap("icon.ico")
+    stats_window.iconbitmap(stats_window,"icon.ico")
     stats_window.minsize(width,height)
     stats_window.resizable(False,False)
     window.withdraw()
@@ -3491,7 +3491,7 @@ def exit():
 
 window = tk.Tk() 
 window.title("MTGO-Stats")
-window.iconbitmap("icon.ico")
+window.iconbitmap(window,"icon.ico")
 window.minsize(main_window_width,main_window_height)
 window.resizable(False,False)
 
