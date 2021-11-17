@@ -121,13 +121,13 @@ def clear_loaded():
     parsed_file_list =  []
     new_import =        False
 
-    button1["state"] = tk.DISABLED
-    button2["state"] = tk.DISABLED
-    button3["state"] = tk.DISABLED
-    button7["state"] = tk.DISABLED
-    button8["state"] = tk.DISABLED
-    button4["state"] = tk.DISABLED
-    button9["state"] = tk.DISABLED
+    match_button["state"] = tk.DISABLED
+    game_button["state"] = tk.DISABLED
+    play_button["state"] = tk.DISABLED
+    filter_button["state"] = tk.DISABLED
+    clear_button["state"] = tk.DISABLED
+    revise_button["state"] = tk.DISABLED
+    stats_button["state"] = tk.DISABLED
     back_button["state"] = tk.DISABLED
     
     text_frame.config(text="Dataframe")
@@ -345,8 +345,8 @@ def startup():
 
     status_label.config(text="Imported " + str(len(all_data[0])) + " matches.")
 
-    button7["state"] = tk.NORMAL
-    button8["state"] = tk.NORMAL
+    filter_button["state"] = tk.NORMAL
+    clear_button["state"] = tk.NORMAL
     data_loaded = True
 
     set_display("Matches")
@@ -381,14 +381,14 @@ def set_display(d,*argv):
     if len(argv) > 0:
         set_bb_state(argv[0])
     
-    if button1["state"] == tk.DISABLED:
-        button1["state"] = tk.NORMAL
-    if button2["state"] == tk.DISABLED:
-        button2["state"] = tk.NORMAL
-    if button3["state"] == tk.DISABLED:
-        button3["state"] = tk.NORMAL
-    if button9["state"] == tk.DISABLED:
-        button9["state"] = tk.NORMAL
+    if match_button["state"] == tk.DISABLED:
+        match_button["state"] = tk.NORMAL
+    if game_button["state"] == tk.DISABLED:
+        game_button["state"] = tk.NORMAL
+    if play_button["state"] == tk.DISABLED:
+        play_button["state"] = tk.NORMAL
+    if stats_button["state"] == tk.DISABLED:
+        stats_button["state"] = tk.NORMAL
         
     if d == "Matches":
         set_bb_state(False)
@@ -455,8 +455,8 @@ def get_all_data():
     new_import = True
 
     if len(all_data[0]) != 0:
-        button7["state"] = tk.NORMAL
-        button8["state"] = tk.NORMAL
+        filter_button["state"] = tk.NORMAL
+        clear_button["state"] = tk.NORMAL
         data_loaded = True
     os.chdir(filepath_root)
 
@@ -521,7 +521,7 @@ def print_data(data,header):
         new_import = False
     else:
         status_label.config(text="Displaying: " + str(len(df_rows)) + " of " + str(total) + " records.")
-    button4["state"] = tk.DISABLED
+    revise_button["state"] = tk.DISABLED
 
 def get_lists():
     global all_decks
@@ -593,22 +593,25 @@ def get_formats():
         set_display("Matches")
 
 def deck_data_guess(data,rerun,update_all):
-    #global all_decks
     global all_data
     global all_data_inverted
-    #all_decks.clear()
-
-    #get_lists()
 
     date_index = modo.match_header().index("Date")
+    p1_index = modo.match_header().index("P1")
+    p2_index = modo.match_header().index("P2")
     p1_sa_index = modo.match_header().index("P1_Subarch")
     p2_sa_index = modo.match_header().index("P2_Subarch")
     format_index = modo.match_header().index("Format")
     df2 = modo.to_dataframe(data[2],modo.play_header())
+
     for i in data[0]:
         mm_yyyy = i[date_index][5:7] + "-" + i[date_index][0:4]
-        players = [i[modo.match_header().index("P1")],i[modo.match_header().index("P2")]]
+        players = [i[p1_index],i[p2_index]]
         
+        #Skip Limited Matches.
+        if i[format_index] in modo.limited_formats:
+            continue
+
         # Update P1_Subarch, P2_Subarch for all Matches.
         if update_all == True:
             cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
@@ -617,8 +620,9 @@ def deck_data_guess(data,rerun,update_all):
             p2_data = modo.closest_list(set(cards2),all_decks,mm_yyyy)
             i[p1_sa_index] = p1_data[0]
             i[p2_sa_index] = p2_data[0]
-            if p1_data[1] == p2_data[1]:
-                i[format_index] = p1_data[1]
+            # Uncomment if we want to update Format column if Best Guesses have matching Format.
+            # if p1_data[1] == p2_data[1]:
+            #     i[format_index] = p1_data[1]
         # Update P1_Subarch, P2_Subarch only if equal to "Unknown" or "NA".
         if update_all == False:
             if (i[p1_sa_index] == "Unknown") or (i[p1_sa_index] == "NA"):
@@ -1414,7 +1418,7 @@ def clear_filter():
     
 def set_filter():
     height = 300
-    width =  400
+    width =  500
     filter_window = tk.Toplevel(window)
     filter_window.title("Set Filters")
     filter_window.iconbitmap(filter_window,"icon.ico")
@@ -1444,21 +1448,37 @@ def set_filter():
             date.grid(row=0,column=3,padx=10,pady=10)
         else:
             drop_key.grid(row=0,column=3,padx=10,pady=10)
+            drop_key.set("None Selected.")
             date.grid_forget()
 
-            index = col_dict[col.get()]
+            # index = col_dict[col.get()]
             
-            key_options = []
-            for i in tree1.get_children():
-                key_options.append(tree1.set(i,index))
+            # key_options = []
+            # for i in tree1.get_children():
+            #     key_options.append(tree1.set(i,index))
+            # key_options = sorted(list(set(key_options)),key=str.casefold)
+            # key.set("None Selected")       
+            # # menu = drop_key["menu"]
+            # # menu.delete(0,"end")
+            # # for i in key_options:
+            # #     menu.add_command(label=i,command=lambda x=i: key.set(x))
+            # drop_key["values"] = key_options
+
+    def update_combobox():
+        index = col_dict[col.get()]
+        
+        key_options = []
+        for i in tree1.get_children():
+            key_options.append(tree1.set(i,index))
+        if key_options[0].isnumeric():
+            key_options = sorted(list(set(key_options)),key=int)
+        else:
             key_options = sorted(list(set(key_options)),key=str.casefold)
-            key.set("None Selected")       
-            menu = drop_key["menu"]
-            menu.delete(0,"end")
-            for i in key_options:
-                menu.add_command(label=i,command=lambda x=i: key.set(x))
+        drop_key["values"] = key_options       
 
     def add():
+        if key.get() == "None Selected.":
+            return
         o = op.get()
         c = col.get()
         if c == "Date":
@@ -1487,6 +1507,9 @@ def set_filter():
             tlabel += "\n"
         label1.config(text=tlabel)
 
+    def defocus(event):
+        drop_key.selection_clear()
+
     def close_filter_window():
         apply_filter()
         filter_window.grab_release()
@@ -1511,15 +1534,9 @@ def set_filter():
     col = tk.StringVar()
     col.set(col_options[0])
     key = tk.StringVar()
-    key.set("None Selected")
+    key.set("None Selected.")
 
-    index = col_dict[col.get()]
-    key_options = []
-    for i in tree1.get_children():
-        key_options.append(tree1.set(i,index))
-    key_options = sorted(list(set(key_options)),key=str.casefold)
-    if len(key_options) == 0:
-        key_options = ["None Selected"]
+    key_options = ["None Selected."]
     
     operators = ["=",">","<"]
     op = tk.StringVar()
@@ -1529,30 +1546,37 @@ def set_filter():
 
     drop_col = tk.OptionMenu(top_frame,col,*col_options)
     op_menu  = tk.OptionMenu(top_frame,op,*operators)
-    drop_key = tk.OptionMenu(top_frame,key,*key_options)
+    #drop_key = tk.OptionMenu(top_frame,key,*key_options)
+    drop_key = ttk.Combobox(top_frame,textvariable=key,width=15,
+        state="readonly",font="Helvetica 12",justify=tk.CENTER,
+        postcommand=update_combobox)
+    drop_key.bind("<FocusIn>",defocus)
     date = DateEntry(top_frame,date_pattern="y-mm-dd",width=10,
         year=today.year,month=today.month,day=today.day,
         font="Helvetica 12",state="readonly")
-
-    button1 = tk.Button(top_frame,text="Clear",command=lambda : [clear_filter(),update_filter_text()])
-    button2 = tk.Button(top_frame,text="Add",command=lambda : add())
+ 
+    button1 = tk.Button(top_frame,text="Add",command=lambda : add())
+    button2 = tk.Button(bot_frame,text="Clear",command=lambda : [clear_filter(),update_filter_text()])
     button3 = tk.Button(bot_frame,text="Apply Filter",command=lambda : close_filter_window())
     label1 = tk.Label(mid_frame,text="",wraplength=width,justify="left")
     
     col.trace("w",update_keys)
 
-    button1.grid(row=0,column=0,padx=10,pady=10)
     drop_col.grid(row=0,column=1,padx=10,pady=10)
     op_menu.grid(row=0,column=2,padx=10,pady=10)
-    drop_key.grid(row=0,column=3,padx=10,pady=10)
-    date.grid(row=0,column=3,padx=10,pady=10)
-    button2.grid(row=0,column=4,padx=10,pady=10)
+    #drop_key.grid(row=0,column=3,padx=10,pady=10)
+    #date.grid(row=0,column=3,padx=10,pady=10)
+    button1.grid(row=0,column=4,padx=10,pady=10)
     label1.grid(row=0,column=0,sticky="w")
-    button3.grid(row=0,column=0,padx=10,pady=10)
+    button2.grid(row=0,column=0,padx=10,pady=10)
+    button3.grid(row=0,column=1,padx=10,pady=10)
 
     update_keys()
     update_filter_text()
     filter_window.protocol("WM_DELETE_WINDOW", lambda : close_filter_window())
+
+def test():
+    pass  
 
 def revise_record():
     if tree1.focus() == "":
@@ -2031,7 +2055,7 @@ def activate_revise(event):
         return
     if data_loaded == False:
         return
-    button4["state"] = tk.NORMAL
+    revise_button["state"] = tk.NORMAL
 
 def revise_button():
     if len(tree1.selection()) > 1:
@@ -3548,11 +3572,13 @@ def exit():
 window = tk.Tk() 
 window.title("MTGO-Stats")
 window.iconbitmap(window,"icon.ico")
-window.minsize(main_window_width,main_window_height)
-window.resizable(False,False)
+#window.minsize(main_window_width,main_window_height)
+window.minsize(1000,500)
+window.geometry("1000x500")
+#window.resizable(False,False)
 
-window.rowconfigure(0,minsize=600,weight=1)
-window.columnconfigure(1,minsize=1400,weight=1)
+window.rowconfigure(0,weight=1)
+window.columnconfigure(1,weight=1)
 
 bottom_frame = tk.LabelFrame(window)
 left_frame = tk.Frame(window)
@@ -3560,25 +3586,30 @@ text_frame = tk.LabelFrame(window,text="Dataframe")
 bottom_frame.grid(row=1,column=1,sticky="ew")
 left_frame.grid(row=0,column=0,sticky="ns")
 text_frame.grid(row=0,column=1,sticky="nsew")
+text_frame.grid_columnconfigure(0,weight=1)
+text_frame.grid_columnconfigure(1,weight=0)
+text_frame.grid_rowconfigure(0,weight=1)
+text_frame.grid_rowconfigure(1,weight=0)
 
-button1 = tk.Button(left_frame,text="Match Data",state=tk.DISABLED,
+match_button = tk.Button(left_frame,text="Match Data",state=tk.DISABLED,
                      command=lambda : [set_display("Matches")])
-button2 = tk.Button(left_frame,text="Game Data",state=tk.DISABLED,
+game_button = tk.Button(left_frame,text="Game Data",state=tk.DISABLED,
                      command=lambda : [set_display("Games")])
-button3 = tk.Button(left_frame,text="Play Data",state=tk.DISABLED,
+play_button = tk.Button(left_frame,text="Play Data",state=tk.DISABLED,
                      command=lambda : [set_display("Plays")])
-button7 = tk.Button(left_frame,text="Filter",state=tk.DISABLED,
+filter_button = tk.Button(left_frame,text="Filter",state=tk.DISABLED,
                      command=lambda : set_filter())
-button8 = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,
+clear_button = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,
                      command=lambda : [clear_filter(),set_display(display)])
-button4 = tk.Button(left_frame,text="Revise Record(s)",state=tk.DISABLED,
+revise_button = tk.Button(left_frame,text="Revise Record(s)",state=tk.DISABLED,
                      command=lambda : [revise_button()])
-button9 = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,
+stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,
                      command=lambda : [get_stats()])
 back_button = tk.Button(left_frame,text="Back",
                         command=lambda :
                         bb_clicked(),
                         state=tk.DISABLED)
+test_button = tk.Button(left_frame,text="TEST BUTTON", command=lambda : test())
 
 status_label = tk.Label(bottom_frame,text="")
 status_label.pack()
@@ -3642,23 +3673,28 @@ data_menu.add_command(label="Delete Saved Session",command=lambda : delete_sessi
 
 window.config(menu=menu_bar)
 
-button1.grid(row=0,column=0,sticky="ew",padx=5,pady=(20,5))
-button2.grid(row=1,column=0,sticky="ew",padx=5,pady=5)
-button3.grid(row=2,column=0,sticky="ew",padx=5,pady=5)
-button7.grid(row=6,column=0,sticky="ew",padx=5,pady=(50,5))
-button8.grid(row=7,column=0,sticky="ew",padx=5,pady=5)
-button4.grid(row=8,column=0,sticky="ew",padx=5,pady=5)
-button9.grid(row=9,column=0,sticky="ew",padx=5,pady=50)
-back_button.grid(row=12,column=0,sticky="ew",padx=5,pady=5)
+match_button.grid(row=0,column=0,sticky="ew",padx=5,pady=(20,5))
+game_button.grid(row=1,column=0,sticky="ew",padx=5,pady=5)
+play_button.grid(row=2,column=0,sticky="ew",padx=5,pady=5)
+filter_button.grid(row=3,column=0,sticky="ew",padx=5,pady=(50,5))
+clear_button.grid(row=4,column=0,sticky="ew",padx=5,pady=5)
+revise_button.grid(row=5,column=0,sticky="ew",padx=5,pady=5)
+stats_button.grid(row=6,column=0,sticky="ew",padx=5,pady=50)
+back_button.grid(row=7,column=0,sticky="ew",padx=5,pady=5)
+#test_button.grid(row=13,column=0,sticky="ew",padx=5,pady=5)
 
 tree1 = ttk.Treeview(text_frame,show="tree")
-tree1.place(relheight=1, relwidth=1)
+tree1.grid(row=0,column=0,sticky="nsew")
 tree1.bind("<Double-1>",tree_double)
 tree1.bind("<ButtonRelease-1>",activate_revise)
 
-tree_scrolly = tk.Scrollbar(text_frame,orient="vertical",command=tree1.yview)
+tree_scrolly = tk.Scrollbar(text_frame,command=tree1.yview)
 tree1.configure(yscrollcommand=tree_scrolly.set)
-tree_scrolly.pack(side="right",fill="y")
+tree_scrolly.grid(row=0,column=1,sticky="ns")
+
+tree_scrollx = tk.Scrollbar(text_frame,orient="horizontal",command=tree1.xview)
+tree1.configure(xscrollcommand=tree_scrollx.set)
+tree_scrollx.grid(row=1,column=0,sticky="ew")
 
 s = ttk.Style()
 s.theme_use("default")
