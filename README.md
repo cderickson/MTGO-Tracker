@@ -133,6 +133,14 @@ Choose to view <b>Match, Game, Play, Time, or Card Data</b> using the top right 
 	
 - - - -
 <details>
+	<summary><b>Main Window Size:</b> Go to 'File => Set Default Window Size'.</summary>
+	<p></p>
+	<p>Small: 1000x500</p>
+	<p>Large: 1750x750</p>
+</details>
+	
+- - - -
+<details>
 	<summary><b>Hero:</b> Go to 'Data => Set Default Hero'.</summary>
 	<p></p>
 	<p>Setting a default 'Hero' moves the Hero's username into the P1 column by default. Data in the 'Statistics' window will be shown from the Hero's perspective.</p>
