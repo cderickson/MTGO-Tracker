@@ -61,7 +61,6 @@ def save_window():
         os.chdir(filepath_root + "\\" + "save")
 
         pickle.dump(all_data,open("all_data.p","wb"))
-        pickle.dump(all_decks,open("all_decks.p","wb"))
         pickle.dump(parsed_file_list,open("parsed_file_list.p","wb"))
 
         status_label.config(text="Save complete. Data will be loaded automatically on next startup.")
@@ -95,7 +94,6 @@ def save_window():
     button_close.grid(row=0,column=1,padx=5,pady=5)
     
     save_window.protocol("WM_DELETE_WINDOW", lambda : close_save_window())
-
 def clear_loaded():
     global all_data
     global all_data_inverted
@@ -142,7 +140,6 @@ def clear_loaded():
         # Clear existing data in tree.
     tree1.delete(*tree1.get_children())
     tree1["show"] = "tree"
-
 def clear_window():
     height = 100
     width =  300
@@ -190,7 +187,6 @@ def clear_window():
     button_close.grid(row=0,column=1,padx=5,pady=5)
     
     clear_window.protocol("WM_DELETE_WINDOW", lambda : close_clear_window())
-
 def load_saved_window():
     height = 100
     width =  300
@@ -238,7 +234,6 @@ def load_saved_window():
     button_close.grid(row=0,column=1,padx=5,pady=5)
     
     load_saved_window.protocol("WM_DELETE_WINDOW", lambda : close_load_window())
-
 def delete_session():
     height = 100
     width =  300
@@ -300,7 +295,6 @@ def delete_session():
     button_close.grid(row=0,column=1,padx=5,pady=5)
     
     del_window.protocol("WM_DELETE_WINDOW", lambda : close_del_window())
-
 def startup():
     global filepath_root
     global filepath_export
@@ -358,13 +352,12 @@ def startup():
     data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
 
     os.chdir(filepath_root)
-
 def save_settings():
     os.chdir(filepath_root + "\\" + "save")
     settings = [filepath_root,filepath_export,filepath_decks,filepath_logs,hero]
     pickle.dump(settings,open("settings.p","wb"))
+    pickle.dump(all_decks,open("all_decks.p","wb"))
     os.chdir(filepath_root)
-
 def set_display(d,*argv):
     global display
     global prev_display
@@ -399,13 +392,11 @@ def set_display(d,*argv):
     elif d == "Plays":
         set_bb_state(True)
         print_data(all_data[2],all_headers[2])
-    
 def set_bb_state(state):
     if state:
         back_button["state"] = tk.NORMAL
     else:
         back_button["state"] = tk.DISABLED
-        
 def get_all_data():
     global all_data
     global all_data_inverted
@@ -458,7 +449,6 @@ def get_all_data():
         clear_button["state"] = tk.NORMAL
         data_loaded = True
     os.chdir(filepath_root)
-
 def print_data(data,header):
     global new_import
     small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num"]
@@ -521,7 +511,6 @@ def print_data(data,header):
     else:
         status_label.config(text="Displaying: " + str(len(df_rows)) + " of " + str(total) + " records.")
     revise_button["state"] = tk.DISABLED
-
 def get_lists():
     global all_decks
     
@@ -538,7 +527,6 @@ def get_lists():
             month_decks.append(deck)
         all_decks[i] = month_decks
     os.chdir(filepath_root)
-
 def get_formats():
     global all_data
     global all_data_inverted
@@ -590,7 +578,6 @@ def get_formats():
     else:
         all_data_inverted = modo.invert_join(all_data)
         set_display("Matches")
-
 def deck_data_guess(data,rerun,update_all):
     global all_data
     global all_data_inverted
@@ -636,7 +623,6 @@ def deck_data_guess(data,rerun,update_all):
 
     all_data = data
     all_data_inverted = modo.invert_join(data)
-
 def rerun_decks_window():
     height = 300
     width =  400
@@ -754,7 +740,6 @@ def rerun_decks_window():
         button_apply_unknown["state"] = tk.DISABLED
 
     rerun_decks_window.protocol("WM_DELETE_WINDOW", lambda : close())
-
 def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
     def close_format_window(*argv):
         global missing_data
@@ -993,7 +978,6 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
 
     gf.protocol("WM_DELETE_WINDOW", lambda : close_format_window("Exit"))
     gf.wait_window()
-    
 def tree_double(event):
     global filter_dict
     
@@ -1013,7 +997,6 @@ def tree_double(event):
     elif display == "Games":
         add_filter_setting("Game_Num",tree1.item(tree1.focus(),"values")[3],"=")
         set_display("Plays",True)
-
 def bb_clicked():
     global filter_dict
     
@@ -1027,7 +1010,6 @@ def bb_clicked():
         set_display("Matches")
     elif display == "Plays":
         set_display("Games")
-
 def export(file_type,data_type,inverted):
     # File_Type: String, "CSV" or "Excel"
     # Data_Type: Int, 0=Match,1=Game,2=Play,3=All,4=Filtered
@@ -1139,7 +1121,6 @@ def export(file_type,data_type,inverted):
                 df = df_filtered
             df.to_excel(f,index=False)
     filepath_export = fp
-
 def set_default_hero():
     height = 100
     width =  200
@@ -1213,7 +1194,6 @@ def set_default_hero():
     button3.grid(row=4,column=2,padx=10,pady=10)
 
     hero_window.protocol("WM_DELETE_WINDOW", lambda : close_hero_window())
-
 def set_default_export():
     height = 300
     width =  400
@@ -1274,7 +1254,6 @@ def set_default_export():
     button4.grid(row=4,column=1,padx=10,pady=10)
     
     export_window.protocol("WM_DELETE_WINDOW", lambda : close_export_window())
-
 def set_default_import():
     height = 300
     width =  400
@@ -1358,7 +1337,6 @@ def set_default_import():
     button1["state"] = tk.DISABLED
 
     import_window.protocol("WM_DELETE_WINDOW", lambda : close_import_window())   
-
 def sort_column(col,reverse,tree1):
     def tuple_casefold(t):
         return (t[0].casefold(),t[1])
@@ -1374,7 +1352,6 @@ def sort_column(col,reverse,tree1):
 
         # Reverse sort next time
     tree1.heading(col,text=col,command=lambda _col=col: sort_column(_col,not reverse,tree1))
-
 def sort_column_int(col,reverse,tree1):
     def tree_tuple_to_int(t):
         return (int(t[0]),t[1])
@@ -1390,7 +1367,6 @@ def sort_column_int(col,reverse,tree1):
 
         # Reverse sort next time
     tree1.heading(col,text=col,command=lambda _col=col: sort_column_int(_col,not reverse,tree1))
-
 def add_filter_setting(index,key,op):
     global filter_dict
     global filter_changed
@@ -1407,12 +1383,10 @@ def add_filter_setting(index,key,op):
     else:
         filter_dict[index] = [op + " " + key]
         filter_changed = True
-    
 def clear_filter():
     global filter_changed
     filter_changed = True
     filter_dict.clear()
-    
 def set_filter():
     height = 300
     width =  500
@@ -1556,11 +1530,9 @@ def set_filter():
     update_keys()
     update_filter_text()
     filter_window.protocol("WM_DELETE_WINDOW", lambda : close_filter_window())
-
 def test():
     # Test function
     pass  
-
 def revise_record():
     if tree1.focus() == "":
         return
@@ -1810,7 +1782,6 @@ def revise_record():
     match_format.trace("w",update_arch)
 
     revise_window.protocol("WM_DELETE_WINDOW", lambda : close_without_saving())
-
 def revise_record_multi():
     if tree1.focus() == "":
         return
@@ -2030,7 +2001,6 @@ def revise_record_multi():
 
     field_updated()
     revise_window.protocol("WM_DELETE_WINDOW", lambda : close_without_saving())
-
 def activate_revise(event):
     if tree1.identify_region(event.x,event.y) == "heading":
         return
@@ -2039,13 +2009,11 @@ def activate_revise(event):
     if data_loaded == False:
         return
     revise_button["state"] = tk.NORMAL
-
 def revise_method_select():
     if len(tree1.selection()) > 1:
         revise_record_multi()
     else:
         revise_record()
-
 def import_window():
     height = 300
     width =  400
@@ -2125,7 +2093,6 @@ def import_window():
     button4.grid(row=0,column=1,padx=10,pady=10)
 
     import_window.protocol("WM_DELETE_WINDOW", lambda : close_import_window())
-
 def get_winners():
     global all_data
     global all_data_inverted
@@ -2160,7 +2127,6 @@ def get_winners():
         modo.update_game_wins(all_data,all_headers)
         all_data_inverted = modo.invert_join(all_data)
         set_display("Matches")
-    
 def ask_for_winner(ga_list,p1,p2,n,total):
     # List of game actions (Strings)
     # String = P1
@@ -2228,7 +2194,6 @@ def ask_for_winner(ga_list,p1,p2,n,total):
     
     gw.protocol("WM_DELETE_WINDOW", lambda : close_gw_window("Exit."))    
     gw.wait_window()  
-
 def get_stats():
     width =  1350
     height = 750
@@ -3543,7 +3508,6 @@ def get_stats():
         menu_1["state"] = tk.NORMAL
 
     stats_window.protocol("WM_DELETE_WINDOW", lambda : close_stats_window())
-
 def exit():
     save_settings()
     window.destroy()
