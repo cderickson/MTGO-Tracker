@@ -2,7 +2,7 @@
 MTGO-Tracker will break down your play history on Magic Online into a personal database. It will help you format your data for further statistical analysis, or allow you to simply use the built-in descriptive statistics.
 
 <p align="center">
-<img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_image.jpg?raw=true" width="880" height="404">
+<img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_image.jpg?raw=true" width="808" height="448">
 </p>
 
 ## Importing Data
