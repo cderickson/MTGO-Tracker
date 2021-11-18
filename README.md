@@ -19,10 +19,10 @@ MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by de
 | ------------- | ------------- | ------------- |
 | Matches | Match_ID | Unique Match ID |
 | | P1 | Player 1 Username |
-| | P1_Arch | Player 1 Deck Archetype (eg. Aggro/Control) |
+| | P1_Arch | Player 1 Deck Archetype (eg. Aggro/Control/etc.) |
 | | P1_Subarch | Player 1 Deckname |
 | | P2 | Player 2 Username |
-| | P2_Arch | Player 2 Deck Archetype (eg. Aggro/Control) |
+| | P2_Arch | Player 2 Deck Archetype (eg. Aggro/Control/etc.) |
 | | P2_Subarch | Player 2 Deckname |
 | | P1_Roll | Integer: Player 1 Die Roll |
 | | P2_Roll | Integer: Player 2 Die Roll |
@@ -83,79 +83,91 @@ MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by de
 </p>
 </details>
 
+- - - -
 ## Data Cleaning
-<details>
-	<summary><b>Missing Match Data:</b> Matches will import with some empty columns by default.</summary>
-	<p></p>
-	<p>Selecting <b>'Data => Input Missing Match Data'</b> will cycle through each Match with an empty P1/P2_Arch, P1/P2_Subarch, (Limited)_Format, and/or Match_Type column and allow you to manually fill them in. All tables will be updated accordingly.</p>
-</details>
+### Missing Match Data:
+**Data => Input Missing Match Data**
 	
-- - - -
-<details>
-	<summary><b>Missing Game_Winner:</b> The 'Games.Game_Winner' column will be set to 'NA' if the game's winner could not be determined.</summary>
-	<p></p>
-	<p>Selecting <b>'Data => Input Missing Game_Winner Data'</b> will allow you to cycle through each affected Game and manually select a Game_Winner based on the trailing Game Actions. All tables will be updated accordingly.</p>
-</details>
+	- Matches will import with empty P1/P2_Arch, P1/P2_Subarch, (Limited)_Format, Match_Type columns by default.
+	- Cycle through Matches with empty columns and manually fill them in.	
+### Missing Game_Winner:
+**Data => Input Missing Game_Winner Data**
+
+	- The 'Games.Game_Winner' column will be set to 'NA' if the game's winner could not be determined.
+	- Cycle through affected Games and manually select a Game_Winner based on trailing Game Actions. 
+	- All tables will be automatically updated accordingly.
+### Best Guess Deck Names:
+**Data => Apply Best Guess for Deck Names**
 	
-- - - -
-<details>
-	<summary><b>Best Guess Deck Names:</b> The 'Matches.P1/P2_Subarch' column will be set to 'NA' by default.</summary>
-	<p></p>
-	<p>Selecting <b>'Data => Apply Best Guess for Deck Names'</b> will allow you to import sample decklists and apply best guess deck names in the 'Matches.P1/P2_Subarch' columns. Click 'Apply to Unknowns' if you do not wish to overwrite your previous changes to these columns.</p>
-</details>
-	
-- - - -
-<details>
-	<summary><b>Revise Record(s):</b> Selected records in the 'Matches' table can be revised.</summary>
-	<p></p>
-	<p>Clicking the <b>'Revise Record(s)'</b> button will allow you to manually revise fields in the selected row(s). If multiple rows are selected, the revision will apply to all selected records. This is only applicable to records in the 'Matches' table.</p>
-</details>
-	
+	- The 'Matches.P1/P2_Subarch' columns will be set to 'NA' by default.
+	- Import sample decklists and apply best guess deck names in the 'Matches.P1/P2_Subarch' columns.
+	- Click 'Apply to Unknowns' if you do not wish to overwrite your previous changes to these columns.
+	- Sample decklists from MM-YYYY to MM-YYYY are included and will be updated at the end of every month.
+### Revise Record(s) Button:
+	- Selected row(s) in the 'Matches' table can be manually revised.
+	- If multiple rows are selected, the revision will apply to all selected rows.
+	- This is only applicable to rows in the 'Matches' table.	
 - - - -
 ## Data Viewing
-<b>Filtering: </b>Manipulate the data being displayed by using the <b>Filter</b> button.
-
-<b>Drill Down: </b>Double-clicking on a Match row will display all Games for the selected Match. Similarly, double-clicking on a Game row will display all Plays for the selected Game. Click the <b>Clear Filter</b> button to display all data.
+### Filtering: 
+	- Manipulate the data being displayed by applying filters accessible using the <b>Filter</b> button.
+### Drill Down:
+	- Double-clicking on a Match row will display all Games for the selected Match. 
+	- Double-clicking on a Game row will display all Plays for the selected Game.
+	- Click the 'Clear Filter' button to display all data after drilling down.
+- - - -
 ## Statistics Window
-Click the <b>Statistics</b> button to view descriptive statistics and basic analysis.  
-
-Choose to view <b>Match, Game, Play, Time, or Card Data</b> using the top right dropdown menu. The statistics being displayed can be filtered using the Format, Deck, and Date Range menus across the top of the window. 
+	- View descriptive statistics and basic analysis. 
+	- Choose to view Match, Game, Play, Time, or Card Data using the top right dropdown menu.
+	- Statistics being displayed can be filtered using the Format, Deck, and Date Range menus across the top of the window.
+- - - -
 ## Settings
 <details>
-	<summary><b>GameLogs Folder:</b> Go to 'Data => Set Import Folders'.</summary>
+	<summary><b>GameLogs Folder</b></summary>
 	<p></p>
-	<p>The folder containing your MTGO GameLog files.</p>
-	<p>MTGO saves these files in <b>"C:\Users\[User]\AppData\Local\Apps\2.0"</b> by default.</p>
-</details>
+	<p><b>Data => Set Import Folders</b></p>
 	
-- - - -
+	- The folder containing your MTGO GameLog files.
+	- MTGO saves these files in "C:\Users\[User]\AppData\Local\Apps\2.0" by default.
+</details>
 <details>
-	<summary><b>Export Folder:</b> Go to 'Export => Set Default Export Folder'.</summary>
+	<summary><b>Export Folder</b></summary>
 	<p></p>
-	<p>The folder where exported .csv and .xlsx files will be saved.</p>
-</details>
+	<p><b>Export => Set Default Export Folder</b></p>
 	
-- - - -
+	- The folder where exported .csv and .xlsx files will be saved.
+</details>
 <details>
-	<summary><b>Main Window Size:</b> Go to 'File => Set Default Window Size'.</summary>
+	<summary><b>Main Window Size</b></summary>
 	<p></p>
-	<p>Small: 1000x500</p>
-	<p>Large: 1750x750</p>
-</details>
+	<p><b>File => Set Default Window Size</b></p>
 	
-- - - -
+	- Small: 1000x500
+	- Large: 1750x750
+</details>
 <details>
-	<summary><b>Hero:</b> Go to 'Data => Set Default Hero'.</summary>
+	<summary><b>Hero</b></summary>
 	<p></p>
-	<p>Setting a default 'Hero' moves the Hero's username into the P1 column by default. Data in the 'Statistics' window will be shown from the Hero's perspective.</p>
-</details>
+	<p><b>Data => Set Default Hero</b></p>
 	
-- - - -
-## Exporting
-MTGO-Tracker creates (3) Tables: 'Matches', 'Games', 'Plays'. Use the <b>'Export' Menu</b> to save your tables as either .csv or .xlsx files.
+	- Setting a default 'Hero' moves the Hero's username into the P1 column by default. 
+	- Data in the 'Statistics' window will be shown from the Hero's perspective.
+</details>
 
-<b>Inverse Join: </b>Each match, MTGO sets each player to P1 or P2 at random. This makes it difficult to analyze your tables for specific players. The Inverse Join table will create a second row for each Match/Game with P1 and P2 reversed. Keep in mind the tables exported with this option will be twice as large.
-## Saving
-Save your session by clicking <b>'File => Save Data'</b>.
+- - - -
+## Saving and Exporting
+### Exporting:
 
-Delete your saved session by clicking <b>'Data => Delete Saved Session'</b>
+	- MTGO-Tracker creates (3) tables: 'Matches', 'Games', 'Plays'. 
+	- Use the 'Export' Menu to save any or all of your tables as either .csv or .xlsx files.
+	- Filtered tables can be exported.
+### Inverse Join:
+
+	- MTGO randomly sets each player to P1 or P2 at the beginning of each match. 
+	- This makes it difficult to analyze Match Data for specific players.
+	- The Inverse Join table creates a second row for each Match/Game with P1 and P2 reversed. 
+	- Keep in mind the tables exported with this option will be twice as large.
+### Saving/Deleting Session Data:
+- **File => Save Data**
+- **Data => Delete Saved Session**
+- - - -
