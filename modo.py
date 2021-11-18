@@ -5,7 +5,6 @@ import copy
 
 uaw = None
 test = False
-window = []
 
 # To add a column to a database:
 # Add the column to appropriate modo.XXXX_header() function.
@@ -56,7 +55,8 @@ def archetypes():
             "Combo",
             "Prison",
             "Tempo",
-            "Ramp"]
+            "Ramp",
+            "Rogue"]
 
 def cube_formats():
     return ["Cube-Other",
@@ -509,7 +509,7 @@ def game_actions(init,time):
             gameactions.append(replace_pname(fullstring,p,pdict))
     return gameactions
 
-def match_data(ga,gd,pd,ad):
+def match_data(ga,gd,pd):
     #input:  [gameactions],[gamedata],[playdata],{alldecks}
     #output: list[match_att]
 
@@ -549,14 +549,6 @@ def match_data(ga,gd,pd,ad):
         match_winner = "P2"
     else:
         match_winner = "NA"
-
-    # mm_yyyy = ga[0][4:6] + "-" + ga[0][0:4]
-    # p1_deck_data = closest_list(cards_played(pd,p1),ad,mm_yyyy)
-    # p2_deck_data = closest_list(cards_played(pd,p2),ad,mm_yyyy)
-    # p1_subarch = p1_deck_data[0]
-    # p2_subarch = p2_deck_data[0]
-    # if p1_deck_data[1] == p2_deck_data[1]:
-    #     match_format = p1_deck_data[1]
 
     match_data.extend((match_id,
                        p1,
@@ -899,17 +891,15 @@ def play_data(ga):
             all_plays.append(play_data)
     return all_plays
 
-def get_all_data(init,mtime,alldecks,w):
+def get_all_data(init,mtime):
     #input:  string,string
     #output: list[matches,games,plays]
-    global window
-    window = w
     
     gameactions = game_actions(init,mtime)
     gamedata = game_data(gameactions)
     rawdata = gamedata[-1]
     gamedata.pop()
     playdata = play_data(gameactions)
-    matchdata = match_data(gameactions,gamedata,playdata,alldecks)
+    matchdata = match_data(gameactions,gamedata,playdata)
 
     return [matchdata,gamedata,playdata,rawdata]
