@@ -4,7 +4,7 @@ MTGO-Tracker will break down your play history on Magic Online into a personal d
 ## Importing Data
 Data can be imported by clicking <b>'File => Load MTGO GameLogs'</b>. Select the folder containing your GameLog files (if it has not already been set, or you wish to import from a different folder).
 
-MTGO saves these files in <b>"C:\Users\[User]\AppData\Local\Apps\2.0"</b> by default.
+MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by default.
 ## Column Descriptions
 <details>
 <summary><b>Match Table</b></summary>
