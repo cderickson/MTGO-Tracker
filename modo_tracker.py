@@ -3513,7 +3513,7 @@ def exit():
     window.destroy()
 
 window = tk.Tk() 
-window.title("MTGO-Stats")
+window.title("MODO Tracker")
 window.iconbitmap(window,"icon.ico")
 
     # Reverse comments to switch between static window size and resizable.
