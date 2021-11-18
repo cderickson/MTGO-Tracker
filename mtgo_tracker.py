@@ -606,13 +606,15 @@ def get_formats():
     p2_sub_index =  modo.match_header().index("P2_Subarch")
 
     n = 0
+    count = 0
     total = len(all_data[0])
     for i in all_data[0]:    # Iterate through matches.
         n += 1
         
-            # Match record is missing some data.
+        # Match record is missing some data.
         if (i[p1_arch_index] == "NA") or (i[p2_arch_index] == "NA") or (i[mformat_index] == "NA") or (i[mtype_index] == "NA") or \
-           ((i[mformat_index] in modo.limited_formats()) & (i[lformat_index] == "NA")): 
+            ((i[mformat_index] in modo.limited_formats()) & (i[lformat_index] == "NA")): 
+            count += 1
             plays = []
             for j in all_data[2]: # Iterate through plays.
                 if i[0] == j[0]:  # Add Play to our List if it has a matching Match_ID
@@ -639,8 +641,8 @@ def get_formats():
                 i[lformat_index] = missing_data[5]
                 i[mtype_index] =   missing_data[6]
 
-    if n == 0:
-        status_label.config(text="No Matches with missing data.")
+    if count == 0:
+        status_label.config(text="No Matches with Missing Data.")
     else:
         all_data_inverted = modo.invert_join(all_data)
         set_display("Matches")
