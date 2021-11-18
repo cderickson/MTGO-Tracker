@@ -1967,14 +1967,22 @@ def revise_record_multi():
     def close_revise_window():
         for i in selected:
             values = list(tree1.item(i,"values"))
-            for j in itertools.chain(*[all_data[0],all_data_inverted[0]]):
+            for index,j in enumerate(itertools.chain(*[all_data[0],all_data_inverted[0]])):
                 if values[0] == j[0]:
                     if field == "P1 Deck":
-                        j[modo.match_header().index("P1_Arch")] = p1_arch_type.get()
-                        j[modo.match_header().index("P1_Subarch")] = p1_subarch_entry.get()
+                        if values[modo.match_header().index("P1")] == j[modo.match_header().index("P1")]:
+                            j[modo.match_header().index("P1_Arch")] = p1_arch_type.get()
+                            j[modo.match_header().index("P1_Subarch")] = p1_subarch_entry.get()
+                        else:
+                            j[modo.match_header().index("P2_Arch")] = p1_arch_type.get()
+                            j[modo.match_header().index("P2_Subarch")] = p1_subarch_entry.get()                          
                     elif field == "P2 Deck":
-                        j[modo.match_header().index("P2_Arch")] = p2_arch_type.get()
-                        j[modo.match_header().index("P2_Subarch")] = p2_subarch_entry.get()
+                        if values[modo.match_header().index("P2")] == j[modo.match_header().index("P2")]:
+                            j[modo.match_header().index("P2_Arch")] = p2_arch_type.get()
+                            j[modo.match_header().index("P2_Subarch")] = p2_subarch_entry.get()
+                        else:
+                            j[modo.match_header().index("P1_Arch")] = p2_arch_type.get()
+                            j[modo.match_header().index("P1_Subarch")] = p2_subarch_entry.get()
                     elif field == "Format":
                         j[modo.match_header().index("Format")] = match_format.get()
                         j[modo.match_header().index("Limited_Format")] = lim_format.get()
