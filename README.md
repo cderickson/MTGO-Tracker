@@ -88,7 +88,7 @@ MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by de
 ### Missing Match Data:
 **Data => Input Missing Match Data**
 	
-	- Matches will import with empty P1/P2_Arch, P1/P2_Subarch, (Limited)_Format, Match_Type columns by default.
+	- Matches import with empty P1/P2_Arch, P1/P2_Subarch, (Limited)_Format, Match_Type columns by default.
 	- Cycle through Matches with empty columns and manually fill them in.	
 ### Missing Game_Winner:
 **Data => Input Missing Game_Winner Data**
@@ -110,7 +110,7 @@ MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by de
 - - - -
 ## Data Viewing
 ### Filtering: 
-	- Manipulate the data being displayed by applying filters accessible using the <b>Filter</b> button.
+	- Manipulate the data being displayed by applying filters accessible using the Filter button.
 ### Drill Down:
 	- Double-clicking on a Match row will display all Games for the selected Match. 
 	- Double-clicking on a Game row will display all Plays for the selected Game.
@@ -119,7 +119,7 @@ MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by de
 ## Statistics Window
 	- View descriptive statistics and basic analysis. 
 	- Choose to view Match, Game, Play, Time, or Card Data using the top right dropdown menu.
-	- Statistics being displayed can be filtered using the Format, Deck, and Date Range menus across the top of the window.
+	- Statistics can be filtered using the Format, Deck, and Date Range menus across the top of the window.
 - - - -
 ## Settings
 <details>
