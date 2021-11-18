@@ -29,13 +29,13 @@ filepath_export =   ""
 filepath_decks =    ""
 filepath_logs =     ""
 hero =              ""
+main_window_size =  ("small",1000,500)
 
 display =           ""
 data_loaded =       False
 filter_changed =    False
 prev_display =      ""
 uaw =               "NA"
-main_window_size =  ("small",1000,500)
 new_import =        False
 field =             ""
 
