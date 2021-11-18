@@ -1,6 +1,10 @@
 # MTGO-Tracker
 MTGO-Tracker will break down your play history on Magic Online into a personal database. It will help you format your data for further statistical analysis, or allow you to simply use the built-in descriptive statistics.
 
+<p align="center">
+<img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_image.JPG?raw=true" width="880" height="404">
+</p>
+
 ## Importing Data
 Data can be imported by clicking <b>'File => Load MTGO GameLogs'</b>. Select the folder containing your GameLog files (if it has not already been set, or you wish to import from a different folder).
 
