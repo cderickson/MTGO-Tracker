@@ -19,7 +19,8 @@ def user_assigned_winner(player):
 def limited_formats():
     return ["Booster Draft",
             "Sealed Deck",
-            "Cube"]
+            "Cube",
+            "Other Limited"]
 
 def con_formats():
     return ["Vintage",
