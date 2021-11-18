@@ -35,8 +35,7 @@ data_loaded =       False
 filter_changed =    False
 prev_display =      ""
 uaw =               "NA"
-main_window_width = 1750
-main_window_height= 750
+main_window_size =  ("small",1000,500)
 new_import =        False
 field =             ""
 
@@ -94,6 +93,70 @@ def save_window():
     button_close.grid(row=0,column=1,padx=5,pady=5)
     
     save_window.protocol("WM_DELETE_WINDOW", lambda : close_save_window())
+def choose_size_window():
+    height = 150
+    width =  300
+    popup = tk.Toplevel(window)
+    popup.title("Default Window Size")
+    popup.iconbitmap(popup,"icon.ico")
+    popup.minsize(width,height)
+    popup.resizable(False,False)
+    popup.grab_set()
+    popup.focus()
+
+    popup.geometry("+%d+%d" % 
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+
+    def save():
+        global main_window_size
+
+        if window_size.get() == "Small: 1000x500":
+            main_window_size = ("small",1000,500)
+        elif window_size.get() == "Large: 1750x750":
+            main_window_size = ("large",1750,750)
+
+        os.chdir(filepath_root + "\\" + "save")
+        pickle.dump(main_window_size,open("main_window_size.p","wb"))
+        status_label.config(text="Default Window Size saved. Change will take effect at next startup.")
+        os.chdir(filepath_root)
+        close_window()
+
+    def close_window():
+        popup.grab_release()
+        popup.destroy()
+
+    mid_frame = tk.LabelFrame(popup,text="")
+    bot_frame = tk.Frame(popup)
+
+    mid_frame.grid(row=0,column=0,sticky="nsew")
+    bot_frame.grid(row=1,column=0,sticky="")
+
+    popup.grid_columnconfigure(0,weight=1)
+    popup.rowconfigure(0,weight=1)
+    mid_frame.grid_columnconfigure(0,weight=1)
+    mid_frame.grid_rowconfigure(0,weight=1)
+    mid_frame.grid_rowconfigure(1,weight=1)
+    bot_frame.grid_columnconfigure(0,weight=1)
+
+    options = ["Small: 1000x500","Large: 1750x750"]
+    window_size = tk.StringVar()
+    if main_window_size[0] == "small":
+        window_size.set(options[0])
+    elif main_window_size[0] == "large":
+        window_size.set(options[1])
+
+    menu_1 = tk.OptionMenu(mid_frame,window_size,*options)
+    label1 = tk.Label(mid_frame,text="Default Main Window Size",wraplength=width)
+    button_save = tk.Button(bot_frame,text="Save",command=lambda : save())
+    button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close_window())
+    
+    menu_1.grid(row=0,column=0,sticky="s")
+    label1.grid(row=1,column=0,sticky="n",pady=10)       
+    button_save.grid(row=0,column=0,padx=5,pady=5)
+    button_close.grid(row=0,column=1,padx=5,pady=5)
+    
+    popup.protocol("WM_DELETE_WINDOW", lambda : close_window())
 def clear_loaded():
     global all_data
     global all_data_inverted
@@ -357,6 +420,7 @@ def save_settings():
     settings = [filepath_root,filepath_export,filepath_decks,filepath_logs,hero]
     pickle.dump(settings,open("settings.p","wb"))
     pickle.dump(all_decks,open("all_decks.p","wb"))
+    pickle.dump(main_window_size,open("main_window_size.p","wb"))
     os.chdir(filepath_root)
 def set_display(d,*argv):
     global display
@@ -2699,7 +2763,7 @@ def get_stats():
                 for i in tree["column"]:
                     tree.column(i,minwidth=25,stretch=True,width=25)
                     tree.heading(i,text=i)
-                tree.column(0,minwidth=int(main_window_width/16),stretch=False,width=int(main_window_width/16))
+                tree.column(0,minwidth=110,stretch=False,width=110)
                 for i in range(2,len(tree["column"])):
                     tree.column(i,anchor="center")
                 index_list = [["All Games","Overall"],["","Play"],["","Draw"],
@@ -2941,7 +3005,7 @@ def get_stats():
         for i in tree1["column"]:
             tree1.column(i,minwidth=25,stretch=True,width=25)
             tree1.heading(i,text=i)
-        tree1.column(0,minwidth=int(main_window_width/16),stretch=False,width=int(main_window_width/16))
+        tree1.column(0,minwidth=110,stretch=False,width=110)
         for i in range(len(tree1["column"])):
             tree1.column(i,anchor="center")
         tagged = True
@@ -2965,7 +3029,7 @@ def get_stats():
         for i in tree2["column"]:
             tree2.column(i,minwidth=25,stretch=True,width=25)
             tree2.heading(i,text=i)
-        tree2.column(0,minwidth=int(main_window_width/16),stretch=False,width=int(main_window_width/16))
+        tree2.column(0,minwidth=110,stretch=False,width=110)
         for i in range(len(tree2["column"])):
             tree2.column(i,anchor="center")
         tagged = True
@@ -2985,7 +3049,7 @@ def get_stats():
         for i in tree3["column"]:
             tree3.column(i,minwidth=25,stretch=True,width=25)
             tree3.heading(i,text=i)
-        tree3.column(0,minwidth=int(main_window_width/16),stretch=False,width=int(main_window_width/16))
+        tree3.column(0,minwidth=110,stretch=False,width=110)
         for i in range(len(tree3["column"])):
             tree3.column(i,anchor="center")
         tagged = True
@@ -3011,7 +3075,7 @@ def get_stats():
         for i in tree4["column"]:
             tree4.column(i,minwidth=25,stretch=True,width=25)
             tree4.heading(i,text=i)
-        tree4.column(0,minwidth=int(main_window_width/16),stretch=False,width=int(main_window_width/16))
+        tree4.column(0,minwidth=110,stretch=False,width=110)
         for i in range(len(tree4["column"])):
             tree4.column(i,anchor="center")
         tagged = True
@@ -3465,7 +3529,7 @@ def get_stats():
     s_type = tk.StringVar()
     s_type.set(stat_types[0])
     
-    menu_1 = tk.OptionMenu(top_frame,player,*p1_options)     
+    menu_1 = tk.OptionMenu(top_frame,player,*p1_options)
     menu_2 = tk.OptionMenu(top_frame,mformat,*format_options)
     menu_3 = tk.OptionMenu(top_frame,lim_format,*limited_options)
     menu_4 = tk.OptionMenu(top_frame,deck,*decks_played)
@@ -3491,9 +3555,9 @@ def get_stats():
     menu_3.grid(row=0,column=2,padx=10,pady=10)
     menu_4.grid(row=0,column=3,padx=10,pady=10)
     menu_5.grid(row=0,column=4,padx=10,pady=10)
-    menu_6.grid(row=0,column=5,padx=10,pady=10)
-    date_entry_1.grid(row=0,column=6,padx=10,pady=10)
-    date_entry_2.grid(row=0,column=7,padx=10,pady=10)
+    date_entry_1.grid(row=0,column=5,padx=10,pady=10)
+    date_entry_2.grid(row=0,column=6,padx=10,pady=10)
+    menu_6.grid(row=0,column=7,padx=10,pady=10)
     button_1.grid(row=0,column=8,padx=10,pady=10)
     
     player.trace("w",update_hero)
@@ -3516,11 +3580,14 @@ window = tk.Tk()
 window.title("MTGO-Tracker")
 window.iconbitmap(window,"icon.ico")
 
-    # Reverse comments to switch between static window size and resizable.
-window.minsize(1000,500)
-window.geometry("1000x500")
-#window.minsize(main_window_width,main_window_height)
-#window.resizable(False,False)
+cwd = os.getcwd()
+if os.path.isdir("save") == True:
+    os.chdir(cwd + "\\" + "save")
+    if os.path.isfile("main_window_size.p"):
+        main_window_size = pickle.load(open("main_window_size.p","rb"))
+    os.chdir(cwd)
+window.geometry(str(main_window_size[1]) + "x" + str(main_window_size[2]))
+window.resizable(False,False)
 
 window.rowconfigure(0,weight=1)
 window.columnconfigure(1,weight=1)
@@ -3555,7 +3622,7 @@ stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,
 back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,
                         command=lambda :bb_clicked())
 test_button = tk.Button(left_frame,text="TEST BUTTON",
-                        command=lambda : test())
+                        command=lambda : choose_size_window())
 
 status_label = tk.Label(bottom_frame,text="")
 status_label.grid(row=0,column=0)
@@ -3565,10 +3632,12 @@ menu_bar = tk.Menu(window)
 file_menu = tk.Menu(menu_bar,tearoff=False)
 menu_bar.add_cascade(label="File",menu=file_menu)
 
-file_menu.add_command(label="Load MTGO Game Logs",command=lambda : import_window())
+file_menu.add_command(label="Load MTGO GameLogs",command=lambda : import_window())
 file_menu.add_separator()
 file_menu.add_command(label="Load Saved Data",command=lambda : load_saved_window())
 file_menu.add_command(label="Save Data",command=lambda : save_window(),state=tk.DISABLED)
+file_menu.add_separator()
+file_menu.add_command(label="Set Default Window Size",command=lambda : choose_size_window())
 file_menu.add_separator()
 file_menu.add_command(label="Exit",command=lambda : exit())
 
