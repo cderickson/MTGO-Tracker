@@ -207,7 +207,7 @@ def clear_window():
     height = 100
     width =  300
     clear_window = tk.Toplevel(window)
-    clear_window.title("Clear Saved Data")
+    clear_window.title("Clear Loaded Data")
     clear_window.iconbitmap(clear_window,"icon.ico")
     clear_window.minsize(width,height)
     clear_window.resizable(False,False)
@@ -312,9 +312,12 @@ def delete_session():
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
-    files = ["all_data.p","parsed_file_list.p","all_decks.p","settings.p"]
+    files = ["all_data.p","parsed_file_list.p","all_decks.p","settings.p","main_window_size.p"]
 
     def del_session():
+        global all_decks
+        all_decks.clear()
+
         os.chdir(filepath_root + "\\" + "save")   
 
         session_exists = False
@@ -468,7 +471,6 @@ def get_all_data():
     global data_loaded
     global parsed_file_list
     global new_import
-    w = [window.winfo_x(),window.winfo_y(),window.winfo_width(),window.winfo_height()]
     count = 0
 
     new_data = [[],[],[],[]]
@@ -485,7 +487,7 @@ def get_all_data():
                 with io.open(i,"r",encoding="ansi") as gamelog:
                     initial = gamelog.read()
                     mtime = time.ctime(os.path.getmtime(i))
-                parsed_data = modo.get_all_data(initial,mtime,all_decks,w)
+                parsed_data = modo.get_all_data(initial,mtime)
                 parsed_file_list.append(i)
                 count += 1
 
@@ -2147,7 +2149,6 @@ def import_window():
         button3["state"] = tk.DISABLED
     else:
         label2 = tk.Label(mid_frame,text=filepath_logs,wraplength=width,justify="left")
-    #label3 = tk.Label(mid_frame,text="CAUTION: This will overwrite your current session.",wraplength=width,pady=(20,),justify="left")
     label3 = tk.Label(mid_frame,text="Select folder containing your MTGO GameLog files.",wraplength=width,pady=(20,),justify="left")
 
     label2.grid(row=0,column=0,pady=(60,5))
