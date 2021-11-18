@@ -139,7 +139,7 @@ def clear_loaded():
     data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.DISABLED)
     data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.DISABLED)
 
-    #clear existing data in tree
+        # Clear existing data in tree.
     tree1.delete(*tree1.get_children())
     tree1["show"] = "tree"
 
@@ -442,7 +442,6 @@ def get_all_data():
                 for i in parsed_data[3]:
                     new_data[3].append(i)
 
-    #deck_data_guess(new_data,rerun=False,update_all=True)
     new_data_inverted = modo.invert_join(new_data)
     for index,i in enumerate(new_data):
         for j in new_data[index]:
@@ -464,13 +463,13 @@ def print_data(data,header):
     global new_import
     small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num"]
 
-    # Clear existing data in tree
+        # Clear existing data in tree
     tree1.delete(*tree1.get_children())
 
     tree1["column"] = header
     tree1["show"] = "headings"
 
-    # Insert column headers into tree
+        # Insert column headers into tree
     for i in tree1["column"]:
         if i in small_headers:
             tree1.column(i,anchor="center",stretch=False,width=75)
@@ -529,13 +528,12 @@ def get_lists():
     os.chdir(filepath_decks)
     folders = os.listdir()
     for i in folders:
-        os.chdir(filepath_decks + "/" + i)
+        os.chdir(filepath_decks + "\\" + i)
         files = os.listdir()
         month_decks = []
         for j in files:
             with io.open(j,"r",encoding="ansi") as decklist:
                 initial = decklist.read()
-
             deck = modo.parse_list(j,initial)
             month_decks.append(deck)
         all_decks[i] = month_decks
@@ -557,14 +555,15 @@ def get_formats():
     total = len(all_data[0])
     for i in all_data[0]:    # Iterate through matches.
         n += 1
-        # Match record is missing some data.
+        
+            # Match record is missing some data.
         if (i[p1_arch_index] == "NA") or (i[p2_arch_index] == "NA") or (i[mformat_index] == "NA") or (i[mtype_index] == "NA") or \
            ((i[mformat_index] in modo.limited_formats()) & (i[lformat_index] == "NA")): 
             plays = []
             for j in all_data[2]: # Iterate through plays.
                 if i[0] == j[0]:  # Add Play to our List if it has a matching Match_ID
                     plays.append(j)
-            df =      modo.to_dataframe(plays,modo.play_header())
+            df = modo.to_dataframe(plays,modo.play_header())
             players = [i[modo.match_header().index("P1")],i[modo.match_header().index("P2")]]
             cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
             cards2 =  df[(df.Casting_Player == players[0]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
@@ -608,11 +607,11 @@ def deck_data_guess(data,rerun,update_all):
         mm_yyyy = i[date_index][5:7] + "-" + i[date_index][0:4]
         players = [i[p1_index],i[p2_index]]
         
-        #Skip Limited Matches.
-        if i[format_index] in modo.limited_formats:
+            # Skip Limited Matches.
+        if i[format_index] in modo.limited_formats():
             continue
 
-        # Update P1_Subarch, P2_Subarch for all Matches.
+            # Update P1_Subarch, P2_Subarch for all Matches.
         if update_all == True:
             cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
             cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
@@ -620,10 +619,11 @@ def deck_data_guess(data,rerun,update_all):
             p2_data = modo.closest_list(set(cards2),all_decks,mm_yyyy)
             i[p1_sa_index] = p1_data[0]
             i[p2_sa_index] = p2_data[0]
-            # Uncomment if we want to update Format column if Best Guesses have matching Format.
             # if p1_data[1] == p2_data[1]:
             #     i[format_index] = p1_data[1]
-        # Update P1_Subarch, P2_Subarch only if equal to "Unknown" or "NA".
+                # Uncomment if we want to update Format column if Best Guesses have matching Format.
+
+            # Update P1_Subarch, P2_Subarch only if equal to "Unknown" or "NA".
         if update_all == False:
             if (i[p1_sa_index] == "Unknown") or (i[p1_sa_index] == "NA"):
                 cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
@@ -720,7 +720,6 @@ def rerun_decks_window():
     bot_frame.grid_rowconfigure(0,weight=1)
     bot_frame.grid_rowconfigure(1,weight=1)
 
-    #button1 = tk.Button(mid_frame,text="Get Decks Folder",command=lambda : get_decks_path())
     button2 = tk.Button(mid_frame,text="Import Sample Decklists",command=lambda : import_decks())
     label2 = tk.Label(mid_frame,text="",wraplength=width)
     label3 = tk.Label(mid_frame,text="This will apply best guesses in the P1_Subarch and P2_Subarch columns, overwriting where applicable.\n\n Apply to all Matches or Unknown/NA only?",wraplength=width)
@@ -743,9 +742,6 @@ def rerun_decks_window():
     else:
         label1 = tk.Label(mid_frame,text=filepath_decks,wraplength=width,justify="left")
 
-    #label1.grid(row=0,column=0,pady=(25,5))
-    #button1.grid(row=1,column=0,padx=75,pady=5,sticky="w")
-    #button2.grid(row=1,column=0,padx=75,pady=5,sticky="e")
     label2.grid(row=1,column=0,padx=10,pady=(45,0),sticky="nsew")
     button2.grid(row=2,column=0,padx=10,pady=5) 
     label3.grid(row=3,column=0,padx=10,pady=(45,5),sticky="nsew")       
@@ -1033,9 +1029,10 @@ def bb_clicked():
         set_display("Games")
 
 def export(file_type,data_type,inverted):
-    #file_type: string, "CSV" or "Excel"
-    #data_type: int, 0=Match,1=Game,2=Play,3=All,4=Filtered
-    #inverted:  bool
+    # File_Type: String, "CSV" or "Excel"
+    # Data_Type: Int, 0=Match,1=Game,2=Play,3=All,4=Filtered
+    # Inverted:  Bool
+
     global filepath_export
     fp = filepath_export
     if (filepath_export is None) or (filepath_export == ""):
@@ -1371,11 +1368,11 @@ def sort_column(col,reverse,tree1):
         l.append((tree1.set(k, col), k))
     l.sort(reverse=reverse,key=tuple_casefold)
 
-    # Rearrange items in sorted positions
+        # Rearrange items in sorted positions
     for index, (val, k) in enumerate(l):
         tree1.move(k, '', index)
 
-    # Reverse sort next time
+        # Reverse sort next time
     tree1.heading(col,text=col,command=lambda _col=col: sort_column(_col,not reverse,tree1))
 
 def sort_column_int(col,reverse,tree1):
@@ -1387,11 +1384,11 @@ def sort_column_int(col,reverse,tree1):
         l.append((tree1.set(k, col), k))
     l.sort(reverse=reverse,key=tree_tuple_to_int)
 
-    # Rearrange items in sorted positions
+        # Rearrange items in sorted positions
     for index, (val, k) in enumerate(l):
         tree1.move(k, '', index)
 
-    # Reverse sort next time
+        # Reverse sort next time
     tree1.heading(col,text=col,command=lambda _col=col: sort_column_int(_col,not reverse,tree1))
 
 def add_filter_setting(index,key,op):
@@ -1450,19 +1447,6 @@ def set_filter():
             drop_key.grid(row=0,column=3,padx=10,pady=10)
             drop_key.set("None Selected.")
             date.grid_forget()
-
-            # index = col_dict[col.get()]
-            
-            # key_options = []
-            # for i in tree1.get_children():
-            #     key_options.append(tree1.set(i,index))
-            # key_options = sorted(list(set(key_options)),key=str.casefold)
-            # key.set("None Selected")       
-            # # menu = drop_key["menu"]
-            # # menu.delete(0,"end")
-            # # for i in key_options:
-            # #     menu.add_command(label=i,command=lambda x=i: key.set(x))
-            # drop_key["values"] = key_options
 
     def update_combobox():
         index = col_dict[col.get()]
@@ -1564,8 +1548,6 @@ def set_filter():
 
     drop_col.grid(row=0,column=1,padx=10,pady=10)
     op_menu.grid(row=0,column=2,padx=10,pady=10)
-    #drop_key.grid(row=0,column=3,padx=10,pady=10)
-    #date.grid(row=0,column=3,padx=10,pady=10)
     button1.grid(row=0,column=4,padx=10,pady=10)
     label1.grid(row=0,column=0,sticky="w")
     button2.grid(row=0,column=0,padx=10,pady=10)
@@ -1576,6 +1558,7 @@ def set_filter():
     filter_window.protocol("WM_DELETE_WINDOW", lambda : close_filter_window())
 
 def test():
+    # Test function
     pass  
 
 def revise_record():
@@ -2057,7 +2040,7 @@ def activate_revise(event):
         return
     revise_button["state"] = tk.NORMAL
 
-def revise_button():
+def revise_method_select():
     if len(tree1.selection()) > 1:
         revise_record_multi()
     else:
@@ -2075,7 +2058,7 @@ def import_window():
     import_window.focus()
 
     import_window.geometry("+%d+%d" %
-                           (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+                            (window.winfo_x()+(window.winfo_width()/2)-(width/2),
                             window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def get_logs_path():
@@ -2105,8 +2088,8 @@ def import_window():
             data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
             data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
             data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
-        # This will revert filepath_logs to original setting.
         #filepath_logs = fp_logs
+            # Uncomment to revert filepath_logs to original setting.
         close_import_window()
 
     def close_import_window():
@@ -2179,11 +2162,11 @@ def get_winners():
         set_display("Matches")
     
 def ask_for_winner(ga_list,p1,p2,n,total):
-    # list of game actions (strings)
-    # string = player1
-    # string = player2
-    # int = number in cycle
-    # int = total number of games missing winner
+    # List of game actions (Strings)
+    # String = P1
+    # String = P2
+    # Int = Count in cycle
+    # Int = Total number of games missing Game_Winner
 
     def close_gw_window(winner):
         global uaw
@@ -2228,17 +2211,13 @@ def ask_for_winner(ga_list,p1,p2,n,total):
     label2 = tk.Label(mid_frame,text=all_ga,anchor="center",wraplength=width,justify="left")
 
     button_skip = tk.Button(top_frame,text="Skip Game",
-                            command=lambda :
-                            [close_gw_window("NA")])
+                            command=lambda : close_gw_window("NA"))
     button_exit = tk.Button(top_frame,text="Exit",
-                            command=lambda :
-                            [close_gw_window("Exit.")])    
+                            command=lambda : close_gw_window("Exit."))    
     button1 = tk.Button(bot_frame,text=p1,
-                         command=lambda :
-                         [close_gw_window("P1")])
+                        command=lambda : close_gw_window("P1"))
     button2 = tk.Button(bot_frame,text=p2,
-                         command=lambda :
-                         [close_gw_window("P2")])
+                        command=lambda : close_gw_window("P2"))
 
     button_skip.grid(row=0,column=0,padx=10,pady=10)
     label1.grid(row=0,column=1,sticky="nsew",padx=5,pady=5)
@@ -2251,8 +2230,8 @@ def ask_for_winner(ga_list,p1,p2,n,total):
     gw.wait_window()  
 
 def get_stats():
-    width =  main_window_width -400
-    height = main_window_height
+    width =  1350
+    height = 750
     stats_window = tk.Toplevel(window)
     stats_window.title("Statistics - Match Data")
     stats_window.iconbitmap(stats_window,"icon.ico")
@@ -3572,9 +3551,11 @@ def exit():
 window = tk.Tk() 
 window.title("MTGO-Stats")
 window.iconbitmap(window,"icon.ico")
-#window.minsize(main_window_width,main_window_height)
+
+    # Reverse comments to switch between static window size and resizable.
 window.minsize(1000,500)
 window.geometry("1000x500")
+#window.minsize(main_window_width,main_window_height)
 #window.resizable(False,False)
 
 window.rowconfigure(0,weight=1)
@@ -3586,33 +3567,34 @@ text_frame = tk.LabelFrame(window,text="Dataframe")
 bottom_frame.grid(row=1,column=1,sticky="ew")
 left_frame.grid(row=0,column=0,sticky="ns")
 text_frame.grid(row=0,column=1,sticky="nsew")
+
 text_frame.grid_columnconfigure(0,weight=1)
 text_frame.grid_columnconfigure(1,weight=0)
 text_frame.grid_rowconfigure(0,weight=1)
 text_frame.grid_rowconfigure(1,weight=0)
+bottom_frame.grid_columnconfigure(0,weight=1)
 
 match_button = tk.Button(left_frame,text="Match Data",state=tk.DISABLED,
-                     command=lambda : [set_display("Matches")])
+                        command=lambda : set_display("Matches"))
 game_button = tk.Button(left_frame,text="Game Data",state=tk.DISABLED,
-                     command=lambda : [set_display("Games")])
+                        command=lambda : set_display("Games"))
 play_button = tk.Button(left_frame,text="Play Data",state=tk.DISABLED,
-                     command=lambda : [set_display("Plays")])
+                        command=lambda : set_display("Plays"))
 filter_button = tk.Button(left_frame,text="Filter",state=tk.DISABLED,
-                     command=lambda : set_filter())
+                        command=lambda : set_filter())
 clear_button = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,
-                     command=lambda : [clear_filter(),set_display(display)])
+                        command=lambda : [clear_filter(),set_display(display)])
 revise_button = tk.Button(left_frame,text="Revise Record(s)",state=tk.DISABLED,
-                     command=lambda : [revise_button()])
+                        command=lambda : revise_method_select())
 stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,
-                     command=lambda : [get_stats()])
-back_button = tk.Button(left_frame,text="Back",
-                        command=lambda :
-                        bb_clicked(),
-                        state=tk.DISABLED)
-test_button = tk.Button(left_frame,text="TEST BUTTON", command=lambda : test())
+                        command=lambda : get_stats())
+back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,
+                        command=lambda :bb_clicked())
+test_button = tk.Button(left_frame,text="TEST BUTTON",
+                        command=lambda : test())
 
 status_label = tk.Label(bottom_frame,text="")
-status_label.pack()
+status_label.grid(row=0,column=0)
 
 menu_bar = tk.Menu(window)
 
@@ -3705,10 +3687,10 @@ s.map("Treeview",
       background=[("selected","#4a6984")],
       foreground=[("selected","#ffffff")])
 
-startup()
-
 window.protocol("WM_DELETE_WINDOW", lambda : exit())
 
-# Event loop: listens for events (keypress, etc.)
-# Blocks code after from running until window is closed.
+startup()
+
+    # Event loop: listens for events (keypress, etc.)
+    # Blocks code after from running until window is closed.
 window.mainloop()
