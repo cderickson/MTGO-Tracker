@@ -120,6 +120,10 @@ MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by de
 	- View descriptive statistics and basic analysis. 
 	- Choose to view Match, Game, Play, Time, or Card Data using the top right dropdown menu.
 	- Statistics can be filtered using the Format, Deck, and Date Range menus across the top of the window.
+<p align="center">
+<img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_image2.jpg?raw=true" width="808" height="469">
+</p>
+
 - - - -
 ## Settings
 <details>
