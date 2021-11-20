@@ -313,12 +313,13 @@ def delete_session():
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
-    files = ["all_data.p","parsed_file_list.p","all_decks.p","settings.p","main_window_size.p"]
+    
 
     def del_session():
         global all_decks
         all_decks.clear()
 
+        files = ["all_data.p","parsed_file_list.p","all_decks.p","settings.p","main_window_size.p"]
         os.chdir(filepath_root + "\\" + "save")   
 
         session_exists = False
@@ -472,7 +473,10 @@ def set_display(d,*argv):
     text_frame.config(text=display)
 
     if len(argv) > 0:
-        set_bb_state(argv[0])
+        if argv[0] == True:
+            back_button["state"] = tk.NORMAL
+        else:
+            back_button["state"] = tk.DISABLED
     
     if match_button["state"] == tk.DISABLED:
         match_button["state"] = tk.NORMAL
@@ -484,19 +488,14 @@ def set_display(d,*argv):
         stats_button["state"] = tk.NORMAL
         
     if d == "Matches":
-        set_bb_state(False)
+        back_button["state"] = tk.DISABLED
         print_data(all_data[0],all_headers[0])
     elif d == "Games":
-        set_bb_state(True)
+        back_button["state"] = tk.NORMAL
         print_data(all_data[1],all_headers[1])
     elif d == "Plays":
-        set_bb_state(True)
-        print_data(all_data[2],all_headers[2])
-def set_bb_state(state):
-    if state:
         back_button["state"] = tk.NORMAL
-    else:
-        back_button["state"] = tk.DISABLED
+        print_data(all_data[2],all_headers[2])
 def get_all_data():
     global all_data
     global all_data_inverted
@@ -1490,7 +1489,7 @@ def clear_filter():
     filter_dict.clear()
 def set_filter():
     height = 300
-    width =  500
+    width =  550
     filter_window = tk.Toplevel(window)
     filter_window.title("Set Filters")
     filter_window.iconbitmap(filter_window,"icon.ico")
@@ -1532,9 +1531,9 @@ def set_filter():
             drop_key.grid(row=0,column=3,padx=10,pady=10)
             drop_key.set("None Selected.")
             date.grid_forget()
+
     def update_combobox():
         index = col_dict[col.get()]
-        
         key_options = []
         for i in tree1.get_children():
             key_options.append(tree1.set(i,index))
@@ -1543,6 +1542,7 @@ def set_filter():
         else:
             key_options = sorted(list(set(key_options)),key=str.casefold)
         drop_key["values"] = key_options       
+    
     def add():
         if key.get() == "None Selected.":
             return
@@ -1559,6 +1559,7 @@ def set_filter():
             k = key.get()
         add_filter_setting(c,k,o)
         update_filter_text()
+    
     def update_filter_text():
         tlabel1 = ""
         tlabel2 = ""
@@ -1579,18 +1580,19 @@ def set_filter():
                 tlabel2 += "\n"
         label1.config(text=tlabel1)
         label2.config(text=tlabel2)
+    
     def defocus(event):
         # Clear Auto-Highlight in Combobox menu.
         drop_key.selection_clear()
+    
     def apply_filter():
         # Update table and close window.
-
         set_display(display)
         filter_window.grab_release()
         filter_window.destroy()
+    
     def close_filter_window():
         # Revert filter changes and close window.
-
         global filter_dict
         filter_dict = filter_init
         filter_window.grab_release()
@@ -1639,6 +1641,7 @@ def set_filter():
     button1 = tk.Button(top_frame,text="Add",command=lambda : add())
     button2 = tk.Button(bot_frame,text="Clear",command=lambda : [clear_filter(),update_filter_text()])
     button3 = tk.Button(bot_frame,text="Apply Filter",command=lambda : apply_filter())
+    button4 = tk.Button(bot_frame,text="Exit",command=lambda : close_filter_window())
     label1 = tk.Label(mid_frame1,text="",wraplength=width/2,justify="left")
     label2 = tk.Label(mid_frame2,text="",wraplength=width/2,justify="left")
 
@@ -1651,6 +1654,7 @@ def set_filter():
     label2.grid(row=0,column=1,sticky="w")
     button2.grid(row=0,column=0,padx=10,pady=10)
     button3.grid(row=0,column=1,padx=10,pady=10)
+    button4.grid(row=0,column=2,padx=10,pady=10)
 
     update_keys()
     update_filter_text()
@@ -2338,8 +2342,8 @@ def get_stats():
     stats_window.focus()
 
     stats_window.geometry("+%d+%d" %
-        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
-         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+        (window.winfo_x(),
+         window.winfo_y()))
 
     top_frame = tk.Frame(stats_window)
     mid_frame = tk.Frame(stats_window)
@@ -3195,7 +3199,6 @@ def get_stats():
             return [x,wr_over_time]
 
         def get_pm_over_time(df,start_index):
-
             match_winners = df.Match_Winner.tolist()
             x = []
             last = 0
@@ -3244,7 +3247,7 @@ def get_stats():
             fig = plt.figure(figsize=(5,4),dpi=100)
             plt.plot(g2_list[0],g2_list[1])
             #plt.title("Match Wins Over .500:\n"+mformat+": "+deck)
-            plt.title("Win Rate Over Time:\n"+mformat)
+            plt.title("Win Rate Over Time:\n" + mformat + ": " + deck)
             plt.xlabel("Matches Played")
             #plt.ylabel("Match Wins Over .500")
             plt.ylabel("Winning Percentage")
@@ -3720,7 +3723,7 @@ export_csv.add_command(label="All Data (3 Files)",command=lambda : export("CSV",
 export_csv.add_separator()
 export_csv.add_command(label="Match History (Inverse Join)",command=lambda : export("CSV",0,True))
 export_csv.add_command(label="Game History (Inverse Join)",command=lambda : export("CSV",1,True))
-export_csv.add_command(label="All Data (Inverse Join)",command=lambda : export("CSV",3,True))
+export_csv.add_command(label="All Data (Inverse Join, 3 Files)",command=lambda : export("CSV",3,True))
 export_csv.add_separator()
 export_csv.add_command(label="Currently Displayed Data (with Filters)",command=lambda : export("CSV",4,False))
 
@@ -3732,9 +3735,9 @@ export_excel.add_command(label="All Data (3 Files)",command=lambda : export("Exc
 export_excel.add_separator()
 export_excel.add_command(label="Match History (Inverse Join)",command=lambda : export("Excel",0,True))
 export_excel.add_command(label="Game History (Inverse Join)",command=lambda : export("Excel",1,True))
-export_excel.add_command(label="All Data (Inverse Join)",command=lambda : export("Excel",3,True))
+export_excel.add_command(label="All Data (Inverse Join, 3 Files)",command=lambda : export("Excel",3,True))
 export_excel.add_separator()
-export_excel.add_command(label="Currently Displayed Data (with Filters)",command=lambda : export("Excel",4,False))
+export_excel.add_command(label="Currently Displayed Table (with Filters)",command=lambda : export("Excel",4,False))
 
 export_menu.add_cascade(label="Export to CSV",menu=export_csv)
 export_menu.add_cascade(label="Export to Excel",menu=export_excel)
@@ -3788,10 +3791,9 @@ s.map("Treeview",
       background=[("selected","#4a6984")],
       foreground=[("selected","#ffffff")])
 
+startup()
 window.protocol("WM_DELETE_WINDOW", lambda : exit())
 
-startup()
-
-    # Event loop: listens for events (keypress, etc.)
-    # Blocks code after from running until window is closed.
+# Event loop: listens for events (keypress, etc.)
+# Blocks code after from running until window is closed.
 window.mainloop()
