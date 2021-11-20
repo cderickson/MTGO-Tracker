@@ -134,7 +134,7 @@ MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by de
 <details>
 	<summary><b>GameLogs Folder</b></summary>
 	<p></p>
-	<p><b>Data => Set Import Folders</b></p>
+	<p><b>Data => Set Default Import Folders</b></p>
 	
 	- The folder containing your MTGO GameLog files.
 	- MTGO saves these files in "C:\Users\[User]\AppData\Local\Apps\2.0" by default.
