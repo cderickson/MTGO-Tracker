@@ -377,19 +377,22 @@ def startup():
 
     if os.path.isfile("input_options.txt"):
         in_header = False
+        in_instr = True
         x = ""
         y = []
         with io.open("input_options.txt","r",encoding="ansi") as file:
             initial = file.read().split("\n")
             for i in initial:
                 if i == "-----------------------------":
+                    if in_instr:
+                        in_instr = False
                     in_header = not in_header
                     if in_header == False:
                         x = last.split(":")[0].split("# ")[1]
                     elif x != "":
                         input_options[x] = y
                         y = []                        
-                elif (in_header == False) and (i != ""):
+                elif (in_header == False) and (i != "") and (in_instr == False):
                     y.append(i)
                 last = i
     else:
