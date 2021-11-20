@@ -11,16 +11,10 @@ test = False
 # Add the column to appropriate modo.XXXX_data() function.
 # Any saved data will have to be deleted and reloaded.
 
-def user_assigned_winner(player):
-    global uaw
-    uaw = player
-
 def limited_formats():
     return ["Booster Draft",
             "Sealed Deck",
-            "Cube",
-            "Other Limited"]
-
+            "Cube"]
 def con_formats():
     return ["Vintage",
             "Legacy",
@@ -29,25 +23,22 @@ def con_formats():
             "Pioneer",
             "Pauper",
             "Other Constructed"]
-
 def match_types():
     return ["League",
             "Preliminary",
             "Challenge",
-            "Premier",
+            "Premier Constructed",
             "2-Man",
             "Practice",
             "Open Play BO1"]
-
 def match_type_booster():
     return ["Draft League",
             "Swiss Draft",
             "Elimination Draft"]
-
 def match_type_sealed():
     return ["Friendly Sealed League",
-            "Competitive Sealed League"]  
-
+            "Competitive Sealed League",
+            "Premier Sealed"]  
 def archetypes():
     return ["Aggro",
             "Midrange",
@@ -57,27 +48,75 @@ def archetypes():
             "Tempo",
             "Ramp",
             "Rogue"]
-
 def cube_formats():
     return ["Cube-Other",
             "Vintage Cube",
             "Legacy Cube",
             "Modern Cube"]
-
 def draft_formats():
-    return ["MIDx3",
-            "MM3x3",
-            "MM2x3",
-            "UMAx3"]
-
+    return ["VOW x3",
+            "MID x3",
+            "AFR x3",
+            "MH2 x3",
+            "STX x3",
+            "TSR x3",
+            "KHM x3",
+            "ZNR x3",
+            "2XM x3",
+            "M21 x3",
+            "IKO x3",
+            "THB x3",
+            "ELD x3",
+            "M20 x3",
+            "MH1 x3",
+            "WAR x3",
+            "RNA x3",
+            "UMA x3",
+            "GRN x3",
+            "M19 x3",
+            "DOM x3",
+            "A25 x3",
+            "RIX x3",
+            "IMA x3",
+            "XLN x3",
+            "HOU x3",
+            "AKH x3",
+            "MM3 x3",
+            "AER x3",
+            "Other Booster Draft"]
 def sealed_formats():
-    return ["MIDx6",
-            "MM3x6",
-            "MM2x6",
-            "UMAx6"]
-
+    return ["VOW x6",
+            "MID x6",
+            "AFR x6",
+            "MH2 x6",
+            "STX x6",
+            "TSR x6",
+            "KHM x6",
+            "ZNR x6",
+            "2XM x6",
+            "M21 x6",
+            "IKO x6",
+            "THB x6",
+            "ELD x6",
+            "M20 x6",
+            "MH1 x6",
+            "WAR x6",
+            "RNA x6",
+            "UMA x6",
+            "GRN x6",
+            "M19 x6",
+            "DOM x6",
+            "A25 x6",
+            "RIX x6",
+            "IMA x6",
+            "XLN x6",
+            "HOU x6",
+            "AKH x6",
+            "MM3 x6",
+            "AER x6",
+            "Other Sealed"]
 def match_header():
-    #output: list[match_attrs]
+    # Output: List[Match_Attributes]
 
     return ["Match_ID",
             "P1",
@@ -96,9 +135,8 @@ def match_header():
             "Limited_Format",
             "Match_Type",
             "Date"]
-
 def game_header():
-    #output: list[game_attrs]
+    # Output: List[Game_Attributes]
 
     return ["Match_ID",
             "P1",
@@ -112,9 +150,8 @@ def game_header():
             "P2_Mulls",
             "Turns",
             "Game_Winner"]
-
 def play_header():
-    #output: list[play_attrs]
+    # Output: List[Play_Attributes]
 
     return ["Match_ID",
             "Game_Num",
@@ -132,16 +169,14 @@ def play_header():
             "Attackers",
             "Active_Player",
             "Nonactive_Player"]
-
 def transpose(data):
-    #input:  list[rows]
-    #output: list[cols]
+    # Input:  List[Rows]
+    # Output: List[Cols]
     
     return [list(x) for x in zip(*data)]
-
 def swap_cols(data,header,col_a,col_b):
-    #input:  list[matchdata or gamedata],colheader string,colheader string
-    #output: list[matchdata]   
+    # Input:  List[Matches or Games],List[Headers],String,String
+    # Output: List[Matches]   
 
     for index,i in enumerate(header):
         if i == col_a:
@@ -149,10 +184,9 @@ def swap_cols(data,header,col_a,col_b):
         elif i == col_b:
             b = index
     data[a], data[b] = data[b], data[a]
-    
 def invert_matchdata(data):
-    #input:  list[matchdata]
-    #output: list[matchdata]
+    # Input:  List[Matches]
+    # Output: List[Matches]
 
     swap_cols(data,match_header(),"P1","P2")
     swap_cols(data,match_header(),"P1_Arch","P2_Arch")
@@ -169,10 +203,9 @@ def invert_matchdata(data):
             data[a] = "P2"
         elif data[a] == "P2":
             data[a] = "P1"
-
 def invert_gamedata(data):
-    #input:  list[gamedata]
-    #output: list[gamedata]
+    # Input:  List[Games]
+    # Output: List[Games]
 
     swap_cols(data,game_header(),"P1","P2")
     swap_cols(data,game_header(),"P1_Mulls","P2_Mulls")
@@ -187,12 +220,11 @@ def invert_gamedata(data):
             data[a] = "P2"
         elif data[a] == "P2":
             data[a] = "P1"
-
 def invert_join(ad):
-    #input:  list[list[matches],list[games],list[plays]]
-    #output: list[list[matches],list[games],list[plays]]
+    # Input:  List[List[Matches],List[Games],List[Plays]]
+    # Output: List[List[Matches],List[Games],List[Plays]]
+
     ad_inverted = copy.deepcopy(ad)
-    
     for i in ad_inverted[0]:
         invert_matchdata(i)
     for i in ad_inverted[1]:
@@ -202,10 +234,9 @@ def invert_join(ad):
     ad_inverted[1] += ad[1]
 
     return ad_inverted
-
 def update_game_wins(ad,headers):
-    #input:  list[matches,games,plays],list[mheader,gheader,pheader]
-    #output: list[matches,games,plays]
+    #Input:  List[Matches,Games,Plays], List[MatchHeader,GameHeader,PlayHeader]
+    #Output: List[Matches,Games,Plays]
     
     for index,i in enumerate(headers[0]):
         if i == "P1_Wins":
@@ -233,17 +264,15 @@ def update_game_wins(ad,headers):
             if i[p1wins_index] > i[p2wins_index]:
                 i[mw_index] = "P1"
             elif i[p2wins_index] > i[p1wins_index]:
-                i[mw_index] = "P2"
-            
+                i[mw_index] = "P2"    
 def to_dataframe(data,headers):
-    #input:  list[matchdata/gamedata/playdata],list[headers]
-    #output: dataframe
+    # Input:  List[Matches/Games/Plays], List[Headers]
+    # Output: Dataframe
 
     return pd.DataFrame(data,columns=headers)
-    
 def format_time(time):
-    #input:  string
-    #output: string
+    # Input:  String
+    # Output: String
 
     time = time.split()
     hhmmss = time[3].split(":")
@@ -257,33 +286,31 @@ def format_time(time):
         time[2] = "0" + time[2]
         
     return time[4] + time[1] + time[2] + hhmmss[0] + hhmmss[1]
-    
 def players(init):
-    #input:  string or list[strings]
-    #output: list[strings]
+    # Input:  String or List[Strings]
+    # Output: List[Strings]
 
     if isinstance(init, str):
         init = init.split("@P")
         
     players = []
     
-    #initialize list of players in the game
+    # Initialize list of players in the game
     for i in init:
         if i.find(" joined the game") != -1:
             player = i.split(" joined the game")[0]
             player.replace(" ","+")
             players.append(player)
 
-    #filter duplicates from player list
+    # Filter duplicates from player list
     players = list(set(players))
     players.sort()
     players.sort(key=len, reverse=True)
 
     return players
-
 def players_dict(init):
-    #input:  string or list[strings]
-    #output: dict[string : string]
+    # Input:  String or List[Strings]
+    # Output: Dict{String : String}
 
     if isinstance(init, str):
         init = init.split("@P")
@@ -296,10 +323,9 @@ def players_dict(init):
             player = i.split(" joined the game")[0]
             players[player] = player.replace(" ","+")
     return players
-
 def high_roll(init):
-    #input:  string or list[strings]
-    #output: dict{string : int}
+    # Input:  String or List[Strings]
+    # Output: Dict{String : Int}
 
     if isinstance(init, str):
         init = init.split("@P")
@@ -312,26 +338,22 @@ def high_roll(init):
             if len(tlist[1]) == 1:
                 rolls[tlist[0].replace(" ","+")] = int(tlist[1])          
     return rolls        
-
 def mulls(cards):
-    #input:  string
-    #output: int
+    # Input:  String
+    # Output: Int
 
     mull_dict = {"seven":0,"six":1,"five":2,"four":3,"three":4,"two":5,\
                  "one":6,"zero":7}
     return mull_dict[cards]
-    
 def get_winner(curr_game_list,p1,p2):
-    #input:  [gameactions],string,string,
-    #output: string
-    if test:
-        return p1
+    # Input:  [Game Actions],String,String,
+    # Output: String
     
     global uaw
     uaw = None
 
     lastline = curr_game_list[-1]
-    #add more lose conditions
+    # Add more lose conditions
     if lastline.find("has conceded") != -1 or \
        lastline.find("is being attacked") != -1 or \
        lastline.find("has lost the game") != -1 or \
@@ -340,18 +362,17 @@ def get_winner(curr_game_list,p1,p2):
             return "P2"
         elif lastline.split()[0] == p2:
             return "P1"
-    #add more win conditions
+    # Add more win conditions
     if lastline.find("triggered ability from [Thassa's Oracle]") != -1:
         if lastline.split()[0] == p1:
             return "P1"
         elif lastline.split()[0] == p2:
             return "P2"
     # Could not determine a winner.
-    return "NA"
-    
+    return "NA" 
 def get_cards(play):
-    #input:  string
-    #output: list[strings]
+    # Input:  String
+    # Output: List[Strings]
 
     cards = []
     count = play.count("[")
@@ -367,10 +388,9 @@ def get_cards(play):
         cards.append("NA")
         
     return cards
-
 def cards_played(plays,*argv):
-    #input:  list[plays],string
-    #output: set{strings}
+    # Input:  List[Plays],String
+    # Output: Set{strings}
 
     cards_played = []
     if len(argv) == 0: #return all cards played
@@ -384,10 +404,9 @@ def cards_played(plays,*argv):
                     cards_played.append(i[6])
 
     return set(cards_played)
-
 def closest_list(cards_played,ad,mm_yyyy):
-    #input:  set[cards],dict{list[string,string,set[cards]]}
-    #output: [string, string]
+    # Input:  Set[CardsPlayed],Dict{List[String,String,Set[Cards]]}
+    # Output: [String,String]
     
     if mm_yyyy in ad:
         alldecks = ad.get(mm_yyyy)
@@ -410,19 +429,17 @@ def closest_list(cards_played,ad,mm_yyyy):
         return [alldecks[index][0],alldecks[index][1]]
     else:
         return ["Unknown","NA"]
-
 def replace_pname(tstring,plist,pdict):
-    #input:  string,list,dict
-    #output: string
+    # Input:  String,List,Dict
+    # Output: String
 
     for i in plist:
         if tstring.find(i) != -1:
             tstring = tstring.replace(i,pdict[i])
     return tstring
-
 def parse_list(filename,init):
-    #input:  string,string
-    #output: [string,string,set{maindeck+sideboard}]
+    # Input:  String,String
+    # Output: [String,String,Set{MaindeckCards+SideboardCards}]
 
     initial = init.split("\n")
     d_format = filename.split(".txt")[0].split(" - ")[0]
@@ -450,10 +467,9 @@ def parse_list(filename,init):
                 card_count -= 1
                 
     return [name,d_format,set(maindeck)]
-
 def game_actions(init,time):
-    #input:  string,string
-    #output: list[strings]
+    # Input:  String,String
+    # Output: List[Strings]
     
     initial =       init.split("@P")
     gameactions =   []
@@ -508,10 +524,9 @@ def game_actions(init,time):
         elif i.find(".") != -1:
             gameactions.append(replace_pname(fullstring,p,pdict))
     return gameactions
-
 def match_data(ga,gd,pd):
-    #input:  [gameactions],[gamedata],[playdata],{alldecks}
-    #output: list[match_att]
+    # Input:  List[GameActions],List[GameData],List[PlayData]
+    # Output: List[Match_Attributes]
 
     match_data =    []
     p1 =            players(ga)[0]
@@ -568,10 +583,9 @@ def match_data(ga,gd,pd):
                        match_type,
                        date))
     return match_data
-
 def game_data(ga):
-    #input:  list[gameactions]
-    #output: list[g1_list,g2_list,g3_list]
+    # Input:  List[GameActions]
+    # Output: List[G1_List,G2_List,G3_List]
 
     game_num =      0
     pd_selector =   ""
@@ -715,10 +729,9 @@ def game_data(ga):
         game_data.append(g3)
     game_data.append(all_games_ga)
     return game_data
-
 def is_play(play):
-    #input:  string
-    #output: bool
+    # Input:  String
+    # Output: Bool
 
     action_keywords = ["plays","casts","draws","chooses","discards"]
     action_keyphrases = ["is being attacked by",
@@ -732,10 +745,9 @@ def is_play(play):
         if curr_list[1] in action_keywords:
             return True
     return False
-
 def player_is_target(tstring,player):
-    #input:  string,string
-    #output: 1 or 0
+    # Input:  String,String
+    # Output: 1 or 0
 
     count = tstring.count("[")
     
@@ -749,10 +761,9 @@ def player_is_target(tstring,player):
     if tstring.find(player) != -1:
         return 1   
     return 0
-
 def cards_drawn(cards_drawn):
-    #input:  string
-    #output: int
+    # Input:  String
+    # Output: Int
 
     num_dict = {"a":1,
                 "two":2,
@@ -762,10 +773,9 @@ def cards_drawn(cards_drawn):
                 "six":6,
                 "seven":7}
     return num_dict[cards_drawn]
-    
 def play_data(ga):
-    #input:  list[gameactions]
-    #output: list[plays]
+    # Input:  List[GameActions]
+    # Output: List[Plays]
     
     game_num = 0
     play_num = 0
@@ -890,10 +900,9 @@ def play_data(ga):
                               non_active_player))
             all_plays.append(play_data)
     return all_plays
-
 def get_all_data(init,mtime):
-    #input:  string,string
-    #output: list[matches,games,plays]
+    # Input:  String,String
+    # Output: List[Matches,Games,Plays]
     
     gameactions = game_actions(init,mtime)
     gamedata = game_data(gameactions)
