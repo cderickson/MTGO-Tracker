@@ -162,25 +162,27 @@ def clear_loaded():
     global all_data
     global all_data_inverted
     global all_decks
-    global display
+    global parsed_file_list
+    global hero
     global filter_dict
+    global display
     global data_loaded
     global filter_changed
     global prev_display
     global uaw
-    global parsed_file_list
     global new_import
 
     all_data =          [[],[],[],[]]
     all_data_inverted = [[],[],[],[]]
     all_decks.clear()
+    parsed_file_list =  []
+    hero =              ""
+    filter_dict.clear()
     display =           ""
-    filter_dict =       {}
     data_loaded =       False
     filter_changed =    False
     prev_display =      ""
     uaw =               "NA"
-    parsed_file_list =  []
     new_import =        False
 
     match_button["state"] = tk.DISABLED
@@ -201,7 +203,7 @@ def clear_loaded():
     data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.DISABLED)
     data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.DISABLED)
 
-        # Clear existing data in tree.
+    # Clear existing data in tree.
     tree1.delete(*tree1.get_children())
     tree1["show"] = "tree"
 def clear_window():
@@ -441,6 +443,8 @@ def startup():
 
     filter_button["state"] = tk.NORMAL
     clear_button["state"] = tk.NORMAL
+    if hero != "":
+        stats_button["state"] = tk.NORMAL
     data_loaded = True
 
     set_display("Matches")
@@ -484,8 +488,8 @@ def set_display(d,*argv):
         game_button["state"] = tk.NORMAL
     if play_button["state"] == tk.DISABLED:
         play_button["state"] = tk.NORMAL
-    if stats_button["state"] == tk.DISABLED:
-        stats_button["state"] = tk.NORMAL
+    # if stats_button["state"] == tk.DISABLED:
+    #     stats_button["state"] = tk.NORMAL
         
     if d == "Matches":
         back_button["state"] = tk.DISABLED
@@ -1244,6 +1248,7 @@ def set_default_hero():
             status_label.config(text="Cleared Setting: Hero")
             if display != "Plays":
                 set_display(display)
+            stats_button["state"] = tk.DISABLED
             close_hero_window()
         elif entry.get() in hero_options:
             hero = entry.get()
@@ -1251,6 +1256,7 @@ def set_default_hero():
             status_label.config(text="Updated Hero to " + hero + ".")
             if display != "Plays":
                 set_display(display)
+            stats_button["state"] = tk.NORMAL
             close_hero_window()
         else:
             label2["text"] = "Not found."
@@ -3612,7 +3618,7 @@ def get_stats():
     date_entry_2 = DateEntry(top_frame,date_pattern="y-mm-dd",width=10,
         year=today.year,month=today.month,day=today.day,
         font="Helvetica 12",state="readonly")
-    button_1 = tk.Button(top_frame,text="GO",state=tk.DISABLED,command=lambda : load_data())
+    button_1 = tk.Button(top_frame,text="GO",state=tk.DISABLED,width=12,bg="black",fg="white",command=lambda : load_data())
     
     menu_1["state"] = tk.DISABLED
     menu_2["state"] = tk.DISABLED
@@ -3631,6 +3637,10 @@ def get_stats():
     menu_6.grid(row=0,column=7,padx=10,pady=10)
     button_1.grid(row=0,column=8,padx=10,pady=10)
     
+    menu_1.config(bg="black",disabledforeground="white")
+    menu_6.config(bg="black",fg="white",activebackground="black",activeforeground="white")
+    menu_6["menu"].config(bg="black",fg="white",borderwidth=0)
+
     player.trace("w",update_hero)
     mformat.trace("w",update_format)
     lim_format.trace("w",update_lim_format)
