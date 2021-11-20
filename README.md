@@ -122,6 +122,8 @@ MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by de
 	- Click the 'Clear Filter' button to display all data after drilling down.
 - - - -
 ## Statistics Window
+	- 'Hero' setting must be applied before Statistics Window can be viewed.
+	
 	- View descriptive statistics and basic analysis. 
 	- Choose to view Match, Game, Play, Time, or Card Data using the top right dropdown menu.
 	- Statistics can be filtered using the Format, Deck, and Date Range menus across the top of the window.
