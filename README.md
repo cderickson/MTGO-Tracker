@@ -106,7 +106,12 @@ MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by de
 ### Revise Record(s) Button:
 	- Selected row(s) in the 'Matches' table can be manually revised.
 	- If multiple rows are selected, the revision will apply to all selected rows.
-	- This is only applicable to rows in the 'Matches' table.	
+	- This is only applicable to rows in the 'Matches' table.
+### Input Options File
+	- Control the dropdown menu options available when making revisions.
+	- Add or delete options under their respective header.
+	- Each option MUST be on it's own line.
+	- Do not alter headers in this file.
 - - - -
 ## Data Viewing
 ### Filtering: 
