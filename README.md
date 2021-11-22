@@ -6,9 +6,9 @@ MTGO-Tracker will break down your play history on Magic Online into a personal d
 </p>
 
 ## Getting Started
-Import your data by clicking **'File => Load MTGO GameLogs'**. Select the folder containing your GameLog files (if it has not already been set, or if you wish to import from a different folder). MTGO saves these files in **"C:\Users\\[User]\AppData\Local\Apps\2.0"** by default.
+Import your data by clicking **'File => Load MTGO GameLogs'**. Select the folder containing your GameLog files. MTGO saves these files in **"C:\Users\\[User]\AppData\Local\Apps\2.0"** by default.
 
-Set default Hero to your MTGO username by clicking **'Data => Set Default Hero'**. This will make an individualized dataset more readable. The statistics window will also become accessible from the left-panel, allowing you to view general statistics regarding your personal performance.
+Set the default Hero to your MTGO username by clicking **'Data => Set Default Hero'**. This will make an individualized dataset more readable. The statistics window will also become accessible from the left-panel, allowing you to view general statistics regarding your personal performance.
 
 Complete your dataset by using the **Data Cleaning** methods described below to fill in information for attributes such as Deck Archetype, Deck Name, Match Format, and more.
 
@@ -80,8 +80,8 @@ Continue importing data as you play more matches on MTGO!
 | | Target3 | Target Card #3 of Primary Card ('NA' if <3 Targeted Cards) |
 | | Opp_Target | Bool (1 or 0): '1' if Current Play is Targetting Opponent |
 | | Self_Target | Bool (1 or 0): '1' if Current Play is Self-Targetting |
-| | Cards_Drawn | Integer: Total Cards Drawn (Current Play Only) |
-| | Attackers | Integer: Total Attackers (Current Play Only) |
+| | Cards_Drawn | Integer: Total Cards Drawn (Current Action) |
+| | Attackers | Integer: Total Attackers (Current Action) |
 | | Active_Player | Active Player |
 | | Nonactive_Player | Nonactive Player |
 </p>
@@ -107,6 +107,7 @@ Continue importing data as you play more matches on MTGO!
 	- Import sample decklists and apply best guess deck names in the 'Matches.P1/P2_Subarch' columns.
 	- Sample decklists from YYYY-MM to YYYY-MM are included and will be updated at the end of every month.
 
+	- Clicking 'Apply to All' will overwrite any existing P1/P2_Subarch values.
 	- Click 'Apply to Unknowns' if you do not wish to overwrite your previous changes to these columns.
 	- Matches with Format set to Draft/Sealed/Cube will have deck name set to colors played (eg. WU/RG/etc.)
 ### Revise Record(s) Button:
@@ -117,7 +118,7 @@ Continue importing data as you play more matches on MTGO!
 	- Control the dropdown menu options available when making revisions.
 	- Add or delete options under their respective header.
 	- Each option MUST be on it's own line.
-	- Do not alter headers in this file.
+	- Do not alter the pre-existing headers in this file.
 - - - -
 ## Data Viewing
 ### Filtering: 
@@ -184,7 +185,9 @@ Continue importing data as you play more matches on MTGO!
 ### Inverse Join:
 
 	- MTGO randomly sets each player to P1 or P2 at the beginning of each match. 
-	- This makes it difficult to analyze Match Data for specific players.
-	- The Inverse Join table creates a second row for each Match/Game with P1 and P2 reversed. 
+	- This makes it difficult to view data for specific players.
+	
+	- The Inverse Join table creates a second row for each Match/Game with P1 and P2 reversed.
+	- This allows filtering on either the P1 or P2 columns to display all games involving a specific player.
 	- Keep in mind the tables exported with this option will be twice as large.
 - - - -
