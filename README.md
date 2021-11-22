@@ -99,10 +99,12 @@ MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by de
 ### Best Guess Deck Names:
 **Data => Apply Best Guess for Deck Names**
 	
-	- The 'Matches.P1/P2_Subarch' columns will be set to 'NA' by default.
+	- The 'Matches.P1/P2_Subarch' columns will be set to 'NA' by default after importing.
 	- Import sample decklists and apply best guess deck names in the 'Matches.P1/P2_Subarch' columns.
+	- Sample decklists from YYYY-MM to YYYY-MM are included and will be updated at the end of every month.
+
 	- Click 'Apply to Unknowns' if you do not wish to overwrite your previous changes to these columns.
-	- Sample decklists from MM-YYYY to MM-YYYY are included and will be updated at the end of every month.
+	- Matches with Format set to Draft/Sealed/Cube will have deck name set to colors played (eg. WU/RG/etc.)
 ### Revise Record(s) Button:
 	- Selected row(s) in the 'Matches' table can be manually revised.
 	- If multiple rows are selected, the revision will apply to all selected rows.
