@@ -5,10 +5,14 @@ MTGO-Tracker will break down your play history on Magic Online into a personal d
 <img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_image.jpg?raw=true" width="808" height="448">
 </p>
 
-## Importing Data
-Data can be imported by clicking <b>'File => Load MTGO GameLogs'</b>. Select the folder containing your GameLog files (if it has not already been set, or you wish to import from a different folder).
+## Getting Started
+Import your data by clicking **'File => Load MTGO GameLogs'**. Select the folder containing your GameLog files (if it has not already been set, or if you wish to import from a different folder). MTGO saves these files in **"C:\Users\\[User]\AppData\Local\Apps\2.0"** by default.
 
-MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by default.
+Set default Hero to your MTGO username by clicking **'Data => Set Default Hero'**. This will make an individualized dataset more readable. The statistics window will also become accessible from the left-panel, allowing you to view general statistics regarding your personal performance.
+
+Complete your dataset by using the **Data Cleaning** methods described below to fill in information for attributes such as Deck Archetype, Deck Name, Match Format, and more.
+
+Continue importing data as you play more matches on MTGO!
 ## Column Descriptions
 <details>
 <summary><b>Match Table</b></summary>
@@ -169,6 +173,9 @@ MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by de
 
 - - - -
 ## Saving and Exporting
+### Session Data:
+- **File => Save Data**
+- **Data => Delete Saved Session**
 ### Exporting:
 
 	- MTGO-Tracker creates (3) tables: 'Matches', 'Games', 'Plays'. 
@@ -180,7 +187,4 @@ MTGO saves these files in <b>"C:\Users\\[User]\AppData\Local\Apps\2.0"</b> by de
 	- This makes it difficult to analyze Match Data for specific players.
 	- The Inverse Join table creates a second row for each Match/Game with P1 and P2 reversed. 
 	- Keep in mind the tables exported with this option will be twice as large.
-### Saving/Deleting Session Data:
-- **File => Save Data**
-- **Data => Delete Saved Session**
 - - - -
