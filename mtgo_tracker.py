@@ -194,7 +194,7 @@ def clear_loaded():
     
     text_frame.config(text="Dataframe")
 
-    data_menu.entryconfig("Set Default 'Hero'",state=tk.DISABLED)
+    data_menu.entryconfig("Set Default Hero",state=tk.DISABLED)
     data_menu.entryconfig("Clear Loaded Data",state=tk.DISABLED)
     file_menu.entryconfig("Save Data",state=tk.DISABLED)
     data_menu.entryconfig("Input Missing Match Data",state=tk.DISABLED)
@@ -446,7 +446,7 @@ def startup():
     data_loaded = True
 
     set_display("Matches")
-    data_menu.entryconfig("Set Default 'Hero'",state=tk.NORMAL)
+    data_menu.entryconfig("Set Default Hero",state=tk.NORMAL)
     data_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
     file_menu.entryconfig("Save Data",state=tk.NORMAL)
     data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
@@ -680,7 +680,7 @@ def get_formats():
     else:
         all_data_inverted = modo.invert_join(all_data)
         set_display("Matches")
-def deck_data_guess(rerun,update_all):
+def deck_data_guess(update_type):
     global all_data
     global all_data_inverted
 
@@ -700,11 +700,18 @@ def deck_data_guess(rerun,update_all):
         # if i[format_index] in input_options["Limited Formats"]:
         #     continue
 
+        if update_type == "Limited":
+            if (i[format_index] in input_options["Limited Formats"]) & (i[format_index] != "Cube"):
+                cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
+                cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
+                i[p1_sa_index] = modo.get_limited_subarch(cards1)
+                i[p2_sa_index] = modo.get_limited_subarch(cards2)
+
         # Update P1_Subarch, P2_Subarch for all Matches.
-        if update_all == True:
+        elif update_type == "All":
             cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
             cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-            if i[format_index] in input_options["Limited Formats"]:
+            if (i[format_index] in input_options["Limited Formats"]) & (i[format_index] != "Cube"):
                 i[p1_sa_index] = modo.get_limited_subarch(cards1)
                 i[p2_sa_index] = modo.get_limited_subarch(cards2)
             else: 
@@ -712,22 +719,23 @@ def deck_data_guess(rerun,update_all):
                 p2_data = modo.closest_list(set(cards2),all_decks,yyyy_mm)
                 i[p1_sa_index] = p1_data[0]
                 i[p2_sa_index] = p2_data[0]
+
             # if p1_data[1] == p2_data[1]:
             #     i[format_index] = p1_data[1]
             # Uncomment if we want to update Format column if Best Guesses have matching Format.
 
         # Update P1_Subarch, P2_Subarch only if equal to "Unknown" or "NA".
-        if update_all == False:
+        elif update_type == "Unknowns":
             if (i[p1_sa_index] == "Unknown") or (i[p1_sa_index] == "NA"):
                 cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                if i[format_index] in input_options["Limited Formats"]:
+                if (i[format_index] in input_options["Limited Formats"]) & (i[format_index] != "Cube"):
                     i[p1_sa_index] = modo.get_limited_subarch(cards1)
                 else:
                     p1_data = modo.closest_list(set(cards1),all_decks,yyyy_mm)
                     i[p1_sa_index] = p1_data[0]
             if (i[p2_sa_index] == "Unknown") or (i[p2_sa_index] == "NA"):
                 cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                if i[format_index] in input_options["Limited Formats"]:
+                if (i[format_index] in input_options["Limited Formats"]) & (i[format_index] != "Cube"):
                     i[p2_sa_index] = modo.get_limited_subarch(cards2)
                 else:
                     p2_data = modo.closest_list(set(cards2),all_decks,yyyy_mm)
@@ -735,7 +743,7 @@ def deck_data_guess(rerun,update_all):
 
     all_data_inverted = modo.invert_join(all_data)
 def rerun_decks_window():
-    height = 300
+    height = 200
     width =  400
     rerun_decks_window = tk.Toplevel(window)
     rerun_decks_window.title("Best Guess Deck Names")
@@ -750,16 +758,30 @@ def rerun_decks_window():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def apply_to_all():
-        deck_data_guess(rerun=True,update_all=True)
+        deck_data_guess(update_type="All")
         set_display("Matches")
-        status_label.config(text="Updated the P1_Subarch, P2_Subarch, Format columns for each match.")
+        status_label.config(text="Updated the P1_Subarch, P2_Subarch columns for each match.")
         close()
 
     def apply_to_unknowns():
-        deck_data_guess(rerun=True,update_all=False)
+        deck_data_guess(update_type="Unknowns")
         set_display("Matches")
         status_label.config(text="Updated Unknowns in the P1_Subarch, P2_Subarch columns.")
         close()
+
+    def apply_to_limited():
+        deck_data_guess(update_type="Limited")
+        set_display("Matches")
+        status_label.config(text="Updated the P1_Subarch, P2_Subarch columns for Limited (Non-Cube) Matches.")
+        close()
+
+    def guess(mode):
+        if mode == "Overwrite All":
+            apply_to_all()
+        elif mode == "Unknown Decks Only":
+            apply_to_unknowns()
+        elif mode == "Limited (Non-Cube) Decks Only":
+            apply_to_limited()
 
     def get_decks_path():
         fp_decks = filedialog.askdirectory()  
@@ -817,11 +839,17 @@ def rerun_decks_window():
     bot_frame.grid_rowconfigure(0,weight=1)
     bot_frame.grid_rowconfigure(1,weight=1)
 
+    apply_options = ["Overwrite All","Unknown Decks Only","Limited (Non-Cube) Decks Only"]
+    apply_mode = tk.StringVar()
+    apply_mode.set(apply_options[0])
+
     button2 = tk.Button(mid_frame,text="Import Sample Decklists",command=lambda : import_decks())
     label2 = tk.Label(mid_frame,text="",wraplength=width)
-    label3 = tk.Label(mid_frame,text="This will apply best guesses in the P1_Subarch and P2_Subarch columns, overwriting where applicable.\n\n Apply to all Matches or Unknown/NA only?",wraplength=width)
-    button_apply_all = tk.Button(bot_frame,text="Apply to All",command=lambda : apply_to_all())
-    button_apply_unknown = tk.Button(bot_frame,text="Apply to Unknowns",command=lambda : apply_to_unknowns())
+    label3 = tk.Label(mid_frame,text="This will apply best guess deck names in the P1/P2_Subarch columns.\n\nChoose which rows to apply changes.",wraplength=width)
+    #button_apply_all = tk.Button(bot_frame,text="Apply to All",command=lambda : apply_to_all())
+    #button_apply_unknown = tk.Button(bot_frame,text="Apply to Unknowns",command=lambda : apply_to_unknowns())
+    apply_menu = tk.OptionMenu(bot_frame,apply_mode,*apply_options)
+    button_apply = tk.Button(bot_frame,text="Apply",command=lambda : guess(apply_mode.get()))
     button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close())
 
     if len(all_decks) == 0:
@@ -839,11 +867,13 @@ def rerun_decks_window():
     else:
         label1 = tk.Label(mid_frame,text=filepath_decks,wraplength=width,justify="left")
 
-    label2.grid(row=1,column=0,padx=10,pady=(45,0),sticky="nsew")
+    label2.grid(row=1,column=0,padx=10,pady=(20,0),sticky="nsew")
     button2.grid(row=2,column=0,padx=10,pady=5) 
-    label3.grid(row=3,column=0,padx=10,pady=(45,5),sticky="nsew")       
-    button_apply_all.grid(row=0,column=0,padx=10,pady=10)
-    button_apply_unknown.grid(row=0,column=1,padx=10,pady=10)
+    label3.grid(row=3,column=0,padx=10,pady=(10,5),sticky="nsew")       
+    #button_apply_all.grid(row=0,column=0,padx=10,pady=10)
+    #button_apply_unknown.grid(row=0,column=1,padx=10,pady=10)
+    apply_menu.grid(row=0,column=0,padx=10,pady=10)
+    button_apply.grid(row=0,column=1,padx=10,pady=10)
     button_close.grid(row=0,column=2,padx=10,pady=10)   
 
     if len(all_decks) == 0:
@@ -1236,7 +1266,7 @@ def set_default_hero():
     height = 100
     width =  275
     hero_window = tk.Toplevel(window)
-    hero_window.title("Set Default 'Hero'")
+    hero_window.title("Set Default Hero")
     hero_window.iconbitmap(hero_window,"icon.ico")
     hero_window.minsize(width,height)
     hero_window.resizable(False,False)
@@ -2165,8 +2195,8 @@ def revise_method_select():
     else:
         revise_record()
 def import_window():
-    height = 300
-    width =  400
+    height = 200
+    width =  350
     import_window = tk.Toplevel(window)
     import_window.title("Import Data")
     import_window.iconbitmap(import_window,"icon.ico")
@@ -2200,7 +2230,7 @@ def import_window():
         clear_filter()
         set_display("Matches")
         if data_loaded != False:
-            data_menu.entryconfig("Set Default 'Hero'",state=tk.NORMAL)
+            data_menu.entryconfig("Set Default Hero",state=tk.NORMAL)
             file_menu.entryconfig("Save Data",state=tk.NORMAL)
             data_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
             data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
@@ -2235,7 +2265,7 @@ def import_window():
         label2 = tk.Label(mid_frame,text=filepath_logs,wraplength=width,justify="left")
     label3 = tk.Label(mid_frame,text="Select folder containing your MTGO GameLog files.",wraplength=width,pady=(20,),justify="left")
 
-    label2.grid(row=0,column=0,pady=(60,5))
+    label2.grid(row=0,column=0,pady=(20,5))
     button2.grid(row=1,column=0,pady=0)
     label3.grid(row=2,column=0,pady=5)
     button3.grid(row=0,column=0,padx=10,pady=10)
@@ -3700,7 +3730,7 @@ def get_stats():
 
     stats_window.protocol("WM_DELETE_WINDOW", lambda : close_stats_window())
 def exit():
-    save_settings()
+    #save_settings()
     window.destroy()
 
 window = tk.Tk() 
@@ -3807,7 +3837,7 @@ data_menu.add_command(label="Input Missing Match Data",command=lambda : get_form
 data_menu.add_command(label="Input Missing Game_Winner Data",command=lambda : get_winners(),state=tk.DISABLED)
 data_menu.add_command(label="Apply Best Guess for Deck Names",command=lambda : rerun_decks_window(),state=tk.DISABLED)
 data_menu.add_separator()
-data_menu.add_command(label="Set Default 'Hero'",command=lambda : set_default_hero(),state=tk.DISABLED)
+data_menu.add_command(label="Set Default Hero",command=lambda : set_default_hero(),state=tk.DISABLED)
 data_menu.add_command(label="Set Default Import Folders",command=lambda : set_default_import())
 data_menu.add_separator()
 data_menu.add_command(label="Clear Loaded Data",command=lambda : clear_window(),state=tk.DISABLED)
