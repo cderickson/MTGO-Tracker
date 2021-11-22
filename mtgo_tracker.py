@@ -663,7 +663,7 @@ def get_formats():
             cards2 = sorted(cards2,key=str.casefold)
             cards3 = sorted(cards3,key=str.casefold)
             cards4 = sorted(cards4,key=str.casefold)
-            ask_for_format(players,cards1,cards2,cards3,cards4,n,total,i)
+            input_missing_data(players,cards1,cards2,cards3,cards4,n,total,i)
             if missing_data == "Exit":
                 break
             if missing_data != "Skip":
@@ -851,7 +851,7 @@ def rerun_decks_window():
         button_apply_unknown["state"] = tk.DISABLED
 
     rerun_decks_window.protocol("WM_DELETE_WINDOW", lambda : close())
-def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
+def input_missing_data(players,cards1,cards2,card3,cards4,n,total,mdata):
     def close_format_window(*argv):
         global missing_data
         missing_data = [p1_arch.get(),p1_sub.get(),p2_arch.get(),p2_sub.get(),mformat.get(),dformat.get(),mtype.get()]
