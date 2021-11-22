@@ -3,9 +3,6 @@ import tkinter as tk
 import pandas as pd
 import copy
 
-uaw = None
-test = False
-
 # To add a column to a database:
 # Add the column to appropriate modo.XXXX_header() function.
 # Add the column to appropriate modo.XXXX_data() function.
@@ -348,9 +345,6 @@ def mulls(cards):
 def get_winner(curr_game_list,p1,p2):
     # Input:  [Game Actions],String,String,
     # Output: String
-    
-    global uaw
-    uaw = None
 
     lastline = curr_game_list[-1]
     # Add more lose conditions
@@ -404,12 +398,12 @@ def cards_played(plays,*argv):
                     cards_played.append(i[6])
 
     return set(cards_played)
-def closest_list(cards_played,ad,mm_yyyy):
-    # Input:  Set[CardsPlayed],Dict{List[String,String,Set[Cards]]}
+def closest_list(cards_played,ad,yyyy_mm):
+    # Input:  Set{Strings},Dict{String : List[String,String,Set[Strings]]},String
     # Output: [String,String]
     
-    if mm_yyyy in ad:
-        alldecks = ad.get(mm_yyyy)
+    if yyyy_mm in ad:
+        alldecks = ad.get(yyyy_mm)
         if alldecks == []:
             return ["Unknown","NA"]
     else:
@@ -429,6 +423,29 @@ def closest_list(cards_played,ad,mm_yyyy):
         return [alldecks[index][0],alldecks[index][1]]
     else:
         return ["Unknown","NA"]
+def get_limited_subarch(cards_played):
+    # Input:  Set{Strings}
+    # Output: [String,String]
+
+    wubrg = ["","","","",""]
+
+    for card in cards_played:
+        if card == "Plains":
+            wubrg[0] = "W"
+        elif card == "Island":
+            wubrg[1] = "U"
+        elif card == "Swamp":
+            wubrg[2] = "B"
+        elif card == "Mountain":
+            wubrg[3] = "R"
+        elif card == "Forest":
+            wubrg[4] = "G"
+
+    limited_sa = wubrg[0] + wubrg[1] + wubrg[2] + wubrg[3] + wubrg[4]
+    if limited_sa == "":
+        return "NA"
+    else:
+        return limited_sa
 def replace_pname(tstring,plist,pdict):
     # Input:  String,List,Dict
     # Output: String

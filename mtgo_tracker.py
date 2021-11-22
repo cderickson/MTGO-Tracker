@@ -161,7 +161,6 @@ def choose_size_window():
 def clear_loaded():
     global all_data
     global all_data_inverted
-    global all_decks
     global parsed_file_list
     global hero
     global filter_dict
@@ -174,7 +173,6 @@ def clear_loaded():
 
     all_data =          [[],[],[],[]]
     all_data_inverted = [[],[],[],[]]
-    all_decks.clear()
     parsed_file_list =  []
     hero =              ""
     filter_dict.clear()
@@ -682,7 +680,7 @@ def get_formats():
     else:
         all_data_inverted = modo.invert_join(all_data)
         set_display("Matches")
-def deck_data_guess(data,rerun,update_all):
+def deck_data_guess(rerun,update_all):
     global all_data
     global all_data_inverted
 
@@ -692,41 +690,50 @@ def deck_data_guess(data,rerun,update_all):
     p1_sa_index = modo.match_header().index("P1_Subarch")
     p2_sa_index = modo.match_header().index("P2_Subarch")
     format_index = modo.match_header().index("Format")
-    df2 = modo.to_dataframe(data[2],modo.play_header())
+    df2 = modo.to_dataframe(all_data[2],modo.play_header())
 
-    for i in data[0]:
-        mm_yyyy = i[date_index][5:7] + "-" + i[date_index][0:4]
+    for i in all_data[0]:
+        yyyy_mm = i[date_index][0:4] + "-" + i[date_index][5:7]
         players = [i[p1_index],i[p2_index]]
         
-            # Skip Limited Matches.
-        if i[format_index] in input_options["Limited Formats"]:
-            continue
+        # Skip Limited Matches.
+        # if i[format_index] in input_options["Limited Formats"]:
+        #     continue
 
-            # Update P1_Subarch, P2_Subarch for all Matches.
+        # Update P1_Subarch, P2_Subarch for all Matches.
         if update_all == True:
             cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
             cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-            p1_data = modo.closest_list(set(cards1),all_decks,mm_yyyy)
-            p2_data = modo.closest_list(set(cards2),all_decks,mm_yyyy)
-            i[p1_sa_index] = p1_data[0]
-            i[p2_sa_index] = p2_data[0]
+            if i[format_index] in input_options["Limited Formats"]:
+                i[p1_sa_index] = modo.get_limited_subarch(cards1)
+                i[p2_sa_index] = modo.get_limited_subarch(cards2)
+            else: 
+                p1_data = modo.closest_list(set(cards1),all_decks,yyyy_mm)
+                p2_data = modo.closest_list(set(cards2),all_decks,yyyy_mm)
+                i[p1_sa_index] = p1_data[0]
+                i[p2_sa_index] = p2_data[0]
             # if p1_data[1] == p2_data[1]:
             #     i[format_index] = p1_data[1]
-                # Uncomment if we want to update Format column if Best Guesses have matching Format.
+            # Uncomment if we want to update Format column if Best Guesses have matching Format.
 
-            # Update P1_Subarch, P2_Subarch only if equal to "Unknown" or "NA".
+        # Update P1_Subarch, P2_Subarch only if equal to "Unknown" or "NA".
         if update_all == False:
             if (i[p1_sa_index] == "Unknown") or (i[p1_sa_index] == "NA"):
                 cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                p1_data = modo.closest_list(set(cards1),all_decks,mm_yyyy)
-                i[p1_sa_index] = p1_data[0]
+                if i[format_index] in input_options["Limited Formats"]:
+                    i[p1_sa_index] = modo.get_limited_subarch(cards1)
+                else:
+                    p1_data = modo.closest_list(set(cards1),all_decks,yyyy_mm)
+                    i[p1_sa_index] = p1_data[0]
             if (i[p2_sa_index] == "Unknown") or (i[p2_sa_index] == "NA"):
                 cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                p2_data = modo.closest_list(set(cards2),all_decks,mm_yyyy)
-                i[p2_sa_index] = p2_data[0]
+                if i[format_index] in input_options["Limited Formats"]:
+                    i[p2_sa_index] = modo.get_limited_subarch(cards2)
+                else:
+                    p2_data = modo.closest_list(set(cards2),all_decks,yyyy_mm)
+                    i[p2_sa_index] = p2_data[0]
 
-    all_data = data
-    all_data_inverted = modo.invert_join(data)
+    all_data_inverted = modo.invert_join(all_data)
 def rerun_decks_window():
     height = 300
     width =  400
@@ -743,13 +750,13 @@ def rerun_decks_window():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def apply_to_all():
-        deck_data_guess(all_data,rerun=True,update_all=True)
+        deck_data_guess(rerun=True,update_all=True)
         set_display("Matches")
         status_label.config(text="Updated the P1_Subarch, P2_Subarch, Format columns for each match.")
         close()
 
     def apply_to_unknowns():
-        deck_data_guess(all_data,rerun=True,update_all=False)
+        deck_data_guess(rerun=True,update_all=False)
         set_display("Matches")
         status_label.config(text="Updated Unknowns in the P1_Subarch, P2_Subarch columns.")
         close()
@@ -998,7 +1005,7 @@ def ask_for_format(players,cards1,cards2,card3,cards4,n,total,mdata):
     label3 = tk.Label(mid_frame2,text=str3,anchor="n",wraplength=width/2,justify="left")
     label4 = tk.Label(mid_frame2,text=str4,anchor="n",wraplength=width/2,justify="left")
 
-    submit_button = tk.Button(bot_frame2,text="Save Changes",command=lambda : [close_format_window()])
+    submit_button = tk.Button(bot_frame2,text="Apply Changes",command=lambda : [close_format_window()])
 
     arch_options = ["NA"] + input_options["Archetypes"]
     p1_arch = tk.StringVar()
@@ -1637,12 +1644,12 @@ def set_filter():
     drop_col = tk.OptionMenu(top_frame,col,*col_options)
     op_menu  = tk.OptionMenu(top_frame,op,*operators)
     drop_key = ttk.Combobox(top_frame,textvariable=key,width=15,
-        state="readonly",font="Helvetica 12",justify=tk.CENTER,
+        state="readonly",font="Helvetica 14",justify=tk.CENTER,
         postcommand=update_combobox)
     drop_key.bind("<FocusIn>",defocus)
     date = DateEntry(top_frame,date_pattern="y-mm-dd",width=10,
         year=today.year,month=today.month,day=today.day,
-        font="Helvetica 12",state="readonly")
+        font="Helvetica 14",state="readonly")
  
     button1 = tk.Button(top_frame,text="Add",command=lambda : add())
     button2 = tk.Button(bot_frame,text="Clear",command=lambda : [clear_filter(),update_filter_text()])
@@ -2410,6 +2417,13 @@ def get_stats():
         mid_frame6.grid_remove()
         mid_frame7.grid_remove()
         mid_frame8.grid_remove()
+
+    def defocus(event):
+        # Clear Auto-Highlight in Combobox menu.
+        menu_2.selection_clear()
+        menu_3.selection_clear()
+        menu_4.selection_clear()
+        menu_5.selection_clear()
 
     def match_stats(hero,mformat,lformat,deck,opp_deck,date_range,s_type):
         stats_window.title("Statistics - Match Data")
@@ -3222,22 +3236,22 @@ def get_stats():
                 pm_over_time = pm_over_time[start_index:]
             return [x,pm_over_time]
 
-        #mid_frame5["text"] = "Win Rate Over Time: " + mformat
-        #mid_frame6["text"] = "Win Rate Over Time: "+ mformat + " - " + deck
-
         df_time = df0_i[(df0_i.P1 == hero)]
         if mformat != "All Formats":
             df_time =   df_time[(df_time.Format == mformat)]
         df_time = df_time.sort_values(by=["Date"])
+        df_time = df_time[(df_time.Date.between(date_range[0],date_range[1]))]
+        
         g1_list = get_wr_over_time(df_time,0)
-        #g1_list = get_pm_over_time(df_time,0)
+        # g1_list = get_pm_over_time(df_time,0)
 
-        fig = plt.figure(figsize=(5,4),dpi=100)
+        fig = plt.figure(figsize=(7,5),dpi=100)
         plt.plot(g1_list[0],g1_list[1])
-        #plt.title("Match Wins Over .500:\n"+mformat)
-        plt.title("Win Rate Over Time:\n"+mformat)
         plt.xlabel("Matches Played")
-        #plt.ylabel("Match Wins Over .500")
+
+        # plt.title("Match Wins Over .500:\n" + mformat)
+        # plt.ylabel("Match Wins Over .500")
+        plt.title("Win Rate Over Time:\n" + mformat)
         plt.ylabel("Winning Percentage")
 
         canvas = FigureCanvasTkAgg(fig,mid_frame5)
@@ -3245,17 +3259,20 @@ def get_stats():
         canvas.get_tk_widget().grid(row=0,column=0,sticky="")
 
         if deck != "All Decks":
-            df_time_d =  df_time[(df_time.P1_Subarch == deck)] # Filtered by P1=hero,Format=mformat,P1_Subarch=deck
+            # Filtered by P1=hero,Format=mformat,P1_Subarch=deck
+            df_time_d = df_time[(df_time.P1_Subarch == deck)]
             df_time_d = df_time_d.sort_values(by=["Date"])     
+            
             g2_list = get_wr_over_time(df_time_d,0)
-            #g2_list = get_pm_over_time(df_time_d,0)
+            # g2_list = get_pm_over_time(df_time_d,0)
 
-            fig = plt.figure(figsize=(5,4),dpi=100)
+            fig = plt.figure(figsize=(7,5),dpi=100)
             plt.plot(g2_list[0],g2_list[1])
-            #plt.title("Match Wins Over .500:\n"+mformat+": "+deck)
-            plt.title("Win Rate Over Time:\n" + mformat + ": " + deck)
             plt.xlabel("Matches Played")
-            #plt.ylabel("Match Wins Over .500")
+
+            # plt.title("Match Wins Over .500:\n" + mformat + ": " + deck)
+            # plt.ylabel("Match Wins Over .500")
+            plt.title("Win Rate Over Time:\n" + mformat + ": " + deck)
             plt.ylabel("Winning Percentage")
 
             canvas2 = FigureCanvasTkAgg(fig,mid_frame6)
@@ -3463,25 +3480,30 @@ def get_stats():
 
         format_options = df0_i[(df0_i.P1 == player.get())].Format.value_counts().keys().tolist()
         format_options.insert(0,"All Formats")
-        menu = menu_2["menu"]
-        menu.delete(0,"end")
-        for i in format_options:
-            menu.add_command(label=i,command=lambda x=i: mformat.set(x))
+        # menu = menu_2["menu"]
+        # menu.delete(0,"end")
+        # for i in format_options:
+        #     menu.add_command(label=i,command=lambda x=i: mformat.set(x))
+        menu_2["values"] = format_options # Comment out to switch to OptionMenu.
         mformat.set(format_options[0])
 
         update_deck_menu()
         update_opp_deck_menu()
        
-        menu_2["state"]   = tk.NORMAL
-        menu_4["state"]   = tk.NORMAL
-        menu_5["state"]   = tk.NORMAL
+        #menu_2["state"]   = tk.NORMAL
+        #menu_4["state"]   = tk.NORMAL
+        #menu_5["state"]   = tk.NORMAL
         menu_6["state"]   = tk.NORMAL
+        menu_2["state"]   = "readonly"
+        menu_4["state"]   = "readonly"
+        menu_5["state"]   = "readonly"
         button_1["state"] = tk.NORMAL
         
     def update_format(*argv):
         if mformat.get() in input_options["Limited Formats"]:
             lim_format.set("All Limited Formats")
-            menu_3["state"] = tk.NORMAL
+            #menu_3["state"] = tk.NORMAL
+            menu_3["state"] = "readonly"
             update_lim_menu()
         else:
             lim_format.set("All Limited Formats")
@@ -3497,10 +3519,11 @@ def get_stats():
         lim_formats_played = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())].Limited_Format.value_counts().keys().tolist()
         lim_formats_played.insert(0,"All Limited Formats")
 
-        menu = menu_3["menu"]
-        menu.delete(0,"end")
-        for i in lim_formats_played:
-            menu.add_command(label=i,command=lambda x=i: lim_format.set(x))
+        # menu = menu_3["menu"]
+        # menu.delete(0,"end")
+        # for i in lim_formats_played:
+        #     menu.add_command(label=i,command=lambda x=i: lim_format.set(x))
+        menu_3["values"] = lim_formats_played # Comment out to switch to OptionMenu.
         lim_format.set(lim_formats_played[0])
 
     def update_deck_menu(*argv):
@@ -3525,10 +3548,11 @@ def get_stats():
                     break
         decks_played.insert(0,"All Decks")
 
-        menu = menu_4["menu"]
-        menu.delete(0,"end")
-        for i in decks_played:
-            menu.add_command(label=i,command=lambda x=i: deck.set(x))
+        # menu = menu_4["menu"]
+        # menu.delete(0,"end")
+        # for i in decks_played:
+        #     menu.add_command(label=i,command=lambda x=i: deck.set(x))
+        menu_4["values"] = decks_played # Comment out to switch to OptionMenu.
         deck.set(decks_played[0])
 
     def update_opp_deck_menu(*argv):
@@ -3546,10 +3570,11 @@ def get_stats():
         opp_decks_played = df.P2_Subarch.value_counts().keys().tolist()
         opp_decks_played.insert(0,"All Opp. Decks")
 
-        menu = menu_5["menu"]
-        menu.delete(0,"end")
-        for i in opp_decks_played:
-            menu.add_command(label=i,command=lambda x=i: opp_deck.set(x))
+        # menu = menu_5["menu"]
+        # menu.delete(0,"end")
+        # for i in opp_decks_played:
+        #     menu.add_command(label=i,command=lambda x=i: opp_deck.set(x))
+        menu_5["values"] = opp_decks_played # Comment out to switch to OptionMenu.
         opp_deck.set(opp_decks_played[0])
 
     def update_s_type(*argv):
@@ -3558,7 +3583,11 @@ def get_stats():
         if s_type.get() == "Time Data":
             menu_5["state"]   = tk.DISABLED
         else:
-            menu_5["state"]   = tk.NORMAL
+            #menu_5["state"]   = tk.NORMAL
+            menu_5["state"]   = "readonly"
+
+    def update_combobox():
+        pass
 
     def load_data():
         if date_entry_1.get() < date_entry_2.get():
@@ -3607,17 +3636,29 @@ def get_stats():
     s_type.set(stat_types[0])
     
     menu_1 = tk.OptionMenu(top_frame,player,*p1_options)
-    menu_2 = tk.OptionMenu(top_frame,mformat,*format_options)
-    menu_3 = tk.OptionMenu(top_frame,lim_format,*limited_options)
-    menu_4 = tk.OptionMenu(top_frame,deck,*decks_played)
-    menu_5 = tk.OptionMenu(top_frame,opp_deck,*opp_decks_played)
+    # menu_2 = tk.OptionMenu(top_frame,mformat,*format_options)
+    # menu_3 = tk.OptionMenu(top_frame,lim_format,*limited_options)
+    # menu_4 = tk.OptionMenu(top_frame,deck,*decks_played)
+    # menu_5 = tk.OptionMenu(top_frame,opp_deck,*opp_decks_played)
+    menu_2 = ttk.Combobox(top_frame,textvariable=mformat,width=14,height=12,
+        state="readonly",font="Helvetica 14",justify=tk.CENTER,
+        postcommand=update_combobox)
+    menu_3 = ttk.Combobox(top_frame,textvariable=lim_format,width=14,height=12,
+        state="readonly",font="Helvetica 14",justify=tk.CENTER,
+        postcommand=update_combobox)
+    menu_4 = ttk.Combobox(top_frame,textvariable=deck,width=14,height=12,
+        state="readonly",font="Helvetica 14",justify=tk.CENTER,
+        postcommand=update_combobox)
+    menu_5 = ttk.Combobox(top_frame,textvariable=opp_deck,width=14,height=12,
+        state="readonly",font="Helvetica 14",justify=tk.CENTER,
+        postcommand=update_combobox)
     menu_6 = tk.OptionMenu(top_frame,s_type,*stat_types)
     date_entry_1 = DateEntry(top_frame,date_pattern="y-mm-dd",width=10,
         year=int(date_min[0:4]),month=int(date_min[5:7]),day=int(date_min[8:10]),
-        font="Helvetica 12",state="readonly")
+        font="Helvetica 14",state="readonly")
     date_entry_2 = DateEntry(top_frame,date_pattern="y-mm-dd",width=10,
         year=today.year,month=today.month,day=today.day,
-        font="Helvetica 12",state="readonly")
+        font="Helvetica 14",state="readonly")
     button_1 = tk.Button(top_frame,text="GO",state=tk.DISABLED,width=12,bg="black",fg="white",command=lambda : load_data())
     
     menu_1["state"] = tk.DISABLED
@@ -3626,16 +3667,21 @@ def get_stats():
     menu_4["state"] = tk.DISABLED
     menu_5["state"] = tk.DISABLED
     menu_6["state"] = tk.DISABLED
-    
-    menu_1.grid(row=0,column=0,padx=10,pady=10)
-    menu_2.grid(row=0,column=1,padx=10,pady=10)
-    menu_3.grid(row=0,column=2,padx=10,pady=10)
-    menu_4.grid(row=0,column=3,padx=10,pady=10)
-    menu_5.grid(row=0,column=4,padx=10,pady=10)
-    date_entry_1.grid(row=0,column=5,padx=10,pady=10)
-    date_entry_2.grid(row=0,column=6,padx=10,pady=10)
-    menu_6.grid(row=0,column=7,padx=10,pady=10)
-    button_1.grid(row=0,column=8,padx=10,pady=10)
+
+    menu_2.bind("<FocusIn>",defocus)
+    menu_3.bind("<FocusIn>",defocus)
+    menu_4.bind("<FocusIn>",defocus)
+    menu_5.bind("<FocusIn>",defocus)
+
+    menu_1.grid(row=0,column=0,padx=5,pady=10)
+    menu_2.grid(row=0,column=1,padx=5,pady=10)
+    menu_3.grid(row=0,column=2,padx=5,pady=10)
+    menu_4.grid(row=0,column=3,padx=5,pady=10)
+    menu_5.grid(row=0,column=4,padx=5,pady=10)
+    date_entry_1.grid(row=0,column=5,padx=5,pady=10)
+    date_entry_2.grid(row=0,column=6,padx=5,pady=10)
+    menu_6.grid(row=0,column=7,padx=5,pady=10)
+    button_1.grid(row=0,column=8,padx=5,pady=10)
     
     menu_1.config(bg="black",disabledforeground="white")
     menu_6.config(bg="black",fg="white",activebackground="black",activeforeground="white")
