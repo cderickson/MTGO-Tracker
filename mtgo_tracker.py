@@ -647,7 +647,10 @@ def input_missing_data():
         n += 1
         
         # Match record is missing some data.
-        if (i[p1_arch_index] == "NA") or (i[p2_arch_index] == "NA") or (i[mformat_index] == "NA") or (i[mtype_index] == "NA") or \
+        if (i[p1_arch_index] == "NA") or (i[p1_sub_index] == "NA") or \
+            (i[p2_arch_index] == "NA") or (i[p2_sub_index] == "NA") or \
+            (i[p1_sub_index] == "Unknown") or (i[p2_sub_index] == "Unknown") or \
+            (i[mformat_index] == "NA") or (i[mtype_index] == "NA") or \
             ((i[mformat_index] in input_options["Limited Formats"]) & (i[lformat_index] == "NA")): 
             count += 1
             df = modo.to_dataframe(all_data[2],modo.play_header())
