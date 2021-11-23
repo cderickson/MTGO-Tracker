@@ -701,7 +701,7 @@ def deck_data_guess(update_type):
         #     continue
 
         if update_type == "Limited":
-            if (i[format_index] in input_options["Limited Formats"]) & (i[format_index] != "Cube"):
+            if i[format_index] in input_options["Limited Formats"]:
                 cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
                 cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
                 i[p1_sa_index] = modo.get_limited_subarch(cards1)
@@ -711,7 +711,7 @@ def deck_data_guess(update_type):
         elif update_type == "All":
             cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
             cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-            if (i[format_index] in input_options["Limited Formats"]) & (i[format_index] != "Cube"):
+            if i[format_index] in input_options["Limited Formats"]:
                 i[p1_sa_index] = modo.get_limited_subarch(cards1)
                 i[p2_sa_index] = modo.get_limited_subarch(cards2)
             else: 
@@ -728,14 +728,14 @@ def deck_data_guess(update_type):
         elif update_type == "Unknowns":
             if (i[p1_sa_index] == "Unknown") or (i[p1_sa_index] == "NA"):
                 cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                if (i[format_index] in input_options["Limited Formats"]) & (i[format_index] != "Cube"):
+                if i[format_index] in input_options["Limited Formats"]:
                     i[p1_sa_index] = modo.get_limited_subarch(cards1)
                 else:
                     p1_data = modo.closest_list(set(cards1),all_decks,yyyy_mm)
                     i[p1_sa_index] = p1_data[0]
             if (i[p2_sa_index] == "Unknown") or (i[p2_sa_index] == "NA"):
                 cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                if (i[format_index] in input_options["Limited Formats"]) & (i[format_index] != "Cube"):
+                if i[format_index] in input_options["Limited Formats"]:
                     i[p2_sa_index] = modo.get_limited_subarch(cards2)
                 else:
                     p2_data = modo.closest_list(set(cards2),all_decks,yyyy_mm)
