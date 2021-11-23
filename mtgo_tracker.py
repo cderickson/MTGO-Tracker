@@ -411,15 +411,16 @@ def startup():
     if os.path.isdir("lists") == False:
         os.mkdir(filepath_root + "\\" + "lists")
     filepath_decks = filepath_root + "\\" + "lists"
+
     if os.path.isdir("save") == False:
         os.mkdir(filepath_root + "\\" + "save")
     os.chdir(filepath_root + "\\" + "save")
 
     if os.path.isfile("settings.p"):
         settings = pickle.load(open("settings.p","rb"))
-        filepath_root =   settings[0]
+        #filepath_root =   settings[0]
         filepath_export = settings[1]
-        filepath_decks =  settings[2]
+        #filepath_decks =  settings[2]
         filepath_logs =   settings[3]
         hero =            settings[4]
 
@@ -760,19 +761,28 @@ def rerun_decks_window():
     def apply_to_all():
         deck_data_guess(update_type="All")
         set_display("Matches")
-        status_label.config(text="Updated the P1_Subarch, P2_Subarch columns for each match.")
+        t = "Updated the P1_Subarch, P2_Subarch columns for each Match in the Date Range: " + list(all_decks.keys())[0]
+        if len(all_decks) > 1:
+            t += " to " + list(all_decks.keys())[-1]
+        status_label.config(text=t)
         close()
 
     def apply_to_unknowns():
         deck_data_guess(update_type="Unknowns")
         set_display("Matches")
-        status_label.config(text="Updated Unknowns in the P1_Subarch, P2_Subarch columns.")
+        t = "Updated the P1_Subarch, P2_Subarch columns for Unknown Decks in the Date Range: " + list(all_decks.keys())[0]
+        if len(all_decks) > 1:
+            t += " to " + list(all_decks.keys())[-1]
+        status_label.config(text=t)
         close()
 
     def apply_to_limited():
         deck_data_guess(update_type="Limited")
         set_display("Matches")
-        status_label.config(text="Updated the P1_Subarch, P2_Subarch columns for Limited (Non-Cube) Matches.")
+        t = "Updated the P1_Subarch, P2_Subarch columns for Limited Matches in the Date Range: " + list(all_decks.keys())[0]
+        if len(all_decks) > 1:
+            t += " to " + list(all_decks.keys())[-1]
+        status_label.config(text=t)
         close()
 
     def guess(mode):
@@ -788,12 +798,14 @@ def rerun_decks_window():
         fp_decks = os.path.normpath(fp_decks)
         if (fp_decks is None) or (fp_decks == "") or (fp_decks == "."):
             label1.config(text="No Default Decklists Folder")
-            button_apply_all["state"] = tk.DISABLED
-            button_apply_unknown["state"] = tk.DISABLED
+            #button_apply_all["state"] = tk.DISABLED
+            #button_apply_unknown["state"] = tk.DISABLED
+            button_apply["state"] = tk.DISABLED
         else:
             label1.config(text=fp_decks)
-            button_apply_all["state"] = tk.NORMAL
-            button_apply_unknown["state"] = tk.NORMAL
+            #button_apply_all["state"] = tk.NORMAL
+            #button_apply_unknown["state"] = tk.NORMAL
+            button_apply["state"] = tk.NORMAL
         button2["state"] = tk.NORMAL
 
     def import_decks():
@@ -810,16 +822,19 @@ def rerun_decks_window():
         get_lists()
         if len(all_decks) == 0:
             label2["text"] = "Sample decklists loaded: NONE"
-            button_apply_all["state"] = tk.DISABLED
-            button_apply_unknown["state"] = tk.DISABLED
+            #button_apply_all["state"] = tk.DISABLED
+            #button_apply_unknown["state"] = tk.DISABLED
+            button_apply["state"] = tk.DISABLED
         elif len(all_decks) == 1:
             label2["text"] = "Sample decklists loaded: " + list(all_decks.keys())[0]
-            button_apply_all["state"] = tk.NORMAL
-            button_apply_unknown["state"] = tk.NORMAL
+            #button_apply_all["state"] = tk.NORMAL
+            #button_apply_unknown["state"] = tk.NORMAL
+            button_apply["state"] = tk.NORMAL
         else:
             label2["text"] = "Sample decklists loaded: " + list(all_decks.keys())[0] + " to " + list(all_decks.keys())[-1]
-            button_apply_all["state"] = tk.NORMAL
-            button_apply_unknown["state"] = tk.NORMAL
+            #button_apply_all["state"] = tk.NORMAL
+            #button_apply_unknown["state"] = tk.NORMAL
+            button_apply["state"] = tk.NORMAL
 
         button2["state"] = tk.DISABLED
 
@@ -862,8 +877,9 @@ def rerun_decks_window():
     fp_decks = filepath_decks
     if (filepath_decks is None) or (filepath_decks == "") or (filepath_decks == "."):
         label1 = tk.Label(mid_frame,text="No Default Decklists Folder",wraplength=width,justify="left")
-        button_apply_all["state"] = tk.DISABLED
-        button_apply_unknown["state"] = tk.DISABLED
+        #button_apply_all["state"] = tk.DISABLED
+        #button_apply_unknown["state"] = tk.DISABLED
+        button_apply["state"] = tk.DISABLED
     else:
         label1 = tk.Label(mid_frame,text=filepath_decks,wraplength=width,justify="left")
 
@@ -877,8 +893,9 @@ def rerun_decks_window():
     button_close.grid(row=0,column=2,padx=10,pady=10)   
 
     if len(all_decks) == 0:
-        button_apply_all["state"] = tk.DISABLED
-        button_apply_unknown["state"] = tk.DISABLED
+        #button_apply_all["state"] = tk.DISABLED
+        #button_apply_unknown["state"] = tk.DISABLED
+        button_apply["state"] = tk.DISABLED
 
     rerun_decks_window.protocol("WM_DELETE_WINDOW", lambda : close())
 def input_missing_data(players,cards1,cards2,card3,cards4,n,total,mdata):
