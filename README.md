@@ -1,6 +1,8 @@
 # MTGO-Tracker
 MTGO-Tracker will break down your play history on Magic Online into a personal database. It will help you format your data for further statistical analysis, or allow you to simply use the built-in descriptive statistics.
 
+Three (3) tables are created: **Matches, Games, and Plays**. These tables will help you not only track and analyze your results, but your play patterns as well.
+
 <p align="center">
 <img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_image.jpg?raw=true" width="808" height="448">
 </p>
