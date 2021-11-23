@@ -1338,8 +1338,8 @@ def set_default_hero():
 
     hero_window.protocol("WM_DELETE_WINDOW", lambda : close_hero_window())
 def set_default_export():
-    height = 300
-    width =  400
+    height = 150
+    width =  300
     export_window = tk.Toplevel(window)
     export_window.title("Set Default Export Folder")
     export_window.iconbitmap(export_window,"icon.ico")
@@ -1353,7 +1353,7 @@ def set_default_export():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def get_export_path():
-        fp = filedialog.askdirectory()  
+        fp = filedialog.askdirectory()
         fp = os.path.normpath(fp)
         if (fp is None) or (fp == "") or (fp == "."):
             label1.config(text="No Default Export Folder")
@@ -1391,17 +1391,17 @@ def set_default_export():
     button3 = tk.Button(bot_frame,text="Save",command=lambda : save_path())
     button4 = tk.Button(bot_frame,text="Cancel",command=lambda : close_export_window())
     
-    label1.grid(row=0,column=0,pady=(75,5))
+    label1.grid(row=0,column=0,pady=(10,5))
     button1.grid(row=1,column=0,pady=0)
     button3.grid(row=4,column=0,padx=10,pady=10)
     button4.grid(row=4,column=1,padx=10,pady=10)
     
     export_window.protocol("WM_DELETE_WINDOW", lambda : close_export_window())
 def set_default_import():
-    height = 300
-    width =  400
+    height = 200
+    width =  350
     import_window = tk.Toplevel(window)
-    import_window.title("Set Default Export Folder")
+    import_window.title("Set Default Import Folders")
     import_window.iconbitmap(import_window,"icon.ico")
     import_window.minsize(width,height)
     import_window.resizable(False,False)
@@ -1470,7 +1470,7 @@ def set_default_import():
     button3 = tk.Button(bot_frame,text="Save",command=lambda : save_path())
     button4 = tk.Button(bot_frame,text="Cancel",command=lambda : close_import_window())
 
-    label1.grid(row=0,column=0,pady=(40,5))
+    label1.grid(row=0,column=0,pady=(5,5))
     button1.grid(row=1,column=0,pady=0)
     label2.grid(row=2,column=0,pady=5)
     button2.grid(row=3,column=0,pady=0)
