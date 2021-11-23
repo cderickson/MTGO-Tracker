@@ -1587,10 +1587,11 @@ def set_filter():
         drop_key["values"] = key_options       
     
     def add():
-        if key.get() == "None Selected.":
-            return
         o = op.get()
         c = col.get()
+        k = key.get()
+        if (k == "None Selected.") and (c != "Date"):
+            return
         if c == "Date":
             if o == ">":
                 k = date.get() + "-00:00"
@@ -1598,8 +1599,6 @@ def set_filter():
                 k = date.get() + "-23:59"
             elif o == "=":
                 k = date.get() + "-12:00"
-        else:
-            k = key.get()
         add_filter_setting(c,k,o)
         update_filter_text()
     
