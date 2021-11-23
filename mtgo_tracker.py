@@ -628,7 +628,7 @@ def get_lists():
             month_decks.append(deck)
         all_decks[i] = month_decks
     os.chdir(filepath_root)
-def get_formats():
+def input_missing_data():
     global all_data
     global all_data_inverted
   
@@ -650,11 +650,8 @@ def get_formats():
         if (i[p1_arch_index] == "NA") or (i[p2_arch_index] == "NA") or (i[mformat_index] == "NA") or (i[mtype_index] == "NA") or \
             ((i[mformat_index] in input_options["Limited Formats"]) & (i[lformat_index] == "NA")): 
             count += 1
-            plays = []
-            for j in all_data[2]: # Iterate through plays.
-                if i[0] == j[0]:  # Add Play to our List if it has a matching Match_ID
-                    plays.append(j)
-            df = modo.to_dataframe(plays,modo.play_header())
+            df = modo.to_dataframe(all_data[2],modo.play_header())
+            df = df[(df.Match_ID == i[0])]
             players = [i[modo.match_header().index("P1")],i[modo.match_header().index("P2")]]
             cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
             cards2 =  df[(df.Casting_Player == players[0]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
@@ -664,10 +661,12 @@ def get_formats():
             cards2 = sorted(cards2,key=str.casefold)
             cards3 = sorted(cards3,key=str.casefold)
             cards4 = sorted(cards4,key=str.casefold)
-            input_missing_data(players,cards1,cards2,cards3,cards4,n,total,i)
+            revise_entry_window(players,cards1,cards2,cards3,cards4,(n,total),i)
             if missing_data == "Exit":
                 break
-            if missing_data != "Skip":
+            elif missing_data == "Skip":
+                continue
+            else:
                 i[p1_arch_index] = missing_data[0]
                 i[p1_sub_index] =  missing_data[1]
                 i[p2_arch_index] = missing_data[2]
@@ -898,7 +897,7 @@ def rerun_decks_window():
         button_apply["state"] = tk.DISABLED
 
     rerun_decks_window.protocol("WM_DELETE_WINDOW", lambda : close())
-def input_missing_data(players,cards1,cards2,card3,cards4,n,total,mdata):
+def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     def close_format_window(*argv):
         global missing_data
         missing_data = [p1_arch.get(),p1_sub.get(),p2_arch.get(),p2_sub.get(),mformat.get(),dformat.get(),mtype.get()]
@@ -920,7 +919,10 @@ def input_missing_data(players,cards1,cards2,card3,cards4,n,total,mdata):
     height = 450
     width =  650                
     gf = tk.Toplevel(window)
-    gf.title("Input Missing Data - " + str(n) + "/" + str(total) + " Matches.")
+    if progress == 0:
+        gf.title("Revise Entry")
+    else:
+        gf.title("Input Missing Data - " + str(progress[0]) + "/" + str(progress[1]) + " Matches.")
     gf.iconbitmap(gf,"icon.ico")        
     gf.minsize(width,height)
     gf.resizable(False,False)
@@ -1718,9 +1720,60 @@ def set_filter():
     update_keys()
     update_filter_text()
     filter_window.protocol("WM_DELETE_WINDOW", lambda : close_filter_window())
-def test():
-    # Test function
-    pass  
+def revise_record2():
+    global all_data
+    global all_data_inverted
+
+    if tree1.focus() == "":
+        return
+
+    selected = tree1.focus()
+    values = list(tree1.item(selected,"values"))
+
+    p1_index      = modo.match_header().index("P1")
+    p2_index      = modo.match_header().index("P2")
+    mformat_index = modo.match_header().index("Format")
+    lformat_index = modo.match_header().index("Limited_Format")
+    mtype_index =   modo.match_header().index("Match_Type")
+    p1_arch_index = modo.match_header().index("P1_Arch")
+    p1_sub_index =  modo.match_header().index("P1_Subarch")
+    p2_arch_index = modo.match_header().index("P2_Arch")
+    p2_sub_index =  modo.match_header().index("P2_Subarch")
+
+    df = modo.to_dataframe(all_data[2],modo.play_header())
+    df = df[(df.Match_ID == values[0])]
+    players = [values[p1_index],values[p2_index]]
+    cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
+    cards2 =  df[(df.Casting_Player == players[0]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
+    cards3 =  df[(df.Casting_Player == players[1]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
+    cards4 =  df[(df.Casting_Player == players[1]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
+    cards1 = sorted(cards1,key=str.casefold)
+    cards2 = sorted(cards2,key=str.casefold)
+    cards3 = sorted(cards3,key=str.casefold)
+    cards4 = sorted(cards4,key=str.casefold)
+    revise_entry_window(players,cards1,cards2,cards3,cards4,0,values)
+    if (missing_data == "Exit") or (missing_data == "Skip"):
+        return
+
+    for i in all_data[0]:
+        if i[0] == values[0]:
+            if i[p1_index] == values[p1_index]:
+                i[p1_arch_index] = missing_data[0]
+                i[p1_sub_index] =  missing_data[1]
+                i[p2_arch_index] = missing_data[2]
+                i[p2_sub_index] =  missing_data[3]
+            else:
+                i[p1_arch_index] = missing_data[2]
+                i[p1_sub_index] =  missing_data[3]
+                i[p2_arch_index] = missing_data[0]
+                i[p2_sub_index] =  missing_data[1]
+            i[mformat_index] = missing_data[4]
+            i[lformat_index] = missing_data[5]
+            i[mtype_index] =   missing_data[6]  
+            break
+
+    all_data_inverted = modo.invert_join(all_data)
+    set_display("Matches")
 def revise_record():
     if tree1.focus() == "":
         return
@@ -2209,7 +2262,7 @@ def revise_method_select():
     if len(tree1.selection()) > 1:
         revise_record_multi()
     else:
-        revise_record()
+        revise_record2()
 def import_window():
     height = 200
     width =  350
@@ -3748,6 +3801,9 @@ def get_stats():
 def exit():
     #save_settings()
     window.destroy()
+def test():
+    # Test method
+    pass
 
 window = tk.Tk() 
 window.title("MTGO-Tracker")
@@ -3849,7 +3905,7 @@ export_menu.add_command(label="Set Default Export Folder",command=lambda : set_d
 data_menu = tk.Menu(menu_bar,tearoff=False)
 menu_bar.add_cascade(label="Data",menu=data_menu)
 
-data_menu.add_command(label="Input Missing Match Data",command=lambda : get_formats(),state=tk.DISABLED)
+data_menu.add_command(label="Input Missing Match Data",command=lambda : input_missing_data(),state=tk.DISABLED)
 data_menu.add_command(label="Input Missing Game_Winner Data",command=lambda : get_winners(),state=tk.DISABLED)
 data_menu.add_command(label="Apply Best Guess for Deck Names",command=lambda : rerun_decks_window(),state=tk.DISABLED)
 data_menu.add_separator()
