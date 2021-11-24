@@ -3854,7 +3854,7 @@ stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,
 back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,
                         command=lambda :bb_clicked())
 test_button = tk.Button(left_frame,text="TEST BUTTON",
-                        command=lambda : choose_size_window())
+                        command=lambda : test())
 
 status_label = tk.Label(bottom_frame,text="")
 status_label.grid(row=0,column=0)
