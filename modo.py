@@ -1,4 +1,4 @@
-#modo match log cleaning module
+# MODO GameLog Cleaning Module
 import tkinter as tk
 import pandas as pd
 import copy
@@ -7,6 +7,10 @@ import copy
 # Add the column to appropriate modo.XXXX_header() function.
 # Add the column to appropriate modo.XXXX_data() function.
 # Any saved data will have to be deleted and reloaded.
+
+# To add a menu option to dropdowns in revision windows:
+# Add the option to the appropriate list below.
+# Add the option under the appropriate header in the input_options.txt file.
 
 def limited_formats():
     return ["Booster Draft",

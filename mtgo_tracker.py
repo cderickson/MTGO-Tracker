@@ -1343,7 +1343,7 @@ def set_default_hero():
     mid_frame.grid_rowconfigure(0,weight=1)
     mid_frame.grid_rowconfigure(1,weight=1)
 
-    label1 = tk.Label(mid_frame,text="Enter 'Hero' Name.",wraplength=width,justify="left")
+    label1 = tk.Label(mid_frame,text="Enter 'Hero' Username.",wraplength=width,justify="left")
     entry = tk.Entry(mid_frame)
     entry.insert(0,hero)
     label2 = tk.Label(mid_frame,text="",wraplength=width,justify="left")
@@ -1396,7 +1396,7 @@ def set_default_export():
         export_window.grab_release()
         export_window.destroy()
    
-    mid_frame = tk.LabelFrame(export_window,text="Folder Paths")
+    mid_frame = tk.LabelFrame(export_window,text="Export Folder Path")
     bot_frame = tk.Frame(export_window)
     mid_frame.grid(row=1,column=0,sticky="nsew")
     bot_frame.grid(row=2,column=0,sticky="")
@@ -1469,7 +1469,7 @@ def set_default_import():
         import_window.grab_release()
         import_window.destroy()
    
-    mid_frame = tk.LabelFrame(import_window,text="Folder Paths")
+    mid_frame = tk.LabelFrame(import_window,text="Import Folder Paths")
     bot_frame = tk.Frame(import_window)
     mid_frame.grid(row=1,column=0,sticky="nsew")
     bot_frame.grid(row=2,column=0,sticky="")
@@ -1713,14 +1713,16 @@ def set_filter():
 
     drop_col.grid(row=0,column=1,padx=10,pady=10)
     op_menu.grid(row=0,column=2,padx=10,pady=10)
+    drop_key.grid(row=0,column=3,padx=10,pady=10)
     button1.grid(row=0,column=4,padx=10,pady=10)
-    label1.grid(row=0,column=0,sticky="w",rowspan=11)
+
+    label1.grid(row=0,column=0,sticky="w")
     label2.grid(row=0,column=1,sticky="w")
+
     button2.grid(row=0,column=0,padx=10,pady=10)
     button3.grid(row=0,column=1,padx=10,pady=10)
     button4.grid(row=0,column=2,padx=10,pady=10)
 
-    update_keys()
     update_filter_text()
     filter_window.protocol("WM_DELETE_WINDOW", lambda : close_filter_window())
 def revise_record2():
@@ -2318,7 +2320,7 @@ def import_window():
     
     fp_logs = filepath_logs
 
-    mid_frame = tk.LabelFrame(import_window,text="Folder Path")
+    mid_frame = tk.LabelFrame(import_window,text="Import Folder Path")
     bot_frame = tk.Frame(import_window)
     mid_frame.grid(row=1,column=0,sticky="nsew")
     bot_frame.grid(row=2,column=0,sticky="")
