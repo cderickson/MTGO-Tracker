@@ -33,14 +33,31 @@ main_window_size =  ("small",1000,500)
 input_options =     {}
 filter_dict =       {}
 display =           ""
-data_loaded =       False
-filter_changed =    False
 prev_display =      ""
 uaw =               "NA"
-new_import =        False
 field =             ""
+new_import =        False
+data_loaded =       False
+filter_changed =    False
+ask_to_save =       False
 
-def save_window():
+def save(exit):
+    global ask_to_save
+    ask_to_save = False
+
+    save_settings()
+    os.chdir(filepath_root + "\\" + "save")
+
+    pickle.dump(all_data,open("all_data.p","wb"))
+    pickle.dump(parsed_file_list,open("parsed_file_list.p","wb"))
+
+    status_label.config(text="Save complete. Data will be loaded automatically on next startup.")
+    print(status_label["text"])
+    os.chdir(filepath_root)
+
+    if exit:
+        close()
+def save_window(exit):
     height = 100
     width =  300
     save_window = tk.Toplevel(window)
@@ -54,18 +71,6 @@ def save_window():
     save_window.geometry("+%d+%d" % 
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
-
-    def save():
-        save_settings()
-
-        os.chdir(filepath_root + "\\" + "save")
-
-        pickle.dump(all_data,open("all_data.p","wb"))
-        pickle.dump(parsed_file_list,open("parsed_file_list.p","wb"))
-
-        status_label.config(text="Save complete. Data will be loaded automatically on next startup.")
-        os.chdir(filepath_root)
-        close_save_window()
 
     def close_save_window():
         save_window.grab_release()
@@ -85,16 +90,24 @@ def save_window():
     bot_frame.grid_rowconfigure(0,weight=1)
     bot_frame.grid_rowconfigure(1,weight=1)
 
-    label1 = tk.Label(mid_frame,text="This will overwrite any previously saved data.\nAre you sure you want to save?",wraplength=width)
-    button_save = tk.Button(bot_frame,text="Save",command=lambda : save())
-    button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close_save_window())
+    if exit:
+        t = "Exit without saving?"
+        button_yes =  tk.Button(bot_frame,text="Yes",width=10,command=lambda : [close_save_window(),close()])
+        button_save = tk.Button(bot_frame,text="Save and Exit",width=10,command=lambda : [close_save_window(),save(exit=True)])
+        button_yes.grid(row=0,column=0,padx=5,pady=5)
+    else:
+        t = "This will overwrite any previously saved data.\nAre you sure you want to save?"
+        button_save = tk.Button(bot_frame,text="Save",width=10,command=lambda : [close_save_window(),save(exit=False)])
+    label1 = tk.Label(mid_frame,text=t,wraplength=width)
+    
+    button_close = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_save_window())
     
     label1.grid(row=0,column=0,sticky="nsew")       
-    button_save.grid(row=0,column=0,padx=5,pady=5)
-    button_close.grid(row=0,column=1,padx=5,pady=5)
+    button_save.grid(row=0,column=1,padx=5,pady=5)
+    button_close.grid(row=0,column=2,padx=5,pady=5)
     
     save_window.protocol("WM_DELETE_WINDOW", lambda : close_save_window())
-def choose_size_window():
+def set_default_window_size():
     height = 150
     width =  300
     popup = tk.Toplevel(window)
@@ -109,7 +122,7 @@ def choose_size_window():
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
-    def save():
+    def save_main_window_size():
         global main_window_size
 
         if window_size.get() == "Small: 1000x500":
@@ -120,6 +133,7 @@ def choose_size_window():
         os.chdir(filepath_root + "\\" + "save")
         pickle.dump(main_window_size,open("main_window_size.p","wb"))
         status_label.config(text="Default Window Size saved. Change will take effect at next startup.")
+        print(status_label["text"])
         os.chdir(filepath_root)
         close_window()
 
@@ -149,8 +163,8 @@ def choose_size_window():
 
     menu_1 = tk.OptionMenu(mid_frame,window_size,*options)
     label1 = tk.Label(mid_frame,text="Default Main Window Size",wraplength=width)
-    button_save = tk.Button(bot_frame,text="Save",command=lambda : save())
-    button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close_window())
+    button_save = tk.Button(bot_frame,text="Save",width=10,command=lambda : save_main_window_size())
+    button_close = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_window())
     
     menu_1.grid(row=0,column=0,sticky="s")
     label1.grid(row=1,column=0,sticky="n",pady=10)       
@@ -170,6 +184,7 @@ def clear_loaded():
     global prev_display
     global uaw
     global new_import
+    global ask_to_save
 
     all_data =          [[],[],[],[]]
     all_data_inverted = [[],[],[],[]]
@@ -177,11 +192,12 @@ def clear_loaded():
     hero =              ""
     filter_dict.clear()
     display =           ""
-    data_loaded =       False
-    filter_changed =    False
     prev_display =      ""
     uaw =               "NA"
+    data_loaded =       False
+    filter_changed =    False
     new_import =        False
+    ask_to_save =       False
 
     match_button["state"] = tk.DISABLED
     game_button["state"] = tk.DISABLED
@@ -222,6 +238,7 @@ def clear_window():
     def clear():
         clear_loaded()
         status_label.config(text="Previously loaded data has been cleared.")
+        print(status_label["text"])
         close_clear_window()
 
     def close_clear_window():
@@ -243,8 +260,8 @@ def clear_window():
     bot_frame.grid_rowconfigure(1,weight=1)
 
     label1 = tk.Label(mid_frame,text="This will clear loaded data without saving.\nAre you sure you want to continue?",wraplength=width)
-    button_clear = tk.Button(bot_frame,text="Clear",command=lambda : clear())
-    button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close_clear_window())
+    button_clear = tk.Button(bot_frame,text="Clear",width=10,command=lambda : clear())
+    button_close = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_clear_window())
     
     label1.grid(row=0,column=0,sticky="nsew")       
     button_clear.grid(row=0,column=0,padx=5,pady=5)
@@ -255,7 +272,7 @@ def load_saved_window():
     height = 100
     width =  300
     load_saved_window = tk.Toplevel(window)
-    load_saved_window.title("Clear Saved Data")
+    load_saved_window.title("Load Saved Data")
     load_saved_window.iconbitmap(load_saved_window,"icon.ico")
     load_saved_window.minsize(width,height)
     load_saved_window.resizable(False,False)
@@ -290,8 +307,8 @@ def load_saved_window():
     bot_frame.grid_rowconfigure(1,weight=1)
 
     label1 = tk.Label(mid_frame,text="This will clear your current session.\nAre you sure you want to continue?",wraplength=width)
-    button_load = tk.Button(bot_frame,text="Load",command=lambda : load())
-    button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close_load_window())
+    button_load = tk.Button(bot_frame,text="Load",width=10,command=lambda : load())
+    button_close = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_load_window())
     
     label1.grid(row=0,column=0,sticky="nsew")       
     button_load.grid(row=0,column=0,padx=5,pady=5)
@@ -313,8 +330,6 @@ def delete_session():
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
-    
-
     def del_session():
         global all_decks
         all_decks.clear()
@@ -330,8 +345,10 @@ def delete_session():
 
         if session_exists == True:
             status_label.config(text="Saved session data has been deleted.")
+            print(status_label["text"])
         else:
             status_label.config(text="No saved session data was found.")
+            print(status_label["text"])
 
         os.chdir(filepath_root)
         close_del_window()
@@ -355,8 +372,8 @@ def delete_session():
     bot_frame.grid_rowconfigure(1,weight=1)
 
     label1 = tk.Label(mid_frame,text="This will delete your previous saved session.\nAre you sure you want to continue?",wraplength=width)
-    button_del = tk.Button(bot_frame,text="Delete Saved Session",command=lambda : del_session())
-    button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close_del_window())
+    button_del = tk.Button(bot_frame,text="Delete",width=10,command=lambda : del_session())
+    button_close = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_del_window())
     
     label1.grid(row=0,column=0,sticky="nsew")       
     button_del.grid(row=0,column=0,padx=5,pady=5)
@@ -375,6 +392,7 @@ def startup():
     global parsed_file_list
     global data_loaded
     global input_options
+    global ask_to_save
 
     if os.path.isfile("input_options.txt"):
         in_header = False
@@ -430,6 +448,7 @@ def startup():
 
     if (os.path.isfile("all_data.p") == False) or (os.path.isfile("parsed_file_list.p") == False) or (os.path.isfile("all_decks.p") == False):
         status_label.config(text="No session data to load. Import your MTGO GameLog files to get started.")
+        print(status_label["text"])
         os.chdir(filepath_root)
         return
     all_data = pickle.load(open("all_data.p","rb"))
@@ -437,8 +456,6 @@ def startup():
     parsed_file_list = pickle.load(open("parsed_file_list.p","rb"))
 
     all_data_inverted = modo.invert_join(all_data)
-
-    status_label.config(text="Imported " + str(len(all_data[0])) + " matches.")
 
     filter_button["state"] = tk.NORMAL
     clear_button["state"] = tk.NORMAL
@@ -453,7 +470,7 @@ def startup():
     data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
     data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
     data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
-
+    ask_to_save = False
     os.chdir(filepath_root)
 def save_settings():
     os.chdir(filepath_root + "\\" + "save")
@@ -506,6 +523,7 @@ def get_all_data():
     global data_loaded
     global parsed_file_list
     global new_import
+    global ask_to_save
     count = 0
 
     new_data = [[],[],[],[]]
@@ -543,6 +561,10 @@ def get_all_data():
             all_data_inverted[index].append(j)
 
     status_label.config(text="Imported " + str(count) + " new matches.")
+    print(status_label["text"])
+    
+    if count > 0:
+        ask_to_save = True
     new_import = True
 
     if len(all_data[0]) != 0:
@@ -611,6 +633,7 @@ def print_data(data,header):
         new_import = False
     else:
         status_label.config(text="Displaying: " + str(len(df_rows)) + " of " + str(total) + " records.")
+        print(status_label["text"])
     revise_button["state"] = tk.DISABLED
 def get_lists():
     global all_decks
@@ -680,12 +703,14 @@ def input_missing_data():
 
     if count == 0:
         status_label.config(text="No Matches with Missing Data.")
+        print(status_label["text"])
     else:
         all_data_inverted = modo.invert_join(all_data)
         set_display("Matches")
 def deck_data_guess(update_type):
     global all_data
     global all_data_inverted
+    global ask_to_save
 
     date_index = modo.match_header().index("Date")
     p1_index = modo.match_header().index("P1")
@@ -705,6 +730,7 @@ def deck_data_guess(update_type):
 
         if update_type == "Limited":
             if i[format_index] in input_options["Limited Formats"]:
+                ask_to_save = True
                 cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
                 cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
                 i[p1_sa_index] = modo.get_limited_subarch(cards1)
@@ -712,6 +738,7 @@ def deck_data_guess(update_type):
 
         # Update P1_Subarch, P2_Subarch for all Matches.
         elif update_type == "All":
+            ask_to_save = True
             cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
             cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
             if i[format_index] in input_options["Limited Formats"]:
@@ -730,6 +757,7 @@ def deck_data_guess(update_type):
         # Update P1_Subarch, P2_Subarch only if equal to "Unknown" or "NA".
         elif update_type == "Unknowns":
             if (i[p1_sa_index] == "Unknown") or (i[p1_sa_index] == "NA"):
+                ask_to_save = True
                 cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
                 if i[format_index] in input_options["Limited Formats"]:
                     i[p1_sa_index] = modo.get_limited_subarch(cards1)
@@ -737,6 +765,7 @@ def deck_data_guess(update_type):
                     p1_data = modo.closest_list(set(cards1),all_decks,yyyy_mm)
                     i[p1_sa_index] = p1_data[0]
             if (i[p2_sa_index] == "Unknown") or (i[p2_sa_index] == "NA"):
+                ask_to_save = True
                 cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
                 if i[format_index] in input_options["Limited Formats"]:
                     i[p2_sa_index] = modo.get_limited_subarch(cards2)
@@ -767,6 +796,7 @@ def rerun_decks_window():
         if len(all_decks) > 1:
             t += " to " + list(all_decks.keys())[-1]
         status_label.config(text=t)
+        print(status_label["text"])
         close()
 
     def apply_to_unknowns():
@@ -776,6 +806,7 @@ def rerun_decks_window():
         if len(all_decks) > 1:
             t += " to " + list(all_decks.keys())[-1]
         status_label.config(text=t)
+        print(status_label["text"])
         close()
 
     def apply_to_limited():
@@ -785,6 +816,7 @@ def rerun_decks_window():
         if len(all_decks) > 1:
             t += " to " + list(all_decks.keys())[-1]
         status_label.config(text=t)
+        print(status_label["text"])
         close()
 
     def guess(mode):
@@ -860,14 +892,14 @@ def rerun_decks_window():
     apply_mode = tk.StringVar()
     apply_mode.set(apply_options[0])
 
-    button2 = tk.Button(mid_frame,text="Import Sample Decklists",command=lambda : import_decks())
+    button2 = tk.Button(mid_frame,text="Import Sample Decklists",width=20,command=lambda : import_decks())
     label2 = tk.Label(mid_frame,text="",wraplength=width)
     label3 = tk.Label(mid_frame,text="This will apply best guess deck names in the P1/P2_Subarch columns.\n\nChoose which rows to apply changes.",wraplength=width)
     #button_apply_all = tk.Button(bot_frame,text="Apply to All",command=lambda : apply_to_all())
     #button_apply_unknown = tk.Button(bot_frame,text="Apply to Unknowns",command=lambda : apply_to_unknowns())
     apply_menu = tk.OptionMenu(bot_frame,apply_mode,*apply_options)
-    button_apply = tk.Button(bot_frame,text="Apply",command=lambda : guess(apply_mode.get()))
-    button_close = tk.Button(bot_frame,text="Cancel",command=lambda : close())
+    button_apply = tk.Button(bot_frame,text="Apply",width=10,command=lambda : guess(apply_mode.get()))
+    button_close = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close())
 
     if len(all_decks) == 0:
         label2["text"] = "Sample decklists loaded: NONE"
@@ -903,19 +935,23 @@ def rerun_decks_window():
 def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     def close_format_window(*argv):
         global missing_data
-        missing_data = [p1_arch.get(),p1_sub.get(),p2_arch.get(),p2_sub.get(),mformat.get(),dformat.get(),mtype.get()]
-        if missing_data[0] == "Select P1 Archetype":
-            missing_data[0] = "NA"
-        if missing_data[2] == "Select P2 Archetype":
-            missing_data[2] = "NA"
-        if missing_data[4] == "Select Format":
-            missing_data[4] = "NA"
-        if missing_data[5] == "Select Limited Format":
-            missing_data[5] = "NA"
-        if missing_data[6] == "Select Match Type":
-            missing_data[6] = "NA"         
-        for i in argv:
-            missing_data = i
+        global ask_to_save
+
+        if len(argv) > 0:
+            missing_data = argv[0]
+        else:
+            missing_data = [p1_arch.get(),p1_sub.get(),p2_arch.get(),p2_sub.get(),mformat.get(),dformat.get(),mtype.get()]
+            if missing_data[0] == "Select P1 Archetype":
+                missing_data[0] = "NA"
+            if missing_data[2] == "Select P2 Archetype":
+                missing_data[2] = "NA"
+            if missing_data[4] == "Select Format":
+                missing_data[4] = "NA"
+            if missing_data[5] == "Select Limited Format":
+                missing_data[5] = "NA"
+            if missing_data[6] == "Select Match Type":
+                missing_data[6] = "NA"
+            ask_to_save = True
         gf.grab_release()
         gf.destroy()
              
@@ -1057,7 +1093,7 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     label3 = tk.Label(mid_frame2,text=str3,anchor="n",wraplength=width/2,justify="left")
     label4 = tk.Label(mid_frame2,text=str4,anchor="n",wraplength=width/2,justify="left")
 
-    submit_button = tk.Button(bot_frame2,text="Apply Changes",command=lambda : [close_format_window()])
+    submit_button = tk.Button(bot_frame2,text="Apply",width=10,command=lambda : [close_format_window()])
 
     arch_options = ["NA"] + input_options["Archetypes"]
     p1_arch = tk.StringVar()
@@ -1113,8 +1149,8 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     p1_sub.insert(0,mdata[modo.match_header().index("P1_Subarch")])
     p2_sub.insert(0,mdata[modo.match_header().index("P2_Subarch")])
 
-    button_skip = tk.Button(top_frame,text="Skip Match",command=lambda : [close_format_window("Skip")])
-    button_exit = tk.Button(top_frame,text="Exit",command=lambda : [close_format_window("Exit")])
+    button_skip = tk.Button(top_frame,text="Skip Match",width=10,command=lambda : [close_format_window("Skip")])
+    button_exit = tk.Button(top_frame,text="Exit",width=10,command=lambda : [close_format_window("Exit")])
     
     label1.grid(row=0,column=0,sticky="nsew",padx=5,pady=5)
     label2.grid(row=0,column=1,sticky="nsew",padx=5,pady=5)
@@ -1305,6 +1341,7 @@ def set_default_hero():
             hero = ""
             save_settings()
             status_label.config(text="Cleared Setting: Hero")
+            print(status_label["text"])
             if display != "Plays":
                 set_display(display)
             stats_button["state"] = tk.DISABLED
@@ -1313,6 +1350,7 @@ def set_default_hero():
             hero = entry.get()
             save_settings()
             status_label.config(text="Updated Hero to " + hero + ".")
+            print(status_label["text"])
             if display != "Plays":
                 set_display(display)
             stats_button["state"] = tk.NORMAL
@@ -1347,16 +1385,16 @@ def set_default_hero():
     entry = tk.Entry(mid_frame)
     entry.insert(0,hero)
     label2 = tk.Label(mid_frame,text="",wraplength=width,justify="left")
-    button1 = tk.Button(bot_frame,text="Save",command=lambda : set_hero())
-    button2 = tk.Button(bot_frame,text="Clear",command=lambda : clear_hero())
-    button3 = tk.Button(bot_frame,text="Cancel",command=lambda : close_hero_window())
+    button1 = tk.Button(bot_frame,text="Save",width=10,command=lambda : set_hero())
+    button2 = tk.Button(bot_frame,text="Clear",width=10,command=lambda : clear_hero())
+    button3 = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_hero_window())
 
     label1.grid(row=0,column=0,pady=(15,5))       
     entry.grid(row=1,column=0)    
     label2.grid(row=2,column=0,pady=(5,5))
-    button1.grid(row=4,column=0,padx=10,pady=10)
-    button2.grid(row=4,column=1,padx=10,pady=10)
-    button3.grid(row=4,column=2,padx=10,pady=10)
+    button1.grid(row=4,column=0,padx=5,pady=5)
+    button2.grid(row=4,column=1,padx=5,pady=5)
+    button3.grid(row=4,column=2,padx=5,pady=5)
 
     hero_window.protocol("WM_DELETE_WINDOW", lambda : close_hero_window())
 def set_default_export():
@@ -1390,6 +1428,7 @@ def set_default_export():
             filepath_export = label1["text"]
         save_settings()
         status_label.config(text="Updated export folder location.")
+        print(status_label["text"])
         close_export_window()
         
     def close_export_window():
@@ -1409,14 +1448,14 @@ def set_default_export():
         label1 = tk.Label(mid_frame,text="No Default Export Folder",wraplength=width,justify="left")
     else:
         label1 = tk.Label(mid_frame,text=filepath_export,wraplength=width,justify="left")
-    button1 = tk.Button(mid_frame,text="Set Default Export Folder",command=lambda : get_export_path())
-    button3 = tk.Button(bot_frame,text="Save",command=lambda : save_path())
-    button4 = tk.Button(bot_frame,text="Cancel",command=lambda : close_export_window())
+    button1 = tk.Button(mid_frame,text="Set Default Export Folder",width=20,command=lambda : get_export_path())
+    button3 = tk.Button(bot_frame,text="Save",width=10,command=lambda : save_path())
+    button4 = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_export_window())
     
-    label1.grid(row=0,column=0,pady=(10,5))
+    label1.grid(row=0,column=0,pady=(15,5))
     button1.grid(row=1,column=0,pady=0)
-    button3.grid(row=4,column=0,padx=10,pady=10)
-    button4.grid(row=4,column=1,padx=10,pady=10)
+    button3.grid(row=4,column=0,padx=5,pady=5)
+    button4.grid(row=4,column=1,padx=5,pady=5)
     
     export_window.protocol("WM_DELETE_WINDOW", lambda : close_export_window())
 def set_default_import():
@@ -1463,6 +1502,7 @@ def set_default_import():
             filepath_logs = label2["text"]
         save_settings()
         status_label.config(text="Updated default import folder location.")
+        print(status_label["text"])
         close_import_window()
         
     def close_import_window():
@@ -1482,22 +1522,22 @@ def set_default_import():
         label1 = tk.Label(mid_frame,text="No Default Decklists Folder",wraplength=width,justify="left")
     else:
         label1 = tk.Label(mid_frame,text=filepath_decks,wraplength=width,justify="left")
-    button1 = tk.Button(mid_frame,text="Set Default Decklists Folder",command=lambda : get_decks_path())
+    button1 = tk.Button(mid_frame,text="Get Decklists Folder",width=20,command=lambda : get_decks_path())
 
     if (filepath_logs is None) or (filepath_logs == "") or (filepath_decks == "."):
         label2 = tk.Label(mid_frame,text="No Default Game Logs Folder",wraplength=width,justify="left")
     else:
         label2 = tk.Label(mid_frame,text=filepath_logs,wraplength=width,justify="left")
-    button2 = tk.Button(mid_frame,text="Get Game Logs Folder",command=lambda : get_logs_path())
-    button3 = tk.Button(bot_frame,text="Save",command=lambda : save_path())
-    button4 = tk.Button(bot_frame,text="Cancel",command=lambda : close_import_window())
+    button2 = tk.Button(mid_frame,text="Get Game Logs Folder",width=20,command=lambda : get_logs_path())
+    button3 = tk.Button(bot_frame,text="Save",width=10,command=lambda : save_path())
+    button4 = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_import_window())
 
     label1.grid(row=0,column=0,pady=(5,5))
     button1.grid(row=1,column=0,pady=0)
     label2.grid(row=2,column=0,pady=5)
     button2.grid(row=3,column=0,pady=0)
-    button3.grid(row=4,column=0,padx=10,pady=10)
-    button4.grid(row=4,column=1,padx=10,pady=10)
+    button3.grid(row=4,column=0,padx=5,pady=5)
+    button4.grid(row=4,column=1,padx=5,pady=5)
     
     button1["state"] = tk.DISABLED
 
@@ -1702,10 +1742,10 @@ def set_filter():
         year=today.year,month=today.month,day=today.day,
         font="Helvetica 14",state="readonly")
  
-    button1 = tk.Button(top_frame,text="Add",command=lambda : add())
-    button2 = tk.Button(bot_frame,text="Clear",command=lambda : [clear_filter(),update_filter_text()])
-    button3 = tk.Button(bot_frame,text="Apply Filter",command=lambda : apply_filter())
-    button4 = tk.Button(bot_frame,text="Exit",command=lambda : close_filter_window())
+    button1 = tk.Button(top_frame,text="Add",width=10,command=lambda : add())
+    button2 = tk.Button(bot_frame,text="Clear",width=10,command=lambda : [clear_filter(),update_filter_text()])
+    button3 = tk.Button(bot_frame,text="Apply Filter",width=10,command=lambda : apply_filter())
+    button4 = tk.Button(bot_frame,text="Exit",width=10,command=lambda : close_filter_window())
     label1 = tk.Label(mid_frame1,text="",wraplength=width/2,justify="left")
     label2 = tk.Label(mid_frame2,text="",wraplength=width/2,justify="left")
 
@@ -2145,6 +2185,8 @@ def revise_record_multi():
             lim_format_entry["state"] = tk.DISABLED
 
     def close_revise_window():
+        global ask_to_save
+        ask_to_save = True
         for i in selected:
             values = list(tree1.item(i,"values"))
             for index,j in enumerate(itertools.chain(*[all_data[0],all_data_inverted[0]])):
@@ -2250,6 +2292,9 @@ def revise_record_multi():
     button3.grid(row=0,column=0,padx=10,pady=10)
     button4.grid(row=0,column=1,padx=10,pady=10)
 
+    p1_subarch_entry.insert(0,"NA")
+    p2_subarch_entry.insert(0,"NA")
+
     field_val.trace("w",field_updated)
     match_format.trace("w",format_updated)
 
@@ -2329,9 +2374,9 @@ def import_window():
     import_window.rowconfigure(1,minsize=0,weight=1)  
     mid_frame.grid_columnconfigure(0,weight=1)
 
-    button2 = tk.Button(mid_frame,text="Get Logs Folder",command=lambda : get_logs_path())
-    button3 = tk.Button(bot_frame,text="Import", command=lambda : import_data())
-    button4 = tk.Button(bot_frame,text="Cancel", command=lambda : close_import_window())
+    button2 = tk.Button(mid_frame,text="Get Logs Folder",width=20,command=lambda : get_logs_path())
+    button3 = tk.Button(bot_frame,text="Import",width=10,command=lambda : import_data())
+    button4 = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_import_window())
     if (filepath_logs is None) or (filepath_logs == ""):
         label2 = tk.Label(mid_frame,text="No Default Game Logs Folder",wraplength=width,justify="left")
         button3["state"] = tk.DISABLED
@@ -2373,9 +2418,11 @@ def get_winners():
                 data_index += 1
             else:
                 all_data[3].pop(data_index)
+                ask_to_save = True
             i[gw_index] = uaw
     if n == 0:
         status_label.config(text="No Games with missing Game_Winner.")
+        print(status_label["text"])
     else:
         modo.update_game_wins(all_data,all_headers)
         all_data_inverted = modo.invert_join(all_data)
@@ -2429,14 +2476,10 @@ def ask_for_winner(ga_list,p1,p2,n,total):
     label1 = tk.Label(top_frame,text=message,anchor="center",wraplength=width)
     label2 = tk.Label(mid_frame,text=all_ga,anchor="center",wraplength=width,justify="left")
 
-    button_skip = tk.Button(top_frame,text="Skip Game",
-                            command=lambda : close_gw_window("NA"))
-    button_exit = tk.Button(top_frame,text="Exit",
-                            command=lambda : close_gw_window("Exit."))    
-    button1 = tk.Button(bot_frame,text=p1,
-                        command=lambda : close_gw_window("P1"))
-    button2 = tk.Button(bot_frame,text=p2,
-                        command=lambda : close_gw_window("P2"))
+    button_skip = tk.Button(top_frame,text="Skip Game",width=10,command=lambda : close_gw_window("NA"))
+    button_exit = tk.Button(top_frame,text="Exit",width=10,command=lambda : close_gw_window("Exit."))    
+    button1 = tk.Button(bot_frame,text=p1,width=20,command=lambda : close_gw_window("P1"))
+    button2 = tk.Button(bot_frame,text=p2,width=20,command=lambda : close_gw_window("P2"))
 
     button_skip.grid(row=0,column=0,padx=10,pady=10)
     label1.grid(row=0,column=1,sticky="nsew",padx=5,pady=5)
@@ -3803,9 +3846,14 @@ def get_stats():
         menu_1["state"] = tk.NORMAL
 
     stats_window.protocol("WM_DELETE_WINDOW", lambda : close_stats_window())
-def exit():
-    #save_settings()
+def close():
+    # Close window and exit program.
     window.destroy()
+def exit_select():
+    if ask_to_save:
+        save_window(exit=True)
+    else:
+        close()
 def test():
     # Test method
     pass
@@ -3869,11 +3917,11 @@ menu_bar.add_cascade(label="File",menu=file_menu)
 file_menu.add_command(label="Load MTGO GameLogs",command=lambda : import_window())
 file_menu.add_separator()
 file_menu.add_command(label="Load Saved Data",command=lambda : load_saved_window())
-file_menu.add_command(label="Save Data",command=lambda : save_window(),state=tk.DISABLED)
+file_menu.add_command(label="Save Data",command=lambda : save_window(exit=False),state=tk.DISABLED)
 file_menu.add_separator()
-file_menu.add_command(label="Set Default Window Size",command=lambda : choose_size_window())
+file_menu.add_command(label="Set Default Window Size",command=lambda : set_default_window_size())
 file_menu.add_separator()
-file_menu.add_command(label="Exit",command=lambda : exit())
+file_menu.add_command(label="Exit",command=lambda : exit_select())
 
 export_menu = tk.Menu(menu_bar,tearoff=False)
 menu_bar.add_cascade(label="Export",menu=export_menu)
@@ -3955,7 +4003,7 @@ s.map("Treeview",
       foreground=[("selected","#ffffff")])
 
 startup()
-window.protocol("WM_DELETE_WINDOW", lambda : exit())
+window.protocol("WM_DELETE_WINDOW", lambda : exit_select())
 
 # Event loop: listens for events (keypress, etc.)
 # Blocks code after from running until window is closed.
