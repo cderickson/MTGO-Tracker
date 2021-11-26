@@ -505,8 +505,6 @@ def set_display(d,*argv):
         game_button["state"] = tk.NORMAL
     if play_button["state"] == tk.DISABLED:
         play_button["state"] = tk.NORMAL
-    # if stats_button["state"] == tk.DISABLED:
-    #     stats_button["state"] = tk.NORMAL
         
     if d == "Matches":
         back_button["state"] = tk.DISABLED
@@ -614,7 +612,6 @@ def print_data(data,header):
                 value = i[2:]
             if i[0] == "=":
                 if key == "Date":
-                    print(value[0:10])
                     df = df[(df[key].str.contains(value[0:10]))]
                 else:
                     df = df[(df[key] == value)]
@@ -915,7 +912,7 @@ def rerun_decks_window():
     if len(all_decks) == 0:
         button_apply["state"] = tk.DISABLED
 
-    rerun_decks_window.protocol("WM_DELETE_WINDOW", lambda : close())
+    rerun_decks_window.protocol("WM_DELETE_WINDOW", lambda : close_window())
 def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     def close_format_window(*argv):
         global missing_data
@@ -951,7 +948,7 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     gf.resizable(False,False)
     gf.attributes("-topmost",True)
     gf.grab_set()
-    gf.focus()
+    gf.focus_force()
 
     gf.geometry("+%d+%d" %
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
@@ -996,7 +993,7 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
                 menu.add_command(label=i,command=lambda x=i: mtype.set(x))
         if mtype.get() not in l:
             mtype.set("Select Match Type")
-            
+
         if mformat.get() in input_options["Limited Formats"]:
             draft_format["state"] = tk.NORMAL
             arch_options = ["Limited"]
@@ -1157,17 +1154,18 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     label_message.grid(row=0,column=1,padx=10,pady=10)
     button_exit.grid(row=0,column=2,padx=10,pady=10)
 
-    match_format.grid(row=0,column=0,padx=10,pady=10)
+    match_format.grid(row=0,column=0,padx=5,pady=5)
     match_format.config(width=20)
-    draft_format.grid(row=0,column=1,padx=10,pady=10)
+    draft_format.grid(row=0,column=1,padx=5,pady=5)
     draft_format.config(width=20)
-    match_type.grid(row=0,column=2,padx=10,pady=10)
+    match_type.grid(row=0,column=2,padx=5,pady=5)
     match_type.config(width=25)
-    submit_button.grid(row=0,column=3,padx=10,pady=10)
+    submit_button.grid(row=0,column=3,padx=5,pady=5)
 
     if mformat.get() not in input_options["Limited Formats"]:
         draft_format["state"] = tk.DISABLED
-
+    if progress == 0:
+        button_skip["state"] = tk.DISABLED
     mformat.trace("w",update_arch)
 
     gf.protocol("WM_DELETE_WINDOW", lambda : close_format_window("Exit"))
@@ -1216,6 +1214,7 @@ def export(file_type,data_type,inverted):
         filepath_export = os.path.normpath(filepath_export)
     if filepath_export is None:
         return
+    count = 0
 
     if (hero != "") or (inverted == True):
         data_to_write = all_data_inverted
@@ -1287,6 +1286,7 @@ def export(file_type,data_type,inverted):
 
     if file_type == "CSV":
         for i in range(len(file_names)):
+            count += 1
             with open(filepath_export+"/"+file_names[i],"w",encoding="UTF8",newline="") as file:
                 writer = csv.writer(file)
                 if data_type == 3:
@@ -1304,8 +1304,11 @@ def export(file_type,data_type,inverted):
                     df_rows = df_filtered.to_numpy().tolist()
                     for row in df_rows:
                         writer.writerow(row)
+        status_label.config(text="Exported " + str(count) + " CSV file(s) to " + filepath_export)
+        print(status_label["text"])
     elif file_type == "Excel":
         for i in range(len(file_names)):
+            count += 1
             f = filepath_export+"/"+file_names[i]
             if data_type == 3:
                 df = df_list[i]
@@ -1314,6 +1317,8 @@ def export(file_type,data_type,inverted):
             else:
                 df = df_filtered
             df.to_excel(f,index=False)
+        status_label.config(text="Exported " + str(count) + " Excel file(s) to " + filepath_export)
+        print(status_label["text"])
     filepath_export = fp
 def set_default_hero():
     height = 100
