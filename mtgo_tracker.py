@@ -4028,18 +4028,11 @@ def get_stats():
             date_entry_2["state"] = "readonly"
         load_data()
 
-    def update_combobox_opp():
-        pass
-
-    def update_combobox():
-        pass
-
     def load_data(*argv):
         if date_entry_1.get() < date_entry_2.get():
             dr = [date_entry_1.get() + "-00:00",date_entry_2.get() + "-23:59"]
         else:
             dr = [date_entry_1.get() + "-00:00",date_entry_2.get() + "-23:59"]
-
         if s_type.get() == "Match Stats":
             match_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())
         elif s_type.get() == "Game Stats":
@@ -4052,7 +4045,7 @@ def get_stats():
             time_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())
         elif s_type.get() == "Card Data":
             card_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())      
-        #print("loaded data:"+player.get()+","+opponent.get()+","+mformat.get()+","+lim_format.get()+","+deck.get()+","+opp_deck.get()+","+dr[0]+","+dr[1]+","+s_type.get())
+        print("loaded data:"+player.get()+","+opponent.get()+","+mformat.get()+","+lim_format.get()+","+deck.get()+","+opp_deck.get()+","+dr[0]+","+dr[1]+","+s_type.get())
 
     def close_stats_window():
         window.deiconify()
@@ -4086,20 +4079,15 @@ def get_stats():
     s_type.set(stat_types[0])
     
     menu_1 = ttk.Combobox(top_frame,textvariable=opponent,width=12,
-        state="readonly",font="Helvetica 14",justify=tk.CENTER,
-        postcommand=update_combobox_opp)
+        state="readonly",font="Helvetica 14",justify=tk.CENTER)
     menu_2 = ttk.Combobox(top_frame,textvariable=mformat,width=12,
-        state="readonly",font="Helvetica 14",justify=tk.CENTER,
-        postcommand=update_combobox)
+        state="readonly",font="Helvetica 14",justify=tk.CENTER)
     menu_3 = ttk.Combobox(top_frame,textvariable=lim_format,width=12,
-        state="readonly",font="Helvetica 14",justify=tk.CENTER,
-        postcommand=update_combobox)
+        state="readonly",font="Helvetica 14",justify=tk.CENTER)
     menu_4 = ttk.Combobox(top_frame,textvariable=deck,width=12,
-        state="readonly",font="Helvetica 14",justify=tk.CENTER,
-        postcommand=update_combobox)
+        state="readonly",font="Helvetica 14",justify=tk.CENTER)
     menu_5 = ttk.Combobox(top_frame,textvariable=opp_deck,width=12,
-        state="readonly",font="Helvetica 14",justify=tk.CENTER,
-        postcommand=update_combobox)
+        state="readonly",font="Helvetica 14",justify=tk.CENTER)
     date_entry_1 = DateEntry(top_frame,date_pattern="y-mm-dd",width=10,
         year=int(date_min[0:4]),month=int(date_min[5:7]),day=int(date_min[8:10]),
         font="Helvetica 14",state="readonly")
@@ -4124,23 +4112,29 @@ def get_stats():
 
     menu_1.grid(row=0,column=0,padx=5,pady=10,sticky="e")
     menu_2.grid(row=0,column=1,padx=5,pady=10)
-    # Menu_3 set to active when Format set to a Limited Format.
     menu_4.grid(row=0,column=3,padx=5,pady=10)
     menu_5.grid(row=0,column=4,padx=5,pady=10)
     date_entry_1.grid(row=0,column=5,padx=5,pady=10)
     date_entry_2.grid(row=0,column=6,padx=5,pady=10,sticky="w")
-    menu_6.grid(row=0,column=7,padx=5,pady=10)
+    menu_6.grid(row=0,column=7,padx=(5,10),pady=10)
     menu_6.config(width=15)
-    button_1.grid(row=0,column=8,padx=(5,10),pady=10)
+    #button_1.grid(row=0,column=8,padx=(5,10),pady=10)
     
     menu_6.config(bg="black",fg="white",activebackground="black",activeforeground="white")
     menu_6["menu"].config(bg="black",fg="white",borderwidth=0)
 
     player.trace("w",update_hero)
-    #opponent.trace("w",load_data)
     mformat.trace("w",update_format)
     lim_format.trace("w",update_lim_format)
     s_type.trace("w",update_s_type)
+
+    menu_1.bind("<<ComboboxSelected>>",load_data)
+    menu_2.bind("<<ComboboxSelected>>",load_data)
+    menu_3.bind("<<ComboboxSelected>>",load_data)
+    menu_4.bind("<<ComboboxSelected>>",load_data)
+    menu_5.bind("<<ComboboxSelected>>",load_data)
+    date_entry_1.bind("<<DateEntrySelected>>",load_data)
+    date_entry_2.bind("<<DateEntrySelected>>",load_data)
 
     player.set(hero)
     load_data()
