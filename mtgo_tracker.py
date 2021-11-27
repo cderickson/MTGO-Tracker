@@ -132,7 +132,8 @@ def set_default_window_size():
 
         os.chdir(filepath_root + "\\" + "save")
         pickle.dump(main_window_size,open("main_window_size.p","wb"))
-        status_label.config(text="Default Window Size saved. Change will take effect at next startup.")
+        window.geometry(str(main_window_size[1]) + "x" + str(main_window_size[2]))
+        status_label.config(text="Default Window Size saved.")
         print(status_label["text"])
         os.chdir(filepath_root)
         close_window()
@@ -4208,7 +4209,7 @@ file_menu.add_separator()
 file_menu.add_command(label="Load Saved Data",command=lambda : load_saved_window())
 file_menu.add_command(label="Save Data",command=lambda : save_window(exit=False),state=tk.DISABLED)
 file_menu.add_separator()
-file_menu.add_command(label="Set Default Window Size",command=lambda : set_default_window_size())
+file_menu.add_command(label="Set Main Window Size",command=lambda : set_default_window_size())
 file_menu.add_separator()
 file_menu.add_command(label="Exit",command=lambda : exit_select())
 
