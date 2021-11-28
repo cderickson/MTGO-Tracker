@@ -406,15 +406,25 @@ def closest_list(cards_played,ad,yyyy_mm):
     # Input:  Set{Strings},Dict{String : List[String,String,Set[Strings]]},String
     # Output: [String,String]
     
-    if yyyy_mm in ad:
-        alldecks = ad.get(yyyy_mm)
-        if alldecks == []:
-            return ["Unknown","NA"]
+    decks = []
+    yyyy = yyyy_mm[0:4]
+    mm = yyyy_mm[5:7]
+    if mm == "01":
+        mm = "12"
+        yyyy = str(int(yyyy) - 1)
     else:
+        mm = str(int(mm) - 1).zfill(2)
+    yyyy_mm_prev = yyyy + "-" + mm
+
+    if yyyy_mm in ad:
+        decks = ad.get(yyyy_mm).copy()
+    if yyyy_mm_prev in ad:
+        decks.extend(ad.get(yyyy_mm_prev).copy())
+    if decks == []:
         return ["Unknown","NA"]
 
     sim_list = []
-    for i in alldecks:
+    for i in decks:
         if len(i[2]) == 0:
             sim = 0
         else:
@@ -424,7 +434,7 @@ def closest_list(cards_played,ad,yyyy_mm):
 
     index = sim_list.index(max(sim_list))
     if max(sim_list) > 20:
-        return [alldecks[index][0],alldecks[index][1]]
+        return [decks[index][0],decks[index][1]]
     else:
         return ["Unknown","NA"]
 def get_limited_subarch(cards_played):
