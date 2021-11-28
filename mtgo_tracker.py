@@ -67,7 +67,6 @@ def save_window(exit):
     save_window.resizable(False,False)
     save_window.grab_set()
     save_window.focus()
-
     save_window.geometry("+%d+%d" % 
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
@@ -117,7 +116,6 @@ def set_default_window_size():
     popup.resizable(False,False)
     popup.grab_set()
     popup.focus()
-
     popup.geometry("+%d+%d" % 
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
@@ -232,7 +230,6 @@ def clear_window():
     clear_window.resizable(False,False)
     clear_window.grab_set()
     clear_window.focus()
-
     clear_window.geometry("+%d+%d" % 
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
@@ -722,10 +719,6 @@ def deck_data_guess(update_type):
     for i in all_data[0]:
         yyyy_mm = i[date_index][0:4] + "-" + i[date_index][5:7]
         players = [i[p1_index],i[p2_index]]
-        
-        # Skip Limited Matches.
-        # if i[format_index] in input_options["Limited Formats"]:
-        #     continue
 
         if update_type == "Limited":
             if i[format_index] in input_options["Limited Formats"]:
@@ -783,7 +776,6 @@ def rerun_decks_window():
     rerun_decks_window.resizable(False,False)
     rerun_decks_window.grab_set()
     rerun_decks_window.focus()
-
     rerun_decks_window.geometry("+%d+%d" % 
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
@@ -1172,8 +1164,7 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     gf.protocol("WM_DELETE_WINDOW", lambda : close_format_window("Exit"))
     gf.wait_window()
 def tree_double(event):
-    global filter_dict
-    
+    global filter_dict  
     if tree1.focus() == "":
         return None
     if display == "Plays":
@@ -1192,7 +1183,6 @@ def tree_double(event):
         set_display("Plays",True)
 def bb_clicked():
     global filter_dict
-    
     if "Match_ID" in filter_dict:
         match_id = filter_dict["Match_ID"][0][2:]
         clear_filter()
@@ -1331,7 +1321,6 @@ def set_default_hero():
     hero_window.resizable(False,False)
     hero_window.grab_set()
     hero_window.focus()
-
     hero_window.geometry("+%d+%d" % 
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
@@ -1408,7 +1397,6 @@ def set_default_export():
     export_window.resizable(False,False)
     export_window.grab_set()
     export_window.focus()
-
     export_window.geometry("+%d+%d" %
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
@@ -1469,7 +1457,6 @@ def set_default_import():
     import_window.resizable(False,False)
     import_window.grab_set()
     import_window.focus()
-
     import_window.geometry("+%d+%d" %
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
@@ -1576,7 +1563,6 @@ def sort_column_int(col,reverse,tree1):
 def add_filter_setting(index,key,op):
     global filter_dict
     global filter_changed
-    
     if key == "None Selected":
         return None
     
@@ -1603,7 +1589,6 @@ def set_filter():
     filter_window.resizable(False,False)
     filter_window.grab_set()
     filter_window.focus()
-
     filter_window.geometry("+%d+%d" %
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
@@ -2071,7 +2056,6 @@ def revise_record():
 def revise_record_multi():
     if tree1.focus() == "":
         return
-
     height = 180
     width =  300
     revise_window = tk.Toplevel(window)
@@ -2082,7 +2066,6 @@ def revise_record_multi():
     revise_window.attributes("-topmost",True)
     revise_window.grab_set()
     revise_window.focus()
-
     revise_window.geometry("+%d+%d" %
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
@@ -2623,9 +2606,9 @@ def get_stats():
         mid_frame3.grid(row=1,column=0,sticky="nsew")
         mid_frame4.grid(row=1,column=1,sticky="nsew")
 
-        df0_i_f =        df0_i[(df0_i.P1 == hero)]
-        hero_n =         df0_i_f.shape[0] # Matches played by hero
-        df0_i_f =        df0_i_f[(df0_i_f.Date > date_range[0]) & (df0_i_f.Date < date_range[1])]
+        df0_i_f = df0_i[(df0_i.P1 == hero)]
+        hero_n =  df0_i_f.shape[0] # Matches played by hero
+        df0_i_f = df0_i_f[(df0_i_f.Date > date_range[0]) & (df0_i_f.Date < date_range[1])]
 
         if mformat in input_options["Limited Formats"]:
             formats_played = df0_i_f[(df0_i_f.Format == mformat)].Limited_Format.value_counts().keys().tolist()
@@ -3921,7 +3904,6 @@ def get_stats():
         menu_4["state"]   = "readonly"
         menu_5["state"]   = "readonly"
         menu_6["state"]   = tk.NORMAL
-        button_1["state"] = tk.NORMAL
 
     def update_opp_menu(*argv):
         df = df0_i[(df0_i.P1 == player.get())]
@@ -4096,7 +4078,6 @@ def get_stats():
         year=today.year,month=today.month,day=today.day,
         font="Helvetica 14",state="readonly")
     menu_6 = tk.OptionMenu(top_frame,s_type,*stat_types)
-    button_1 = tk.Button(top_frame,text="GO",state=tk.DISABLED,width=10,bg="black",fg="white",command=lambda : load_data())
     
     menu_1["state"] = tk.DISABLED
     menu_2["state"] = tk.DISABLED
@@ -4119,7 +4100,6 @@ def get_stats():
     date_entry_2.grid(row=0,column=6,padx=5,pady=10,sticky="w")
     menu_6.grid(row=0,column=7,padx=(5,10),pady=10)
     menu_6.config(width=15)
-    #button_1.grid(row=0,column=8,padx=(5,10),pady=10)
     
     menu_6.config(bg="black",fg="white",activebackground="black",activeforeground="white")
     menu_6["menu"].config(bg="black",fg="white",borderwidth=0)
