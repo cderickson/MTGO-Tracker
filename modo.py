@@ -488,7 +488,10 @@ def parse_list(filename,init):
         if i == "" and sb == False:
             sb = True
         else:
-            card_count = int(i.split(" ",1)[0])
+            try:
+                card_count = int(i.split(" ",1)[0])
+            except ValueError:
+                return None
             card = i.split(" ",1)[1]
             while card_count > 0 and sb == False:
                 maindeck.append(card)
