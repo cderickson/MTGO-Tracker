@@ -633,7 +633,9 @@ def print_data(data,header):
     revise_button["state"] = tk.DISABLED
 def get_lists():
     global all_decks
-    
+    global ask_to_save
+    errors = []
+
     os.chdir(filepath_decks)
     folders = os.listdir()
     for i in folders:
@@ -644,8 +646,24 @@ def get_lists():
             with io.open(j,"r",encoding="ansi") as decklist:
                 initial = decklist.read()
             deck = modo.parse_list(j,initial)
+            if deck == None:
+                errors.append((i,j))
             month_decks.append(deck)
         all_decks[i] = month_decks
+    ask_to_save = True
+
+    label = f"Imported Sample Decklists. {str(len(errors))} error(s) found"
+    if len(errors) == 0:
+        label += "."
+    else:
+        label += ": "
+        for index,i in enumerate(errors):
+            if index > 0:
+                label += ", "
+            label += i[0] + "/" + i[1]
+    status_label.config(text=label)
+    print(status_label["text"])
+    
     os.chdir(filepath_root)
 def input_missing_data():
     global all_data
@@ -915,9 +933,9 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
             missing_data = argv[0]
         else:
             missing_data = [p1_arch.get(),p1_sub.get(),p2_arch.get(),p2_sub.get(),mformat.get(),dformat.get(),mtype.get()]
-            if missing_data[0] == "Select P1 Archetype":
+            if missing_data[0] == "P1 Archetype":
                 missing_data[0] = "NA"
-            if missing_data[2] == "Select P2 Archetype":
+            if missing_data[2] == "P2 Archetype":
                 missing_data[2] = "NA"
             if missing_data[4] == "Select Format":
                 missing_data[4] = "NA"
@@ -984,6 +1002,7 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
             l = ["NA"] + input_options["Sealed Match Types"]
             for i in l:
                 menu.add_command(label=i,command=lambda x=i: mtype.set(x))
+        
         if mtype.get() not in l:
             mtype.set("Select Match Type")
 
@@ -1031,13 +1050,12 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
             for i in arch_options:
                 menu.add_command(label=i,command=lambda x=i: p2_arch.set(x))
 
-            if mdata[modo.match_header().index("P1_Arch")] == "NA":
-                p1_arch.set("Select P1 Archetype")
+            if (mdata[modo.match_header().index("P1_Arch")] == "NA") or (mdata[modo.match_header().index("P1_Arch")] == "Limited"):
+                p1_arch.set("P1 Archetype")
             else:
                 p1_arch.set(mdata[modo.match_header().index("P1_Arch")])
-
-            if mdata[modo.match_header().index("P2_Arch")] == "NA":
-                p2_arch.set("Select P2 Archetype")
+            if (mdata[modo.match_header().index("P2_Arch")] == "NA") or (mdata[modo.match_header().index("P2_Arch")] == "Limited"):
+                p2_arch.set("P2 Archetype")
             else:
                 p2_arch.set(mdata[modo.match_header().index("P2_Arch")])
 
@@ -1077,9 +1095,9 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
 
     arch_options = ["NA"] + input_options["Archetypes"]
     p1_arch = tk.StringVar()
-    p1_arch.set("Select P1 Archetype")
+    p1_arch.set("P1 Archetype")
     p2_arch = tk.StringVar()
-    p2_arch.set("Select P2 Archetype")
+    p2_arch.set("P2 Archetype")
 
     format_options = ["NA"] + input_options["Constructed Formats"] + input_options["Limited Formats"]
     mformat = tk.StringVar()
