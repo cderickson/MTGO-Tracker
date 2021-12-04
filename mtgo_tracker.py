@@ -1606,7 +1606,7 @@ def set_filter():
     filter_window.minsize(width,height)
     filter_window.resizable(False,False)
     filter_window.grab_set()
-    filter_window.focus()
+    filter_window.focus_force()
     filter_window.geometry("+%d+%d" %
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
@@ -1642,7 +1642,7 @@ def set_filter():
             date.grid_forget()
 
     def update_combobox():
-        index = col_dict[col.get()]
+        index = col_options.index(col.get()) + 1
         key_options = []
         for i in tree1.get_children():
             key_options.append(tree1.set(i,index))
@@ -1710,19 +1710,14 @@ def set_filter():
     filter_changed = False
     filter_init = filter_dict.copy()
 
-    col_dict = {}
     if display == "Matches":
-        for index, i in enumerate(all_headers[0]):
-            col_dict[i] = index
+        col_options = all_headers[0].copy()
     elif display == "Games":
-        for index, i in enumerate(all_headers[1]):
-            col_dict[i] = index
+        col_options = all_headers[1].copy()
     elif display == "Plays":
-        for index, i in enumerate(all_headers[2]):
-            col_dict[i] = index
-    col_dict.pop("Match_ID")
+        col_options = all_headers[2].copy()
+    col_options.pop(0)
     
-    col_options = list(col_dict.keys())
     col = tk.StringVar()
     col.set(col_options[0])
     key = tk.StringVar()
@@ -1753,8 +1748,6 @@ def set_filter():
     label1 = tk.Label(mid_frame1,text="",wraplength=width/2,justify="left")
     label2 = tk.Label(mid_frame2,text="",wraplength=width/2,justify="left")
 
-    col.trace("w",update_keys)
-
     drop_col.grid(row=0,column=1,padx=10,pady=10)
     drop_col.config(width=15)
     op_menu.grid(row=0,column=2,padx=10,pady=10)
@@ -1768,6 +1761,7 @@ def set_filter():
     button3.grid(row=0,column=1,padx=10,pady=10)
     button4.grid(row=0,column=2,padx=10,pady=10)
 
+    col.trace("w",update_keys)
     update_filter_text()
     filter_window.protocol("WM_DELETE_WINDOW", lambda : close_filter_window())
 def revise_record2():
