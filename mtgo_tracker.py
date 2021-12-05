@@ -1600,6 +1600,11 @@ def clear_filter():
 def set_filter():
     height = 300
     width =  550
+
+    tree1.grid_forget()
+    tree_empty.grid(row=0,column=0,sticky="nsew")
+    text_frame.config(text=f"Filtering {display}")
+
     filter_window = tk.Toplevel(window)
     filter_window.title("Set Filters")
     filter_window.iconbitmap(filter_window,"icon.ico")
@@ -1696,6 +1701,8 @@ def set_filter():
     def apply_filter():
         # Update table and close window.
         set_display(display)
+        tree1.grid(row=0,column=0,sticky="nsew")
+        tree_empty.grid_forget()
         filter_window.grab_release()
         filter_window.destroy()
     
@@ -1703,6 +1710,9 @@ def set_filter():
         # Revert filter changes and close window.
         global filter_dict
         filter_dict = filter_init
+        tree1.grid(row=0,column=0,sticky="nsew")
+        tree_empty.grid_forget()
+        text_frame.config(text=display)
         filter_window.grab_release()
         filter_window.destroy()
 
@@ -4261,6 +4271,8 @@ revise_button.grid(row=5,column=0,sticky="ew",padx=5,pady=5)
 stats_button.grid(row=6,column=0,sticky="ew",padx=5,pady=50)
 back_button.grid(row=7,column=0,sticky="ew",padx=5,pady=5)
 #test_button.grid(row=13,column=0,sticky="ew",padx=5,pady=5)
+
+tree_empty = ttk.Treeview(text_frame,show="tree")
 
 tree1 = ttk.Treeview(text_frame,show="tree")
 tree1.grid(row=0,column=0,sticky="nsew")
