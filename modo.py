@@ -55,7 +55,8 @@ def cube_formats():
             "Legacy Cube",
             "Modern Cube"]
 def draft_formats():
-    return ["VOW x3",
+    return ["Vintage Masters x3",
+            "VOW x3",
             "MID x3",
             "AFR x3",
             "MH2 x3",
@@ -425,6 +426,10 @@ def closest_list(cards_played,ad,yyyy_mm):
 
     sim_list = []
     for i in decks:
+        if i == None:
+            print("error: Null List")
+            continue
+
         if len(i[2]) == 0:
             sim = 0
         else:
