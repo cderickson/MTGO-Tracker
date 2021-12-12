@@ -333,7 +333,9 @@ def delete_session():
         global all_decks
         all_decks.clear()
 
-        files = ["all_data.p","parsed_file_list.p","all_decks.p","settings.p","main_window_size.p"]
+        # Uncomment if we are adding back ability to load sample decklists from .txt files.
+        # files = ["all_data.p","parsed_file_list.p","all_decks.p","settings.p","main_window_size.p"]
+        files = ["all_data.p","parsed_file_list.p","settings.p","main_window_size.p"]
         os.chdir(filepath_root + "\\" + "save")   
 
         session_exists = False
@@ -425,9 +427,11 @@ def startup():
         input_options["Sealed Formats"] = modo.sealed_formats()
     
     filepath_root = os.getcwd()
-    if os.path.isdir("lists") == False:
-        os.mkdir(filepath_root + "\\" + "lists")
-    filepath_decks = filepath_root + "\\" + "lists"
+    # Uncomment this if we are adding back ability to import sample decklists from .txt files.
+    # if os.path.isdir("lists") == False:
+    #     os.mkdir(filepath_root + "\\" + "lists")
+    # filepath_decks = filepath_root + "\\" + "lists"
+    filepath_decks = None
 
     if os.path.isdir("save") == False:
         os.mkdir(filepath_root + "\\" + "save")
@@ -445,13 +449,15 @@ def startup():
     all_headers[1] = modo.game_header()
     all_headers[2] = modo.play_header()
 
-    if (os.path.isfile("all_data.p") == False) or (os.path.isfile("parsed_file_list.p") == False) or (os.path.isfile("all_decks.p") == False):
+    if os.path.isfile("all_decks.p"):
+        all_decks = pickle.load(open("all_decks.p","rb"))
+
+    if (os.path.isfile("all_data.p") == False) or (os.path.isfile("parsed_file_list.p") == False):
         status_label.config(text="No session data to load. Import your MTGO GameLog files to get started.")
         print(status_label["text"])
         os.chdir(filepath_root)
         return
     all_data = pickle.load(open("all_data.p","rb"))
-    all_decks = pickle.load(open("all_decks.p","rb"))
     parsed_file_list = pickle.load(open("parsed_file_list.p","rb"))
 
     all_data_inverted = modo.invert_join(all_data)
@@ -475,7 +481,8 @@ def save_settings():
     os.chdir(filepath_root + "\\" + "save")
     settings = [filepath_root,filepath_export,filepath_decks,filepath_logs,hero]
     pickle.dump(settings,open("settings.p","wb"))
-    pickle.dump(all_decks,open("all_decks.p","wb"))
+    # Uncomment if we are adding back ability to save sample decklists from .txt files.
+    # pickle.dump(all_decks,open("all_decks.p","wb"))
     pickle.dump(main_window_size,open("main_window_size.p","wb"))
     os.chdir(filepath_root)
 def set_display(d,*argv):
@@ -836,28 +843,10 @@ def rerun_decks_window():
         elif mode == "Limited Decks":
             apply_to_limited()
 
-    def get_decks_path():
-        fp_decks = filedialog.askdirectory()  
-        fp_decks = os.path.normpath(fp_decks)
-        if (fp_decks is None) or (fp_decks == "") or (fp_decks == "."):
-            label1.config(text="No Default Decklists Folder")
-            button_apply["state"] = tk.DISABLED
-        else:
-            label1.config(text=fp_decks)
-            button_apply["state"] = tk.NORMAL
-        button2["state"] = tk.NORMAL
-
     def import_decks():
         global all_decks
-        global filepath_decks
-        
-        if (label1["text"] == "No Default Decklists Folder"):
-            label3["text"] = "Decks and/or Game Logs Folder Location not set."
-            return
-        filepath_decks = label1["text"]
 
         all_decks.clear()
-
         get_lists()
         if len(all_decks) == 0:
             label2["text"] = "Sample decklists loaded: NONE"
@@ -905,13 +894,6 @@ def rerun_decks_window():
     else:
         label2["text"] = "Sample decklists loaded: " + list(all_decks.keys())[0] + " to " + list(all_decks.keys())[-1]
 
-    fp_decks = filepath_decks
-    if (filepath_decks is None) or (filepath_decks == "") or (filepath_decks == "."):
-        label1 = tk.Label(mid_frame,text="No Default Decklists Folder",wraplength=width,justify="left")
-        button_apply["state"] = tk.DISABLED
-    else:
-        label1 = tk.Label(mid_frame,text=filepath_decks,wraplength=width,justify="left")
-
     label2.grid(row=1,column=0,padx=10,pady=(20,0),sticky="nsew")
     button2.grid(row=2,column=0,padx=10,pady=5) 
     label3.grid(row=3,column=0,padx=10,pady=(10,5),sticky="nsew")       
@@ -923,6 +905,8 @@ def rerun_decks_window():
     if len(all_decks) == 0:
         button_apply["state"] = tk.DISABLED
 
+    # Comment out if we want to add back ability to import sample decklists from .txt files.
+    button2["state"] = tk.DISABLED
     rerun_decks_window.protocol("WM_DELETE_WINDOW", lambda : close_window())
 def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     def close_format_window(*argv):
