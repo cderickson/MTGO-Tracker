@@ -550,7 +550,6 @@ def game_actions(init,time):
             gameactions.append(newstring)
         # Skip game state changes.
         elif i.count(".") == 0:
-            print(i)
             continue
         # Remove tags from cards and rules text
         elif fullstring.count("[") > 0:
