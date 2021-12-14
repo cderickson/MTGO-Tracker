@@ -504,12 +504,9 @@ def set_display(d,*argv):
         else:
             back_button["state"] = tk.DISABLED
     
-    if match_button["state"] == tk.DISABLED:
-        match_button["state"] = tk.NORMAL
-    if game_button["state"] == tk.DISABLED:
-        game_button["state"] = tk.NORMAL
-    if play_button["state"] == tk.DISABLED:
-        play_button["state"] = tk.NORMAL
+    match_button["state"] = tk.NORMAL
+    game_button["state"] = tk.NORMAL
+    play_button["state"] = tk.NORMAL
         
     if d == "Matches":
         back_button["state"] = tk.DISABLED
@@ -574,6 +571,7 @@ def get_all_data():
     if len(all_data[0]) != 0:
         filter_button["state"] = tk.NORMAL
         clear_button["state"] = tk.NORMAL
+        stats_button["state"] = tk.DISABLED
         data_loaded = True
     os.chdir(filepath_root)
 def print_data(data,header):
@@ -2442,7 +2440,7 @@ def ask_for_winner(ga_list,p1,p2,n,total):
         gw.destroy()
         
     gw = tk.Toplevel()
-    gw.title("Select Game Winner")
+    gw.title("Select Game Winner - " + str(n) + "/" + str(total) + " Games")
     gw.iconbitmap(gw,"icon.ico")
     height = 400
     width = 700
@@ -2450,13 +2448,13 @@ def ask_for_winner(ga_list,p1,p2,n,total):
     gw.resizable(False,False)
     gw.attributes("-topmost",True)
     gw.grab_set()
-    gw.focus()
+    gw.focus_force()
 
     gw.geometry("+%d+%d" %
                 (window.winfo_x()+(window.winfo_width()/2)-(width/2),
                  window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
-    message = "Winner could not be determined. Please determine Game Winner.\n" + str(n) + "/" + str(total) + " Games"
+    message = "Winner could not be determined.\nPlease select Game Winner."
     all_ga =  ""
     for i in ga_list[-15:]:
         all_ga += i + "\n"
