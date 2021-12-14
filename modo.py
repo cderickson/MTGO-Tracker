@@ -301,7 +301,8 @@ def players(init):
     for i in init:
         if i.find(" joined the game") != -1:
             player = i.split(" joined the game")[0]
-            player.replace(" ","+")
+            player = player.replace(" ","+")
+            player = player.replace(".","*")
             players.append(player)
 
     # Filter duplicates from player list
@@ -323,18 +324,25 @@ def players_dict(init):
     for i in init:
         if i.find(" joined the game") != -1:
             player = i.split(" joined the game")[0]
-            players[player] = player.replace(" ","+")
+            player_val = player.replace(" ","+")
+            player_val = player.replace(".","*")
+            players[player] = player_val
     return players
 def high_roll(init):
     # Input:  String or List[Strings]
     # Output: Dict{String : Int}
 
+    remove_trailing = False
     if isinstance(init, str):
         init = init.split("@P")
+        remove_trailing = True
 
     rolls = {}
     for i in init:
-        tstring = i.rsplit(".")[0]
+        if remove_trailing:
+            tstring = i.rsplit(".",1)[0]
+        else:
+            tstring = i
         if i.find(" rolled a ") != -1:
             tlist = tstring.split(" rolled a ")
             if len(tlist[1]) == 1:
@@ -465,14 +473,6 @@ def get_limited_subarch(cards_played):
         return "NA"
     else:
         return limited_sa
-def replace_pname(tstring,plist,pdict):
-    # Input:  String,List,Dict
-    # Output: String
-
-    for i in plist:
-        if tstring.find(i) != -1:
-            tstring = tstring.replace(i,pdict[i])
-    return tstring
 def parse_list(filename,init):
     # Input:  String,String
     # Output: [String,String,Set{MaindeckCards+SideboardCards}]
@@ -510,17 +510,21 @@ def game_actions(init,time):
     # Input:  String,String
     # Output: List[Strings]
     
-    initial =       init.split("@P")
+    initial =       init
     gameactions =   []
     p =             players(init)
     pdict =         players_dict(init)
     count =         0
     lost_conn =     0
-    
+
+    for i in pdict:
+        initial = initial.replace(i,pdict[i])
+    initial = initial.split("@P")
+
     gameactions.append(format_time(time))
     for i in initial:
-        fullstring = i.rsplit(".")[0]
-        #player joined game header
+        fullstring = i.split(".")[0]
+        # Player joined game header.
         if count == 0:
             count += 1
         elif i.find(" has lost connection to the game") != -1:
@@ -529,39 +533,43 @@ def game_actions(init,time):
             if lost_conn == 1:
                 lost_conn = 0
             else:
-                gameactions.append(replace_pname(fullstring,p,pdict))
-        #skip looking at extra cards
+                gameactions.append(fullstring)
+        # Skip looking at extra cards.
         elif i.find(" draws their next card.") != -1:
-            None
-        #skip leaving to sideboard
+            continue
+        # Skip leaving to sideboard.
         elif i.find(" has left the game.") != -1:
-            None
-        #new turn header
+            continue
+        # New turn header.
         elif i.find("Turn ") != -1 and i.find(": ") != -1:
             newstring = i.split()[0] + " " + i.split()[1]
             for j in p:
                 if len(newstring.split()) < 3:
                     if i.split(": ")[1].find(j) != -1:
                         newstring += " " + j
-            gameactions.append(replace_pname(newstring,p,pdict))
-        #remove tags from cards and rules text
+            gameactions.append(newstring)
+        # Skip game state changes.
+        elif i.count(".") == 0:
+            print(i)
+            continue
+        # Remove tags from cards and rules text
         elif fullstring.count("[") > 0:
             newstring = ""
             while fullstring.count("[") > 0:
                 tlist = fullstring.split("@",1)
-                newstring += replace_pname(tlist[0],p,pdict)
+                newstring += tlist[0]
                 fullstring = tlist[1]
                 tlist = fullstring.split("@",1)
                 newstring += tlist[0] + "]"
                 fullstring = tlist[1]
                 tlist = fullstring.split("]",1)
                 fullstring = tlist[1]        
-            newstring += replace_pname(tlist[1],p,pdict)
+            newstring += tlist[1]
             newstring = newstring.split("(")[0]
             gameactions.append(newstring)
-        #everything else
+        # Everything else
         elif i.find(".") != -1:
-            gameactions.append(replace_pname(fullstring,p,pdict))
+            gameactions.append(fullstring)
     return gameactions
 def match_data(ga,gd,pd):
     # Input:  List[GameActions],List[GameData],List[PlayData]
