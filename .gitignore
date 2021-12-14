@@ -3,6 +3,7 @@ __pycache__/
 # UTILITY FILES
 scraper.py
 exe_command.txt
+build_mtgo_tracker.bat
 
 # AUXILIARY FILES
 icon.ico
