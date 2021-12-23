@@ -1076,7 +1076,7 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
 
     submit_button = tk.Button(bot_frame2,text="Apply",width=10,command=lambda : [close_format_window()])
 
-    arch_options = ["NA"] + input_options["Archetypes"]
+    arch_options = ["NA"]
     p1_arch = tk.StringVar()
     p1_arch.set("P1 Archetype")
     p2_arch = tk.StringVar()
@@ -1093,6 +1093,11 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     draft_format_options = ["NA"]
     dformat = tk.StringVar()
     dformat.set("Select Limited Format")
+
+    if mdata[modo.match_header().index("Format")] in input_options["Limited Formats"]:
+        arch_options = ["Limited"]
+    else:
+        arch_options += input_options["Archetypes"]
 
     if mdata[modo.match_header().index("P1_Arch")] != "NA":
         p1_arch.set(mdata[modo.match_header().index("P1_Arch")])
@@ -1760,11 +1765,13 @@ def set_filter():
 def revise_record2():
     global all_data
     global all_data_inverted
+    global selected
     if tree1.focus() == "":
         return
 
     selected = tree1.focus()
     values = list(tree1.item(selected,"values"))
+    sel_matchid = values[0]
 
     p1_index      = modo.match_header().index("P1")
     p2_index      = modo.match_header().index("P2")
@@ -1810,6 +1817,14 @@ def revise_record2():
 
     all_data_inverted = modo.invert_join(all_data)
     set_display("Matches")
+    revise_button["state"] = tk.NORMAL
+
+    for i in tree1.get_children():
+        if list(tree1.item(i,"values"))[0] == sel_matchid:
+            tree1.selection_set(i)
+            tree1.focus(i)
+            selected = i
+            break
 def revise_record():
     if tree1.focus() == "":
         return
