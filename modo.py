@@ -811,13 +811,16 @@ def cards_drawn(cards_drawn):
     # Input:  String
     # Output: Int
 
-    num_dict = {"a":1,
+    num_dict = {"zero":0,
+                "a":1,
                 "two":2,
                 "three":3,
                 "four":4,
                 "five":5,
                 "six":6,
                 "seven":7}
+    if cards_drawn not in num_dict:
+        return 8
     return num_dict[cards_drawn]
 def play_data(ga):
     # Input:  List[GameActions]
