@@ -40,6 +40,7 @@ new_import =        False
 data_loaded =       False
 filter_changed =    False
 ask_to_save =       False
+selected =          ()
 
 def save(exit):
     global ask_to_save
@@ -2186,6 +2187,7 @@ def revise_record_multi():
 
     def close_revise_window():
         global ask_to_save
+        global selected
         ask_to_save = True
         for i in selected:
             values = list(tree1.item(i,"values"))
@@ -2208,21 +2210,41 @@ def revise_record_multi():
                     elif field == "Format":
                         j[modo.match_header().index("Format")] = match_format.get()
                         j[modo.match_header().index("Limited_Format")] = lim_format.get()
+                        if match_format.get() in input_options["Limited Formats"]:
+                            j[modo.match_header().index("P1_Arch")] = "Limited"
+                            j[modo.match_header().index("P2_Arch")] = "Limited"
+                        elif match_format.get() in input_options["Constructed Formats"]:
+                            if j[modo.match_header().index("P1_Arch")] == "Limited":
+                                j[modo.match_header().index("P1_Arch")] = "NA"
+                            if j[modo.match_header().index("P2_Arch")] == "Limited":
+                                j[modo.match_header().index("P2_Arch")] = "NA"
                     elif field == "Match Type":
                         j[modo.match_header().index("Match_Type")] = match_type.get() 
         set_display("Matches")
-        revise_window.grab_release()
-        revise_window.destroy()
+        revise_button["state"] = tk.NORMAL
+
+        sel_tuple = ()
+        for i in tree1.get_children():
+            if list(tree1.item(i,"values"))[0] in sel_matchid:
+                sel_tuple += (i,)
+        tree1.selection_set(sel_tuple)
+        tree1.focus(list(sel_tuple)[0])
+        selected = sel_tuple
+        #revise_window.grab_release()
+        #revise_window.destroy()
 
     def close_without_saving():
         revise_window.grab_release()
         revise_window.destroy()       
 
+    global selected
     selected = tree1.selection()
+    sel_matchid = []
     format_index = modo.match_header().index("Format")
     sel_formats = {"constructed":False,"booster":False,"sealed":False}
     for i in selected:
         format_i = list(tree1.item(i,"values"))[format_index]
+        sel_matchid.append(list(tree1.item(i,"values"))[0])
         if format_i in input_options["Constructed Formats"]:
             sel_formats["constructed"] = True
         elif (format_i == "Booster Draft") or (format_i == "Cube"):
@@ -2285,7 +2307,7 @@ def revise_record_multi():
     match_type_entry =   tk.OptionMenu(mid_frame,match_type,*match_options)
 
     button3 = tk.Button(bot_frame,text="Apply to All",width=10,command=lambda : close_revise_window())
-    button4 = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_without_saving())
+    button4 = tk.Button(bot_frame,text="Close",width=10,command=lambda : close_without_saving())
 
     lim_format_entry["state"] = tk.DISABLED
     button3.grid(row=0,column=0,padx=10,pady=10)
