@@ -572,7 +572,6 @@ def get_all_data():
     if len(all_data[0]) != 0:
         filter_button["state"] = tk.NORMAL
         clear_button["state"] = tk.NORMAL
-        stats_button["state"] = tk.DISABLED
         data_loaded = True
     os.chdir(filepath_root)
 def print_data(data,header):
