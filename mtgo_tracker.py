@@ -52,8 +52,7 @@ def save(exit):
     pickle.dump(all_data,open("all_data.p","wb"))
     pickle.dump(parsed_file_list,open("parsed_file_list.p","wb"))
 
-    status_label.config(text="Save complete. Data will be loaded automatically on next startup.")
-    print(status_label["text"])
+    update_status_bar(status="Save complete. Data will be loaded automatically on next startup.")
     os.chdir(filepath_root)
 
     if exit:
@@ -132,8 +131,7 @@ def set_default_window_size():
         os.chdir(filepath_root + "\\" + "save")
         pickle.dump(main_window_size,open("main_window_size.p","wb"))
         window.geometry(str(main_window_size[1]) + "x" + str(main_window_size[2]))
-        status_label.config(text="Default Window Size saved.")
-        print(status_label["text"])
+        update_status_bar(status="Default Window Size saved.")
         os.chdir(filepath_root)
         close_window()
 
@@ -237,8 +235,7 @@ def clear_window():
 
     def clear():
         clear_loaded()
-        status_label.config(text="Previously loaded data has been cleared.")
-        print(status_label["text"])
+        update_status_bar(status="Previously loaded data has been cleared.")
         close_clear_window()
 
     def close_clear_window():
@@ -346,11 +343,9 @@ def delete_session():
                 os.remove(i)
 
         if session_exists == True:
-            status_label.config(text="Saved session data has been deleted.")
-            print(status_label["text"])
+            update_status_bar(status="Saved session data has been deleted.")
         else:
-            status_label.config(text="No saved session data was found.")
-            print(status_label["text"])
+            update_status_bar(status="No saved session data was found.")
 
         os.chdir(filepath_root)
         close_del_window()
@@ -454,8 +449,7 @@ def startup():
         all_decks = pickle.load(open("all_decks.p","rb"))
 
     if (os.path.isfile("all_data.p") == False) or (os.path.isfile("parsed_file_list.p") == False):
-        status_label.config(text="No session data to load. Import your MTGO GameLog files to get started.")
-        print(status_label["text"])
+        update_status_bar(status="No session data to load. Import your MTGO GameLog files to get started.")
         os.chdir(filepath_root)
         return
     all_data = pickle.load(open("all_data.p","rb"))
@@ -469,7 +463,7 @@ def startup():
         stats_button["state"] = tk.NORMAL
     data_loaded = True
 
-    set_display("Matches")
+    set_display("Matches",update_status=True,bb_state=False)
     data_menu.entryconfig("Set Default Hero",state=tk.NORMAL)
     data_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
     file_menu.entryconfig("Save Data",state=tk.NORMAL)
@@ -486,7 +480,7 @@ def save_settings():
     # pickle.dump(all_decks,open("all_decks.p","wb"))
     pickle.dump(main_window_size,open("main_window_size.p","wb"))
     os.chdir(filepath_root)
-def set_display(d,*argv):
+def set_display(d,update_status,bb_state):
     global display
     global prev_display
 
@@ -499,11 +493,10 @@ def set_display(d,*argv):
         
     text_frame.config(text=display)
 
-    if len(argv) > 0:
-        if argv[0] == True:
-            back_button["state"] = tk.NORMAL
-        else:
-            back_button["state"] = tk.DISABLED
+    if bb_state == True:
+        back_button["state"] = tk.NORMAL
+    else:
+        back_button["state"] = tk.DISABLED
     
     match_button["state"] = tk.NORMAL
     game_button["state"] = tk.NORMAL
@@ -511,13 +504,13 @@ def set_display(d,*argv):
         
     if d == "Matches":
         back_button["state"] = tk.DISABLED
-        print_data(all_data[0],all_headers[0])
+        print_data(all_data[0],all_headers[0],update_status)
     elif d == "Games":
         back_button["state"] = tk.NORMAL
-        print_data(all_data[1],all_headers[1])
+        print_data(all_data[1],all_headers[1],update_status)
     elif d == "Plays":
         back_button["state"] = tk.NORMAL
-        print_data(all_data[2],all_headers[2])
+        print_data(all_data[2],all_headers[2],update_status)
 def get_all_data():
     global all_data
     global all_data_inverted
@@ -562,9 +555,7 @@ def get_all_data():
         for j in new_data_inverted[index]:
             all_data_inverted[index].append(j)
 
-    status_label.config(text="Imported " + str(count) + " new matches.")
-    print(status_label["text"])
-    
+    update_status_bar(status="Imported " + str(count) + " new matches.")
     if count > 0:
         ask_to_save = True
     new_import = True
@@ -574,7 +565,7 @@ def get_all_data():
         clear_button["state"] = tk.NORMAL
         data_loaded = True
     os.chdir(filepath_root)
-def print_data(data,header):
+def print_data(data,header,update_status):
     global new_import
     small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num"]
 
@@ -605,9 +596,10 @@ def print_data(data,header):
     else:
         df = modo.to_dataframe(data,header)
     total = df.shape[0]
+    filtered_list = []
     for key in filter_dict:
         if key not in header:
-            break
+            continue
         for i in filter_dict[key]:
             if i[2:].isnumeric():
                 value = int(i[2:])
@@ -615,13 +607,25 @@ def print_data(data,header):
                 value = i[2:]
             if i[0] == "=":
                 if key == "Date":
-                    df = df[(df[key].str.contains(value[0:10]))]
+                    filtered_list.append(df[(df[key].str.contains(value[0:10]))])
                 else:
-                    df = df[(df[key] == value)]
+                    filtered_list.append(df[(df[key] == value)])
             elif i[0] == ">":
-                df = df[(df[key] > value)]
+                filtered_list.append(df[(df[key] > value)])
             elif i[0] == "<":
-                df = df[(df[key] < value)]
+                filtered_list.append(df[(df[key] < value)])
+        if len(filtered_list) == 0:
+            pass
+        elif len(filtered_list) == 1:
+            df = filtered_list[0]
+        else:
+            index = 1
+            df = filtered_list[0]
+            while index < (len(filtered_list)):
+                df = pd.merge(df,filtered_list[index],how="outer")
+                index += 1
+        filtered_list.clear()
+
     if (display == "Matches") or (display == "Games"):
         df = df.sort_values(by=["Match_ID"],ascending=False)
     elif display == "Plays":
@@ -632,9 +636,8 @@ def print_data(data,header):
 
     if new_import == True:
         new_import = False
-    else:
-        status_label.config(text="Displaying: " + str(len(df_rows)) + " of " + str(total) + " records.")
-        print(status_label["text"])
+    elif update_status == True:
+        update_status_bar(status="Displaying: " + str(len(df_rows)) + " of " + str(total) + " records.")
     revise_button["state"] = tk.DISABLED
 def get_lists():
     global all_decks
@@ -666,8 +669,7 @@ def get_lists():
             if index > 0:
                 label += ", "
             label += i[0] + "/" + i[1]
-    status_label.config(text=label)
-    print(status_label["text"])
+    update_status_bar(status=label)
     
     os.chdir(filepath_root)
 def input_missing_data():
@@ -721,11 +723,10 @@ def input_missing_data():
                 i[mtype_index] =   missing_data[6]
 
     if count == 0:
-        status_label.config(text="No Matches with Missing Data.")
-        print(status_label["text"])
+        update_status_bar(status="No Matches with Missing Data.")
     else:
         all_data_inverted = modo.invert_join(all_data)
-        set_display("Matches")
+        set_display("Matches",update_status=True,bb_state=False)
 def deck_data_guess(update_type):
     global all_data
     global all_data_inverted
@@ -805,32 +806,29 @@ def rerun_decks_window():
 
     def apply_to_all():
         deck_data_guess(update_type="All")
-        set_display("Matches")
+        set_display("Matches",update_status=True,bb_state=False)
         t = "Updated the P1_Subarch, P2_Subarch columns for each Match in the Date Range: " + list(all_decks.keys())[0]
         if len(all_decks) > 1:
             t += " to " + list(all_decks.keys())[-1]
-        status_label.config(text=t)
-        print(status_label["text"])
+        update_status_bar(status=t)
         close_window()
 
     def apply_to_unknowns():
         deck_data_guess(update_type="Unknowns")
-        set_display("Matches")
+        set_display("Matches",update_status=True,bb_state=False)
         t = "Updated the P1_Subarch, P2_Subarch columns for Unknown Decks in the Date Range: " + list(all_decks.keys())[0]
         if len(all_decks) > 1:
             t += " to " + list(all_decks.keys())[-1]
-        status_label.config(text=t)
-        print(status_label["text"])
+        update_status_bar(status=t)
         close_window()
 
     def apply_to_limited():
         deck_data_guess(update_type="Limited")
-        set_display("Matches")
+        set_display("Matches",update_status=True,bb_state=False)
         t = "Updated the P1_Subarch, P2_Subarch columns for Limited Matches in the Date Range: " + list(all_decks.keys())[0]
         if len(all_decks) > 1:
             t += " to " + list(all_decks.keys())[-1]
-        status_label.config(text=t)
-        print(status_label["text"])
+        update_status_bar(status=t)
         close_window()
 
     def guess(mode):
@@ -1182,10 +1180,10 @@ def tree_double(event):
     clear_filter()
     add_filter_setting("Match_ID",tree1.item(tree1.focus(),"values")[0],"=")
     if display == "Matches":
-        set_display("Games",True)
+        set_display("Games",update_status=True,bb_state=True)
     elif display == "Games":
         add_filter_setting("Game_Num",tree1.item(tree1.focus(),"values")[3],"=")
-        set_display("Plays",True)
+        set_display("Plays",update_status=True,bb_state=True)
 def bb_clicked():
     global filter_dict
     if "Match_ID" in filter_dict:
@@ -1195,9 +1193,9 @@ def bb_clicked():
     else:
         clear_filter()
     if display == "Games":
-        set_display("Matches")
+        set_display("Matches",update_status=True,bb_state=False)
     elif display == "Plays":
-        set_display("Games")
+        set_display("Games",update_status=True,bb_state=False)
 def export(file_type,data_type,inverted):
     # File_Type: String, "CSV" or "Excel"
     # Data_Type: Int, 0=Match,1=Game,2=Play,3=All,4=Filtered
@@ -1300,8 +1298,7 @@ def export(file_type,data_type,inverted):
                     df_rows = df_filtered.to_numpy().tolist()
                     for row in df_rows:
                         writer.writerow(row)
-        status_label.config(text="Exported " + str(count) + " CSV file(s) to " + filepath_export)
-        print(status_label["text"])
+        update_status_bar(status="Exported " + str(count) + " CSV file(s) to " + filepath_export)
     elif file_type == "Excel":
         for i in range(len(file_names)):
             count += 1
@@ -1313,8 +1310,7 @@ def export(file_type,data_type,inverted):
             else:
                 df = df_filtered
             df.to_excel(f,index=False)
-        status_label.config(text="Exported " + str(count) + " Excel file(s) to " + filepath_export)
-        print(status_label["text"])
+        update_status_bar(status="Exported " + str(count) + " Excel file(s) to " + filepath_export)
     filepath_export = fp
 def set_default_hero():
     height = 100
@@ -1332,22 +1328,24 @@ def set_default_hero():
 
     def set_hero():
         global hero
-        if entry.get() == "":
+        entry_str = entry.get()
+        entry_str = entry_str.strip()
+        entry_str = entry_str.replace(".","*")
+        entry_str = entry_str.replace(" ","+")
+        if entry_str == "":
             hero = ""
             save_settings()
-            status_label.config(text="Cleared Setting: Hero")
-            print(status_label["text"])
+            update_status_bar(status="Cleared Setting: Hero")
             if display != "Plays":
-                set_display(display)
+                set_display(display,update_status=False,bb_state=False)
             stats_button["state"] = tk.DISABLED
             close_hero_window()
-        elif entry.get() in hero_options:
-            hero = entry.get()
+        elif entry_str in hero_options:
+            hero = entry_str
             save_settings()
-            status_label.config(text="Updated Hero to " + hero + ".")
-            print(status_label["text"])
+            update_status_bar(status="Updated Hero to " + hero + ".")
             if display != "Plays":
-                set_display(display)
+                set_display(display,update_status=False,bb_state=False)
             stats_button["state"] = tk.NORMAL
             close_hero_window()
         else:
@@ -1421,8 +1419,7 @@ def set_default_export():
         else:
             filepath_export = label1["text"]
         save_settings()
-        status_label.config(text="Updated export folder location.")
-        print(status_label["text"])
+        update_status_bar(status="Updated export folder location.")
         close_export_window()
         
     def close_export_window():
@@ -1494,8 +1491,7 @@ def set_default_import():
         else:
             filepath_logs = label2["text"]
         save_settings()
-        status_label.config(text="Updated default import folder locations.")
-        print(status_label["text"])
+        update_status_bar(status="Updated default import folder locations.")
         close_import_window()
         
     def close_import_window():
@@ -1584,13 +1580,15 @@ def clear_filter():
     global filter_changed
     filter_changed = True
     filter_dict.clear()
+    update_status_bar("Cleared All Filters.")
+    set_display(display,update_status=False,bb_state=False)
 def set_filter():
     height = 300
     width =  550
 
     tree1.grid_forget()
     tree_empty.grid(row=0,column=0,sticky="nsew")
-    text_frame.config(text=f"Filtering {display}")
+    update_status_bar(status=f"Applying Filters to {display} Table.")
 
     filter_window = tk.Toplevel(window)
     filter_window.title("Set Filters")
@@ -1659,6 +1657,8 @@ def set_filter():
                 k = date.get() + "-12:00"
         add_filter_setting(c,k,o)
         update_filter_text()
+        if button2["state"] == tk.DISABLED:
+            button2["state"] = tk.NORMAL
     
     def update_filter_text():
         tlabel1 = ""
@@ -1687,16 +1687,25 @@ def set_filter():
     
     def apply_filter():
         # Update table and close window.
-        set_display(display)
+        set_display(display,update_status=True,bb_state=False)
         tree1.grid(row=0,column=0,sticky="nsew")
         tree_empty.grid_forget()
         filter_window.grab_release()
         filter_window.destroy()
-    
+
+    def clear_filter():
+        global filter_changed
+        filter_changed = True
+        filter_dict.clear()
+        set_display(display,update_status=False,bb_state=False)
+        update_filter_text()
+        button2["state"] = tk.DISABLED
+
     def close_filter_window():
         # Revert filter changes and close window.
         global filter_dict
         filter_dict = filter_init
+        set_display(display,update_status=True,bb_state=False)
         tree1.grid(row=0,column=0,sticky="nsew")
         tree_empty.grid_forget()
         text_frame.config(text=display)
@@ -1739,7 +1748,7 @@ def set_filter():
         font="Helvetica 14",state="readonly")
  
     button1 = tk.Button(top_frame,text="Add",width=10,command=lambda : add())
-    button2 = tk.Button(bot_frame,text="Clear",width=10,command=lambda : [clear_filter(),update_filter_text()])
+    button2 = tk.Button(bot_frame,text="Clear",state=tk.DISABLED,width=10,command=lambda : clear_filter())
     button3 = tk.Button(bot_frame,text="Apply Filter",width=10,command=lambda : apply_filter())
     button4 = tk.Button(bot_frame,text="Exit",width=10,command=lambda : close_filter_window())
     label1 = tk.Label(mid_frame1,text="",wraplength=width/2,justify="left")
@@ -1748,6 +1757,7 @@ def set_filter():
     drop_col.grid(row=0,column=1,padx=10,pady=10)
     drop_col.config(width=15)
     op_menu.grid(row=0,column=2,padx=10,pady=10)
+    op_menu.config(width=3)
     drop_key.grid(row=0,column=3,padx=10,pady=10)
     button1.grid(row=0,column=4,padx=10,pady=10)
 
@@ -1757,6 +1767,9 @@ def set_filter():
     button2.grid(row=0,column=0,padx=10,pady=10)
     button3.grid(row=0,column=1,padx=10,pady=10)
     button4.grid(row=0,column=2,padx=10,pady=10)
+
+    if len(filter_dict) > 0:
+        button2["state"] == tk.NORMAL
 
     col.trace("w",update_keys)
     update_filter_text()
@@ -1815,7 +1828,7 @@ def revise_record2():
             break
 
     all_data_inverted = modo.invert_join(all_data)
-    set_display("Matches")
+    set_display("Matches",update_status=True,bb_state=False)
     revise_button["state"] = tk.NORMAL
 
     for i in tree1.get_children():
@@ -1940,7 +1953,7 @@ def revise_record():
                 i[modo.match_header().index("Limited_Format")] = limited_format.get()
                 i[modo.match_header().index("Match_Type")] = match_type.get()                   
                 all_data_inverted = modo.invert_join(all_data)
-                set_display("Matches")
+                set_display("Matches",update_status=True,bb_state=False)
                 break
         revise_window.grab_release()
         revise_window.destroy()
@@ -2234,7 +2247,7 @@ def revise_record_multi():
                                 j[modo.match_header().index("P2_Arch")] = "NA"
                     elif field == "Match Type":
                         j[modo.match_header().index("Match_Type")] = match_type.get() 
-        set_display("Matches")
+        set_display("Matches",update_status=True,bb_state=False)
         revise_button["state"] = tk.NORMAL
 
         sel_tuple = ()
@@ -2382,7 +2395,7 @@ def import_window():
         filepath_logs = label2["text"]
         get_all_data()
         clear_filter()
-        set_display("Matches")
+        set_display("Matches",update_status=False,bb_state=False)
         if data_loaded != False:
             data_menu.entryconfig("Set Default Hero",state=tk.NORMAL)
             file_menu.entryconfig("Save Data",state=tk.NORMAL)
@@ -2456,12 +2469,11 @@ def get_winners():
                 ask_to_save = True
             i[gw_index] = uaw
     if n == 0:
-        status_label.config(text="No Games with missing Game_Winner.")
-        print(status_label["text"])
+        update_status_bar(status="No Games with missing Game_Winner.")
     else:
         modo.update_game_wins(all_data,all_headers)
         all_data_inverted = modo.invert_join(all_data)
-        set_display("Matches")
+        set_display("Matches",update_status=True,bb_state=False)
 def ask_for_winner(ga_list,p1,p2,n,total):
     # List of game actions (Strings)
     # String = P1
@@ -4178,6 +4190,9 @@ def load_window_size_setting():
         if os.path.isfile("main_window_size.p"):
             main_window_size = pickle.load(open("main_window_size.p","rb"))
         os.chdir(cwd)
+def update_status_bar(status):
+    status_label.config(text=status)
+    print(status)
 def test():
     # Test method
     pass
@@ -4206,11 +4221,11 @@ text_frame.grid_rowconfigure(0,weight=1)
 text_frame.grid_rowconfigure(1,weight=0)
 bottom_frame.grid_columnconfigure(0,weight=1)
 
-match_button = tk.Button(left_frame,text="Match Data",state=tk.DISABLED,command=lambda : set_display("Matches"))
-game_button = tk.Button(left_frame,text="Game Data",state=tk.DISABLED,command=lambda : set_display("Games"))
-play_button = tk.Button(left_frame,text="Play Data",state=tk.DISABLED,command=lambda : set_display("Plays"))
+match_button = tk.Button(left_frame,text="Match Data",state=tk.DISABLED,command=lambda : set_display("Matches",update_status=True,bb_state=False))
+game_button = tk.Button(left_frame,text="Game Data",state=tk.DISABLED,command=lambda : set_display("Games",update_status=True,bb_state=False))
+play_button = tk.Button(left_frame,text="Play Data",state=tk.DISABLED,command=lambda : set_display("Plays",update_status=True,bb_state=False))
 filter_button = tk.Button(left_frame,text="Filter",state=tk.DISABLED,command=lambda : set_filter())
-clear_button = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,command=lambda : [clear_filter(),set_display(display)])
+clear_button = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,command=lambda : clear_filter())
 revise_button = tk.Button(left_frame,text="Revise Record(s)",state=tk.DISABLED,command=lambda : revise_method_select())
 stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,command=lambda : get_stats())
 back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,command=lambda :bb_clicked())
