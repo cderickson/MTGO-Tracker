@@ -504,13 +504,13 @@ def set_display(d,update_status,bb_state):
         
     if d == "Matches":
         back_button["state"] = tk.DISABLED
-        print_data(all_data[0],all_headers[0],update_status)
+        print_data(all_data[0],update_status)
     elif d == "Games":
         back_button["state"] = tk.NORMAL
-        print_data(all_data[1],all_headers[1],update_status)
+        print_data(all_data[1],update_status)
     elif d == "Plays":
         back_button["state"] = tk.NORMAL
-        print_data(all_data[2],all_headers[2],update_status)
+        print_data(all_data[2],update_status)
 def get_all_data():
     global all_data
     global all_data_inverted
@@ -565,14 +565,14 @@ def get_all_data():
         clear_button["state"] = tk.NORMAL
         data_loaded = True
     os.chdir(filepath_root)
-def print_data(data,header,update_status):
+def print_data(data,update_status):
     global new_import
     small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num"]
 
     # Clear existing data in tree
     tree1.delete(*tree1.get_children())
 
-    tree1["column"] = header
+    tree1["column"] = modo.header(display)
     tree1["show"] = "headings"
 
     # Insert column headers into tree
@@ -588,19 +588,19 @@ def print_data(data,header,update_status):
     tree1.column("Match_ID",anchor="w")
     
     if data == None:
-        df = df = modo.to_dataframe([],header)
+        df = df = modo.to_dataframe([],modo.header(display))
     elif (hero != "") & (display == "Matches"):
-        df = modo.to_dataframe(all_data_inverted[0],all_headers[0])
+        df = modo.to_dataframe(all_data_inverted[0],modo.header("Matches"))
         df = df[(df.P1 == hero)]
     elif (hero != "") & (display == "Games"):
-        df = modo.to_dataframe(all_data_inverted[1],all_headers[1])
+        df = modo.to_dataframe(all_data_inverted[1],modo.header("Games"))
         df = df[(df.P1 == hero)]
     else:
-        df = modo.to_dataframe(data,header)
+        df = modo.to_dataframe(data,modo.header(display))
     total = df.shape[0]
     filtered_list = []
     for key in filter_dict:
-        if key not in header:
+        if key not in modo.header(display):
             continue
         for i in filter_dict[key]:
             if i[2:].isnumeric():
@@ -1221,16 +1221,16 @@ def export(file_type,data_type,inverted):
     # Create Dataframe and apply filters.
     if data_type == 4:
         if display == "Matches":
-            df_filtered = modo.to_dataframe(data_to_write[0],all_headers[0])
-            headers = all_headers[0]
+            df_filtered = modo.to_dataframe(data_to_write[0],modo.header("Matches"))
+            headers = modo.header("Matches")
             file_names = ["matches"]
         elif display == "Games":
-            df_filtered = modo.to_dataframe(data_to_write[1],all_headers[1])
-            headers = all_headers[1]
+            df_filtered = modo.to_dataframe(data_to_write[1],modo.header("Games"))
+            headers = modo.header("Games")
             file_names = ["games"]
         elif display == "Plays":
-            df_filtered = modo.to_dataframe(data_to_write[2],all_headers[2])
-            headers = all_headers[2]
+            df_filtered = modo.to_dataframe(data_to_write[2],modo.header("Plays"))
+            headers = modo.header("Plays")
             file_names = ["plays"]
         if hero != "":
             df_filtered = df_filtered[(df_filtered.P1 == hero)]
@@ -1252,9 +1252,9 @@ def export(file_type,data_type,inverted):
                 elif i[0] == "<":
                     df_filtered = df_filtered[(df_filtered[key] < value)]
     elif data_type == 3:
-        df_filtered_0 = modo.to_dataframe(data_to_write[0],all_headers[0])
-        df_filtered_1 = modo.to_dataframe(data_to_write[1],all_headers[1])
-        df_filtered_2 = modo.to_dataframe(data_to_write[2],all_headers[2])
+        df_filtered_0 = modo.to_dataframe(data_to_write[0],modo.header("Matches"))
+        df_filtered_1 = modo.to_dataframe(data_to_write[1],modo.header("Games"))
+        df_filtered_2 = modo.to_dataframe(data_to_write[2],modo.header("Plays"))
         if (hero != "") & (inverted == False):
             df_filtered_0 = df_filtered_0[(df_filtered_0.P1 == hero)]
             df_filtered_1 = df_filtered_1[(df_filtered_1.P1 == hero)]
@@ -1360,7 +1360,7 @@ def set_default_hero():
         hero_window.grab_release()
         hero_window.destroy()
     
-    df0_i = modo.to_dataframe(all_data_inverted[0],all_headers[0])
+    df0_i = modo.to_dataframe(all_data_inverted[0],modo.header("Matches"))
     hero_options = df0_i.P1.tolist()
     hero_options = sorted(list(set(hero_options)),key=str.casefold)
 
@@ -1590,7 +1590,7 @@ def set_filter():
     height = 300
     width =  550
 
-    print_data(data=None,header=modo.header(display),update_status=False)
+    print_data(data=None,update_status=False)
     hidden_tree_init(modo.header(display))
     hidden_tree_print(print_empty=False)
     update_status_bar(status=f"Applying Filters to {display} Table.")
@@ -1718,11 +1718,11 @@ def set_filter():
     filter_init = filter_dict.copy()
 
     if display == "Matches":
-        col_options = all_headers[0].copy()
+        col_options = modo.header("Matches").copy()
     elif display == "Games":
-        col_options = all_headers[1].copy()
+        col_options = modo.header("Games").copy()
     elif display == "Plays":
-        col_options = all_headers[2].copy()
+        col_options = modo.header("Plays").copy()
     col_options.pop(0)
     
     col = tk.StringVar()
@@ -2589,12 +2589,12 @@ def get_stats():
     mid_frame.grid_columnconfigure(0,weight=1)
     mid_frame.grid_columnconfigure(1,weight=1)
     
-    df0 = modo.to_dataframe(all_data[0],all_headers[0])
-    df1 = modo.to_dataframe(all_data[1],all_headers[1])
-    df2 = modo.to_dataframe(all_data[2],all_headers[2])
-    df0_i = modo.to_dataframe(all_data_inverted[0],all_headers[0])
-    df1_i = modo.to_dataframe(all_data_inverted[1],all_headers[1])
-    df2_i = modo.to_dataframe(all_data_inverted[2],all_headers[2])
+    df0 = modo.to_dataframe(all_data[0],modo.header("Matches"))
+    df1 = modo.to_dataframe(all_data[1],modo.header("Games"))
+    df2 = modo.to_dataframe(all_data[2],modo.header("Plays"))
+    df0_i = modo.to_dataframe(all_data_inverted[0],modo.header("Matches"))
+    df1_i = modo.to_dataframe(all_data_inverted[1],modo.header("Games"))
+    df2_i = modo.to_dataframe(all_data_inverted[2],modo.header("Plays"))
  
     def clear_frames():
         for widget in mid_frame1.winfo_children():
