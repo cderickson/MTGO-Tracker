@@ -281,7 +281,7 @@ def load_saved_window():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def load():
-        clear_filter(update_status=False)
+        clear_filter(update_status=False,reload_display=True)
         startup()
         close_load_window()
 
@@ -1177,7 +1177,7 @@ def tree_double(event):
     if tree1.identify_region(event.x,event.y) == "heading":
         return None    
         
-    clear_filter(update_status=False)
+    clear_filter(update_status=False,reload_display=False)
     add_filter_setting("Match_ID",tree1.item(tree1.focus(),"values")[0],"=")
     if display == "Matches":
         set_display("Games",update_status=True,bb_state=True)
@@ -1188,10 +1188,10 @@ def bb_clicked():
     global filter_dict
     if "Match_ID" in filter_dict:
         match_id = filter_dict["Match_ID"][0][2:]
-        clear_filter(update_status=False)
+        clear_filter(update_status=False,reload_display=True)
         add_filter_setting("Match_ID",match_id,"=")
     else:
-        clear_filter(update_status=False)
+        clear_filter(update_status=False,reload_display=True)
     if display == "Games":
         set_display("Matches",update_status=True,bb_state=False)
     elif display == "Plays":
@@ -1576,13 +1576,14 @@ def add_filter_setting(index,key,op):
     else:
         filter_dict[index] = [op + " " + key]
         filter_changed = True
-def clear_filter(update_status):
+def clear_filter(update_status,reload_display):
     global filter_changed
     filter_changed = True
     filter_dict.clear()
     if update_status:
         update_status_bar("Cleared All Filters.")
-    set_display(display,update_status=False,bb_state=False)
+    if reload_display:
+        set_display(display,update_status=False,bb_state=False)
 def set_filter():
     height = 300
     width =  550
@@ -1770,7 +1771,7 @@ def set_filter():
     button4.grid(row=0,column=2,padx=10,pady=10)
 
     if len(filter_dict) > 0:
-        button2["state"] == tk.NORMAL
+        button2["state"] = tk.NORMAL
 
     col.trace("w",update_keys)
     update_filter_text()
@@ -2395,7 +2396,7 @@ def import_window():
             return
         filepath_logs = label2["text"]
         get_all_data()
-        clear_filter(update_status=False)
+        clear_filter(update_status=False,reload_display=True)
         set_display("Matches",update_status=False,bb_state=False)
         if data_loaded != False:
             data_menu.entryconfig("Set Default Hero",state=tk.NORMAL)
@@ -4226,7 +4227,7 @@ match_button = tk.Button(left_frame,text="Match Data",state=tk.DISABLED,command=
 game_button = tk.Button(left_frame,text="Game Data",state=tk.DISABLED,command=lambda : set_display("Games",update_status=True,bb_state=False))
 play_button = tk.Button(left_frame,text="Play Data",state=tk.DISABLED,command=lambda : set_display("Plays",update_status=True,bb_state=False))
 filter_button = tk.Button(left_frame,text="Filter",state=tk.DISABLED,command=lambda : set_filter())
-clear_button = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,command=lambda : clear_filter(update_status=True))
+clear_button = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,command=lambda : clear_filter(update_status=True,reload_display=True))
 revise_button = tk.Button(left_frame,text="Revise Record(s)",state=tk.DISABLED,command=lambda : revise_method_select())
 stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,command=lambda : get_stats())
 back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,command=lambda :bb_clicked())
