@@ -117,60 +117,58 @@ def sealed_formats():
             "MM3 x6",
             "AER x6",
             "Other Sealed"]
-def match_header():
-    # Output: List[Match_Attributes]
-
-    return ["Match_ID",
-            "P1",
-            "P1_Arch",
-            "P1_Subarch",
-            "P2",
-            "P2_Arch",
-            "P2_Subarch",
-            "P1_Roll",
-            "P2_Roll",
-            "Roll_Winner",
-            "P1_Wins",
-            "P2_Wins",
-            "Match_Winner",
-            "Format",
-            "Limited_Format",
-            "Match_Type",
-            "Date"]
-def game_header():
-    # Output: List[Game_Attributes]
-
-    return ["Match_ID",
-            "P1",
-            "P2",
-            "Game_Num",
-            "PD_Selector",
-            "PD_Choice",
-            "On_Play",
-            "On_Draw",
-            "P1_Mulls",
-            "P2_Mulls",
-            "Turns",
-            "Game_Winner"]
-def play_header():
+def header(table):
     # Output: List[Play_Attributes]
 
-    return ["Match_ID",
-            "Game_Num",
-            "Play_Num",
-            "Turn_Num",\
-            "Casting_Player",
-            "Action",
-            "Primary_Card",
-            "Target1",
-            "Target2",
-            "Target3",
-            "Opp_Target",
-            "Self_Target",
-            "Cards_Drawn",
-            "Attackers",
-            "Active_Player",
-            "Nonactive_Player"]
+    if table == "Matches":
+        return ["Match_ID",
+                "P1",
+                "P1_Arch",
+                "P1_Subarch",
+                "P2",
+                "P2_Arch",
+                "P2_Subarch",
+                "P1_Roll",
+                "P2_Roll",
+                "Roll_Winner",
+                "P1_Wins",
+                "P2_Wins",
+                "Match_Winner",
+                "Format",
+                "Limited_Format",
+                "Match_Type",
+                "Date"]
+    elif table == "Games":
+        return ["Match_ID",
+                "P1",
+                "P2",
+                "Game_Num",
+                "PD_Selector",
+                "PD_Choice",
+                "On_Play",
+                "On_Draw",
+                "P1_Mulls",
+                "P2_Mulls",
+                "Turns",
+                "Game_Winner"]
+    elif table == "Plays":
+        return ["Match_ID",
+                "Game_Num",
+                "Play_Num",
+                "Turn_Num",\
+                "Casting_Player",
+                "Action",
+                "Primary_Card",
+                "Target1",
+                "Target2",
+                "Target3",
+                "Opp_Target",
+                "Self_Target",
+                "Cards_Drawn",
+                "Attackers",
+                "Active_Player",
+                "Nonactive_Player"]
+    return []
 def transpose(data):
     # Input:  List[Rows]
     # Output: List[Cols]
@@ -190,15 +188,15 @@ def invert_matchdata(data):
     # Input:  List[Matches]
     # Output: List[Matches]
 
-    swap_cols(data,match_header(),"P1","P2")
-    swap_cols(data,match_header(),"P1_Arch","P2_Arch")
-    swap_cols(data,match_header(),"P1_Subarch","P2_Subarch")
-    swap_cols(data,match_header(),"P1_Roll","P2_Roll")
-    swap_cols(data,match_header(),"P1_Wins","P2_Wins")
+    swap_cols(data,header("Matches"),"P1","P2")
+    swap_cols(data,header("Matches"),"P1_Arch","P2_Arch")
+    swap_cols(data,header("Matches"),"P1_Subarch","P2_Subarch")
+    swap_cols(data,header("Matches"),"P1_Roll","P2_Roll")
+    swap_cols(data,header("Matches"),"P1_Wins","P2_Wins")
 
     cols_to_invert = ["Match_Winner","Roll_Winner"]
     for i in cols_to_invert:
-        for index,j in enumerate(match_header()):
+        for index,j in enumerate(header("Matches")):
             if j == i:
                 a = index
         if data[a] == "P1":
@@ -209,13 +207,13 @@ def invert_gamedata(data):
     # Input:  List[Games]
     # Output: List[Games]
 
-    swap_cols(data,game_header(),"P1","P2")
-    swap_cols(data,game_header(),"P1_Mulls","P2_Mulls")
-    swap_cols(data,game_header(),"On_Play","On_Draw")
+    swap_cols(data,header("Games"),"P1","P2")
+    swap_cols(data,header("Games"),"P1_Mulls","P2_Mulls")
+    swap_cols(data,header("Games"),"On_Play","On_Draw")
     
     cols_to_invert = ["PD_Selector","Game_Winner"]
     for i in cols_to_invert:
-        for index,j in enumerate(game_header()):
+        for index,j in enumerate(header("Games")):
             if j == i:
                 a = index
         if data[a] == "P1":
