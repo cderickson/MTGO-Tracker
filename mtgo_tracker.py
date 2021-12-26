@@ -441,9 +441,9 @@ def startup():
         filepath_logs =   settings[3]
         hero =            settings[4]
 
-    all_headers[0] = modo.match_header()
-    all_headers[1] = modo.game_header()
-    all_headers[2] = modo.play_header()
+    all_headers[0] = modo.header("Matches")
+    all_headers[1] = modo.header("Games")
+    all_headers[2] = modo.header("Plays")
 
     if os.path.isfile("all_decks"):
         all_decks = pickle.load(open("all_decks","rb"))
@@ -587,7 +587,9 @@ def print_data(data,header,update_status):
             tree1.heading(i,text=i,command=lambda _col=i: sort_column(_col,False,tree1))
     tree1.column("Match_ID",anchor="w")
     
-    if (hero != "") & (display == "Matches"):
+    if data == None:
+        df = df = modo.to_dataframe([],header)
+    elif (hero != "") & (display == "Matches"):
         df = modo.to_dataframe(all_data_inverted[0],all_headers[0])
         df = df[(df.P1 == hero)]
     elif (hero != "") & (display == "Games"):
@@ -676,13 +678,13 @@ def input_missing_data():
     global all_data
     global all_data_inverted
   
-    mformat_index = modo.match_header().index("Format")
-    lformat_index = modo.match_header().index("Limited_Format")
-    mtype_index =   modo.match_header().index("Match_Type")
-    p1_arch_index = modo.match_header().index("P1_Arch")
-    p1_sub_index =  modo.match_header().index("P1_Subarch")
-    p2_arch_index = modo.match_header().index("P2_Arch")
-    p2_sub_index =  modo.match_header().index("P2_Subarch")
+    mformat_index = modo.header("Matches").index("Format")
+    lformat_index = modo.header("Matches").index("Limited_Format")
+    mtype_index =   modo.header("Matches").index("Match_Type")
+    p1_arch_index = modo.header("Matches").index("P1_Arch")
+    p1_sub_index =  modo.header("Matches").index("P1_Subarch")
+    p2_arch_index = modo.header("Matches").index("P2_Arch")
+    p2_sub_index =  modo.header("Matches").index("P2_Subarch")
 
     n = 0
     count = 0
@@ -697,9 +699,9 @@ def input_missing_data():
             (i[mformat_index] == "NA") or (i[mtype_index] == "NA") or \
             ((i[mformat_index] in input_options["Limited Formats"]) & (i[lformat_index] == "NA")): 
             count += 1
-            df = modo.to_dataframe(all_data[2],modo.play_header())
+            df = modo.to_dataframe(all_data[2],modo.header("Plays"))
             df = df[(df.Match_ID == i[0])]
-            players = [i[modo.match_header().index("P1")],i[modo.match_header().index("P2")]]
+            players = [i[modo.header("Matches").index("P1")],i[modo.header("Matches").index("P2")]]
             cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
             cards2 =  df[(df.Casting_Player == players[0]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
             cards3 =  df[(df.Casting_Player == players[1]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
@@ -732,13 +734,13 @@ def deck_data_guess(update_type):
     global all_data_inverted
     global ask_to_save
 
-    date_index = modo.match_header().index("Date")
-    p1_index = modo.match_header().index("P1")
-    p2_index = modo.match_header().index("P2")
-    p1_sa_index = modo.match_header().index("P1_Subarch")
-    p2_sa_index = modo.match_header().index("P2_Subarch")
-    format_index = modo.match_header().index("Format")
-    df2 = modo.to_dataframe(all_data[2],modo.play_header())
+    date_index = modo.header("Matches").index("Date")
+    p1_index = modo.header("Matches").index("P1")
+    p2_index = modo.header("Matches").index("P2")
+    p1_sa_index = modo.header("Matches").index("P1_Subarch")
+    p2_sa_index = modo.header("Matches").index("P2_Subarch")
+    format_index = modo.header("Matches").index("Format")
+    df2 = modo.to_dataframe(all_data[2],modo.header("Plays"))
 
     for i in all_data[0]:
         yyyy_mm = i[date_index][0:4] + "-" + i[date_index][5:7]
@@ -944,7 +946,7 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     gf.geometry("+%d+%d" %
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
-    message = "Date Played: " + mdata[modo.match_header().index("Date")]
+    message = "Date Played: " + mdata[modo.header("Matches").index("Date")]
     str1 = str2 = str3 = str4 = ""
     for index,i in enumerate(cards1):
         if index > 0:
@@ -1030,14 +1032,14 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
             for i in arch_options:
                 menu.add_command(label=i,command=lambda x=i: p2_arch.set(x))
 
-            if (mdata[modo.match_header().index("P1_Arch")] == "NA") or (mdata[modo.match_header().index("P1_Arch")] == "Limited"):
+            if (mdata[modo.header("Matches").index("P1_Arch")] == "NA") or (mdata[modo.header("Matches").index("P1_Arch")] == "Limited"):
                 p1_arch.set("P1 Archetype")
             else:
-                p1_arch.set(mdata[modo.match_header().index("P1_Arch")])
-            if (mdata[modo.match_header().index("P2_Arch")] == "NA") or (mdata[modo.match_header().index("P2_Arch")] == "Limited"):
+                p1_arch.set(mdata[modo.header("Matches").index("P1_Arch")])
+            if (mdata[modo.header("Matches").index("P2_Arch")] == "NA") or (mdata[modo.header("Matches").index("P2_Arch")] == "Limited"):
                 p2_arch.set("P2 Archetype")
             else:
-                p2_arch.set(mdata[modo.match_header().index("P2_Arch")])
+                p2_arch.set(mdata[modo.header("Matches").index("P2_Arch")])
 
     top_frame = tk.Frame(gf)
     mid_frame = tk.Frame(gf)
@@ -1091,21 +1093,21 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     dformat = tk.StringVar()
     dformat.set("Select Limited Format")
 
-    if mdata[modo.match_header().index("Format")] in input_options["Limited Formats"]:
+    if mdata[modo.header("Matches").index("Format")] in input_options["Limited Formats"]:
         arch_options = ["Limited"]
     else:
         arch_options += input_options["Archetypes"]
 
-    if mdata[modo.match_header().index("P1_Arch")] != "NA":
-        p1_arch.set(mdata[modo.match_header().index("P1_Arch")])
-    if mdata[modo.match_header().index("P2_Arch")] != "NA":
-        p2_arch.set(mdata[modo.match_header().index("P2_Arch")])
-    if mdata[modo.match_header().index("Format")] != "NA": 
-        mformat.set(mdata[modo.match_header().index("Format")])
-    if mdata[modo.match_header().index("Limited_Format")] != "NA":
-        dformat.set(mdata[modo.match_header().index("Limited_Format")])
-    if mdata[modo.match_header().index("Match_Type")] != "NA":
-        mtype.set(mdata[modo.match_header().index("Match_Type")])
+    if mdata[modo.header("Matches").index("P1_Arch")] != "NA":
+        p1_arch.set(mdata[modo.header("Matches").index("P1_Arch")])
+    if mdata[modo.header("Matches").index("P2_Arch")] != "NA":
+        p2_arch.set(mdata[modo.header("Matches").index("P2_Arch")])
+    if mdata[modo.header("Matches").index("Format")] != "NA": 
+        mformat.set(mdata[modo.header("Matches").index("Format")])
+    if mdata[modo.header("Matches").index("Limited_Format")] != "NA":
+        dformat.set(mdata[modo.header("Matches").index("Limited_Format")])
+    if mdata[modo.header("Matches").index("Match_Type")] != "NA":
+        mtype.set(mdata[modo.header("Matches").index("Match_Type")])
     
     if mformat.get() == "Cube":
         draft_format_options += input_options["Cube Formats"]
@@ -1129,8 +1131,8 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     match_format = tk.OptionMenu(bot_frame2,mformat,*format_options)
     match_type = tk.OptionMenu(bot_frame2,mtype,*type_options)
     draft_format = tk.OptionMenu(bot_frame2,dformat,*draft_format_options)
-    p1_sub.insert(0,mdata[modo.match_header().index("P1_Subarch")])
-    p2_sub.insert(0,mdata[modo.match_header().index("P2_Subarch")])
+    p1_sub.insert(0,mdata[modo.header("Matches").index("P1_Subarch")])
+    p2_sub.insert(0,mdata[modo.header("Matches").index("P2_Subarch")])
 
     button_skip = tk.Button(top_frame,text="Skip Match",width=10,command=lambda : [close_format_window("Skip")])
     button_exit = tk.Button(top_frame,text="Exit",width=10,command=lambda : [close_format_window("Exit")])
@@ -1588,8 +1590,9 @@ def set_filter():
     height = 300
     width =  550
 
-    tree1.grid_forget()
-    tree_empty.grid(row=0,column=0,sticky="nsew")
+    print_data(data=None,header=modo.header(display),update_status=False)
+    hidden_tree_init(modo.header(display))
+    hidden_tree_print(print_empty=False)
     update_status_bar(status=f"Applying Filters to {display} Table.")
 
     filter_window = tk.Toplevel(window)
@@ -1636,8 +1639,8 @@ def set_filter():
     def update_combobox():
         index = col_options.index(col.get()) + 1
         key_options = []
-        for i in tree1.get_children():
-            key_options.append(tree1.set(i,index))
+        for i in tree_hidden.get_children():
+            key_options.append(tree_hidden.set(i,index))
         if key_options[0].isnumeric():
             key_options = sorted(list(set(key_options)),key=int)
         else:
@@ -1690,8 +1693,6 @@ def set_filter():
     def apply_filter():
         # Update table and close window.
         set_display(display,update_status=True,bb_state=False)
-        tree1.grid(row=0,column=0,sticky="nsew")
-        tree_empty.grid_forget()
         filter_window.grab_release()
         filter_window.destroy()
 
@@ -1699,7 +1700,7 @@ def set_filter():
         global filter_changed
         filter_changed = True
         filter_dict.clear()
-        set_display(display,update_status=False,bb_state=False)
+        hidden_tree_print(print_empty=False)
         update_filter_text()
         button2["state"] = tk.DISABLED
 
@@ -1708,8 +1709,6 @@ def set_filter():
         global filter_dict
         filter_dict = filter_init
         set_display(display,update_status=True,bb_state=False)
-        tree1.grid(row=0,column=0,sticky="nsew")
-        tree_empty.grid_forget()
         text_frame.config(text=display)
         filter_window.grab_release()
         filter_window.destroy()
@@ -1787,17 +1786,17 @@ def revise_record2():
     values = list(tree1.item(selected,"values"))
     sel_matchid = values[0]
 
-    p1_index      = modo.match_header().index("P1")
-    p2_index      = modo.match_header().index("P2")
-    mformat_index = modo.match_header().index("Format")
-    lformat_index = modo.match_header().index("Limited_Format")
-    mtype_index =   modo.match_header().index("Match_Type")
-    p1_arch_index = modo.match_header().index("P1_Arch")
-    p1_sub_index =  modo.match_header().index("P1_Subarch")
-    p2_arch_index = modo.match_header().index("P2_Arch")
-    p2_sub_index =  modo.match_header().index("P2_Subarch")
+    p1_index      = modo.header("Matches").index("P1")
+    p2_index      = modo.header("Matches").index("P2")
+    mformat_index = modo.header("Matches").index("Format")
+    lformat_index = modo.header("Matches").index("Limited_Format")
+    mtype_index =   modo.header("Matches").index("Match_Type")
+    p1_arch_index = modo.header("Matches").index("P1_Arch")
+    p1_sub_index =  modo.header("Matches").index("P1_Subarch")
+    p2_arch_index = modo.header("Matches").index("P2_Arch")
+    p2_sub_index =  modo.header("Matches").index("P2_Subarch")
 
-    df = modo.to_dataframe(all_data[2],modo.play_header())
+    df = modo.to_dataframe(all_data[2],modo.header("Plays"))
     df = df[(df.Match_ID == values[0])]
     players = [values[p1_index],values[p2_index]]
     cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
@@ -1930,30 +1929,30 @@ def revise_record():
             for i in arch_options:
                 menu.add_command(label=i,command=lambda x=i: p2_arch_type.set(x))
 
-            if values[modo.match_header().index("P1_Arch")] == "Limited":
+            if values[modo.header("Matches").index("P1_Arch")] == "Limited":
                 p1_arch_type.set(arch_options[0])
                 p2_arch_type.set(arch_options[0])
             else:
-                p1_arch_type.set(values[modo.match_header().index("P1_Arch")])
-                p2_arch_type.set(values[modo.match_header().index("P2_Arch")])
+                p1_arch_type.set(values[modo.header("Matches").index("P1_Arch")])
+                p2_arch_type.set(values[modo.header("Matches").index("P2_Arch")])
 
     def close_revise_window():
         global all_data_inverted
         for count,i in enumerate(all_data[0]):
             if i[0] == values[0]:
-                if i[modo.match_header().index("P1")] == values[modo.match_header().index("P1")]:
-                    i[modo.match_header().index("P1_Arch")] = p1_arch_type.get()
-                    i[modo.match_header().index("P1_Subarch")] = p1_subarch_entry.get()
-                    i[modo.match_header().index("P2_Arch")] = p2_arch_type.get()
-                    i[modo.match_header().index("P2_Subarch")] = p2_subarch_entry.get()
+                if i[modo.header("Matches").index("P1")] == values[modo.header("Matches").index("P1")]:
+                    i[modo.header("Matches").index("P1_Arch")] = p1_arch_type.get()
+                    i[modo.header("Matches").index("P1_Subarch")] = p1_subarch_entry.get()
+                    i[modo.header("Matches").index("P2_Arch")] = p2_arch_type.get()
+                    i[modo.header("Matches").index("P2_Subarch")] = p2_subarch_entry.get()
                 else:
-                    i[modo.match_header().index("P1_Arch")] = p2_arch_type.get()
-                    i[modo.match_header().index("P1_Subarch")] = p2_subarch_entry.get()
-                    i[modo.match_header().index("P2_Arch")] = p1_arch_type.get()
-                    i[modo.match_header().index("P2_Subarch")] = p1_subarch_entry.get()
-                i[modo.match_header().index("Format")] = match_format.get()
-                i[modo.match_header().index("Limited_Format")] = limited_format.get()
-                i[modo.match_header().index("Match_Type")] = match_type.get()                   
+                    i[modo.header("Matches").index("P1_Arch")] = p2_arch_type.get()
+                    i[modo.header("Matches").index("P1_Subarch")] = p2_subarch_entry.get()
+                    i[modo.header("Matches").index("P2_Arch")] = p1_arch_type.get()
+                    i[modo.header("Matches").index("P2_Subarch")] = p1_subarch_entry.get()
+                i[modo.header("Matches").index("Format")] = match_format.get()
+                i[modo.header("Matches").index("Limited_Format")] = limited_format.get()
+                i[modo.header("Matches").index("Match_Type")] = match_type.get()                   
                 all_data_inverted = modo.invert_join(all_data)
                 set_display("Matches",update_status=True,bb_state=False)
                 break
@@ -1969,7 +1968,7 @@ def revise_record():
 
     format_options = ["NA"] + input_options["Constructed Formats"] + input_options["Limited Formats"]
     match_format = tk.StringVar()
-    match_format.set(values[modo.match_header().index("Format")])
+    match_format.set(values[modo.header("Matches").index("Format")])
 
     if match_format.get() == "Cube":
         limited_options = input_options["Cube Formats"]
@@ -1988,45 +1987,45 @@ def revise_record():
         match_options = ["NA"] + input_options["Constructed Match Types"] + input_options["Booster Draft Match Types"] + input_options["Sealed Match Types"]
 
     limited_format = tk.StringVar()
-    limited_format.set(values[modo.match_header().index("Limited_Format")])
+    limited_format.set(values[modo.header("Matches").index("Limited_Format")])
 
     match_type = tk.StringVar()
-    match_type.set(values[modo.match_header().index("Match_Type")])
+    match_type.set(values[modo.header("Matches").index("Match_Type")])
 
-    if values[modo.match_header().index("Format")] in input_options["Limited Formats"]:
+    if values[modo.header("Matches").index("Format")] in input_options["Limited Formats"]:
         arch_options = ["Limited"]
     else:
         arch_options = input_options["Archetypes"]
     p1_arch_type = tk.StringVar()
-    p1_arch_type.set(values[modo.match_header().index("P1_Arch")])
+    p1_arch_type.set(values[modo.header("Matches").index("P1_Arch")])
 
     p2_arch_type = tk.StringVar()
-    p2_arch_type.set(values[modo.match_header().index("P2_Arch")])
+    p2_arch_type.set(values[modo.header("Matches").index("P2_Arch")])
 
     p1_label =           tk.Label(mid_frame,text="P1:")
-    p1_entry =           tk.Label(mid_frame,text=values[modo.match_header().index("P1")])
+    p1_entry =           tk.Label(mid_frame,text=values[modo.header("Matches").index("P1")])
     p1_arch_label =      tk.Label(mid_frame,text="P1_Arch:")
     p1_arch_entry =      tk.OptionMenu(mid_frame,p1_arch_type,*arch_options)
     p1_subarch_label =   tk.Label(mid_frame,text="P1_Subarch:")
     p1_subarch_entry =   tk.Entry(mid_frame)
     p2_label =           tk.Label(mid_frame,text="P2:")
-    p2_entry =           tk.Label(mid_frame,text=values[modo.match_header().index("P2")])
+    p2_entry =           tk.Label(mid_frame,text=values[modo.header("Matches").index("P2")])
     p2_arch_label =      tk.Label(mid_frame,text="P2_Arch:")
     p2_arch_entry =      tk.OptionMenu(mid_frame,p2_arch_type,*arch_options)
     p2_subarch_label =   tk.Label(mid_frame,text="P2_Subarch:")
     p2_subarch_entry =   tk.Entry(mid_frame)
     p1_roll_label =      tk.Label(mid_frame,text="P1_Roll:")
-    p1_roll_entry =      tk.Label(mid_frame,text=values[modo.match_header().index("P1_Roll")])
+    p1_roll_entry =      tk.Label(mid_frame,text=values[modo.header("Matches").index("P1_Roll")])
     p2_roll_label =      tk.Label(mid_frame,text="P2_Roll:")
-    p2_roll_entry =      tk.Label(mid_frame,text=values[modo.match_header().index("P2_Roll")])
+    p2_roll_entry =      tk.Label(mid_frame,text=values[modo.header("Matches").index("P2_Roll")])
     roll_winner_label =  tk.Label(mid_frame,text="Roll_Winner:")
-    roll_winner_entry =  tk.Label(mid_frame,text=values[modo.match_header().index("Roll_Winner")])
+    roll_winner_entry =  tk.Label(mid_frame,text=values[modo.header("Matches").index("Roll_Winner")])
     p1_wins_label =      tk.Label(mid_frame,text="P1_Wins:")
-    p1_wins_entry =      tk.Label(mid_frame,text=values[modo.match_header().index("P1_Wins")])
+    p1_wins_entry =      tk.Label(mid_frame,text=values[modo.header("Matches").index("P1_Wins")])
     p2_wins_label =      tk.Label(mid_frame,text="P2_Wins:")
-    p2_wins_entry =      tk.Label(mid_frame,text=values[modo.match_header().index("P2_Wins")])
+    p2_wins_entry =      tk.Label(mid_frame,text=values[modo.header("Matches").index("P2_Wins")])
     match_winner_label = tk.Label(mid_frame,text="Match_Winner:")
-    match_winner_entry = tk.Label(mid_frame,text=values[modo.match_header().index("Match_Winner")])
+    match_winner_entry = tk.Label(mid_frame,text=values[modo.header("Matches").index("Match_Winner")])
     format_label =       tk.Label(mid_frame,text="Format:")
     format_entry =       tk.OptionMenu(mid_frame,match_format,*format_options)
     draft_type_label =   tk.Label(mid_frame,text="Limited_Format:")
@@ -2034,10 +2033,10 @@ def revise_record():
     match_type_label =   tk.Label(mid_frame,text="Match_Type:")
     match_type_entry =   tk.OptionMenu(mid_frame,match_type,*match_options)
     date_label =         tk.Label(mid_frame,text="Date:")
-    date_entry =         tk.Label(mid_frame,text=values[modo.match_header().index("Date")])
+    date_entry =         tk.Label(mid_frame,text=values[modo.header("Matches").index("Date")])
 
-    p1_subarch_entry.insert(0,values[modo.match_header().index("P1_Subarch")])
-    p2_subarch_entry.insert(0,values[modo.match_header().index("P2_Subarch")])
+    p1_subarch_entry.insert(0,values[modo.header("Matches").index("P1_Subarch")])
+    p2_subarch_entry.insert(0,values[modo.header("Matches").index("P2_Subarch")])
 
     button3 = tk.Button(bot_frame,text="Apply Changes",
                         command=lambda : close_revise_window())
@@ -2223,32 +2222,32 @@ def revise_record_multi():
             for index,j in enumerate(itertools.chain(*[all_data[0],all_data_inverted[0]])):
                 if values[0] == j[0]:
                     if field == "P1 Deck":
-                        if values[modo.match_header().index("P1")] == j[modo.match_header().index("P1")]:
-                            j[modo.match_header().index("P1_Arch")] = p1_arch_type.get()
-                            j[modo.match_header().index("P1_Subarch")] = p1_subarch_entry.get()
+                        if values[modo.header("Matches").index("P1")] == j[modo.header("Matches").index("P1")]:
+                            j[modo.header("Matches").index("P1_Arch")] = p1_arch_type.get()
+                            j[modo.header("Matches").index("P1_Subarch")] = p1_subarch_entry.get()
                         else:
-                            j[modo.match_header().index("P2_Arch")] = p1_arch_type.get()
-                            j[modo.match_header().index("P2_Subarch")] = p1_subarch_entry.get()                          
+                            j[modo.header("Matches").index("P2_Arch")] = p1_arch_type.get()
+                            j[modo.header("Matches").index("P2_Subarch")] = p1_subarch_entry.get()                          
                     elif field == "P2 Deck":
-                        if values[modo.match_header().index("P2")] == j[modo.match_header().index("P2")]:
-                            j[modo.match_header().index("P2_Arch")] = p2_arch_type.get()
-                            j[modo.match_header().index("P2_Subarch")] = p2_subarch_entry.get()
+                        if values[modo.header("Matches").index("P2")] == j[modo.header("Matches").index("P2")]:
+                            j[modo.header("Matches").index("P2_Arch")] = p2_arch_type.get()
+                            j[modo.header("Matches").index("P2_Subarch")] = p2_subarch_entry.get()
                         else:
-                            j[modo.match_header().index("P1_Arch")] = p2_arch_type.get()
-                            j[modo.match_header().index("P1_Subarch")] = p2_subarch_entry.get()
+                            j[modo.header("Matches").index("P1_Arch")] = p2_arch_type.get()
+                            j[modo.header("Matches").index("P1_Subarch")] = p2_subarch_entry.get()
                     elif field == "Format":
-                        j[modo.match_header().index("Format")] = match_format.get()
-                        j[modo.match_header().index("Limited_Format")] = lim_format.get()
+                        j[modo.header("Matches").index("Format")] = match_format.get()
+                        j[modo.header("Matches").index("Limited_Format")] = lim_format.get()
                         if match_format.get() in input_options["Limited Formats"]:
-                            j[modo.match_header().index("P1_Arch")] = "Limited"
-                            j[modo.match_header().index("P2_Arch")] = "Limited"
+                            j[modo.header("Matches").index("P1_Arch")] = "Limited"
+                            j[modo.header("Matches").index("P2_Arch")] = "Limited"
                         elif match_format.get() in input_options["Constructed Formats"]:
-                            if j[modo.match_header().index("P1_Arch")] == "Limited":
-                                j[modo.match_header().index("P1_Arch")] = "NA"
-                            if j[modo.match_header().index("P2_Arch")] == "Limited":
-                                j[modo.match_header().index("P2_Arch")] = "NA"
+                            if j[modo.header("Matches").index("P1_Arch")] == "Limited":
+                                j[modo.header("Matches").index("P1_Arch")] = "NA"
+                            if j[modo.header("Matches").index("P2_Arch")] == "Limited":
+                                j[modo.header("Matches").index("P2_Arch")] = "NA"
                     elif field == "Match Type":
-                        j[modo.match_header().index("Match_Type")] = match_type.get() 
+                        j[modo.header("Matches").index("Match_Type")] = match_type.get() 
         set_display("Matches",update_status=True,bb_state=False)
         revise_button["state"] = tk.NORMAL
 
@@ -2269,7 +2268,7 @@ def revise_record_multi():
     global selected
     selected = tree1.selection()
     sel_matchid = []
-    format_index = modo.match_header().index("Format")
+    format_index = modo.header("Matches").index("Format")
     sel_formats = {"constructed":False,"booster":False,"sealed":False}
     for i in selected:
         format_i = list(tree1.item(i,"values"))[format_index]
@@ -2446,14 +2445,14 @@ def get_winners():
     global all_data_inverted
     global uaw
 
-    gw_index = modo.game_header().index("Game_Winner")
-    p1_index = modo.game_header().index("P1")
-    p2_index = modo.game_header().index("P2")
-    gn_index = modo.game_header().index("Game_Num")
+    gw_index = modo.header("Games").index("Game_Winner")
+    p1_index = modo.header("Games").index("P1")
+    p2_index = modo.header("Games").index("P2")
+    gn_index = modo.header("Games").index("Game_Num")
 
     n = 0
     data_index = 0
-    df1 =   modo.to_dataframe(all_data[1],modo.game_header())
+    df1 =   modo.to_dataframe(all_data[1],modo.header("Games"))
     total = df1[(df1.Game_Winner == "NA")].shape[0]
     for count,i in enumerate(all_data[1]):    # Iterate through games.
         if i[gw_index] == "NA": # Game record does not have a winner.
@@ -4195,6 +4194,71 @@ def load_window_size_setting():
 def update_status_bar(status):
     status_label.config(text=status)
     print(status)
+def hidden_tree_init(header):
+    small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num"]
+
+    # Clear existing data in tree
+    tree_hidden.delete(*tree_hidden.get_children())
+
+    tree_hidden["column"] = header
+    tree_hidden["show"] = "headings"
+
+    # Insert column headers into tree
+    for i in tree_hidden["column"]:
+        if i in small_headers:
+            tree_hidden.column(i,anchor="center",stretch=False,width=75)
+        else:
+            tree_hidden.column(i,anchor="center",stretch=False,width=100)
+        tree_hidden.heading(i,text=i)
+def hidden_tree_print(print_empty):
+    if print_empty == True:
+        df = df = modo.to_dataframe([],modo.header(display))
+    elif (hero != "") & (display == "Matches"):
+        df = modo.to_dataframe(all_data_inverted[0],modo.header(display))
+        df = df[(df.P1 == hero)]
+    elif display == "Matches":
+        df = modo.to_dataframe(all_data[0],modo.header(display))
+    elif (hero != "") & (display == "Games"):
+        df = modo.to_dataframe(all_data_inverted[1],modo.header(display))
+        df = df[(df.P1 == hero)]
+    elif display == "Games":
+        df = modo.to_dataframe(all_data[1],modo.header(display))
+    else:
+        df = modo.to_dataframe(all_data[2],modo.header(display))
+
+    filtered_list = []
+    for key in filter_dict:
+        if key not in modo.header(display):
+            continue
+        for i in filter_dict[key]:
+            if i[2:].isnumeric():
+                value = int(i[2:])
+            else:
+                value = i[2:]
+            if i[0] == "=":
+                if key == "Date":
+                    filtered_list.append(df[(df[key].str.contains(value[0:10]))])
+                else:
+                    filtered_list.append(df[(df[key] == value)])
+            elif i[0] == ">":
+                filtered_list.append(df[(df[key] > value)])
+            elif i[0] == "<":
+                filtered_list.append(df[(df[key] < value)])
+        if len(filtered_list) == 0:
+            pass
+        elif len(filtered_list) == 1:
+            df = filtered_list[0]
+        else:
+            index = 1
+            df = filtered_list[0]
+            while index < (len(filtered_list)):
+                df = pd.merge(df,filtered_list[index],how="outer")
+                index += 1
+        filtered_list.clear()
+
+    df_rows = df.to_numpy().tolist()
+    for i in df_rows:
+        tree_hidden.insert("","end",values=i)
 def test():
     # Test method
     pass
@@ -4307,7 +4371,7 @@ stats_button.grid(row=6,column=0,sticky="ew",padx=5,pady=50)
 back_button.grid(row=7,column=0,sticky="ew",padx=5,pady=5)
 #test_button.grid(row=13,column=0,sticky="ew",padx=5,pady=5)
 
-tree_empty = ttk.Treeview(text_frame,show="tree")
+tree_hidden = ttk.Treeview(text_frame,show="tree")
 
 tree1 = ttk.Treeview(text_frame,show="tree")
 tree1.grid(row=0,column=0,sticky="nsew")
