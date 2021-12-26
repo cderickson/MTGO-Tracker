@@ -4081,7 +4081,7 @@ def get_stats():
             time_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())
         elif s_type.get() == "Card Data":
             card_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())      
-        print("loaded data:"+player.get()+","+opponent.get()+","+mformat.get()+","+lim_format.get()+","+deck.get()+","+opp_deck.get()+","+dr[0]+","+dr[1]+","+s_type.get())
+        print("Loaded Data:"+player.get()+","+opponent.get()+","+mformat.get()+","+lim_format.get()+","+deck.get()+","+opp_deck.get()+","+dr[0]+","+dr[1]+","+s_type.get())
 
     def close_stats_window():
         window.deiconify()
