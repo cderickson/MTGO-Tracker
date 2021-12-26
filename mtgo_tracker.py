@@ -1591,7 +1591,7 @@ def set_filter():
     width =  550
 
     print_data(data=None,update_status=False)
-    hidden_tree_init(modo.header(display))
+    hidden_tree_init()
     hidden_tree_print(print_empty=False)
     update_status_bar(status=f"Applying Filters to {display} Table.")
 
@@ -1692,6 +1692,7 @@ def set_filter():
     
     def apply_filter():
         # Update table and close window.
+        hidden_tree_print(print_empty=True)
         set_display(display,update_status=True,bb_state=False)
         filter_window.grab_release()
         filter_window.destroy()
@@ -4194,13 +4195,13 @@ def load_window_size_setting():
 def update_status_bar(status):
     status_label.config(text=status)
     print(status)
-def hidden_tree_init(header):
+def hidden_tree_init():
     small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num"]
 
     # Clear existing data in tree
     tree_hidden.delete(*tree_hidden.get_children())
 
-    tree_hidden["column"] = header
+    tree_hidden["column"] = modo.header(display)
     tree_hidden["show"] = "headings"
 
     # Insert column headers into tree
