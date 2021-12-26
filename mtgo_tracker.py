@@ -49,8 +49,8 @@ def save(exit):
     save_settings()
     os.chdir(filepath_root + "\\" + "save")
 
-    pickle.dump(all_data,open("all_data.p","wb"))
-    pickle.dump(parsed_file_list,open("parsed_file_list.p","wb"))
+    pickle.dump(all_data,open("all_data","wb"))
+    pickle.dump(parsed_file_list,open("parsed_file_list","wb"))
 
     update_status_bar(status="Save complete. Data will be loaded automatically on next startup.")
     os.chdir(filepath_root)
@@ -129,7 +129,7 @@ def set_default_window_size():
             main_window_size = ("large",1750,750)
 
         os.chdir(filepath_root + "\\" + "save")
-        pickle.dump(main_window_size,open("main_window_size.p","wb"))
+        pickle.dump(main_window_size,open("main_window_size","wb"))
         window.geometry(str(main_window_size[1]) + "x" + str(main_window_size[2]))
         update_status_bar(status="Default Window Size saved.")
         os.chdir(filepath_root)
@@ -332,8 +332,8 @@ def delete_session():
         all_decks.clear()
 
         # Uncomment if we are adding back ability to load sample decklists from .txt files.
-        # files = ["all_data.p","parsed_file_list.p","all_decks.p","settings.p","main_window_size.p"]
-        files = ["all_data.p","parsed_file_list.p","settings.p","main_window_size.p"]
+        # files = ["all_data","parsed_file_list","all_decks","settings","main_window_size"]
+        files = ["all_data","parsed_file_list","settings","main_window_size"]
         os.chdir(filepath_root + "\\" + "save")   
 
         session_exists = False
@@ -433,8 +433,8 @@ def startup():
         os.mkdir(filepath_root + "\\" + "save")
     os.chdir(filepath_root + "\\" + "save")
 
-    if os.path.isfile("settings.p"):
-        settings = pickle.load(open("settings.p","rb"))
+    if os.path.isfile("settings"):
+        settings = pickle.load(open("settings","rb"))
         #filepath_root =   settings[0]
         filepath_export = settings[1]
         #filepath_decks =  settings[2]
@@ -445,15 +445,15 @@ def startup():
     all_headers[1] = modo.game_header()
     all_headers[2] = modo.play_header()
 
-    if os.path.isfile("all_decks.p"):
-        all_decks = pickle.load(open("all_decks.p","rb"))
+    if os.path.isfile("all_decks"):
+        all_decks = pickle.load(open("all_decks","rb"))
 
-    if (os.path.isfile("all_data.p") == False) or (os.path.isfile("parsed_file_list.p") == False):
+    if (os.path.isfile("all_data") == False) or (os.path.isfile("parsed_file_list") == False):
         update_status_bar(status="No session data to load. Import your MTGO GameLog files to get started.")
         os.chdir(filepath_root)
         return
-    all_data = pickle.load(open("all_data.p","rb"))
-    parsed_file_list = pickle.load(open("parsed_file_list.p","rb"))
+    all_data = pickle.load(open("all_data","rb"))
+    parsed_file_list = pickle.load(open("parsed_file_list","rb"))
 
     all_data_inverted = modo.invert_join(all_data)
 
@@ -475,10 +475,10 @@ def startup():
 def save_settings():
     os.chdir(filepath_root + "\\" + "save")
     settings = [filepath_root,filepath_export,filepath_decks,filepath_logs,hero]
-    pickle.dump(settings,open("settings.p","wb"))
+    pickle.dump(settings,open("settings","wb"))
     # Uncomment if we are adding back ability to save sample decklists from .txt files.
-    # pickle.dump(all_decks,open("all_decks.p","wb"))
-    pickle.dump(main_window_size,open("main_window_size.p","wb"))
+    # pickle.dump(all_decks,open("all_decks","wb"))
+    pickle.dump(main_window_size,open("main_window_size","wb"))
     os.chdir(filepath_root)
 def set_display(d,update_status,bb_state):
     global display
@@ -4188,8 +4188,8 @@ def load_window_size_setting():
     cwd = os.getcwd()
     if os.path.isdir("save") == True:
         os.chdir(cwd + "\\" + "save")
-        if os.path.isfile("main_window_size.p"):
-            main_window_size = pickle.load(open("main_window_size.p","rb"))
+        if os.path.isfile("main_window_size"):
+            main_window_size = pickle.load(open("main_window_size","rb"))
         os.chdir(cwd)
 def update_status_bar(status):
     status_label.config(text=status)
