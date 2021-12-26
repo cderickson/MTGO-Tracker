@@ -914,7 +914,7 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
         if len(argv) > 0:
             missing_data = argv[0]
         else:
-            missing_data = [p1_arch.get(),p1_sub.get(),p2_arch.get(),p2_sub.get(),mformat.get(),dformat.get(),mtype.get()]
+            missing_data = [p1_arch.get(),p1_sub.get().strip(),p2_arch.get(),p2_sub.get().strip(),mformat.get(),dformat.get(),mtype.get()]
             if missing_data[0] == "P1 Archetype":
                 missing_data[0] = "NA"
             if missing_data[2] == "P2 Archetype":
@@ -2224,17 +2224,17 @@ def revise_record_multi():
                     if field == "P1 Deck":
                         if values[modo.header("Matches").index("P1")] == j[modo.header("Matches").index("P1")]:
                             j[modo.header("Matches").index("P1_Arch")] = p1_arch_type.get()
-                            j[modo.header("Matches").index("P1_Subarch")] = p1_subarch_entry.get()
+                            j[modo.header("Matches").index("P1_Subarch")] = p1_subarch_entry.get().strip()
                         else:
                             j[modo.header("Matches").index("P2_Arch")] = p1_arch_type.get()
-                            j[modo.header("Matches").index("P2_Subarch")] = p1_subarch_entry.get()                          
+                            j[modo.header("Matches").index("P2_Subarch")] = p1_subarch_entry.get().strip()                   
                     elif field == "P2 Deck":
                         if values[modo.header("Matches").index("P2")] == j[modo.header("Matches").index("P2")]:
                             j[modo.header("Matches").index("P2_Arch")] = p2_arch_type.get()
-                            j[modo.header("Matches").index("P2_Subarch")] = p2_subarch_entry.get()
+                            j[modo.header("Matches").index("P2_Subarch")] = p2_subarch_entry.get().strip()
                         else:
                             j[modo.header("Matches").index("P1_Arch")] = p2_arch_type.get()
-                            j[modo.header("Matches").index("P1_Subarch")] = p2_subarch_entry.get()
+                            j[modo.header("Matches").index("P1_Subarch")] = p2_subarch_entry.get().strip()
                     elif field == "Format":
                         j[modo.header("Matches").index("Format")] = match_format.get()
                         j[modo.header("Matches").index("Limited_Format")] = lim_format.get()
