@@ -1591,8 +1591,6 @@ def set_filter():
     width =  550
 
     print_data(data=None,update_status=False)
-    hidden_tree_init()
-    hidden_tree_print(print_empty=False)
     update_status_bar(status=f"Applying Filters to {display} Table.")
 
     filter_window = tk.Toplevel(window)
@@ -1637,10 +1635,8 @@ def set_filter():
             date.grid_forget()
 
     def update_combobox():
-        index = col_options.index(col.get()) + 1
-        key_options = []
-        for i in tree_hidden.get_children():
-            key_options.append(tree_hidden.set(i,index))
+        key_options = list(df[col.get()].unique())
+
         if key_options[0].isnumeric():
             key_options = sorted(list(set(key_options)),key=int)
         else:
@@ -1692,7 +1688,6 @@ def set_filter():
     
     def apply_filter():
         # Update table and close window.
-        hidden_tree_print(print_empty=True)
         set_display(display,update_status=True,bb_state=False)
         filter_window.grab_release()
         filter_window.destroy()
@@ -1701,7 +1696,6 @@ def set_filter():
         global filter_changed
         filter_changed = True
         filter_dict.clear()
-        hidden_tree_print(print_empty=False)
         update_filter_text()
         button2["state"] = tk.DISABLED
 
@@ -1717,6 +1711,23 @@ def set_filter():
     global filter_changed
     filter_changed = False
     filter_init = filter_dict.copy()
+
+    # Building dataframe (unfiltered) to give us our dropdown options.
+    if hero == "":
+        if display == "Matches":
+            df = modo.to_dataframe(all_data[0],modo.header("Matches"))
+        elif display == "Games":
+            df = modo.to_dataframe(all_data[1],modo.header("Games"))
+        elif display == "Plays":
+            df = modo.to_dataframe(all_data[2],modo.header("Plays"))
+    else:
+        if display == "Matches":
+            df = modo.to_dataframe(all_data_inverted[0],modo.header("Matches"))
+        elif display == "Games":
+            df = modo.to_dataframe(all_data_inverted[1],modo.header("Games"))
+        elif display == "Plays":
+            df = modo.to_dataframe(all_data_inverted[2],modo.header("Plays"))
+        df = df[(df.P1 == hero)]
 
     if display == "Matches":
         col_options = modo.header("Matches").copy()
@@ -4195,71 +4206,6 @@ def load_window_size_setting():
 def update_status_bar(status):
     status_label.config(text=status)
     print(status)
-def hidden_tree_init():
-    small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num"]
-
-    # Clear existing data in tree
-    tree_hidden.delete(*tree_hidden.get_children())
-
-    tree_hidden["column"] = modo.header(display)
-    tree_hidden["show"] = "headings"
-
-    # Insert column headers into tree
-    for i in tree_hidden["column"]:
-        if i in small_headers:
-            tree_hidden.column(i,anchor="center",stretch=False,width=75)
-        else:
-            tree_hidden.column(i,anchor="center",stretch=False,width=100)
-        tree_hidden.heading(i,text=i)
-def hidden_tree_print(print_empty):
-    if print_empty == True:
-        df = df = modo.to_dataframe([],modo.header(display))
-    elif (hero != "") & (display == "Matches"):
-        df = modo.to_dataframe(all_data_inverted[0],modo.header(display))
-        df = df[(df.P1 == hero)]
-    elif display == "Matches":
-        df = modo.to_dataframe(all_data[0],modo.header(display))
-    elif (hero != "") & (display == "Games"):
-        df = modo.to_dataframe(all_data_inverted[1],modo.header(display))
-        df = df[(df.P1 == hero)]
-    elif display == "Games":
-        df = modo.to_dataframe(all_data[1],modo.header(display))
-    else:
-        df = modo.to_dataframe(all_data[2],modo.header(display))
-
-    filtered_list = []
-    for key in filter_dict:
-        if key not in modo.header(display):
-            continue
-        for i in filter_dict[key]:
-            if i[2:].isnumeric():
-                value = int(i[2:])
-            else:
-                value = i[2:]
-            if i[0] == "=":
-                if key == "Date":
-                    filtered_list.append(df[(df[key].str.contains(value[0:10]))])
-                else:
-                    filtered_list.append(df[(df[key] == value)])
-            elif i[0] == ">":
-                filtered_list.append(df[(df[key] > value)])
-            elif i[0] == "<":
-                filtered_list.append(df[(df[key] < value)])
-        if len(filtered_list) == 0:
-            pass
-        elif len(filtered_list) == 1:
-            df = filtered_list[0]
-        else:
-            index = 1
-            df = filtered_list[0]
-            while index < (len(filtered_list)):
-                df = pd.merge(df,filtered_list[index],how="outer")
-                index += 1
-        filtered_list.clear()
-
-    df_rows = df.to_numpy().tolist()
-    for i in df_rows:
-        tree_hidden.insert("","end",values=i)
 def test():
     # Test method
     pass
@@ -4371,8 +4317,6 @@ revise_button.grid(row=5,column=0,sticky="ew",padx=5,pady=5)
 stats_button.grid(row=6,column=0,sticky="ew",padx=5,pady=50)
 back_button.grid(row=7,column=0,sticky="ew",padx=5,pady=5)
 #test_button.grid(row=13,column=0,sticky="ew",padx=5,pady=5)
-
-tree_hidden = ttk.Treeview(text_frame,show="tree")
 
 tree1 = ttk.Treeview(text_frame,show="tree")
 tree1.grid(row=0,column=0,sticky="nsew")
