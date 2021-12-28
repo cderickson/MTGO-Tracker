@@ -657,7 +657,7 @@ def game_data(ga):
         curr_list = i.split()
         if i.find("joined the game") != -1:
             if player_count == 0:
-                #new game
+                # New Game
                 player_count = len(players(ga)) - 1
                 game_winner = get_winner(curr_game_list,p1,p2)
                 if game_winner == "NA":
@@ -693,8 +693,7 @@ def game_data(ga):
                 curr_game_list = []
             else:
                 player_count -= 1
-        elif i.find("chooses to play first") != -1 or \
-             i.find("chooses to not play first") != -1:
+        elif (i.find("chooses to play first") != -1) or (i.find("chooses to not play first") != -1):
             game_num += 1
             if curr_list[0] == p1:
                 pd_selector = "P1"
@@ -849,8 +848,7 @@ def play_data(ga):
         cardsdrawn = 0
         attackers = 0
         play_data = []
-        if i.find("chooses to play first") != -1 or \
-             i.find("chooses to draw first") != -1:
+        if (i.find("chooses to play first") != -1) or (i.find("chooses to not play first") != -1):
             game_num += 1
             play_num = 0
         elif i.find("Turn ") != -1 and \
