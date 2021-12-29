@@ -20,7 +20,7 @@ all_data =          [[],[],[],[]]
 all_data_inverted = [[],[],[],[]]
 all_headers =       [[],[],[]]
 all_decks =         {}
-parsed_file_list =  []
+parsed_file_dict =  {}
 
 # Settings imported/saved in save folder:
 filepath_root =     ""
@@ -50,7 +50,7 @@ def save(exit):
     os.chdir(filepath_root + "\\" + "save")
 
     pickle.dump(all_data,open("all_data","wb"))
-    pickle.dump(parsed_file_list,open("parsed_file_list","wb"))
+    pickle.dump(parsed_file_dict,open("parsed_file_dict","wb"))
 
     update_status_bar(status="Save complete. Data will be loaded automatically on next startup.")
     os.chdir(filepath_root)
@@ -174,7 +174,7 @@ def set_default_window_size():
 def clear_loaded():
     global all_data
     global all_data_inverted
-    global parsed_file_list
+    global parsed_file_dict
     global hero
     global filter_dict
     global display
@@ -187,7 +187,7 @@ def clear_loaded():
 
     all_data =          [[],[],[],[]]
     all_data_inverted = [[],[],[],[]]
-    parsed_file_list =  []
+    parsed_file_dict.clear()
     hero =              ""
     filter_dict.clear()
     display =           ""
@@ -204,6 +204,7 @@ def clear_loaded():
     filter_button["state"] = tk.DISABLED
     clear_button["state"] = tk.DISABLED
     revise_button["state"] = tk.DISABLED
+    remove_button["state"] = tk.DISABLED
     stats_button["state"] = tk.DISABLED
     back_button["state"] = tk.DISABLED
     
@@ -331,9 +332,7 @@ def delete_session():
         global all_decks
         all_decks.clear()
 
-        # Uncomment if we are adding back ability to load sample decklists from .txt files.
-        # files = ["all_data","parsed_file_list","all_decks","settings","main_window_size"]
-        files = ["all_data","parsed_file_list","settings","main_window_size"]
+        files = ["all_data","parsed_file_dict","settings","main_window_size"]
         os.chdir(filepath_root + "\\" + "save")   
 
         session_exists = False
@@ -386,7 +385,7 @@ def startup():
     global all_data
     global all_data_inverted
     global all_decks
-    global parsed_file_list
+    global parsed_file_dict
     global data_loaded
     global input_options
     global ask_to_save
@@ -448,12 +447,12 @@ def startup():
     if os.path.isfile("all_decks"):
         all_decks = pickle.load(open("all_decks","rb"))
 
-    if (os.path.isfile("all_data") == False) or (os.path.isfile("parsed_file_list") == False):
+    if (os.path.isfile("all_data") == False) or (os.path.isfile("parsed_file_dict") == False):
         update_status_bar(status="No session data to load. Import your MTGO GameLog files to get started.")
         os.chdir(filepath_root)
         return
     all_data = pickle.load(open("all_data","rb"))
-    parsed_file_list = pickle.load(open("parsed_file_list","rb"))
+    parsed_file_dict = pickle.load(open("parsed_file_dict","rb"))
 
     all_data_inverted = modo.invert_join(all_data)
 
@@ -505,18 +504,24 @@ def set_display(d,update_status,bb_state):
     if d == "Matches":
         back_button["state"] = tk.DISABLED
         print_data(all_data[0],update_status)
+        revise_button["state"] = tk.DISABLED
+        remove_button["state"] = tk.DISABLED
     elif d == "Games":
         back_button["state"] = tk.NORMAL
         print_data(all_data[1],update_status)
+        revise_button["state"] = tk.DISABLED
+        remove_button["state"] = tk.DISABLED
     elif d == "Plays":
         back_button["state"] = tk.NORMAL
         print_data(all_data[2],update_status)
+        revise_button["state"] = tk.DISABLED
+        remove_button["state"] = tk.DISABLED
 def get_all_data():
     global all_data
     global all_data_inverted
     global all_headers
     global data_loaded
-    global parsed_file_list
+    global parsed_file_dict
     global new_import
     global ask_to_save
     count = 0
@@ -528,7 +533,7 @@ def get_all_data():
         for i in files:
             if ("Match_GameLog_" not in i) or (len(i) < 30):
                 pass
-            elif (i in parsed_file_list):
+            elif (i in parsed_file_dict):
                 pass
             else:
                 os.chdir(root)
@@ -536,7 +541,7 @@ def get_all_data():
                     initial = gamelog.read()
                     mtime = time.ctime(os.path.getmtime(i))
                 parsed_data = modo.get_all_data(initial,mtime)
-                parsed_file_list.append(i)
+                parsed_file_dict[i] = parsed_data[0][0]
                 count += 1
 
                 new_data[0].append(parsed_data[0])
@@ -555,7 +560,10 @@ def get_all_data():
         for j in new_data_inverted[index]:
             all_data_inverted[index].append(j)
 
-    update_status_bar(status="Imported " + str(count) + " new matches.")
+    if count == 1:
+        update_status_bar(status="Imported " + str(count) + " new Match.")
+    else:
+        update_status_bar(status="Imported " + str(count) + " new Matches.")
     if count > 0:
         ask_to_save = True
     new_import = True
@@ -640,7 +648,6 @@ def print_data(data,update_status):
         new_import = False
     elif update_status == True:
         update_status_bar(status="Displaying: " + str(len(df_rows)) + " of " + str(total) + " records.")
-    revise_button["state"] = tk.DISABLED
 def get_lists():
     global all_decks
     global ask_to_save
@@ -746,6 +753,7 @@ def deck_data_guess(update_type):
         yyyy_mm = i[date_index][0:4] + "-" + i[date_index][5:7]
         players = [i[p1_index],i[p2_index]]
 
+        # Update P1_Subarch, P2_Subarch for all Limited Matches.
         if update_type == "Limited":
             if i[format_index] in input_options["Limited Formats"]:
                 ask_to_save = True
@@ -753,6 +761,17 @@ def deck_data_guess(update_type):
                 cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
                 i[p1_sa_index] = modo.get_limited_subarch(cards1)
                 i[p2_sa_index] = modo.get_limited_subarch(cards2)
+
+        # Update P1_Subarch, P2_Subarch for all Constructed Matches.
+        elif update_type == "Constructed":
+            if i[format_index] in input_options["Constructed Formats"]:
+                ask_to_save = True
+                cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
+                cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
+                p1_data = modo.closest_list(set(cards1),all_decks,yyyy_mm)
+                p2_data = modo.closest_list(set(cards2),all_decks,yyyy_mm)
+                i[p1_sa_index] = p1_data[0]
+                i[p2_sa_index] = p2_data[0]
 
         # Update P1_Subarch, P2_Subarch for all Matches.
         elif update_type == "All":
@@ -767,10 +786,6 @@ def deck_data_guess(update_type):
                 p2_data = modo.closest_list(set(cards2),all_decks,yyyy_mm)
                 i[p1_sa_index] = p1_data[0]
                 i[p2_sa_index] = p2_data[0]
-
-            # if p1_data[1] == p2_data[1]:
-            #     i[format_index] = p1_data[1]
-            # Uncomment if we want to update Format column if Best Guesses have matching Format.
 
         # Update P1_Subarch, P2_Subarch only if equal to "Unknown" or "NA".
         elif update_type == "Unknowns":
@@ -806,40 +821,25 @@ def rerun_decks_window():
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
-    def apply_to_all():
-        deck_data_guess(update_type="All")
-        set_display("Matches",update_status=True,bb_state=False)
-        t = "Updated the P1_Subarch, P2_Subarch columns for each Match in the Date Range: " + list(all_decks.keys())[0]
-        if len(all_decks) > 1:
-            t += " to " + list(all_decks.keys())[-1]
-        update_status_bar(status=t)
-        close_window()
-
-    def apply_to_unknowns():
-        deck_data_guess(update_type="Unknowns")
-        set_display("Matches",update_status=True,bb_state=False)
-        t = "Updated the P1_Subarch, P2_Subarch columns for Unknown Decks in the Date Range: " + list(all_decks.keys())[0]
-        if len(all_decks) > 1:
-            t += " to " + list(all_decks.keys())[-1]
-        update_status_bar(status=t)
-        close_window()
-
-    def apply_to_limited():
-        deck_data_guess(update_type="Limited")
-        set_display("Matches",update_status=True,bb_state=False)
-        t = "Updated the P1_Subarch, P2_Subarch columns for Limited Matches in the Date Range: " + list(all_decks.keys())[0]
-        if len(all_decks) > 1:
-            t += " to " + list(all_decks.keys())[-1]
-        update_status_bar(status=t)
-        close_window()
-
     def guess(mode):
-        if mode == "Overwrite All":
-            apply_to_all()
-        elif mode == "Unknown Decks":
-            apply_to_unknowns()
-        elif mode == "Limited Decks":
-            apply_to_limited()
+        if mode == "NA/Unknown":
+            t = "Updated the P1_Subarch, P2_Subarch columns for Unknown Decks in the Date Range: " + list(all_decks.keys())[0]
+            deck_data_guess(update_type="Unknowns")
+        elif mode == "Limited":
+            t = "Updated the P1_Subarch, P2_Subarch columns for Limited Matches in the Date Range: " + list(all_decks.keys())[0]
+            deck_data_guess(update_type="Limited")
+        elif mode == "Constructed":
+            t = "Updated the P1_Subarch, P2_Subarch columns for Constructed Matches in the Date Range: " + list(all_decks.keys())[0]
+            deck_data_guess(update_type="Constructed")
+        elif mode == "Overwrite All":
+            t = "Updated the P1_Subarch, P2_Subarch columns for each Match in the Date Range: " + list(all_decks.keys())[0]
+            deck_data_guess(update_type="All")
+
+        set_display("Matches",update_status=False,bb_state=False)
+        if len(all_decks) > 1:
+            t += " to " + list(all_decks.keys())[-1]
+        update_status_bar(status=t)
+        close_window()
 
     def import_decks():
         global all_decks
@@ -874,7 +874,7 @@ def rerun_decks_window():
     bot_frame.grid_rowconfigure(0,weight=1)
     bot_frame.grid_rowconfigure(1,weight=1)
 
-    apply_options = ["Unknown Decks","Overwrite All","Limited Decks"]
+    apply_options = ["NA/Unknown","Limited","Constructed","Overwrite All"]
     apply_mode = tk.StringVar()
     apply_mode.set(apply_options[0])
 
@@ -1723,11 +1723,12 @@ def set_filter():
     else:
         if display == "Matches":
             df = modo.to_dataframe(all_data_inverted[0],modo.header("Matches"))
+            df = df[(df.P1 == hero)]
         elif display == "Games":
             df = modo.to_dataframe(all_data_inverted[1],modo.header("Games"))
+            df = df[(df.P1 == hero)]
         elif display == "Plays":
             df = modo.to_dataframe(all_data_inverted[2],modo.header("Plays"))
-        df = df[(df.P1 == hero)]
 
     if display == "Matches":
         col_options = modo.header("Matches").copy()
@@ -2270,8 +2271,6 @@ def revise_record_multi():
         tree1.selection_set(sel_tuple)
         tree1.focus(list(sel_tuple)[0])
         selected = sel_tuple
-        #revise_window.grab_release()
-        #revise_window.destroy()
 
     def close_without_saving():
         revise_window.grab_release()
@@ -2323,7 +2322,7 @@ def revise_record_multi():
     field_menu.grid(row=0,column=0,pady=10,sticky="")
     field_menu.config(width=15)
 
-    arch_options = ["NA"] + input_options["Archetypes"]
+    arch_options = ["NA"] + ["Limited"] + input_options["Archetypes"]
 
     p1_arch_type = tk.StringVar()
     p1_arch_type.set(arch_options[0])
@@ -2369,6 +2368,7 @@ def activate_revise(event):
     if data_loaded == False:
         return
     revise_button["state"] = tk.NORMAL
+    remove_button["state"] = tk.NORMAL
 def revise_method_select():
     if len(tree1.selection()) > 1:
         revise_record_multi()
@@ -2407,7 +2407,7 @@ def import_window():
             return
         filepath_logs = label2["text"]
         get_all_data()
-        clear_filter(update_status=False,reload_display=True)
+        clear_filter(update_status=False,reload_display=False)
         set_display("Matches",update_status=False,bb_state=False)
         if data_loaded != False:
             data_menu.entryconfig("Set Default Hero",state=tk.NORMAL)
@@ -2416,8 +2416,6 @@ def import_window():
             data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
             data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
             data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
-        #filepath_logs = fp_logs
-            # Uncomment to revert filepath_logs to original setting.
         close_import_window()
 
     def close_import_window():
@@ -4206,9 +4204,102 @@ def load_window_size_setting():
 def update_status_bar(status):
     status_label.config(text=status)
     print(status)
-def test():
-    # Test method
-    pass
+def remove_record(ignore):
+    global all_data
+    global all_data_inverted
+    global parsed_file_dict
+    global ask_to_save
+    global selected
+
+    # Return if nothing is selected.
+    selected = tree1.selection()
+    if len(selected) == 0:
+        return
+
+    # Get Match_IDs of selected records.
+    sel_matchid = []
+    for i in selected:
+        sel_matchid.append(list(tree1.item(i,"values"))[0])
+
+    precounts = [len(all_data[0]),len(all_data[1]),len(all_data[2])]
+
+    # Remove records from our table data.
+    all_data[0] = [i for i in all_data[0] if i[0] not in sel_matchid]
+    all_data[1] = [i for i in all_data[1] if i[0] not in sel_matchid]
+    all_data[2] = [i for i in all_data[2] if i[0] not in sel_matchid]
+    all_data_inverted[0] = [i for i in all_data_inverted[0] if i[0] not in sel_matchid]
+    all_data_inverted[1] = [i for i in all_data_inverted[1] if i[0] not in sel_matchid]
+    all_data_inverted[2] = [i for i in all_data_inverted[2] if i[0] not in sel_matchid]
+
+    counts = [precounts[0]-len(all_data[0]),precounts[1]-len(all_data[1]),precounts[2]-len(all_data[2])]
+
+    # Remove GameLog filename from our list of previously parsed files.
+    if ignore == False:
+        for i in sel_matchid:
+            for j in parsed_file_dict:
+                if parsed_file_dict[j] in sel_matchid:
+                    parsed_file_dict.pop(j)
+                    break
+
+    ask_to_save = True
+    set_display("Matches",update_status=False,bb_state=False)
+    if len(selected) == 1:
+        update_status_bar(f"Removed {counts[0]} Match, {counts[1]} Games, {counts[2]} Plays from Database.")
+    else:
+        update_status_bar(f"Removed {counts[0]} Matches, {counts[1]} Games, {counts[2]} Plays from Database.")
+def remove_select():
+    height = 150
+    width =  350
+    remove_select = tk.Toplevel(window)
+    remove_select.title("Remove Record(s)")
+    remove_select.iconbitmap(remove_select,"icon.ico")
+    remove_select.minsize(width,height)
+    remove_select.resizable(False,False)
+    remove_select.grab_set()
+    remove_select.focus()
+    remove_select.geometry("+%d+%d" % 
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+
+    def close_window():
+        remove_select.grab_release()
+        remove_select.destroy()
+
+    mid_frame = tk.LabelFrame(remove_select,text="")
+    bot_frame = tk.Frame(remove_select)
+
+    mid_frame.grid(row=0,column=0,sticky="nsew")
+    bot_frame.grid(row=1,column=0,sticky="")
+
+    remove_select.grid_columnconfigure(0,weight=1)
+    remove_select.rowconfigure(0,weight=1)
+    mid_frame.grid_columnconfigure(0,weight=1)
+    mid_frame.grid_rowconfigure(0,weight=1)
+    mid_frame.grid_rowconfigure(1,weight=1)
+    bot_frame.grid_columnconfigure(0,weight=1)
+    bot_frame.grid_rowconfigure(0,weight=1)
+    bot_frame.grid_rowconfigure(1,weight=1)
+
+    if len(tree1.selection()) == 1:
+        t1 = "This will delete the selected Match and associated Games and Plays from your Database."
+        t2 = "Would you like to ignore this Match in future imports?"
+    else:
+        t1 = "This will delete the selected Matches and associated Games and Plays from your Database."
+        t2 = "Would you like to ignore these Matches in future imports?"
+
+    label1 = tk.Label(mid_frame,text=t1,wraplength=width,anchor="s",justify="left")
+    label2 = tk.Label(mid_frame,text=t2,wraplength=width,anchor="n")
+    button_delete =  tk.Button(bot_frame,text="Remove",width=10,command=lambda : [close_window(),remove_record(ignore=False)])
+    button_ignore = tk.Button(bot_frame,text="Remove and Ignore",width=15,command=lambda : [close_window(),remove_record(ignore=True)])
+    button_close = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_window())
+    
+    label1.grid(row=0,column=0,sticky="nsew",padx=20,pady=(0,5))
+    label2.grid(row=1,column=0,sticky="nsew",padx=20,pady=(5,0))
+    button_delete.grid(row=0,column=0,padx=5,pady=5)
+    button_ignore.grid(row=0,column=1,padx=5,pady=5)
+    button_close.grid(row=0,column=2,padx=5,pady=5)
+    
+    remove_select.protocol("WM_DELETE_WINDOW", lambda : close_window())
 
 window = tk.Tk() 
 window.title("MTGO-Tracker")
@@ -4240,6 +4331,7 @@ play_button = tk.Button(left_frame,text="Play Data",state=tk.DISABLED,command=la
 filter_button = tk.Button(left_frame,text="Filter",state=tk.DISABLED,command=lambda : set_filter())
 clear_button = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,command=lambda : clear_filter(update_status=True,reload_display=True))
 revise_button = tk.Button(left_frame,text="Revise Record(s)",state=tk.DISABLED,command=lambda : revise_method_select())
+remove_button = tk.Button(left_frame,text="Remove Record(s)",state=tk.DISABLED,command=lambda : remove_select())
 stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,command=lambda : get_stats())
 back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,command=lambda :bb_clicked())
 test_button = tk.Button(left_frame,text="TEST BUTTON",command=lambda : test())
@@ -4314,8 +4406,9 @@ play_button.grid(row=2,column=0,sticky="ew",padx=5,pady=5)
 filter_button.grid(row=3,column=0,sticky="ew",padx=5,pady=(50,5))
 clear_button.grid(row=4,column=0,sticky="ew",padx=5,pady=5)
 revise_button.grid(row=5,column=0,sticky="ew",padx=5,pady=5)
-stats_button.grid(row=6,column=0,sticky="ew",padx=5,pady=50)
-back_button.grid(row=7,column=0,sticky="ew",padx=5,pady=5)
+remove_button.grid(row=6,column=0,sticky="ew",padx=5,pady=5)
+stats_button.grid(row=7,column=0,sticky="ew",padx=5,pady=50)
+back_button.grid(row=8,column=0,sticky="ew",padx=5,pady=5)
 #test_button.grid(row=13,column=0,sticky="ew",padx=5,pady=5)
 
 tree1 = ttk.Treeview(text_frame,show="tree")
