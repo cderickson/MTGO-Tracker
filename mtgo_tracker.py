@@ -3708,7 +3708,9 @@ def get_stats():
 
         df_time = df0_i[(df0_i.P1 == hero)]
         if mformat != "All Formats":
-            df_time =   df_time[(df_time.Format == mformat)]
+            df_time = df_time[(df_time.Format == mformat)]
+        if lformat != "All Limited Formats":
+            df_time = df_time[(df_time.Limited_Format == lformat)]
         df_time = df_time.sort_values(by=["Date"])
         df_time = df_time[(df_time.Date.between(date_range[0],date_range[1]))]
         
@@ -3721,7 +3723,11 @@ def get_stats():
 
         # plt.title("Match Wins Over .500:\n" + mformat)
         # plt.ylabel("Match Wins Over .500")
-        plt.title("Win Rate Over Time:\n" + mformat)
+
+        if lformat == "All Limited Formats":
+            plt.title("Win Rate Over Time:\n" + mformat)
+        else:
+            plt.title("Win Rate Over Time:\n" + mformat + " - " + lformat)
         plt.ylabel("Winning Percentage")
 
         canvas = FigureCanvasTkAgg(fig,mid_frame5)
@@ -3742,7 +3748,10 @@ def get_stats():
 
             # plt.title("Match Wins Over .500:\n" + mformat + ": " + deck)
             # plt.ylabel("Match Wins Over .500")
-            plt.title("Win Rate Over Time:\n" + mformat + ": " + deck)
+            if lformat == "All Limited Formats":
+                plt.title("Win Rate Over Time:\n" + mformat + ": " + deck)
+            else:
+                plt.title("Win Rate Over Time:\n" + mformat + " - " + lformat + ": " + deck)
             plt.ylabel("Winning Percentage")
 
             canvas2 = FigureCanvasTkAgg(fig,mid_frame6)
