@@ -142,17 +142,18 @@ Continue importing data as you play more matches on MTGO!
 	- Double-clicking on a Match row will display all Games for the selected Match. 
 	- Double-clicking on a Game row will display all Plays for the selected Game.
 	- Click the 'Clear Filter' button to display all data after drilling down.
+</details>
+
 - - - -
 ## Statistics Window
 	- 'Hero' setting must be applied before Statistics Window can be viewed.
 	
 	- View descriptive statistics and basic analysis. 
-	- Choose to view Match, Game, Play, Time, or Card Data using the top right dropdown menu.
+	- Choose to view Match, Game, Play, Opponent, Time, or Card Data using the top right dropdown menu.
 	- Statistics can be filtered using the Format, Deck, and Date Range menus across the top of the window.
 <p align="center">
 <img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_image2.jpg?raw=true" width="808" height="469">
 </p>
-</details>
 
 - - - -
 ## Settings
