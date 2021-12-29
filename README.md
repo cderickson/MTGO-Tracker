@@ -8,7 +8,7 @@ Three (3) tables are created: **Matches, Games, and Plays**. These tables will h
 </p>
 
 ## Getting Started
-Import your data by clicking **'File => Load MTGO GameLogs'**. Select the folder containing your GameLog files. MTGO saves these files in **"C:\Users\\[User]\AppData\Local\Apps\2.0"** by default.
+Import your data by clicking **'File => Load MTGO GameLogs'** and navigate to the folder containing your GameLog files. MTGO saves these files in **"C:\Users\\[User]\AppData\Local\Apps\2.0"** by default.
 
 Set the default Hero to your MTGO username by clicking **'Data => Set Default Hero'**. This will make an individualized dataset more readable. The statistics window will also become accessible from the left-panel, allowing you to view general statistics regarding your personal performance.
 
@@ -91,6 +91,9 @@ Continue importing data as you play more matches on MTGO!
 
 - - - -
 ## Data Cleaning
+<details>
+<summary><b>Data Cleaning Methods</b></summary>
+
 ### Missing Match Data:
 **Data => Input Missing Match Data**
 	
@@ -116,13 +119,23 @@ Continue importing data as you play more matches on MTGO!
 	- Selected row(s) in the 'Matches' table can be manually revised.
 	- If multiple rows are selected, the revision will apply to all selected rows.
 	- This is only applicable to rows in the 'Matches' table.
+### Remove Record(s) Button:
+	- Selected row(s) in the 'Matches' table can be removed from your database.
+	- All associated Games and Plays data will also be removed.
+	- Removed Matches can be ignored, meaning they will not be included in future imports.
+	- This is only applicable to rows in the 'Matches' table.
 ### Input Options File
 	- Control the dropdown menu options available when making revisions.
 	- Add or delete options under their respective header.
 	- Each option MUST be on it's own line.
 	- Do not alter the pre-existing headers in this file.
+</details>
+
 - - - -
 ## Data Viewing
+<details>
+<summary><b>Data Viewing Methods</b></summary>
+	
 ### Filtering: 
 	- Manipulate the data being displayed by applying filters accessible using the Filter button.
 ### Drill Down:
@@ -139,6 +152,7 @@ Continue importing data as you play more matches on MTGO!
 <p align="center">
 <img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_image2.jpg?raw=true" width="808" height="469">
 </p>
+</details>
 
 - - - -
 ## Settings
@@ -184,7 +198,7 @@ Continue importing data as you play more matches on MTGO!
 	- MTGO-Tracker creates (3) tables: 'Matches', 'Games', 'Plays'. 
 	- Use the 'Export' Menu to save any or all of your tables as either .csv or .xlsx files.
 	- Filtered tables can be exported.
-### Inverse Join:
+### Inverse Joined Table Export:
 
 	- MTGO randomly sets each player to P1 or P2 at the beginning of each match. 
 	- This makes it difficult to view data for specific players.
