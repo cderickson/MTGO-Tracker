@@ -3706,6 +3706,8 @@ def get_stats():
                 pm_over_time = pm_over_time[start_index:]
             return [x,pm_over_time]
 
+        chart_type = "plusminus"
+
         df_time = df0_i[(df0_i.P1 == hero)]
         if mformat != "All Formats":
             df_time = df_time[(df_time.Format == mformat)]
@@ -3714,45 +3716,57 @@ def get_stats():
         df_time = df_time.sort_values(by=["Date"])
         df_time = df_time[(df_time.Date.between(date_range[0],date_range[1]))]
         
-        g1_list = get_wr_over_time(df_time,0)
-        # g1_list = get_pm_over_time(df_time,0)
+        if chart_type == "winrate":
+            g1_list = get_wr_over_time(df_time,0)
+        elif chart_type == "plusminus":
+            g1_list = get_pm_over_time(df_time,0)
 
         fig = plt.figure(figsize=(7,5),dpi=100)
         plt.plot(g1_list[0],g1_list[1])
         plt.xlabel("Matches Played")
 
-        # plt.title("Match Wins Over .500:\n" + mformat)
-        # plt.ylabel("Match Wins Over .500")
-
-        if lformat == "All Limited Formats":
-            plt.title("Win Rate Over Time:\n" + mformat)
-        else:
-            plt.title("Win Rate Over Time:\n" + mformat + " - " + lformat)
-        plt.ylabel("Winning Percentage")
+        if chart_type == "winrate":
+            if lformat == "All Limited Formats":
+                plt.title("Win Rate Over Time:\n" + mformat)
+            else:
+                plt.title("Win Rate Over Time:\n" + mformat + " - " + lformat)
+            plt.ylabel("Winning Percentage")
+        elif chart_type == "plusminus":
+            if lformat == "All Limited Formats":
+                plt.title("Match Wins Over .500:\n" + mformat)
+            else:
+                plt.title("Match Wins Over .500:\n" + mformat + " - " + lformat)
+            plt.ylabel("Match Wins Over .500")
 
         canvas = FigureCanvasTkAgg(fig,mid_frame5)
         canvas.draw()
         canvas.get_tk_widget().grid(row=0,column=0,sticky="")
 
         if deck != "All Decks":
-            # Filtered by P1=hero,Format=mformat,P1_Subarch=deck
             df_time_d = df_time[(df_time.P1_Subarch == deck)]
             df_time_d = df_time_d.sort_values(by=["Date"])     
             
-            g2_list = get_wr_over_time(df_time_d,0)
-            # g2_list = get_pm_over_time(df_time_d,0)
+            if chart_type == "winrate":
+                g2_list = get_wr_over_time(df_time_d,0)
+            elif chart_type == "plusminus":
+                g2_list = get_pm_over_time(df_time_d,0)
 
             fig = plt.figure(figsize=(7,5),dpi=100)
             plt.plot(g2_list[0],g2_list[1])
             plt.xlabel("Matches Played")
 
-            # plt.title("Match Wins Over .500:\n" + mformat + ": " + deck)
-            # plt.ylabel("Match Wins Over .500")
-            if lformat == "All Limited Formats":
-                plt.title("Win Rate Over Time:\n" + mformat + ": " + deck)
-            else:
-                plt.title("Win Rate Over Time:\n" + mformat + " - " + lformat + ": " + deck)
-            plt.ylabel("Winning Percentage")
+            if chart_type == "winrate":
+                if lformat == "All Limited Formats":
+                    plt.title("Win Rate Over Time:\n" + mformat + ": " + deck)
+                else:
+                    plt.title("Win Rate Over Time:\n" + mformat + " - " + lformat + ": " + deck)
+                plt.ylabel("Winning Percentage")
+            elif chart_type == "plusminus":
+                if lformat == "All Limited Formats":
+                    plt.title("Match Wins Over .500:\n" + mformat + ": " + deck)
+                else:
+                    plt.title("Match Wins Over .500:\n" + mformat + " - " + lformat + ": " + deck)
+                plt.ylabel("Match Wins Over .500")
 
             canvas2 = FigureCanvasTkAgg(fig,mid_frame6)
             canvas2.draw()
