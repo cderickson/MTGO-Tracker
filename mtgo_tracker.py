@@ -2710,6 +2710,7 @@ def get_stats():
         df0_i_f.sort_values(by="Date",ascending=False,inplace=True)
         tree1_dates    = df0_i_f.Date.tolist()
         tree1_decks    = df0_i_f.P1_Subarch.tolist()
+        tree1_opp      = df0_i_f.P2.tolist()
         tree1_oppdecks = df0_i_f.P2_Subarch.tolist()
         tree1_wins     = df0_i_f.P1_Wins.tolist()
         tree1_losses   = df0_i_f.P2_Wins.tolist()
@@ -2736,6 +2737,7 @@ def get_stats():
             df0_i_f = df0_i_f[(df0_i_f.Limited_Format == lformat)]
         tree2_dates    = df0_i_f.Date.tolist()
         tree2_decks    = df0_i_f.P1_Subarch.tolist()
+        tree2_opp      = df0_i_f.P2.tolist()
         tree2_oppdecks = df0_i_f.P2_Subarch.tolist()
         tree2_wins     = df0_i_f.P1_Wins.tolist()
         tree2_losses   = df0_i_f.P2_Wins.tolist()
@@ -2761,7 +2763,7 @@ def get_stats():
         tree1.tag_configure("win",background="#a3ffb1")
         tree1.tag_configure("lose",background="#ffa3a3")
         tree1.delete(*tree1.get_children())
-        tree1["column"] = ["Date","Deck","Opp. Deck","Match Result","Format"]
+        tree1["column"] = ["Date","Opponent","Deck","Opp. Deck","Match Result","Format"]
         for i in tree1["column"]:
             tree1.column(i,minwidth=20,stretch=True,width=20,anchor="center")
             tree1.heading(i,text=i)
@@ -2769,12 +2771,14 @@ def get_stats():
         for i in range(tree1_count):
             if "Win" in tree1_result[i]:
                 tree1.insert("","end",values=[tree1_dates[i],
+                                              tree1_opp[i],
                                               tree1_decks[i],
                                               tree1_oppdecks[i],
                                               tree1_result[i],
                                               tree1_format[i]],tags=("win",))
             else:
                 tree1.insert("","end",values=[tree1_dates[i],
+                                              tree1_opp[i],
                                               tree1_decks[i],
                                               tree1_oppdecks[i],
                                               tree1_result[i],
@@ -2789,7 +2793,7 @@ def get_stats():
         tree2.tag_configure("win",background="#a3ffb1")
         tree2.tag_configure("lose",background="#ffa3a3")
         tree2.delete(*tree2.get_children())
-        tree2["column"] = ["Date","Deck","Opp. Deck","Match Result","Format"]
+        tree2["column"] = ["Date","Opponent","Deck","Opp. Deck","Match Result","Format"]
         for i in tree2["column"]:
             tree2.column(i,minwidth=20,stretch=True,width=20,anchor="center")
             tree2.heading(i,text=i)
@@ -2797,12 +2801,14 @@ def get_stats():
         for i in range(tree2_count):
             if "Win" in tree2_result[i]:
                 tree2.insert("","end",values=[tree2_dates[i],
+                                              tree2_opp[i],
                                               tree2_decks[i],
                                               tree2_oppdecks[i],
                                               tree2_result[i],
                                               tree2_format[i]],tags=("win",))
             else:
                 tree2.insert("","end",values=[tree2_dates[i],
+                                              tree2_opp[i],
                                               tree2_decks[i],
                                               tree2_oppdecks[i],
                                               tree2_result[i],
