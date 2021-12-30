@@ -2577,6 +2577,8 @@ def get_stats():
     mid_frame6 = tk.LabelFrame(mid_frame,font=14,labelanchor="n",width=100,height=100)
     mid_frame7 = tk.LabelFrame(mid_frame,font=14,labelanchor="n",width=100,height=100)
     mid_frame8 = tk.LabelFrame(mid_frame,font=14,labelanchor="n",width=100,height=100)  
+    mid_frame9 = tk.LabelFrame(mid_frame,font=14,labelanchor="n",width=100,height=100)
+    mid_frame10 = tk.LabelFrame(mid_frame,font=14,labelanchor="n",width=100,height=100)  
 
     mid_frame1.grid(row=0,column=0,sticky="nsew")
     mid_frame2.grid(row=0,column=1,sticky="nsew")
@@ -2622,7 +2624,11 @@ def get_stats():
         for widget in mid_frame7.winfo_children():
             widget.destroy()  
         for widget in mid_frame8.winfo_children():
-            widget.destroy()    
+            widget.destroy()
+        for widget in mid_frame9.winfo_children():
+            widget.destroy()  
+        for widget in mid_frame10.winfo_children():
+            widget.destroy()  
         mid_frame1.grid_remove()
         mid_frame2.grid_remove()
         mid_frame3.grid_remove()
@@ -2631,6 +2637,8 @@ def get_stats():
         mid_frame6.grid_remove()
         mid_frame7.grid_remove()
         mid_frame8.grid_remove()
+        mid_frame9.grid_remove()
+        mid_frame10.grid_remove()
 
     def defocus(event):
         # Clear Auto-Highlight in Combobox menu.
@@ -2639,6 +2647,166 @@ def get_stats():
         menu_3.selection_clear()
         menu_4.selection_clear()
         menu_5.selection_clear()
+
+    def match_history(hero,opp,mformat,lformat,deck,opp_deck,date_range,s_type):
+        stats_window.title("Statistics - Card Data: " + hero)
+        clear_frames()
+        def tree1_skip(event):
+            if tree1.identify_region(event.x,event.y) == "separator":
+                return "break"
+            if tree1.identify_region(event.x,event.y) == "heading":
+                return "break"
+        def tree1_unselect(event):
+            if tree1.identify_region(event.x,event.y) != "cell":
+                tree1.selection_set(())  
+            if tree1.identify_region(event.x,event.y) == "separator":
+                return "break"
+            if tree1.identify_region(event.x,event.y) == "heading":
+                return "break"
+        def tree2_skip(event):
+            if tree2.identify_region(event.x,event.y) == "separator":
+                return "break"
+            if tree2.identify_region(event.x,event.y) == "heading":
+                return "break"
+        def tree2_unselect(event):
+            if tree2.identify_region(event.x,event.y) != "cell":
+                tree2.selection_set(())  
+            if tree2.identify_region(event.x,event.y) == "separator":
+                return "break"
+            if tree2.identify_region(event.x,event.y) == "heading":
+                return "break"
+        def tree1_setup(tree):
+            tree.place(relheight=1, relwidth=1)
+            tree.bind("<Button-1>",tree1_unselect)
+            tree.bind("<Enter>",tree1_skip)
+            tree.bind("<ButtonRelease-1>",tree1_unselect)
+            tree.bind("<Motion>",tree1_skip)
+        def tree2_setup(tree):
+            tree.place(relheight=1, relwidth=1)
+            tree.bind("<Button-1>",tree2_unselect)
+            tree.bind("<Enter>",tree2_skip)
+            tree.bind("<ButtonRelease-1>",tree2_unselect)
+            tree.bind("<Motion>",tree2_skip)   
+
+        tree1 = ttk.Treeview(mid_frame9,show="headings",padding=10)
+        tree2 = ttk.Treeview(mid_frame10,show="headings",padding=10)
+        tree1_setup(tree1)
+        tree2_setup(tree2)
+        mid_frame.grid_rowconfigure(0,weight=1)
+        mid_frame.grid_rowconfigure(1,weight=0)
+        mid_frame.grid_columnconfigure(0,weight=1)
+        mid_frame.grid_columnconfigure(1,weight=1)
+        mid_frame9.grid_rowconfigure(0,weight=1)
+        mid_frame9.grid_columnconfigure(0,weight=1)
+        mid_frame10.grid_rowconfigure(0,weight=1)
+        mid_frame10.grid_columnconfigure(0,weight=1)
+        mid_frame9.grid(row=0,column=0,sticky="nsew")
+        mid_frame10.grid(row=0,column=1,sticky="nsew")
+
+        mid_frame9.grid_propagate(0)
+        mid_frame10.grid_propagate(0)
+
+        df0_i_f        = df0_i[(df0_i.P1 == hero)]
+        df0_i_f.sort_values(by="Date",ascending=False,inplace=True)
+        tree1_dates    = df0_i_f.Date.tolist()
+        tree1_decks    = df0_i_f.P1_Subarch.tolist()
+        tree1_oppdecks = df0_i_f.P2_Subarch.tolist()
+        tree1_wins     = df0_i_f.P1_Wins.tolist()
+        tree1_losses   = df0_i_f.P2_Wins.tolist()
+        tree1_result   = df0_i_f.Match_Winner.tolist()
+        tree1_format   = df0_i_f.Format.tolist()
+        tree1_lformat  = df0_i_f.Limited_Format.tolist()
+        tree1_count = 30
+        if len(tree1_dates) < 30:
+            tree1_count = len(tree1_dates)
+        for index,i in enumerate(tree1_format):
+            if i in modo.limited_formats():
+                tree1_format[index] += ": " + tree1_lformat[index]
+        for index,i in enumerate(tree1_result):
+            if i == "P1":
+                tree1_result[index] = "Win "
+            elif i == "P2":
+                tree1_result[index] = "Loss "
+            elif i == "NA":
+                tree1_result[index] = "NA "
+            tree1_result[index] += str(tree1_wins[index]) + "-" + str(tree1_losses[index])
+
+        df0_i_f = df0_i_f[(df0_i_f.Format == mformat)]
+        if lformat != "All Limited Formats":
+            df0_i_f = df0_i_f[(df0_i_f.Limited_Format == lformat)]
+        tree2_dates    = df0_i_f.Date.tolist()
+        tree2_decks    = df0_i_f.P1_Subarch.tolist()
+        tree2_oppdecks = df0_i_f.P2_Subarch.tolist()
+        tree2_wins     = df0_i_f.P1_Wins.tolist()
+        tree2_losses   = df0_i_f.P2_Wins.tolist()
+        tree2_result   = df0_i_f.Match_Winner.tolist()
+        tree2_format   = df0_i_f.Format.tolist()
+        tree2_lformat  = df0_i_f.Limited_Format.tolist()
+        tree2_count = 30
+        if len(tree2_dates) < 30:
+            tree2_count = len(tree2_dates)
+        for index,i in enumerate(tree2_format):
+            if i in modo.limited_formats():
+                tree2_format[index] += ": " + tree2_lformat[index]
+        for index,i in enumerate(tree2_result):
+            if i == "P1":
+                tree2_result[index] = "Win "
+            elif i == "P2":
+                tree2_result[index] = "Loss "
+            elif i == "NA":
+                tree2_result[index] = "NA "
+            tree2_result[index] += str(tree2_wins[index]) + "-" + str(tree2_losses[index])
+
+        mid_frame9["text"] = "Match History: " + hero
+        tree1.tag_configure("win",background="#a3ffb1")
+        tree1.tag_configure("lose",background="#ffa3a3")
+        tree1.delete(*tree1.get_children())
+        tree1["column"] = ["Date","Deck","Opp. Deck","Match Result","Format"]
+        for i in tree1["column"]:
+            tree1.column(i,minwidth=20,stretch=True,width=20,anchor="center")
+            tree1.heading(i,text=i)
+        tagged = False
+        for i in range(tree1_count):
+            if "Win" in tree1_result[i]:
+                tree1.insert("","end",values=[tree1_dates[i],
+                                              tree1_decks[i],
+                                              tree1_oppdecks[i],
+                                              tree1_result[i],
+                                              tree1_format[i]],tags=("win",))
+            else:
+                tree1.insert("","end",values=[tree1_dates[i],
+                                              tree1_decks[i],
+                                              tree1_oppdecks[i],
+                                              tree1_result[i],
+                                              tree1_format[i]],tags=("lose",))
+
+        if mformat == "All Formats":
+            mid_frame10["text"] = "Choose a Format"
+        elif (mformat in modo.limited_formats()) & (lformat != "All Limited Formats"):
+            mid_frame10["text"] = "Match History: " + hero + " - " + mformat + ", " + lformat
+        else:
+            mid_frame10["text"] = "Match History: " + hero + " - " + mformat
+        tree2.tag_configure("win",background="#a3ffb1")
+        tree2.tag_configure("lose",background="#ffa3a3")
+        tree2.delete(*tree2.get_children())
+        tree2["column"] = ["Date","Deck","Opp. Deck","Match Result","Format"]
+        for i in tree2["column"]:
+            tree2.column(i,minwidth=20,stretch=True,width=20,anchor="center")
+            tree2.heading(i,text=i)
+        tagged = False
+        for i in range(tree2_count):
+            if "Win" in tree2_result[i]:
+                tree2.insert("","end",values=[tree2_dates[i],
+                                              tree2_decks[i],
+                                              tree2_oppdecks[i],
+                                              tree2_result[i],
+                                              tree2_format[i]],tags=("win",))
+            else:
+                tree2.insert("","end",values=[tree2_dates[i],
+                                              tree2_decks[i],
+                                              tree2_oppdecks[i],
+                                              tree2_result[i],
+                                              tree2_format[i]],tags=("lose",))
 
     def match_stats(hero,opp,mformat,lformat,deck,opp_deck,date_range,s_type):
         stats_window.title("Statistics - Match Data: " + hero)
@@ -4074,7 +4242,14 @@ def get_stats():
         update_format_menu()
         update_deck_menu()
         update_opp_deck_menu()
-        if s_type.get() == "Time Data":
+        if s_type.get() == "Match History":
+            menu_1["state"] = tk.DISABLED
+            menu_2["state"] = "readonly"
+            menu_4["state"] = tk.DISABLED
+            menu_5["state"] = tk.DISABLED
+            date_entry_1["state"] = tk.DISABLED
+            date_entry_2["state"] = tk.DISABLED
+        elif s_type.get() == "Time Data":
             menu_1["state"] = tk.DISABLED
             menu_2["state"] = "readonly"
             menu_4["state"] = "readonly"
@@ -4102,7 +4277,9 @@ def get_stats():
             dr = [date_entry_1.get() + "-00:00",date_entry_2.get() + "-23:59"]
         else:
             dr = [date_entry_1.get() + "-00:00",date_entry_2.get() + "-23:59"]
-        if s_type.get() == "Match Stats":
+        if s_type.get() == "Match History":
+            match_history(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())
+        elif s_type.get() == "Match Stats":
             match_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())
         elif s_type.get() == "Game Stats":
             game_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())
@@ -4130,7 +4307,7 @@ def get_stats():
     limited_options = [""]
     decks_played = [""]
     opp_decks_played = [""]
-    stat_types = ["Match Stats","Game Stats","Play Stats","Opponent Stats","Time Data","Card Data"]
+    stat_types = ["Match History","Match Stats","Game Stats","Play Stats","Opponent Stats","Time Data","Card Data"]
     
     player = tk.StringVar()
     player.set(hero)
@@ -4204,7 +4381,7 @@ def get_stats():
     date_entry_2.bind("<<DateEntrySelected>>",load_data)
 
     player.set(hero)
-    load_data()
+    update_s_type(s_type.get())
 
     stats_window.title("Statistics - Match Data: " + player.get())
     stats_window.protocol("WM_DELETE_WINDOW", lambda : close_stats_window())
