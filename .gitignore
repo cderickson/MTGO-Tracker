@@ -9,4 +9,6 @@ build_mtgo_tracker.bat
 icon.ico
 lists/
 save/
+logs/
 input_options.txt
+debug.txt
