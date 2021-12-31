@@ -14,6 +14,7 @@ from tkcalendar import DateEntry
 import datetime
 import itertools
 import pickle
+import shutil
 
 # Saved data:
 all_data =          [[],[],[],[]]
@@ -27,6 +28,7 @@ filepath_root =     ""
 filepath_export =   ""
 filepath_decks =    ""
 filepath_logs =     ""
+filepath_copy =     ""
 hero =              ""
 main_window_size =  ("small",1000,500)
 
@@ -381,6 +383,7 @@ def startup():
     global filepath_export
     global filepath_decks
     global filepath_logs
+    global filepath_copy
     global hero
     global all_data
     global all_data_inverted
@@ -422,23 +425,23 @@ def startup():
         input_options["Sealed Formats"] = modo.sealed_formats()
     
     filepath_root = os.getcwd()
-    # Uncomment this if we are adding back ability to import sample decklists from .txt files.
-    # if os.path.isdir("lists") == False:
-    #     os.mkdir(filepath_root + "\\" + "lists")
-    # filepath_decks = filepath_root + "\\" + "lists"
     filepath_decks = None
 
     if os.path.isdir("save") == False:
         os.mkdir(filepath_root + "\\" + "save")
+    if os.path.isdir("logs") == False:
+        os.mkdir(filepath_root + "\\" + "logs")
+    filepath_copy = filepath_root + "\\" + "logs"
     os.chdir(filepath_root + "\\" + "save")
 
     if os.path.isfile("settings"):
         settings = pickle.load(open("settings","rb"))
-        #filepath_root =   settings[0]
+        #filepath_root   = settings[0]
         filepath_export = settings[1]
-        #filepath_decks =  settings[2]
+        #filepath_decks = settings[2]
         filepath_logs =   settings[3]
-        hero =            settings[4]
+        #filepath_copy =   settings[4]
+        hero =            settings[5]
 
     all_headers[0] = modo.header("Matches")
     all_headers[1] = modo.header("Games")
@@ -473,10 +476,8 @@ def startup():
     os.chdir(filepath_root)
 def save_settings():
     os.chdir(filepath_root + "\\" + "save")
-    settings = [filepath_root,filepath_export,filepath_decks,filepath_logs,hero]
+    settings = [filepath_root,filepath_export,filepath_decks,filepath_logs,filepath_copy,hero]
     pickle.dump(settings,open("settings","wb"))
-    # Uncomment if we are adding back ability to save sample decklists from .txt files.
-    # pickle.dump(all_decks,open("all_decks","wb"))
     pickle.dump(main_window_size,open("main_window_size","wb"))
     os.chdir(filepath_root)
 def set_display(d,update_status,bb_state):
@@ -534,9 +535,10 @@ def get_all_data():
             if ("Match_GameLog_" not in i) or (len(i) < 30):
                 pass
             elif (i in parsed_file_dict):
-                pass
+                os.chdir(root)
             else:
                 os.chdir(root)
+                shutil.copy(i,filepath_copy)
                 with io.open(i,"r",encoding="ansi") as gamelog:
                     initial = gamelog.read()
                     mtime = time.ctime(os.path.getmtime(i))
@@ -4506,7 +4508,61 @@ def remove_select():
     button_close.grid(row=0,column=2,padx=5,pady=5)
     
     remove_select.protocol("WM_DELETE_WINDOW", lambda : close_window())
+def debug():
+    os.chdir(filepath_root)
+    with open("debug.txt","w",encoding="utf-8") as txt:
+        txt.write("Settings:\n")
+        txt.write(f"Filepath_Root: {filepath_root}\n")
+        txt.write(f"Filepath_Export: {filepath_export}\n")
+        txt.write(f"Filepath_Decks: {filepath_decks}\n")
+        txt.write(f"Filepath_Logs: {filepath_logs}\n")
+        txt.write(f"Filepath_Copy: {filepath_copy}\n")
+        txt.write(f"Hero: {hero}\n")
+        txt.write(f"Main Window Size: {main_window_size}\n")
+        txt.write("\n")
 
+        txt.write("Input Options:\n")
+        for i in input_options:
+            txt.write(f"{i}: {input_options[i]}\n")
+        txt.write("\n")
+        txt.write(f"Parsed_File_Dict ({str(len(parsed_file_dict))} files):\n")
+        for i in parsed_file_dict:
+            txt.write(f"{i}: {parsed_file_dict[i]}\n")
+        txt.write("\n")
+
+        txt.write(f"Matches: {str(len(all_data[0]))}\n")
+        txt.write(f"Games: {str(len(all_data[1]))}\n")
+        txt.write(f"Plays: {str(len(all_data[2]))}\n")
+        txt.write(f"Raw: {str(len(all_data[3]))}\n")
+        txt.write(f"Matches (Inverse): {str(len(all_data_inverted[0]))} (should be {str(len(all_data[0])*2)})\n")
+        txt.write(f"Games (Inverse): {str(len(all_data_inverted[1]))} (should be {str(len(all_data[1])*2)})\n")
+        txt.write(f"Plays (Inverse): {str(len(all_data_inverted[2]))} (should be {str(len(all_data[2]))})\n")
+        txt.write(f"Raw (Inverse): {str(len(all_data_inverted[3]))}\n")
+        txt.write("\n")
+
+        txt.write("All Decks:\n")
+        txt.write(f"{list(all_decks.keys())[0]} to {list(all_decks.keys())[-1]}\n")
+        for i in all_decks:
+            txt.write(f"{i}: {str(len(all_decks[i]))}\n")
+        txt.write("\n")
+
+        txt.write("Headers:\n")
+        for i in all_headers:
+            txt.write(f"{i}\n")
+        txt.write("\n")
+
+        txt.write("Other Variables:\n")
+        txt.write(f"Display: {display}\n")
+        txt.write(f"Previous Display: {prev_display}\n")
+        txt.write(f"UAW: {uaw}\n")
+        txt.write(f"Field: {field}\n")
+        txt.write(f"New_Import: {new_import}\n")
+        txt.write(f"Data_Loaded: {data_loaded}\n")
+        txt.write(f"Filter_Changed: {filter_changed}\n")
+        txt.write(f"Ask_To_Save: {ask_to_save}\n")
+        txt.write(f"Selected: {selected}\n")
+
+main_window_size =  ("small",1000,500)
 window = tk.Tk() 
 window.title("MTGO-Tracker")
 window.iconbitmap(window,"icon.ico")
@@ -4540,7 +4596,7 @@ revise_button = tk.Button(left_frame,text="Revise Record(s)",state=tk.DISABLED,c
 remove_button = tk.Button(left_frame,text="Remove Record(s)",state=tk.DISABLED,command=lambda : remove_select())
 stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,command=lambda : get_stats())
 back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,command=lambda :bb_clicked())
-test_button = tk.Button(left_frame,text="TEST BUTTON",command=lambda : test())
+debug_button = tk.Button(left_frame,text="DEBUG BUTTON",command=lambda : debug())
 
 status_label = tk.Label(bottom_frame,text="")
 status_label.grid(row=0,column=0)
@@ -4613,9 +4669,9 @@ filter_button.grid(row=3,column=0,sticky="ew",padx=5,pady=(50,5))
 clear_button.grid(row=4,column=0,sticky="ew",padx=5,pady=5)
 revise_button.grid(row=5,column=0,sticky="ew",padx=5,pady=5)
 remove_button.grid(row=6,column=0,sticky="ew",padx=5,pady=5)
-stats_button.grid(row=7,column=0,sticky="ew",padx=5,pady=50)
+stats_button.grid(row=7,column=0,sticky="ew",padx=5,pady=35)
 back_button.grid(row=8,column=0,sticky="ew",padx=5,pady=5)
-#test_button.grid(row=13,column=0,sticky="ew",padx=5,pady=5)
+debug_button.grid(row=9,column=0,sticky="ew",padx=5,pady=5)
 
 tree1 = ttk.Treeview(text_frame,show="tree")
 tree1.grid(row=0,column=0,sticky="nsew")
