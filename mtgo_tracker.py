@@ -4671,7 +4671,7 @@ revise_button.grid(row=5,column=0,sticky="ew",padx=5,pady=5)
 remove_button.grid(row=6,column=0,sticky="ew",padx=5,pady=5)
 stats_button.grid(row=7,column=0,sticky="ew",padx=5,pady=35)
 back_button.grid(row=8,column=0,sticky="ew",padx=5,pady=5)
-debug_button.grid(row=9,column=0,sticky="ew",padx=5,pady=5)
+#debug_button.grid(row=9,column=0,sticky="ew",padx=5,pady=5)
 
 tree1 = ttk.Treeview(text_frame,show="tree")
 tree1.grid(row=0,column=0,sticky="nsew")
