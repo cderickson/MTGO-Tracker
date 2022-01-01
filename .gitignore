@@ -1,7 +1,7 @@
 __pycache__/
 
 # UTILITY FILES
-scraper.py
+mtgo-goldfish-lists.py
 exe_command.txt
 build_mtgo_tracker.bat
 
