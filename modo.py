@@ -847,17 +847,17 @@ def play_data(ga):
                 casting_player = curr_list[0]
                 try:
                     primary_card = get_cards(i)[0]
+                # MODO Bug Encountered. Primary_Card = "NA"
                 except IndexError:
                     pass
-                    #print(i)
                 action = "Land Drop"
             elif curr_list[1] == "casts":
                 casting_player = curr_list[0]
                 try:
                     primary_card = get_cards(i)[0]
+                # MODO Bug Encountered. Primary_Card = "NA"
                 except IndexError:
                     pass
-                    #print(i)
                 action = curr_list[1].capitalize()
                 if i.find("targeting") != -1:
                     targets = get_cards(i.split("targeting")[1])
@@ -896,8 +896,10 @@ def play_data(ga):
                 try:
                     primary_card = get_cards(i)[0]
                 except IndexError:
-                    pass
-                    #print(i)
+                    primary_card = i.split("triggered ability from ")[1].split(" onto the stack ")[0]
+                    # MODO Bug Encountered. Primary_Card = "NA"
+                    if (primary_card == p1) or (primary_card == p2):
+                        primary_card = "NA"
                 action = "Triggers"
                 if i.find("targeting") != -1:
                     targets = get_cards(i.split("targeting")[1])
@@ -924,8 +926,10 @@ def play_data(ga):
                 try:
                     primary_card = get_cards(i)[0]
                 except IndexError:
-                    pass
-                    #print(i)
+                    primary_card = i.split("activates an ability of ")[1].split(" (")[0]
+                    # MODO Bug Encountered. Primary_Card = "NA"
+                    if (primary_card == p1) or (primary_card == p2):
+                        primary_card = "NA"
                 action = "Activated Ability"
                 if i.find("targeting") != -1:
                     targets = get_cards(i.split("targeting")[1])
