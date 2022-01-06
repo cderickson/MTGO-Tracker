@@ -299,8 +299,6 @@ def players(init):
     for i in init:
         if i.find(" joined the game") != -1:
             player = i.split(" joined the game")[0]
-            player = player.replace(" ","+")
-            player = player.replace(".","*")
             players.append(player)
 
     # Filter duplicates from player list
@@ -309,23 +307,14 @@ def players(init):
     players.sort(key=len, reverse=True)
 
     return players
-def players_dict(init):
-    # Input:  String or List[Strings]
-    # Output: Dict{String : String}
-
-    if isinstance(init, str):
-        init = init.split("@P")
-        
-    players = {}
-    
-    #initialize list of players in the game
-    for i in init:
-        if i.find(" joined the game") != -1:
-            player = i.split(" joined the game")[0]
-            player_val = player.replace(" ","+")
-            player_val = player.replace(".","*")
-            players[player] = player_val
-    return players
+def alter(player_name,original):
+    if original == True:
+        player = player_name.replace("+"," ")
+        player = player.replace("*",".")
+    else:
+        player = player_name.replace(" ","+")
+        player = player.replace(".","*")
+    return player     
 def high_roll(init):
     # Input:  String or List[Strings]
     # Output: Dict{String : Int}
@@ -387,11 +376,7 @@ def get_cards(play):
         play = play[1].split("]",1)
         cards.append(play[0])
         play = play[1]
-        count -= 1
-
-    while len(cards) < 3:
-        cards.append("NA")
-        
+        count -= 1  
     return cards
 def cards_played(plays,*argv):
     # Input:  List[Plays],String
@@ -511,12 +496,11 @@ def game_actions(init,time):
     initial =       init
     gameactions =   []
     p =             players(init)
-    pdict =         players_dict(init)
     count =         0
     lost_conn =     0
 
-    for i in pdict:
-        initial = initial.replace(i,pdict[i])
+    for i in p:
+        initial = initial.replace(i,alter(i,original=False))
     initial = initial.split("@P")
 
     gameactions.append(format_time(time))
@@ -543,8 +527,8 @@ def game_actions(init,time):
             newstring = i.split()[0] + " " + i.split()[1]
             for j in p:
                 if len(newstring.split()) < 3:
-                    if i.split(": ")[1].find(j) != -1:
-                        newstring += " " + j
+                    if i.split(": ")[1].find(alter(j,original=False)) != -1:
+                        newstring += " " + alter(j,original=False)
             gameactions.append(newstring)
         # Skip game state changes.
         elif i.count(".") == 0:
@@ -594,7 +578,7 @@ def match_data(ga,gd,pd):
         roll_winner = "P1"
     else:
         roll_winner = "P2"
-    match_id = ga[0] + "_" + players_dict(ga)[p1] + "_" + players_dict(ga)[p2]
+    match_id = ga[0] + "_" + p1 + "_" + p2
     
     for i in gd:
         if i[0] == match_id and i[11] == "P1":
@@ -610,10 +594,10 @@ def match_data(ga,gd,pd):
         match_winner = "NA"
 
     match_data.extend((match_id,
-                       p1,
+                       alter(p1,original=True),
                        p1_arch,
                        p1_subarch,
-                       p2,
+                       alter(p2,original=True),
                        p2_arch,
                        p2_subarch,
                        p1_roll,
@@ -652,7 +636,7 @@ def game_data(ga):
     prev_string =   ""
     curr_list =     []
 
-    match_id = ga[0] + "_" + players_dict(ga)[p1] + "_" + players_dict(ga)[p2]    
+    match_id = ga[0] + "_" + p1 + "_" + p2
     for i in ga:
         curr_list = i.split()
         if i.find("joined the game") != -1:
@@ -664,8 +648,8 @@ def game_data(ga):
                     all_games_ga.append(curr_game_list)
                 if game_num == 1:
                     g1.extend((match_id,
-                               p1,
-                               p2,
+                               alter(p1,original=True),
+                               alter(p2,original=True),
                                game_num,
                                pd_selector,
                                pd_choice,
@@ -678,8 +662,8 @@ def game_data(ga):
                     game_data.append(g1)
                 elif game_num == 2:
                     g2.extend((match_id,
-                               p1,
-                               p2,
+                               alter(p1,original=True),
+                               alter(p2,original=True),
                                game_num,
                                pd_selector,
                                pd_choice,
@@ -730,8 +714,8 @@ def game_data(ga):
         all_games_ga.append(curr_game_list)
     if game_num == 1:
         g1.extend((match_id,
-                   p1,
-                   p2,
+                   alter(p1,original=True),
+                   alter(p2,original=True),
                    game_num,
                    pd_selector,
                    pd_choice,
@@ -744,8 +728,8 @@ def game_data(ga):
         game_data.append(g1)
     elif game_num == 2:
         g2.extend((match_id,
-                   p1,
-                   p2,
+                   alter(p1,original=True),
+                   alter(p2,original=True),
                    game_num,
                    pd_selector,
                    pd_choice,
@@ -758,8 +742,8 @@ def game_data(ga):
         game_data.append(g2)
     elif game_num == 3:
         g3.extend((match_id,
-                   p1,
-                   p2,
+                   alter(p1,original=True),
+                   alter(p2,original=True),
                    game_num,
                    pd_selector,
                    pd_choice,
@@ -834,7 +818,7 @@ def play_data(ga):
     p2 = players(ga)[1]
     curr_list = []
 
-    match_id = ga[0] + "_" + players_dict(ga)[p1] + "_" + players_dict(ga)[p2]    
+    match_id = ga[0] + "_" + p1 + "_" + p2  
     for i in ga:
         curr_list = i.split()
         casting_player = ""
@@ -851,8 +835,7 @@ def play_data(ga):
         if (i.find("chooses to play first") != -1) or (i.find("chooses to not play first") != -1):
             game_num += 1
             play_num = 0
-        elif i.find("Turn ") != -1 and \
-             len(curr_list) == 3:
+        elif (i.find("Turn ") != -1) and (len(curr_list) == 3):
             turn_num = int(curr_list[1].split(":")[0])
             active_player = curr_list[2]
             if active_player == p1:
@@ -862,18 +845,34 @@ def play_data(ga):
         elif is_play(i):
             if curr_list[1] == "plays":
                 casting_player = curr_list[0]
-                primary_card = get_cards(i)[0]
-                #action = curr_list[1].capitalize()
+                try:
+                    primary_card = get_cards(i)[0]
+                except IndexError:
+                    pass
+                    #print(i)
                 action = "Land Drop"
             elif curr_list[1] == "casts":
                 casting_player = curr_list[0]
-                primary_card = get_cards(i)[0]
+                try:
+                    primary_card = get_cards(i)[0]
+                except IndexError:
+                    pass
+                    #print(i)
                 action = curr_list[1].capitalize()
                 if i.find("targeting") != -1:
                     targets = get_cards(i.split("targeting")[1])
-                    target1 = targets[0]
-                    target2 = targets[1]
-                    target3 = targets[2]
+                    try:
+                        target1 = targets[0]
+                    except IndexError:
+                        pass
+                    try:
+                        target2 = targets[1]
+                    except IndexError:
+                        pass
+                    try:
+                        target3 = targets[2]
+                    except IndexError:
+                        pass
                     if casting_player == p1:
                         self_target = player_is_target(i.split("targeting")[1],p1)
                         opp_target = player_is_target(i.split("targeting")[1],p2)
@@ -885,26 +884,35 @@ def play_data(ga):
                 action = curr_list[1].capitalize()
                 cardsdrawn = cards_drawn(curr_list[2])
             elif curr_list[1] == "chooses":
-                # casting_player = curr_list[0]
-                # action = curr_list[1].capitalize()
                 continue
             elif curr_list[1] == "discards":
-                # casting_player = curr_list[0]
-                # action = curr_list[1].capitalize()
                 continue
             elif i.find("is being attacked by") != -1:
                 casting_player = active_player
                 action = "Attacks"
-                attackers = len(get_cards(i))
+                attackers = len(get_cards(i.split("is being attacked by")[1]))
             elif i.find("puts triggered ability from") != -1:
                 casting_player = curr_list[0]
-                primary_card = get_cards(i)[0]
+                try:
+                    primary_card = get_cards(i)[0]
+                except IndexError:
+                    pass
+                    #print(i)
                 action = "Triggers"
                 if i.find("targeting") != -1:
                     targets = get_cards(i.split("targeting")[1])
-                    target1 = targets[0]
-                    target2 = targets[1]
-                    target3 = targets[2]
+                    try:
+                        target1 = targets[0]
+                    except IndexError:
+                        pass
+                    try:
+                        target2 = targets[1]
+                    except IndexError:
+                        pass
+                    try:
+                        target3 = targets[2]
+                    except IndexError:
+                        pass
                     if casting_player == p1:
                         self_target = player_is_target(i.split("targeting")[1],p1)
                         opp_target = player_is_target(i.split("targeting")[1],p2)
@@ -913,13 +921,26 @@ def play_data(ga):
                         opp_target = player_is_target(i.split("targeting")[1],p1)
             elif i.find("activates an ability of") != -1:
                 casting_player = curr_list[0]
-                primary_card = get_cards(i)[0]
+                try:
+                    primary_card = get_cards(i)[0]
+                except IndexError:
+                    pass
+                    #print(i)
                 action = "Activated Ability"
                 if i.find("targeting") != -1:
                     targets = get_cards(i.split("targeting")[1])
-                    target1 = targets[0]
-                    target2 = targets[1]
-                    target3 = targets[2]
+                    try:
+                        target1 = targets[0]
+                    except IndexError:
+                        pass
+                    try:
+                        target2 = targets[1]
+                    except IndexError:
+                        pass
+                    try:
+                        target3 = targets[2]
+                    except IndexError:
+                        pass
                     if casting_player == p1:
                         self_target = player_is_target(i.split("targeting")[1],p1)
                         opp_target = player_is_target(i.split("targeting")[1],p2)
@@ -931,7 +952,7 @@ def play_data(ga):
                               game_num,
                               play_num,
                               turn_num,
-                              casting_player,
+                              alter(casting_player,original=True),
                               action,
                               primary_card,
                               target1,
@@ -941,8 +962,8 @@ def play_data(ga):
                               self_target,
                               cardsdrawn,
                               attackers,
-                              active_player,
-                              non_active_player))
+                              alter(active_player,original=True),
+                              alter(non_active_player,original=True)))
             all_plays.append(play_data)
     return all_plays
 def get_all_data(init,mtime):
