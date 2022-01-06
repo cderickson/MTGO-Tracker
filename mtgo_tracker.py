@@ -1283,38 +1283,44 @@ def export(file_type,data_type,inverted):
             file_names[index] = i + ".xlsx"
 
     if file_type == "CSV":
-        for i in range(len(file_names)):
-            count += 1
-            with open(filepath_export+"/"+file_names[i],"w",encoding="UTF8",newline="") as file:
-                writer = csv.writer(file)
-                if data_type == 3:
-                    writer.writerow(headers[i])
-                    df_rows = df_list[i].to_numpy().tolist()
-                    for row in df_rows:
-                        writer.writerow(row)
-                elif data_type == 4:
-                    writer.writerow(headers)
-                    df_rows = df_filtered.to_numpy().tolist()
-                    for row in df_rows:
-                        writer.writerow(row)
-                else:
-                    writer.writerow(headers[i])
-                    df_rows = df_filtered.to_numpy().tolist()
-                    for row in df_rows:
-                        writer.writerow(row)
-        update_status_bar(status="Exported " + str(count) + " CSV file(s) to " + filepath_export)
+        try:
+            for i in range(len(file_names)):
+                count += 1
+                with open(filepath_export+"/"+file_names[i],"w",encoding="UTF8",newline="") as file:
+                    writer = csv.writer(file)
+                    if data_type == 3:
+                        writer.writerow(headers[i])
+                        df_rows = df_list[i].to_numpy().tolist()
+                        for row in df_rows:
+                            writer.writerow(row)
+                    elif data_type == 4:
+                        writer.writerow(headers)
+                        df_rows = df_filtered.to_numpy().tolist()
+                        for row in df_rows:
+                            writer.writerow(row)
+                    else:
+                        writer.writerow(headers[i])
+                        df_rows = df_filtered.to_numpy().tolist()
+                        for row in df_rows:
+                            writer.writerow(row)
+            update_status_bar(status="Exported " + str(count) + " CSV file(s) to " + filepath_export)
+        except PermissionError:
+            update_status_bar(status="Permission Error: Common error cause is an open file that can not be overwritten.")
     elif file_type == "Excel":
-        for i in range(len(file_names)):
-            count += 1
-            f = filepath_export+"/"+file_names[i]
-            if data_type == 3:
-                df = df_list[i]
-            elif data_type == 4:
-                df = df_filtered
-            else:
-                df = df_filtered
-            df.to_excel(f,index=False)
-        update_status_bar(status="Exported " + str(count) + " Excel file(s) to " + filepath_export)
+        try:
+            for i in range(len(file_names)):
+                count += 1
+                f = filepath_export+"/"+file_names[i]
+                if data_type == 3:
+                    df = df_list[i]
+                elif data_type == 4:
+                    df = df_filtered
+                else:
+                    df = df_filtered
+                df.to_excel(f,index=False)
+            update_status_bar(status="Exported " + str(count) + " Excel file(s) to " + filepath_export)
+        except PermissionError:
+            update_status_bar(status="Permission Error: Common error cause is an open file that can not be overwritten.")
     filepath_export = fp
 def set_default_hero():
     height = 100
@@ -1628,6 +1634,7 @@ def set_filter():
     mid_frame.grid_rowconfigure(0,weight=1)
 
     def update_keys(*argv):
+        op.set(operators[0])
         if col.get() == "Date":
             drop_key.grid_forget()
             date.grid(row=0,column=3,padx=10,pady=10)
@@ -1639,7 +1646,7 @@ def set_filter():
     def update_combobox():
         key_options = list(df[col.get()].unique())
 
-        if key_options[0].isnumeric():
+        if isinstance(key_options[0],(int,np.integer)):
             key_options = sorted(list(set(key_options)),key=int)
         else:
             key_options = sorted(list(set(key_options)),key=str.casefold)
