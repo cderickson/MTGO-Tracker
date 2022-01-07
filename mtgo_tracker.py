@@ -2408,16 +2408,20 @@ def import_window():
             label2.config(text=fp_logs)
             button3["state"] = tk.NORMAL
 
-    def import_data():
+    def import_data(overwrite):
+        global all_data
+        global all_data_inverted
         global filepath_logs
 
         if (label2["text"]  == "No Default GameLogs Folder"):
             label3["text"] = "Decks and/or GameLogs Folder Location not set."
             return
         filepath_logs = label2["text"]
+        if overwrite:
+            save_dict = user_inputs()
+            clear_loaded()
         get_all_data()
         clear_filter(update_status=False,reload_display=False)
-        set_display("Matches",update_status=False,bb_state=False)
         if data_loaded != False:
             data_menu.entryconfig("Set Default Hero",state=tk.NORMAL)
             file_menu.entryconfig("Save Data",state=tk.NORMAL)
@@ -2425,6 +2429,18 @@ def import_window():
             data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
             data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
             data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
+        if overwrite:
+            for i in all_data[0]:
+                i[modo.header("Matches").index("P1_Arch")] = save_dict[i[0]][0][i[modo.header("Matches").index("P1")]][0]
+                i[modo.header("Matches").index("P1_Subarch")] = save_dict[i[0]][0][i[modo.header("Matches").index("P1")]][1]
+                i[modo.header("Matches").index("P2_Arch")] = save_dict[i[0]][0][i[modo.header("Matches").index("P2")]][0]
+                i[modo.header("Matches").index("P2_Subarch")] = save_dict[i[0]][0][i[modo.header("Matches").index("P2")]][1]
+                i[modo.header("Matches").index("Format")] = save_dict[i[0]][1]
+                i[modo.header("Matches").index("Limited_Format")] = save_dict[i[0]][2]
+                i[modo.header("Matches").index("Match_Type")] = save_dict[i[0]][3]
+            all_data_inverted = modo.invert_join(all_data)
+
+        set_display("Matches",update_status=False,bb_state=False)
         close_import_window()
 
     def close_import_window():
@@ -2443,8 +2459,9 @@ def import_window():
     mid_frame.grid_columnconfigure(0,weight=1)
 
     button2 = tk.Button(mid_frame,text="Get GameLogs Folder",width=20,command=lambda : get_logs_path())
-    button3 = tk.Button(bot_frame,text="Import",width=10,command=lambda : import_data())
-    button4 = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_import_window())
+    button3 = tk.Button(bot_frame,text="Import New",width=15,command=lambda : import_data(overwrite=False))
+    button4 = tk.Button(bot_frame,text="Re-Import All",width=15,command=lambda : import_data(overwrite=True))
+    button5 = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_import_window())
     if (filepath_logs is None) or (filepath_logs == ""):
         label2 = tk.Label(mid_frame,text="No Default GameLogs Folder",wraplength=width,justify="left")
         button3["state"] = tk.DISABLED
@@ -2455,8 +2472,9 @@ def import_window():
     label2.grid(row=0,column=0,pady=(20,5))
     button2.grid(row=1,column=0,pady=0)
     label3.grid(row=2,column=0,pady=5)
-    button3.grid(row=0,column=0,padx=10,pady=10)
-    button4.grid(row=0,column=1,padx=10,pady=10)
+    button3.grid(row=0,column=0,padx=5,pady=5)
+    button4.grid(row=0,column=1,padx=5,pady=5)
+    button5.grid(row=0,column=2,padx=5,pady=5)
 
     import_window.protocol("WM_DELETE_WINDOW", lambda : close_import_window())
 def get_winners():
@@ -4515,6 +4533,26 @@ def remove_select():
     button_close.grid(row=0,column=2,padx=5,pady=5)
     
     remove_select.protocol("WM_DELETE_WINDOW", lambda : close_window())
+def user_inputs():
+    save_dict = {}
+    player_dict = {}
+    p1_index = modo.header("Matches").index("P1")
+    p2_index = modo.header("Matches").index("P2")
+    p1_arch_index = modo.header("Matches").index("P1_Arch")
+    p2_arch_index = modo.header("Matches").index("P2_Arch")
+    p1_sub_index = modo.header("Matches").index("P1_Subarch")
+    p2_sub_index = modo.header("Matches").index("P2_Subarch")
+    format_index = modo.header("Matches").index("Format")
+    lformat_index = modo.header("Matches").index("Limited_Format")
+    match_type_index = modo.header("Matches").index("Match_Type")
+
+    for i in all_data[0]:
+        player_dict = {}
+        player_dict[i[p1_index]] = [i[p1_arch_index],i[p1_sub_index]]
+        player_dict[i[p2_index]] = [i[p2_arch_index],i[p2_sub_index]]
+        save_dict[i[0]] = [player_dict,i[format_index],i[lformat_index],i[match_type_index]]
+
+    return save_dict
 def debug():
     os.chdir(filepath_root)
     with open("debug.txt","w",encoding="utf-8") as txt:
@@ -4604,6 +4642,7 @@ remove_button = tk.Button(left_frame,text="Remove Record(s)",state=tk.DISABLED,c
 stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,command=lambda : get_stats())
 back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,command=lambda :bb_clicked())
 debug_button = tk.Button(left_frame,text="DEBUG BUTTON",command=lambda : debug())
+test_button = tk.Button(left_frame,text="TEST BUTTON",command=lambda : test())
 
 status_label = tk.Label(bottom_frame,text="")
 status_label.grid(row=0,column=0)
@@ -4613,7 +4652,7 @@ menu_bar = tk.Menu(window)
 file_menu = tk.Menu(menu_bar,tearoff=False)
 menu_bar.add_cascade(label="File",menu=file_menu)
 
-file_menu.add_command(label="Load MTGO GameLogs",command=lambda : import_window())
+file_menu.add_command(label="Import MTGO GameLogs",command=lambda : import_window())
 file_menu.add_separator()
 file_menu.add_command(label="Load Saved Data",command=lambda : load_saved_window())
 file_menu.add_command(label="Save Data",command=lambda : save_window(exit=False),state=tk.DISABLED)
@@ -4679,6 +4718,7 @@ remove_button.grid(row=6,column=0,sticky="ew",padx=5,pady=5)
 stats_button.grid(row=7,column=0,sticky="ew",padx=5,pady=35)
 back_button.grid(row=8,column=0,sticky="ew",padx=5,pady=5)
 #debug_button.grid(row=9,column=0,sticky="ew",padx=5,pady=5)
+#test_button.grid(row=10,column=0,sticky="ew",padx=5,pady=5)
 
 tree1 = ttk.Treeview(text_frame,show="tree")
 tree1.grid(row=0,column=0,sticky="nsew")
