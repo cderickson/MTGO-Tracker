@@ -8,7 +8,7 @@ Three (3) tables are created: **Matches, Games, and Plays**. These tables will h
 </p>
 
 ## Getting Started
-Import your data by clicking **'File => Load MTGO GameLogs'** and navigate to the folder containing your GameLog files. MTGO saves these files in **"C:\Users\\[User]\AppData\Local\Apps\2.0"** by default.
+Import your data by clicking **'File => Import MTGO GameLogs'** and navigate to the folder containing your GameLog files. MTGO saves these files in **"C:\Users\\[User]\AppData\Local\Apps\2.0"** by default.
 
 Set the default Hero to your MTGO username by clicking **'Data => Set Default Hero'**. This will make an individualized dataset more readable. The statistics window will also become accessible from the left-panel, allowing you to view general statistics regarding your personal performance.
 
