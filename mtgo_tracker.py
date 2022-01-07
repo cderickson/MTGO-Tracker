@@ -32,6 +32,7 @@ filepath_copy =     ""
 hero =              ""
 main_window_size =  ("small",1000,500)
 
+test_mode =         False
 input_options =     {}
 filter_dict =       {}
 display =           ""
@@ -1605,7 +1606,7 @@ def set_filter():
     update_status_bar(status=f"Applying Filters to {display} Table.")
 
     filter_window = tk.Toplevel(window)
-    filter_window.title("Set Filters")
+    filter_window.title(f"Set Filters - {display}")
     filter_window.iconbitmap(filter_window,"icon.ico")
     filter_window.minsize(width,height)
     filter_window.resizable(False,False)
@@ -4669,11 +4670,11 @@ bottom_frame.grid_columnconfigure(0,weight=1)
 match_button = tk.Button(left_frame,text="Match Data",state=tk.DISABLED,command=lambda : set_display("Matches",update_status=True,bb_state=False))
 game_button = tk.Button(left_frame,text="Game Data",state=tk.DISABLED,command=lambda : set_display("Games",update_status=True,bb_state=False))
 play_button = tk.Button(left_frame,text="Play Data",state=tk.DISABLED,command=lambda : set_display("Plays",update_status=True,bb_state=False))
+stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,command=lambda : get_stats())
 filter_button = tk.Button(left_frame,text="Filter",state=tk.DISABLED,command=lambda : set_filter())
 clear_button = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,command=lambda : clear_filter(update_status=True,reload_display=True))
 revise_button = tk.Button(left_frame,text="Revise Record(s)",state=tk.DISABLED,command=lambda : revise_method_select())
 remove_button = tk.Button(left_frame,text="Remove Record(s)",state=tk.DISABLED,command=lambda : remove_select())
-stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,command=lambda : get_stats())
 back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,command=lambda :bb_clicked())
 debug_button = tk.Button(left_frame,text="DEBUG BUTTON",command=lambda : debug())
 test_button = tk.Button(left_frame,text="TEST BUTTON",command=lambda : test())
@@ -4742,17 +4743,19 @@ data_menu.add_command(label="Delete Saved Session",command=lambda : delete_sessi
 
 window.config(menu=menu_bar)
 
-match_button.grid(row=0,column=0,sticky="ew",padx=5,pady=(20,5))
-game_button.grid(row=1,column=0,sticky="ew",padx=5,pady=5)
-play_button.grid(row=2,column=0,sticky="ew",padx=5,pady=5)
-filter_button.grid(row=3,column=0,sticky="ew",padx=5,pady=(50,5))
-clear_button.grid(row=4,column=0,sticky="ew",padx=5,pady=5)
-revise_button.grid(row=5,column=0,sticky="ew",padx=5,pady=5)
-remove_button.grid(row=6,column=0,sticky="ew",padx=5,pady=5)
-stats_button.grid(row=7,column=0,sticky="ew",padx=5,pady=35)
-back_button.grid(row=8,column=0,sticky="ew",padx=5,pady=5)
-#debug_button.grid(row=9,column=0,sticky="ew",padx=5,pady=5)
-#test_button.grid(row=10,column=0,sticky="ew",padx=5,pady=5)
+match_button.grid(row=1,column=0,sticky="ew",padx=5,pady=(15,5))
+game_button.grid(row=2,column=0,sticky="ew",padx=5,pady=(0,5))
+play_button.grid(row=3,column=0,sticky="ew",padx=5,pady=(0,5))
+stats_button.grid(row=4,column=0,sticky="ew",padx=5,pady=(0,5))
+filter_button.grid(row=5,column=0,sticky="ew",padx=5,pady=(35,5))
+clear_button.grid(row=6,column=0,sticky="ew",padx=5,pady=(0,5))
+revise_button.grid(row=7,column=0,sticky="ew",padx=5,pady=(35,5))
+remove_button.grid(row=8,column=0,sticky="ew",padx=5,pady=(0,5))
+back_button.grid(row=9,column=0,sticky="ew",padx=5,pady=(35,5))
+
+if test_mode:
+    debug_button.grid(row=10,column=0,sticky="ew",padx=5,pady=(0,5))
+    test_button.grid(row=11,column=0,sticky="ew",padx=5,pady=(0,5))
 
 tree1 = ttk.Treeview(text_frame,show="tree")
 tree1.grid(row=0,column=0,sticky="nsew")
