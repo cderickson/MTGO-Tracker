@@ -639,8 +639,10 @@ def print_data(data,update_status):
                 index += 1
         filtered_list.clear()
 
-    if (display == "Matches") or (display == "Games"):
+    if display == "Matches":
         df = df.sort_values(by=["Match_ID"],ascending=False)
+    elif display == "Games":
+        df = df.sort_values(by=["Match_ID","Game_Num"],ascending=(False,True))
     elif display == "Plays":
         df = df.sort_values(by=["Match_ID","Game_Num","Play_Num"],ascending=(False,True,True))
     df_rows = df.to_numpy().tolist()
