@@ -234,20 +234,14 @@ def invert_join(ad):
     ad_inverted[1] += ad[1]
 
     return ad_inverted
-def update_game_wins(ad,headers):
-    #Input:  List[Matches,Games,Plays], List[MatchHeader,GameHeader,PlayHeader]
+def update_game_wins(ad):
+    #Input:  List[Matches,Games,Plays]
     #Output: List[Matches,Games,Plays]
     
-    for index,i in enumerate(headers[0]):
-        if i == "P1_Wins":
-            p1wins_index = index
-        elif i == "P2_Wins":
-            p2wins_index = index
-        elif i == "Match_Winner":
-            mw_index = index
-    for index,i in enumerate(headers[1]):
-        if i == "Game_Winner":
-            gw_index = index
+    p1wins_index = header("Matches").index("P1_Wins")
+    p2wins_index = header("Matches").index("P2_Wins")
+    mw_index = header("Matches").index("Match_Winner")
+    gw_index = header("Games").index("Game_Winner")
 
     for i in ad[0]: # Iterate through Matches.
         i[p1wins_index] = 0
@@ -613,7 +607,7 @@ def match_data(ga,gd,pd):
     return match_data
 def game_data(ga):
     # Input:  List[GameActions]
-    # Output: List[G1_List,G2_List,G3_List]
+    # Output: List[G1_List,G2_List,G3_List,NA_Games_Dict{}]
 
     game_num =      0
     pd_selector =   ""
@@ -629,7 +623,7 @@ def game_data(ga):
     g2 =            []
     g3 =            []
     curr_game_list =[]
-    all_games_ga =  []
+    all_games_ga =  {}
     p1 =            players(ga)[0]
     p2 =            players(ga)[1]   
     player_count =  len(players(ga))
@@ -645,7 +639,7 @@ def game_data(ga):
                 player_count = len(players(ga)) - 1
                 game_winner = get_winner(curr_game_list,p1,p2)
                 if game_winner == "NA":
-                    all_games_ga.append(curr_game_list)
+                    all_games_ga[f"{match_id}-{game_num}"] = curr_game_list
                 if game_num == 1:
                     g1.extend((match_id,
                                alter(p1,original=True),
@@ -711,7 +705,7 @@ def game_data(ga):
         curr_game_list.append(i)
     game_winner = get_winner(curr_game_list,p1,p2)
     if game_winner == "NA":
-        all_games_ga.append(curr_game_list)
+        all_games_ga[f"{match_id}-{game_num}"] = curr_game_list
     if game_num == 1:
         g1.extend((match_id,
                    alter(p1,original=True),
