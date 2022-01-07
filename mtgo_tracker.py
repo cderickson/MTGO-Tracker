@@ -17,8 +17,8 @@ import pickle
 import shutil
 
 # Saved data:
-all_data =          [[],[],[],[]]
-all_data_inverted = [[],[],[],[]]
+all_data =          [[],[],[],{}]
+all_data_inverted = [[],[],[],{}]
 all_headers =       [[],[],[]]
 all_decks =         {}
 parsed_file_dict =  {}
@@ -187,8 +187,8 @@ def clear_loaded():
     global new_import
     global ask_to_save
 
-    all_data =          [[],[],[],[]]
-    all_data_inverted = [[],[],[],[]]
+    all_data =          [[],[],[],{}]
+    all_data_inverted = [[],[],[],{}]
     parsed_file_dict.clear()
     hero =              ""
     filter_dict.clear()
@@ -527,7 +527,7 @@ def get_all_data():
     global ask_to_save
     count = 0
 
-    new_data = [[],[],[],[]]
+    new_data = [[],[],[],{}]
     os.chdir(filepath_logs)
     n = 0
     for (root,dirs,files) in os.walk(filepath_logs):
@@ -552,15 +552,16 @@ def get_all_data():
                 for i in parsed_data[2]:
                     new_data[2].append(i)
                 for i in parsed_data[3]:
-                    new_data[3].append(i)
+                    new_data[3] = new_data[3] | parsed_data[3]
 
     new_data_inverted = modo.invert_join(new_data)
-    for index,i in enumerate(new_data):
+    for index in range(3):
         for j in new_data[index]:
             all_data[index].append(j)
-    for index,i in enumerate(new_data_inverted):
         for j in new_data_inverted[index]:
             all_data_inverted[index].append(j)
+    all_data[3] = all_data[3] | new_data[3]
+    all_data_inverted[3] = all_data_inverted[3] | new_data_inverted[3]
 
     if count == 1:
         update_status_bar(status="Imported " + str(count) + " new Match.")
@@ -2412,13 +2413,16 @@ def import_window():
         global all_data
         global all_data_inverted
         global filepath_logs
+        global hero
 
         if (label2["text"]  == "No Default GameLogs Folder"):
             label3["text"] = "Decks and/or GameLogs Folder Location not set."
             return
         filepath_logs = label2["text"]
         if overwrite:
-            save_dict = user_inputs()
+            h = hero
+            match_dict = user_inputs(type="Matches")
+            game_dict = user_inputs(type="Games")
             clear_loaded()
         get_all_data()
         clear_filter(update_status=False,reload_display=False)
@@ -2431,13 +2435,29 @@ def import_window():
             data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
         if overwrite:
             for i in all_data[0]:
-                i[modo.header("Matches").index("P1_Arch")] = save_dict[i[0]][0][i[modo.header("Matches").index("P1")]][0]
-                i[modo.header("Matches").index("P1_Subarch")] = save_dict[i[0]][0][i[modo.header("Matches").index("P1")]][1]
-                i[modo.header("Matches").index("P2_Arch")] = save_dict[i[0]][0][i[modo.header("Matches").index("P2")]][0]
-                i[modo.header("Matches").index("P2_Subarch")] = save_dict[i[0]][0][i[modo.header("Matches").index("P2")]][1]
-                i[modo.header("Matches").index("Format")] = save_dict[i[0]][1]
-                i[modo.header("Matches").index("Limited_Format")] = save_dict[i[0]][2]
-                i[modo.header("Matches").index("Match_Type")] = save_dict[i[0]][3]
+                try:
+                    i[modo.header("Matches").index("P1_Arch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P1")]][0]
+                    i[modo.header("Matches").index("P1_Subarch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P1")]][1]
+                    i[modo.header("Matches").index("P2_Arch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P2")]][0]
+                    i[modo.header("Matches").index("P2_Subarch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P2")]][1]
+                    i[modo.header("Matches").index("Format")] = match_dict[i[0]][1]
+                    i[modo.header("Matches").index("Limited_Format")] = match_dict[i[0]][2]
+                    i[modo.header("Matches").index("Match_Type")] = match_dict[i[0]][3]
+                # Found new Match for which we don't have user inputs.
+                except KeyError:
+                    pass
+            for i in all_data[1]:
+                key = i[0] + "-" + str(i[modo.header("Games").index("Game_Num")])
+                try:
+                    if (i[modo.header("Games").index("P1")] == game_dict[key][0]):
+                        i[modo.header("Games").index("Game_Winner")] = game_dict[key][2]
+                # Found new Game for which we don't have user inputs.
+                except KeyError:
+                    pass
+            hero = h
+            if hero != "":
+                stats_button["state"] = tk.NORMAL
+            modo.update_game_wins(all_data)
             all_data_inverted = modo.invert_join(all_data)
 
         set_display("Matches",update_status=False,bb_state=False)
@@ -2488,28 +2508,27 @@ def get_winners():
     gn_index = modo.header("Games").index("Game_Num")
 
     n = 0
-    data_index = 0
     df1 =   modo.to_dataframe(all_data[1],modo.header("Games"))
     total = df1[(df1.Game_Winner == "NA")].shape[0]
-    for count,i in enumerate(all_data[1]):    # Iterate through games.
-        if i[gw_index] == "NA": # Game record does not have a winner.
-            empty = False
-            n += 1
-            p1 = i[p1_index]
-            p2 = i[p2_index]
-            ask_for_winner(all_data[3][data_index],p1,p2,n,total)
-            if uaw == "Exit.":
-                break
-            if uaw == "NA":
-                data_index += 1
-            else:
-                all_data[3].pop(data_index)
-                ask_to_save = True
-            i[gw_index] = uaw
-    if n == 0:
+    if total == 0:
         update_status_bar(status="No Games with missing Game_Winner.")
     else:
-        modo.update_game_wins(all_data,all_headers)
+        for count,i in enumerate(all_data[1]):    # Iterate through games.
+            if i[gw_index] == "NA": # Game record does not have a winner.
+                n += 1
+                p1 = i[p1_index]
+                p2 = i[p2_index]
+                raw_data_key = f"{i[0]}-{i[gn_index]}"
+                ask_for_winner(all_data[3][raw_data_key],p1,p2,n,total)
+                if uaw == "Exit.":
+                    break
+                if uaw == "NA":
+                    pass
+                else:
+                    all_data[3].pop(raw_data_key)
+                    ask_to_save = True
+                i[gw_index] = uaw
+        modo.update_game_wins(all_data)
         all_data_inverted = modo.invert_join(all_data)
         set_display("Matches",update_status=True,bb_state=False)
 def ask_for_winner(ga_list,p1,p2,n,total):
@@ -4533,9 +4552,11 @@ def remove_select():
     button_close.grid(row=0,column=2,padx=5,pady=5)
     
     remove_select.protocol("WM_DELETE_WINDOW", lambda : close_window())
-def user_inputs():
-    save_dict = {}
+def user_inputs(type):
+    match_dict = {}
+    game_dict = {}
     player_dict = {}
+
     p1_index = modo.header("Matches").index("P1")
     p2_index = modo.header("Matches").index("P2")
     p1_arch_index = modo.header("Matches").index("P1_Arch")
@@ -4546,13 +4567,21 @@ def user_inputs():
     lformat_index = modo.header("Matches").index("Limited_Format")
     match_type_index = modo.header("Matches").index("Match_Type")
 
-    for i in all_data[0]:
-        player_dict = {}
-        player_dict[i[p1_index]] = [i[p1_arch_index],i[p1_sub_index]]
-        player_dict[i[p2_index]] = [i[p2_arch_index],i[p2_sub_index]]
-        save_dict[i[0]] = [player_dict,i[format_index],i[lformat_index],i[match_type_index]]
+    gn_index = modo.header("Games").index("Game_Num")
+    gw_index = modo.header("Games").index("Game_Winner")
 
-    return save_dict
+    if type == "Matches":
+        for i in all_data[0]:
+            player_dict = {}
+            player_dict[i[p1_index]] = [i[p1_arch_index],i[p1_sub_index]]
+            player_dict[i[p2_index]] = [i[p2_arch_index],i[p2_sub_index]]
+            match_dict[i[0]] = [player_dict,i[format_index],i[lformat_index],i[match_type_index]]
+        return match_dict
+    elif type == "Games":
+        for i in all_data[1]:
+            key = f"{i[0]}-{i[gn_index]}"
+            game_dict[key] = [i[modo.header("Games").index("P1")],i[modo.header("Games").index("P2")],i[gw_index]]
+        return game_dict
 def debug():
     os.chdir(filepath_root)
     with open("debug.txt","w",encoding="utf-8") as txt:
@@ -4606,6 +4635,9 @@ def debug():
         txt.write(f"Filter_Changed: {filter_changed}\n")
         txt.write(f"Ask_To_Save: {ask_to_save}\n")
         txt.write(f"Selected: {selected}\n")
+def test():
+    # Test function
+    pass
 
 main_window_size =  ("small",1000,500)
 window = tk.Tk() 
