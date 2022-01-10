@@ -508,16 +508,25 @@ def set_display(d,update_status,bb_state):
         print_data(all_data[0],update_status)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
+        match_button.config(relief=tk.SUNKEN)
+        game_button.config(relief=tk.RAISED)
+        play_button.config(relief=tk.RAISED)
     elif d == "Games":
         back_button["state"] = tk.NORMAL
         print_data(all_data[1],update_status)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
+        match_button.config(relief=tk.RAISED)
+        game_button.config(relief=tk.SUNKEN)
+        play_button.config(relief=tk.RAISED)
     elif d == "Plays":
         back_button["state"] = tk.NORMAL
         print_data(all_data[2],update_status)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
+        match_button.config(relief=tk.RAISED)
+        game_button.config(relief=tk.RAISED)
+        play_button.config(relief=tk.SUNKEN)
 def get_all_data():
     global all_data
     global all_data_inverted
