@@ -3786,7 +3786,8 @@ def get_stats():
                 meta_deck_wr.append([wins,losses,to_percent(wins/total,1)])
 
         mid_frame1["text"] = "Match History: vs. " + opp
-        tree1.tag_configure("colored",background="#cccccc")
+        tree1.tag_configure("win",background="#a3ffb1")
+        tree1.tag_configure("lose",background="#ffa3a3")
         tree1.delete(*tree1.get_children())
         tree1["column"] = ["Date","Deck","Opp. Deck","Match Result"]
         for i in tree1["column"]:
@@ -3795,19 +3796,17 @@ def get_stats():
         tree1.column("Deck",anchor="center")
         tree1.column("Opp. Deck",anchor="center")
         tree1.column("Match Result",anchor="center")
-        tagged = False
         for i in range(len(tree1_dates)):
-            tagged = not tagged
-            if tagged == True:
+            if "Win" in tree1_result[i]:
                 tree1.insert("","end",values=[tree1_dates[i],
                                               tree1_decks[i],
                                               tree1_oppdecks[i],
-                                              tree1_result[i]],tags=("colored",))
+                                              tree1_result[i]],tags=("win",))
             else:
                 tree1.insert("","end",values=[tree1_dates[i],
                                               tree1_decks[i],
                                               tree1_oppdecks[i],
-                                              tree1_result[i]])
+                                              tree1_result[i]],tags=("lose",))
 
         mid_frame2["text"] = "Overall Performance: vs. " + opp
         tree2.tag_configure("colored",background="#cccccc")
@@ -4371,7 +4370,8 @@ def get_stats():
     limited_options = [""]
     decks_played = [""]
     opp_decks_played = [""]
-    stat_types = ["Match History","Match Stats","Game Stats","Play Stats","Opponent Stats","Time Data","Card Data"]
+    # stat_types = ["Match History","Match Stats","Game Stats","Play Stats","Opponent Stats","Time Data","Card Data"]
+    stat_types = ["Match History","Match Stats","Game Stats","Play Stats","Opponent Stats","Card Data"]
     
     player = tk.StringVar()
     player.set(hero)
