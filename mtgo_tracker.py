@@ -44,6 +44,8 @@ data_loaded =       False
 filter_changed =    False
 ask_to_save =       False
 selected =          ()
+display_index =     0
+ln_per_page =       50
 
 def save(exit):
     global ask_to_save
@@ -125,17 +127,21 @@ def set_default_window_size():
 
     def save_main_window_size():
         global main_window_size
+        global ln_per_page
 
-        if window_size.get() == "Small: 1000x500":
-            main_window_size = ("small",1000,500)
-        elif window_size.get() == "Large: 1750x750":
-            main_window_size = ("large",1750,750)
+        if window_size.get() == "Small":
+            main_window_size = ("small",1000,490)
+            ln_per_page = 20
+        elif window_size.get() == "Large":
+            main_window_size = ("large",1723,780)
+            ln_per_page = 35
 
         os.chdir(filepath_root + "\\" + "save")
         pickle.dump(main_window_size,open("main_window_size","wb"))
         window.geometry(str(main_window_size[1]) + "x" + str(main_window_size[2]))
         update_status_bar(status="Default Window Size saved.")
         os.chdir(filepath_root)
+        set_display(display,update_status=False,start_index=0,reset=False)
         close_window()
 
     def close_window():
@@ -155,7 +161,7 @@ def set_default_window_size():
     mid_frame.grid_rowconfigure(1,weight=1)
     bot_frame.grid_columnconfigure(0,weight=1)
 
-    options = ["Small: 1000x500","Large: 1750x750"]
+    options = ["Small","Large"]
     window_size = tk.StringVar()
     if main_window_size[0] == "small":
         window_size.set(options[0])
@@ -466,7 +472,7 @@ def startup():
         stats_button["state"] = tk.NORMAL
     data_loaded = True
 
-    set_display("Matches",update_status=True,bb_state=False)
+    set_display("Matches",update_status=True,start_index=0,reset=True)
     data_menu.entryconfig("Set Default Hero",state=tk.NORMAL)
     data_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
     file_menu.entryconfig("Save Data",state=tk.NORMAL)
@@ -481,9 +487,10 @@ def save_settings():
     pickle.dump(settings,open("settings","wb"))
     pickle.dump(main_window_size,open("main_window_size","wb"))
     os.chdir(filepath_root)
-def set_display(d,update_status,bb_state):
+def set_display(d,update_status,start_index,reset):
     global display
     global prev_display
+    global display_index
 
     if data_loaded == False:
         return
@@ -491,42 +498,34 @@ def set_display(d,update_status,bb_state):
     if display != d:
         prev_display = display
         display = d
-        
-    text_frame.config(text=display)
+    
+    if reset:
+        display_index = 0
 
-    if bb_state == True:
-        back_button["state"] = tk.NORMAL
-    else:
-        back_button["state"] = tk.DISABLED
+    text_frame.config(text=display)
     
     match_button["state"] = tk.NORMAL
     game_button["state"] = tk.NORMAL
     play_button["state"] = tk.NORMAL
         
     if d == "Matches":
-        back_button["state"] = tk.DISABLED
-        print_data(all_data[0],update_status)
+        # if main_window_size[0] == "large":
+        #     window.geometry("1740x" + str(main_window_size[2]))
+        print_data(all_data[0],update_status,start_index)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
-        match_button.config(relief=tk.SUNKEN)
-        game_button.config(relief=tk.RAISED)
-        play_button.config(relief=tk.RAISED)
     elif d == "Games":
-        back_button["state"] = tk.NORMAL
-        print_data(all_data[1],update_status)
+        # if main_window_size[0] == "large":
+        #     window.geometry("1315x" + str(main_window_size[2]))
+        print_data(all_data[1],update_status,start_index)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
-        match_button.config(relief=tk.RAISED)
-        game_button.config(relief=tk.SUNKEN)
-        play_button.config(relief=tk.RAISED)
     elif d == "Plays":
-        back_button["state"] = tk.NORMAL
-        print_data(all_data[2],update_status)
+        # if main_window_size[0] == "large":
+        #     window.geometry("1665x" + str(main_window_size[2]))
+        print_data(all_data[2],update_status,start_index)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
-        match_button.config(relief=tk.RAISED)
-        game_button.config(relief=tk.RAISED)
-        play_button.config(relief=tk.SUNKEN)
 def get_all_data():
     global all_data
     global all_data_inverted
@@ -586,7 +585,7 @@ def get_all_data():
         clear_button["state"] = tk.NORMAL
         data_loaded = True
     os.chdir(filepath_root)
-def print_data(data,update_status):
+def print_data(data,update_status,start_index):
     global new_import
     small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num"]
 
@@ -656,13 +655,26 @@ def print_data(data,update_status):
     elif display == "Plays":
         df = df.sort_values(by=["Match_ID","Game_Num","Play_Num"],ascending=(False,True,True))
     df_rows = df.to_numpy().tolist()
-    for i in df_rows:
-        tree1.insert("","end",values=i)
+
+    end_index = start_index + ln_per_page
+    if len(df_rows) <= end_index:
+        end_index = len(df_rows)
+        next_button["state"] = tk.DISABLED
+    else:
+        next_button["state"] = tk.NORMAL
+
+    if start_index == 0:
+        back_button["state"] = tk.DISABLED
+    else:
+        back_button["state"] = tk.NORMAL
+
+    for i in range(start_index,end_index):
+        tree1.insert("","end",values=df_rows[i])
 
     if new_import == True:
         new_import = False
     elif update_status == True:
-        update_status_bar(status="Displaying: " + str(len(df_rows)) + " of " + str(total) + " records.")
+        update_status_bar(status=f"Displaying: {str(start_index)}-{str(end_index)} of {str(len(df_rows))} total records.")
 def get_lists():
     global all_decks
     global ask_to_save
@@ -750,7 +762,7 @@ def input_missing_data():
         update_status_bar(status="No Matches with Missing Data.")
     else:
         all_data_inverted = modo.invert_join(all_data)
-        set_display("Matches",update_status=True,bb_state=False)
+        set_display("Matches",update_status=True,start_index=0,reset=True)
 def deck_data_guess(update_type):
     global all_data
     global all_data_inverted
@@ -850,7 +862,7 @@ def rerun_decks_window():
             t = "Updated the P1_Subarch, P2_Subarch columns for each Match in the Date Range: " + list(all_decks.keys())[0]
             deck_data_guess(update_type="All")
 
-        set_display("Matches",update_status=False,bb_state=False)
+        set_display("Matches",update_status=False,start_index=0,reset=True)
         if len(all_decks) > 1:
             t += " to " + list(all_decks.keys())[-1]
         update_status_bar(status=t)
@@ -1197,11 +1209,11 @@ def tree_double(event):
     clear_filter(update_status=False,reload_display=False)
     add_filter_setting("Match_ID",tree1.item(tree1.focus(),"values")[0],"=")
     if display == "Matches":
-        set_display("Games",update_status=True,bb_state=True)
+        set_display("Games",update_status=True,start_index=0,reset=True)
     elif display == "Games":
         add_filter_setting("Game_Num",tree1.item(tree1.focus(),"values")[3],"=")
-        set_display("Plays",update_status=True,bb_state=True)
-def bb_clicked():
+        set_display("Plays",update_status=True,start_index=0,reset=True)
+def back2():
     global filter_dict
     if "Match_ID" in filter_dict:
         match_id = filter_dict["Match_ID"][0][2:]
@@ -1210,9 +1222,17 @@ def bb_clicked():
     else:
         clear_filter(update_status=False,reload_display=True)
     if display == "Games":
-        set_display("Matches",update_status=True,bb_state=False)
+        set_display("Matches",update_status=True,start_index=0,reset=True)
     elif display == "Plays":
-        set_display("Games",update_status=True,bb_state=False)
+        set_display("Games",update_status=True,start_index=0,reset=True)
+def back():
+    global display_index
+    display_index -= ln_per_page
+    set_display(display,update_status=True,start_index=display_index,reset=False)
+def next_page():
+    global display_index
+    display_index += ln_per_page
+    set_display(display,update_status=True,start_index=display_index,reset=False)
 def export(file_type,data_type,inverted):
     # File_Type: String, "CSV" or "Excel"
     # Data_Type: Int, 0=Match,1=Game,2=Play,3=All,4=Filtered
@@ -1360,7 +1380,7 @@ def set_default_hero():
             save_settings()
             update_status_bar(status="Cleared Setting: Hero")
             if display != "Plays":
-                set_display(display,update_status=False,bb_state=False)
+                set_display(display,update_status=False,start_index=0,reset=True)
             stats_button["state"] = tk.DISABLED
             close_hero_window()
         elif entry_str in hero_options:
@@ -1368,7 +1388,7 @@ def set_default_hero():
             save_settings()
             update_status_bar(status="Updated Hero to " + hero + ".")
             if display != "Plays":
-                set_display(display,update_status=False,bb_state=False)
+                set_display(display,update_status=False,start_index=0,reset=True)
             stats_button["state"] = tk.NORMAL
             close_hero_window()
         else:
@@ -1606,12 +1626,12 @@ def clear_filter(update_status,reload_display):
     if update_status:
         update_status_bar("Cleared All Filters.")
     if reload_display:
-        set_display(display,update_status=False,bb_state=False)
+        set_display(display,update_status=False,start_index=0,reset=True)
 def set_filter():
     height = 300
     width =  550
 
-    print_data(data=None,update_status=False)
+    print_data(data=None,update_status=False,start_index=0)
     update_status_bar(status=f"Applying Filters to {display} Table.")
 
     filter_window = tk.Toplevel(window)
@@ -1710,7 +1730,7 @@ def set_filter():
     
     def apply_filter():
         # Update table and close window.
-        set_display(display,update_status=True,bb_state=False)
+        set_display(display,update_status=True,start_index=0,reset=True)
         filter_window.grab_release()
         filter_window.destroy()
 
@@ -1725,7 +1745,7 @@ def set_filter():
         # Revert filter changes and close window.
         global filter_dict
         filter_dict = filter_init
-        set_display(display,update_status=True,bb_state=False)
+        set_display(display,update_status=True,start_index=0,reset=True)
         text_frame.config(text=display)
         filter_window.grab_release()
         filter_window.destroy()
@@ -1864,7 +1884,7 @@ def revise_record2():
             break
 
     all_data_inverted = modo.invert_join(all_data)
-    set_display("Matches",update_status=True,bb_state=False)
+    set_display("Matches",update_status=True,start_index=0,reset=True)
     revise_button["state"] = tk.NORMAL
 
     for i in tree1.get_children():
@@ -1989,7 +2009,7 @@ def revise_record():
                 i[modo.header("Matches").index("Limited_Format")] = limited_format.get()
                 i[modo.header("Matches").index("Match_Type")] = match_type.get()                   
                 all_data_inverted = modo.invert_join(all_data)
-                set_display("Matches",update_status=True,bb_state=False)
+                set_display("Matches",update_status=True,start_index=0,reset=True)
                 break
         revise_window.grab_release()
         revise_window.destroy()
@@ -2283,7 +2303,7 @@ def revise_record_multi():
                                 j[modo.header("Matches").index("P2_Arch")] = "NA"
                     elif field == "Match Type":
                         j[modo.header("Matches").index("Match_Type")] = match_type.get() 
-        set_display("Matches",update_status=True,bb_state=False)
+        set_display("Matches",update_status=True,start_index=0,reset=True)
         revise_button["state"] = tk.NORMAL
 
         sel_tuple = ()
@@ -2472,7 +2492,7 @@ def import_window():
             modo.update_game_wins(all_data)
             all_data_inverted = modo.invert_join(all_data)
 
-        set_display("Matches",update_status=False,bb_state=False)
+        set_display("Matches",update_status=False,start_index=0,reset=True)
         close_import_window()
 
     def close_import_window():
@@ -2542,7 +2562,7 @@ def get_winners():
                 i[gw_index] = uaw
         modo.update_game_wins(all_data)
         all_data_inverted = modo.invert_join(all_data)
-        set_display("Matches",update_status=True,bb_state=False)
+        set_display("Matches",update_status=True,start_index=0,reset=True)
 def ask_for_winner(ga_list,p1,p2,n,total):
     # List of game actions (Strings)
     # String = P1
@@ -4459,11 +4479,17 @@ def exit_select():
         close()
 def load_window_size_setting():
     global main_window_size
+    global ln_per_page
+
     cwd = os.getcwd()
     if os.path.isdir("save") == True:
         os.chdir(cwd + "\\" + "save")
         if os.path.isfile("main_window_size"):
             main_window_size = pickle.load(open("main_window_size","rb"))
+            if main_window_size[0] == "small":
+                ln_per_page = 20
+            elif main_window_size[0] == "large":
+                ln_per_page = 35
         os.chdir(cwd)
 def update_status_bar(status):
     status_label.config(text=status)
@@ -4506,7 +4532,7 @@ def remove_record(ignore):
                     break
 
     ask_to_save = True
-    set_display("Matches",update_status=False,bb_state=False)
+    set_display("Matches",update_status=False,start_index=0,reset=True)
     if len(selected) == 1:
         update_status_bar(f"Removed {counts[0]} Match, {counts[1]} Games, {counts[2]} Plays from Database.")
     else:
@@ -4676,15 +4702,19 @@ text_frame.grid_rowconfigure(0,weight=1)
 text_frame.grid_rowconfigure(1,weight=0)
 bottom_frame.grid_columnconfigure(0,weight=1)
 
-match_button = tk.Button(left_frame,text="Match Data",state=tk.DISABLED,command=lambda : set_display("Matches",update_status=True,bb_state=False))
-game_button = tk.Button(left_frame,text="Game Data",state=tk.DISABLED,command=lambda : set_display("Games",update_status=True,bb_state=False))
-play_button = tk.Button(left_frame,text="Play Data",state=tk.DISABLED,command=lambda : set_display("Plays",update_status=True,bb_state=False))
+match_button = tk.Button(left_frame,text="Match Data",state=tk.DISABLED,\
+    command=lambda : set_display("Matches",update_status=True,start_index=0,reset=True))
+game_button = tk.Button(left_frame,text="Game Data",state=tk.DISABLED,\
+    command=lambda : set_display("Games",update_status=True,start_index=0,reset=True))
+play_button = tk.Button(left_frame,text="Play Data",state=tk.DISABLED,\
+    command=lambda : set_display("Plays",update_status=True,start_index=0,reset=True))
 stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,command=lambda : get_stats())
 filter_button = tk.Button(left_frame,text="Filter",state=tk.DISABLED,command=lambda : set_filter())
 clear_button = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,command=lambda : clear_filter(update_status=True,reload_display=True))
 revise_button = tk.Button(left_frame,text="Revise Record(s)",state=tk.DISABLED,command=lambda : revise_method_select())
 remove_button = tk.Button(left_frame,text="Remove Record(s)",state=tk.DISABLED,command=lambda : remove_select())
-back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,command=lambda :bb_clicked())
+next_button = tk.Button(left_frame,text="Next",command=lambda : next_page())
+back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,command=lambda : back())
 debug_button = tk.Button(left_frame,text="DEBUG BUTTON",command=lambda : debug())
 test_button = tk.Button(left_frame,text="TEST BUTTON",command=lambda : test())
 
@@ -4760,20 +4790,21 @@ filter_button.grid(row=5,column=0,sticky="ew",padx=5,pady=(35,5))
 clear_button.grid(row=6,column=0,sticky="ew",padx=5,pady=(0,5))
 revise_button.grid(row=7,column=0,sticky="ew",padx=5,pady=(35,5))
 remove_button.grid(row=8,column=0,sticky="ew",padx=5,pady=(0,5))
-back_button.grid(row=9,column=0,sticky="ew",padx=5,pady=(35,5))
+next_button.grid(row=9,column=0,sticky="ew",padx=5,pady=(35,5))
+back_button.grid(row=10,column=0,sticky="ew",padx=5,pady=(0,5))
 
 if test_mode:
-    debug_button.grid(row=10,column=0,sticky="ew",padx=5,pady=(0,5))
-    test_button.grid(row=11,column=0,sticky="ew",padx=5,pady=(0,5))
+    debug_button.grid(row=11,column=0,sticky="ew",padx=5,pady=(0,5))
+    test_button.grid(row=12,column=0,sticky="ew",padx=5,pady=(0,5))
 
 tree1 = ttk.Treeview(text_frame,show="tree")
 tree1.grid(row=0,column=0,sticky="nsew")
 tree1.bind("<Double-1>",tree_double)
 tree1.bind("<ButtonRelease-1>",activate_revise)
 
-tree_scrolly = tk.Scrollbar(text_frame,command=tree1.yview)
-tree1.configure(yscrollcommand=tree_scrolly.set)
-tree_scrolly.grid(row=0,column=1,sticky="ns")
+# tree_scrolly = tk.Scrollbar(text_frame,command=tree1.yview)
+# tree1.configure(yscrollcommand=tree_scrolly.set)
+# tree_scrolly.grid(row=0,column=1,sticky="ns")
 
 tree_scrollx = tk.Scrollbar(text_frame,orient="horizontal",command=tree1.xview)
 tree1.configure(xscrollcommand=tree_scrollx.set)
