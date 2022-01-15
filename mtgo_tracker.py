@@ -46,6 +46,7 @@ ask_to_save =       False
 selected =          ()
 display_index =     0
 ln_per_page =       50
+curr_data =         pd.DataFrame()
 
 def save(exit):
     global ask_to_save
@@ -511,19 +512,19 @@ def set_display(d,update_status,start_index,reset):
     if d == "Matches":
         # if main_window_size[0] == "large":
         #     window.geometry("1740x" + str(main_window_size[2]))
-        print_data(all_data[0],update_status,start_index)
+        print_data(all_data[0],update_status,start_index,apply_filter=True)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
     elif d == "Games":
         # if main_window_size[0] == "large":
         #     window.geometry("1315x" + str(main_window_size[2]))
-        print_data(all_data[1],update_status,start_index)
+        print_data(all_data[1],update_status,start_index,apply_filter=True)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
     elif d == "Plays":
         # if main_window_size[0] == "large":
         #     window.geometry("1665x" + str(main_window_size[2]))
-        print_data(all_data[2],update_status,start_index)
+        print_data(all_data[2],update_status,start_index,apply_filter=True)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
 def get_all_data():
@@ -585,8 +586,10 @@ def get_all_data():
         clear_button["state"] = tk.NORMAL
         data_loaded = True
     os.chdir(filepath_root)
-def print_data(data,update_status,start_index):
+def print_data(data,update_status,start_index,apply_filter):
     global new_import
+    global curr_data
+
     small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num"]
 
     # Clear existing data in tree
@@ -601,13 +604,13 @@ def print_data(data,update_status,start_index):
             tree1.column(i,anchor="center",stretch=False,width=75)
         else:
             tree1.column(i,anchor="center",stretch=False,width=100)
-        if (i == "Turns") or (i == "Play_Num") or (i == "Turn_Num") or (i == "Cards_Drawn") or (i == "Attackers"):
-            tree1.heading(i,text=i,command=lambda _col=i: sort_column_int(_col,False,tree1))
-        else:
-            tree1.heading(i,text=i,command=lambda _col=i: sort_column(_col,False,tree1))
+        tree1.heading(i,text=i,command=lambda _col=i: sort_column2(_col,False,tree1))
     tree1.column("Match_ID",anchor="w")
     
-    if data == None:
+    # Build dataframe being printed.
+    if isinstance(data, pd.DataFrame):
+        df = data
+    elif data == None:
         df = df = modo.to_dataframe([],modo.header(display))
     elif (hero != "") & (display == "Matches"):
         df = modo.to_dataframe(all_data_inverted[0],modo.header("Matches"))
@@ -618,42 +621,47 @@ def print_data(data,update_status,start_index):
     else:
         df = modo.to_dataframe(data,modo.header(display))
     total = df.shape[0]
-    filtered_list = []
-    for key in filter_dict:
-        if key not in modo.header(display):
-            continue
-        for i in filter_dict[key]:
-            if i[2:].isnumeric():
-                value = int(i[2:])
-            else:
-                value = i[2:]
-            if i[0] == "=":
-                if key == "Date":
-                    filtered_list.append(df[(df[key].str.contains(value[0:10]))])
-                else:
-                    filtered_list.append(df[(df[key] == value)])
-            elif i[0] == ">":
-                filtered_list.append(df[(df[key] > value)])
-            elif i[0] == "<":
-                filtered_list.append(df[(df[key] < value)])
-        if len(filtered_list) == 0:
-            pass
-        elif len(filtered_list) == 1:
-            df = filtered_list[0]
-        else:
-            index = 1
-            df = filtered_list[0]
-            while index < (len(filtered_list)):
-                df = pd.merge(df,filtered_list[index],how="outer")
-                index += 1
-        filtered_list.clear()
 
-    if display == "Matches":
-        df = df.sort_values(by=["Match_ID"],ascending=False)
-    elif display == "Games":
-        df = df.sort_values(by=["Match_ID","Game_Num"],ascending=(False,True))
-    elif display == "Plays":
-        df = df.sort_values(by=["Match_ID","Game_Num","Play_Num"],ascending=(False,True,True))
+    if apply_filter:
+        # Apply existing filters.
+        filtered_list = []
+        for key in filter_dict:
+            if key not in modo.header(display):
+                continue
+            for i in filter_dict[key]:
+                if i[2:].isnumeric():
+                    value = int(i[2:])
+                else:
+                    value = i[2:]
+                if i[0] == "=":
+                    if key == "Date":
+                        filtered_list.append(df[(df[key].str.contains(value[0:10]))])
+                    else:
+                        filtered_list.append(df[(df[key] == value)])
+                elif i[0] == ">":
+                    filtered_list.append(df[(df[key] > value)])
+                elif i[0] == "<":
+                    filtered_list.append(df[(df[key] < value)])
+            if len(filtered_list) == 0:
+                pass
+            elif len(filtered_list) == 1:
+                df = filtered_list[0]
+            else:
+                index = 1
+                df = filtered_list[0]
+                while index < (len(filtered_list)):
+                    df = pd.merge(df,filtered_list[index],how="outer")
+                    index += 1
+            filtered_list.clear()
+        # Apply Default Sorting.
+        if display == "Matches":
+            df = df.sort_values(by=["Match_ID"],ascending=False)
+        elif display == "Games":
+            df = df.sort_values(by=["Match_ID","Game_Num"],ascending=(False,True))
+        elif display == "Plays":
+            df = df.sort_values(by=["Match_ID","Game_Num","Play_Num"],ascending=(False,True,True))
+        curr_data = df
+
     df_rows = df.to_numpy().tolist()
 
     end_index = start_index + ln_per_page
@@ -674,7 +682,7 @@ def print_data(data,update_status,start_index):
     if new_import == True:
         new_import = False
     elif update_status == True:
-        update_status_bar(status=f"Displaying: {str(start_index)}-{str(end_index)} of {str(len(df_rows))} total records.")
+        update_status_bar(status=f"Displaying: {str(start_index + 1)}-{str(end_index)} of {str(len(df_rows))} total records.")
 def get_lists():
     global all_decks
     global ask_to_save
@@ -1228,11 +1236,11 @@ def back2():
 def back():
     global display_index
     display_index -= ln_per_page
-    set_display(display,update_status=True,start_index=display_index,reset=False)
+    print_data(curr_data,update_status=True,start_index=display_index,apply_filter=False)
 def next_page():
     global display_index
     display_index += ln_per_page
-    set_display(display,update_status=True,start_index=display_index,reset=False)
+    print_data(curr_data,update_status=True,start_index=display_index,apply_filter=False)
 def export(file_type,data_type,inverted):
     # File_Type: String, "CSV" or "Excel"
     # Data_Type: Int, 0=Match,1=Game,2=Play,3=All,4=Filtered
@@ -1574,6 +1582,43 @@ def set_default_import():
     button1["state"] = tk.DISABLED
 
     import_window.protocol("WM_DELETE_WINDOW", lambda : close_import_window())   
+def sort_column2(col,reverse,tree1):
+    def sort_key(element):
+        if element.dtype == np.int64:
+            return element
+        else:
+            return element.str.casefold()
+    global curr_data
+
+    # Clear existing data in tree
+    tree1.delete(*tree1.get_children())
+
+    if display == "Matches":
+        curr_data.sort_values(by=[col,"Match_ID"],inplace=True,ascending=(reverse,False),key=sort_key)
+    elif display == "Games":
+        curr_data.sort_values(by=[col,"Match_ID","Game_Num"],inplace=True,ascending=(reverse,False,True),key=sort_key)
+    elif display == "Plays":
+        curr_data.sort_values(by=[col,"Match_ID","Game_Num","Play_Num"],inplace=True,ascending=(reverse,False,True,True),key=sort_key)
+
+    df_rows = curr_data.to_numpy().tolist()
+
+    end_index = display_index + ln_per_page
+    if len(df_rows) <= end_index:
+        end_index = len(df_rows)
+        next_button["state"] = tk.DISABLED
+    else:
+        next_button["state"] = tk.NORMAL
+
+    if display_index == 0:
+        back_button["state"] = tk.DISABLED
+    else:
+        back_button["state"] = tk.NORMAL
+
+    for i in range(display_index,end_index):
+        tree1.insert("","end",values=df_rows[i])
+
+    # Reverse sort next time
+    tree1.heading(col,text=col,command=lambda _col=col: sort_column2(_col,not reverse,tree1))
 def sort_column(col,reverse,tree1):
     def tuple_casefold(t):
         return (t[0].casefold(),t[1])
@@ -1583,11 +1628,11 @@ def sort_column(col,reverse,tree1):
         l.append((tree1.set(k, col), k))
     l.sort(reverse=reverse,key=tuple_casefold)
 
-        # Rearrange items in sorted positions
+    # Rearrange items in sorted positions
     for index, (val, k) in enumerate(l):
         tree1.move(k, '', index)
 
-        # Reverse sort next time
+    # Reverse sort next time
     tree1.heading(col,text=col,command=lambda _col=col: sort_column(_col,not reverse,tree1))
 def sort_column_int(col,reverse,tree1):
     def tree_tuple_to_int(t):
@@ -1598,11 +1643,11 @@ def sort_column_int(col,reverse,tree1):
         l.append((tree1.set(k, col), k))
     l.sort(reverse=reverse,key=tree_tuple_to_int)
 
-        # Rearrange items in sorted positions
+    # Rearrange items in sorted positions
     for index, (val, k) in enumerate(l):
         tree1.move(k, '', index)
 
-        # Reverse sort next time
+    # Reverse sort next time
     tree1.heading(col,text=col,command=lambda _col=col: sort_column_int(_col,not reverse,tree1))
 def add_filter_setting(index,key,op):
     global filter_dict
@@ -1631,7 +1676,7 @@ def set_filter():
     height = 300
     width =  550
 
-    print_data(data=None,update_status=False,start_index=0)
+    print_data(data=None,update_status=False,start_index=0,apply_filter=False)
     update_status_bar(status=f"Applying Filters to {display} Table.")
 
     filter_window = tk.Toplevel(window)
