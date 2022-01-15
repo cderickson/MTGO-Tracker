@@ -30,7 +30,7 @@ filepath_decks =    ""
 filepath_logs =     ""
 filepath_copy =     ""
 hero =              ""
-main_window_size =  ("small",1000,500)
+main_window_size =  ("small",1000,490)
 
 test_mode =         False
 input_options =     {}
@@ -45,7 +45,7 @@ filter_changed =    False
 ask_to_save =       False
 selected =          ()
 display_index =     0
-ln_per_page =       50
+ln_per_page =       20
 curr_data =         pd.DataFrame()
 
 def save(exit):
@@ -2473,8 +2473,8 @@ def import_window():
     import_window.focus()
 
     import_window.geometry("+%d+%d" %
-                            (window.winfo_x()+(window.winfo_width()/2)-(width/2),
-                            window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def get_logs_path():
         fp_logs = filedialog.askdirectory()
@@ -4722,7 +4722,6 @@ def test():
     # Test function
     pass
 
-main_window_size =  ("small",1000,500)
 window = tk.Tk() 
 window.title("MTGO-Tracker")
 window.iconbitmap(window,"icon.ico")
