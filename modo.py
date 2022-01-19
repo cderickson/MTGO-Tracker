@@ -340,10 +340,17 @@ def get_winner(curr_game_list,p1,p2):
     # Input:  [Game Actions],String,String,
     # Output: String
 
+    # Look for a concession string.
+    for index,i in enumerate(curr_game_list):
+        if i.find("has conceded") != -1:
+            if i.split()[0] == p1:
+                return "P2"
+            elif i.split()[0] == p2:
+                return "P1"
+
     lastline = curr_game_list[-1]
     # Add more lose conditions
-    if lastline.find("has conceded") != -1 or \
-       lastline.find("is being attacked") != -1 or \
+    if lastline.find("is being attacked") != -1 or \
        lastline.find("has lost the game") != -1 or \
        lastline.find("loses because of drawing a card") != -1:
         if lastline.split()[0] == p1:
@@ -357,6 +364,7 @@ def get_winner(curr_game_list,p1,p2):
         elif lastline.split()[0] == p2:
             return "P2"
     # Could not determine a winner.
+    #print(curr_game_list)
     return "NA" 
 def get_cards(play):
     # Input:  String
