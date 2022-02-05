@@ -10,5 +10,6 @@ icon.ico
 lists/
 save/
 logs/
+draftlogs/
 input_options.txt
 debug.txt
