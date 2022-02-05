@@ -33,6 +33,7 @@ hero =              ""
 main_window_size =  ("small",1000,490)
 
 test_mode =         False
+resize =            False
 input_options =     {}
 filter_dict =       {}
 display =           ""
@@ -342,14 +343,19 @@ def delete_session():
         global all_decks
         all_decks.clear()
 
-        files = ["all_data","parsed_file_dict","settings","main_window_size"]
+        save_files = ["all_data","parsed_file_dict","settings","main_window_size"]
         os.chdir(filepath_root + "\\" + "save")   
 
         session_exists = False
-        for i in files:
+        for i in save_files:
             if os.path.exists(i):
                 session_exists = True
                 os.remove(i)
+
+        os.chdir(filepath_root + "\\" + "logs")
+        for (root,dirs,files) in os.walk(os.getcwd()):
+            for i in files:
+                os.remove(i) 
 
         if session_exists == True:
             update_status_bar(status="Saved session data has been deleted.")
@@ -508,26 +514,29 @@ def set_display(d,update_status,start_index,reset):
     match_button["state"] = tk.NORMAL
     game_button["state"] = tk.NORMAL
     play_button["state"] = tk.NORMAL
-        
+
     if d == "Matches":
-        # if main_window_size[0] == "large":
-        #     window.geometry("1740x" + str(main_window_size[2]))
+        if resize:
+            if main_window_size[0] == "large":
+                window.geometry("1740x" + str(main_window_size[2]))
         print_data(all_data[0],update_status,start_index,apply_filter=True)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
     elif d == "Games":
-        # if main_window_size[0] == "large":
-        #     window.geometry("1315x" + str(main_window_size[2]))
+        if resize:
+            if main_window_size[0] == "large":
+                window.geometry("1315x" + str(main_window_size[2]))
         print_data(all_data[1],update_status,start_index,apply_filter=True)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
     elif d == "Plays":
-        # if main_window_size[0] == "large":
-        #     window.geometry("1665x" + str(main_window_size[2]))
+        if resize:
+            if main_window_size[0] == "large":
+                window.geometry("1665x" + str(main_window_size[2]))
         print_data(all_data[2],update_status,start_index,apply_filter=True)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
-def get_all_data():
+def get_all_data(fp,copy):
     global all_data
     global all_data_inverted
     global all_headers
@@ -538,9 +547,9 @@ def get_all_data():
     count = 0
 
     new_data = [[],[],[],{}]
-    os.chdir(filepath_logs)
+    os.chdir(fp)
     n = 0
-    for (root,dirs,files) in os.walk(filepath_logs):
+    for (root,dirs,files) in os.walk(fp):
         for i in files:
             if ("Match_GameLog_" not in i) or (len(i) < 30):
                 pass
@@ -548,12 +557,19 @@ def get_all_data():
                 os.chdir(root)
             else:
                 os.chdir(root)
-                shutil.copy(i,filepath_copy)
                 with io.open(i,"r",encoding="ansi") as gamelog:
                     initial = gamelog.read()
                     mtime = time.ctime(os.path.getmtime(i))
                 parsed_data = modo.get_all_data(initial,mtime)
-                parsed_file_dict[i] = parsed_data[0][0]
+                parsed_file_dict[i] = (parsed_data[0][0],datetime.datetime.strptime(mtime,"%a %b %d %H:%M:%S %Y"))
+                if copy:
+                    try:
+                        shutil.copy(i,filepath_copy)
+                        os.chdir(filepath_copy)
+                        os.utime(i,(datetime.datetime.now().timestamp(),parsed_file_dict[i][1].timestamp()))
+                        os.chdir(root)
+                    except shutil.SameFileError:
+                        pass
                 count += 1
 
                 new_data[0].append(parsed_data[0])
@@ -1237,10 +1253,14 @@ def back():
     global display_index
     display_index -= ln_per_page
     print_data(curr_data,update_status=True,start_index=display_index,apply_filter=False)
+    revise_button["state"] = tk.DISABLED
+    remove_button["state"] = tk.DISABLED
 def next_page():
     global display_index
     display_index += ln_per_page
     print_data(curr_data,update_status=True,start_index=display_index,apply_filter=False)
+    revise_button["state"] = tk.DISABLED
+    remove_button["state"] = tk.DISABLED
 def export(file_type,data_type,inverted):
     # File_Type: String, "CSV" or "Excel"
     # Data_Type: Int, 0=Match,1=Game,2=Play,3=All,4=Filtered
@@ -1929,8 +1949,9 @@ def revise_record2():
             break
 
     all_data_inverted = modo.invert_join(all_data)
-    set_display("Matches",update_status=True,start_index=0,reset=True)
+    set_display("Matches",update_status=True,start_index=display_index,reset=False)
     revise_button["state"] = tk.NORMAL
+    remove_button["state"] = tk.NORMAL
 
     for i in tree1.get_children():
         if list(tree1.item(i,"values"))[0] == sel_matchid:
@@ -2348,8 +2369,9 @@ def revise_record_multi():
                                 j[modo.header("Matches").index("P2_Arch")] = "NA"
                     elif field == "Match Type":
                         j[modo.header("Matches").index("Match_Type")] = match_type.get() 
-        set_display("Matches",update_status=True,start_index=0,reset=True)
+        set_display("Matches",update_status=True,start_index=display_index,reset=False)
         revise_button["state"] = tk.NORMAL
+        remove_button["state"] = tk.NORMAL
 
         sel_tuple = ()
         for i in tree1.get_children():
@@ -2501,7 +2523,9 @@ def import_window():
             match_dict = user_inputs(type="Matches")
             game_dict = user_inputs(type="Games")
             clear_loaded()
-        get_all_data()
+            get_all_data(fp=filepath_copy,copy=False)
+        else:
+            get_all_data(fp=filepath_logs,copy=True)
         clear_filter(update_status=False,reload_display=False)
         if data_loaded != False:
             data_menu.entryconfig("Set Default Hero",state=tk.NORMAL)
@@ -2556,8 +2580,8 @@ def import_window():
     mid_frame.grid_columnconfigure(0,weight=1)
 
     button2 = tk.Button(mid_frame,text="Get GameLogs Folder",width=20,command=lambda : get_logs_path())
-    button3 = tk.Button(bot_frame,text="Import New",width=15,command=lambda : import_data(overwrite=False))
-    button4 = tk.Button(bot_frame,text="Re-Import All",width=15,command=lambda : import_data(overwrite=True))
+    button3 = tk.Button(bot_frame,text="Scan for New Files",width=15,command=lambda : import_data(overwrite=False))
+    button4 = tk.Button(bot_frame,text="Re-Import Copies",width=15,command=lambda : import_data(overwrite=True))
     button5 = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_import_window())
     if (filepath_logs is None) or (filepath_logs == ""):
         label2 = tk.Label(mid_frame,text="No Default GameLogs Folder",wraplength=width,justify="left")
