@@ -15,6 +15,7 @@ import datetime
 import itertools
 import pickle
 import shutil
+import draft_tracker
 
 # Saved data:
 all_data =          [[],[],[],{}]
@@ -32,7 +33,7 @@ filepath_copy =     ""
 hero =              ""
 main_window_size =  ("small",1000,490)
 
-test_mode =         False
+test_mode =         True
 resize =            False
 input_options =     {}
 filter_dict =       {}
@@ -519,21 +520,21 @@ def set_display(d,update_status,start_index,reset):
         if resize:
             if main_window_size[0] == "large":
                 window.geometry("1740x" + str(main_window_size[2]))
-        print_data(all_data[0],update_status,start_index,apply_filter=True)
+        print_data(all_data[0],modo.header(display),update_status,start_index,apply_filter=True)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
     elif d == "Games":
         if resize:
             if main_window_size[0] == "large":
                 window.geometry("1315x" + str(main_window_size[2]))
-        print_data(all_data[1],update_status,start_index,apply_filter=True)
+        print_data(all_data[1],modo.header(display),update_status,start_index,apply_filter=True)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
     elif d == "Plays":
         if resize:
             if main_window_size[0] == "large":
                 window.geometry("1665x" + str(main_window_size[2]))
-        print_data(all_data[2],update_status,start_index,apply_filter=True)
+        print_data(all_data[2],modo.header(display),update_status,start_index,apply_filter=True)
         revise_button["state"] = tk.DISABLED
         remove_button["state"] = tk.DISABLED
 def get_all_data(fp,copy):
@@ -602,26 +603,32 @@ def get_all_data(fp,copy):
         clear_button["state"] = tk.NORMAL
         data_loaded = True
     os.chdir(filepath_root)
-def print_data(data,update_status,start_index,apply_filter):
+def print_data(data,headers,update_status,start_index,apply_filter):
     global new_import
     global curr_data
 
-    small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num"]
+    small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num","Pack_Num","Pick_Num","Pick_Ovr"]
+    med_headers = ["Avail_1","Avail_2","Avail_3","Avail_4","Avail_5","Avail_6","Avail_7","Avail_8","Avail_9","Avail_10","Avail_11","Avail_12","Avail_13","Avail_14"]
+    large_headers = ["Card"]
 
     # Clear existing data in tree
     tree1.delete(*tree1.get_children())
 
-    tree1["column"] = modo.header(display)
+    tree1["column"] = headers
     tree1["show"] = "headings"
 
     # Insert column headers into tree
     for i in tree1["column"]:
         if i in small_headers:
             tree1.column(i,anchor="center",stretch=False,width=75)
+        elif i in med_headers:
+            tree1.column(i,anchor="center",stretch=False,width=80)
+        elif i in large_headers:
+            tree1.column(i,anchor="center",stretch=False,width=120)
         else:
             tree1.column(i,anchor="center",stretch=False,width=100)
         tree1.heading(i,text=i,command=lambda _col=i: sort_column2(_col,False,tree1))
-    tree1.column("Match_ID",anchor="w")
+    tree1.column(0,anchor="w")
     
     # Build dataframe being printed.
     if isinstance(data, pd.DataFrame):
@@ -1252,13 +1259,13 @@ def back2():
 def back():
     global display_index
     display_index -= ln_per_page
-    print_data(curr_data,update_status=True,start_index=display_index,apply_filter=False)
+    print_data(curr_data,headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def next_page():
     global display_index
     display_index += ln_per_page
-    print_data(curr_data,update_status=True,start_index=display_index,apply_filter=False)
+    print_data(curr_data,headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def export(file_type,data_type,inverted):
@@ -1696,7 +1703,7 @@ def set_filter():
     height = 300
     width =  550
 
-    print_data(data=None,update_status=False,start_index=0,apply_filter=False)
+    print_data(data=None,headers=modo.header(display),update_status=False,start_index=0,apply_filter=False)
     update_status_bar(status=f"Applying Filters to {display} Table.")
 
     filter_window = tk.Toplevel(window)
@@ -4744,7 +4751,36 @@ def debug():
         txt.write(f"Selected: {selected}\n")
 def test():
     # Test function
-    pass
+
+    DRAFTS_TABLE = []
+    PICKS_TABLE = []
+    parsed_draft_dict = {}
+
+    os.chdir(os.getcwd() + "\\" + "draftlogs")
+    for (root,dirs,files) in os.walk(os.getcwd()):
+        break
+    for i in files:
+        print(i)
+        if (i in parsed_draft_dict):
+            os.chdir(root)
+        else:
+            os.chdir(root)
+            with io.open(i,"r",encoding="ansi") as gamelog:
+                initial = gamelog.read()   
+            parsed_data = draft_tracker.parse_draft_log(i,initial) 
+            DRAFTS_TABLE.extend(parsed_data[0])
+            PICKS_TABLE.extend(parsed_data[1])
+            parsed_draft_dict[i] = parsed_data[2]
+
+    os.chdir(filepath_root)
+    #print_data(pd.DataFrame(DRAFTS_TABLE),headers=draft_tracker.header("Drafts"),update_status=True,start_index=display_index,apply_filter=False)
+    print_data(pd.DataFrame(PICKS_TABLE),headers=draft_tracker.header("Picks"),update_status=True,start_index=display_index,apply_filter=False)
+    # print(parsed_draft_dict)
+    #for i in DRAFTS_TABLE:
+    #    print(i)
+    # for i in PICKS_TABLE:
+    #     print(i)
+
 
 window = tk.Tk() 
 window.title("MTGO-Tracker")
