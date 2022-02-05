@@ -1,5 +1,4 @@
 # MODO GameLog Cleaning Module
-import tkinter as tk
 import pandas as pd
 import copy
 
