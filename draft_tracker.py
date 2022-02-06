@@ -106,8 +106,6 @@ def parse_draft_log(file,initial):
 	DRAFTS_TABLE.append([DRAFT_ID,HERO] + PLAYER_LIST + [0,0,FORMAT,DATE])
 
 	return (DRAFTS_TABLE,PICKS_TABLE,DRAFT_ID)
-
-def test():
 	parsed_data = ()
 
 	os.chdir(os.getcwd() + "\\" + "draftlogs")
