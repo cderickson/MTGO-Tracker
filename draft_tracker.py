@@ -1,20 +1,3 @@
-import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
-import os
-import time
-import io
-import pandas as pd
-import csv
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import numpy as np
-pd.options.mode.chained_assignment = None
-from tkcalendar import DateEntry
-import datetime
-import itertools
-import pickle
-import shutil
-
 def header(table):
 	if table == "Drafts":
 		return ["Draft_ID",\
