@@ -1,14 +1,14 @@
 # MTGO-Tracker
 MTGO-Tracker will break down your play history on Magic Online into a personal database. It will help you format your data for further statistical analysis, or allow you to simply use the built-in descriptive statistics.
 
-Three (3) tables are created: **Matches, Games, and Plays**. These tables will help you not only track and analyze your results, but your play patterns as well.
+Five (5) tables are created: **Matches, Games, Plays, Drafts, Draft Picks**. These tables will help you not only track and analyze your results, but your play patterns as well.
 
 <p align="center">
 <img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_image.jpg?raw=true" width="808" height="448">
 </p>
 
 ## Getting Started
-Import your data by clicking **'File => Import MTGO GameLogs'** and navigate to the folder containing your GameLog files. MTGO saves these files in **"C:\Users\\[User]\AppData\Local\Apps\2.0"** by default.
+Import your data by clicking **'File => Import MTGO GameLogs'** and navigating to the folder containing your GameLog and/or DraftLog files. MTGO saves these files in **"C:\Users\\[User]\AppData\Local\Apps\2.0"** and **"C:\Users\\[User]\Documents"** respectively.
 
 Set the default Hero to your MTGO username by clicking **'Data => Set Default Hero'**. This will make an individualized dataset more readable. The statistics window will also become accessible from the left-panel, allowing you to view general statistics regarding your personal performance.
 
