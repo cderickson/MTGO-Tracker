@@ -141,6 +141,7 @@ Continue importing data as you play more matches on MTGO!
 ### Drill Down:
 	- Double-clicking on a Match row will display all Games for the selected Match. 
 	- Double-clicking on a Game row will display all Plays for the selected Game.
+	- Double-clicking on a Draft row will display all Draft Picks for the selected Draft.
 	- Click the 'Clear Filter' button to display all data after drilling down.
 </details>
 
@@ -158,12 +159,13 @@ Continue importing data as you play more matches on MTGO!
 - - - -
 ## Settings
 <details>
-	<summary><b>GameLogs Folder</b></summary>
+	<summary><b>GameLogs and DraftLogs Folder</b></summary>
 	<p></p>
 	<p><b>Data => Set Default Import Folders</b></p>
 	
-	- The folder containing your MTGO GameLog files.
-	- MTGO saves these files in "C:\Users\[User]\AppData\Local\Apps\2.0" by default.
+	- The folders containing your MTGO GameLog and DraftLog files.
+	- MTGO saves GameLog files in "C:\Users\[User]\AppData\Local\Apps\2.0" by default.
+	- MTGO saves DraftLog files in "C:\Users\[User]\Documents" by default.
 </details>
 <details>
 	<summary><b>Export Folder</b></summary>
