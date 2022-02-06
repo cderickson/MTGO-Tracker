@@ -17,13 +17,13 @@ Complete your dataset by using the **Data Cleaning** methods described below to 
 Continue importing data as you play more matches on MTGO!
 ## Column Descriptions
 <details>
-<summary><b>Match Table</b></summary>
+<summary><b>Matches Table</b></summary>
 <p></p>
 <p>
 
 | Table | Column_Name | Description |
 | ------------- | ------------- | ------------- |
-| Matches | Match_ID | Unique Match ID |
+| Matches | Match_ID | Unique Match_ID |
 | | P1 | Player 1 Username |
 | | P1_Arch | Player 1 Deck Archetype (eg. Aggro/Control/etc.) |
 | | P1_Subarch | Player 1 Deckname |
@@ -43,13 +43,13 @@ Continue importing data as you play more matches on MTGO!
 </p>
 </details>
 <details>
-<summary><b>Game Table</b></summary>
+<summary><b>Games Table</b></summary>
 <p></p>
 <p>
 
 | Table | Column_Name | Description |
 | ------------- | ------------- | ------------- |
-| Games | Match_ID | Unique Match ID |
+| Games | Match_ID | Unique Match_ID |
 | | P1 | Player 1 Username |
 | | P2 | Player 2 Username |
 | | Game_Num | Integer: 1, 2, 3 |
@@ -64,13 +64,13 @@ Continue importing data as you play more matches on MTGO!
 </p>
 </details>
 <details>
-<summary><b>Play Table</b></summary>
+<summary><b>Plays Table</b></summary>
 <p></p>
 <p>
 
 | Table | Column_Name | Description |
 | ------------- | ------------- | ------------- |
-| Plays | Match_ID | Unique Match ID |
+| Plays | Match_ID | Unique Match_ID |
 | | Game_Num | Integer: 1, 2, 3 |
 | | Play_Num | Integer: Play Number |
 | | Turn_Num | Integer: Turn Number |
@@ -86,6 +86,37 @@ Continue importing data as you play more matches on MTGO!
 | | Attackers | Integer: Total Attackers (Current Action) |
 | | Active_Player | Active Player |
 | | Nonactive_Player | Nonactive Player |
+</p>
+</details>
+<details>
+<summary><b>Drafts Table</b></summary>
+<p></p>
+<p>
+
+| Table | Column_Name | Description |
+| ------------- | ------------- | ------------- |
+| Drafts | Draft_ID | Unique Draft_ID |
+| | Hero | Drafting Player Username |
+| | Player_1-8 | Username |
+| | Match_Wins | Integer: Hero Match Wins |
+| | Match_Losses | Integer: Hero Match Losses |
+| | Format | Draft Format Played |
+| | Date | Date/Time at Start of Match: YYYY-MM-DD-HH-MM |
+</p>
+</details>
+<details>
+<summary><b>Draft Picks Table</b></summary>
+<p></p>
+<p>
+
+| Table | Column_Name | Description |
+| ------------- | ------------- | ------------- |
+| Draft Picks | Draft_ID | Unique Draft_ID |
+| | Card | Selected/Drafted Card |
+| | Pack_Num | Integer: Pack of the Current Draft |
+| | Pick_Num | Integer: Pick of the Current Pack |
+| | Pick_Ovr | Integer: Overall Pick of the Draft |
+| | Avail_1-14 | Other Available Cards During Pick |
 </p>
 </details>
 
@@ -196,9 +227,14 @@ Continue importing data as you play more matches on MTGO!
 ### Session Data:
 - **File => Save Data**
 - **Data => Delete Saved Session**
+### Previously Imported Files:
+
+	- Previously imported GameLog and DraftLog files are copied and saved.
+	- Copied GameLog files are saved in /root/gamelogs/.
+	- Copied DraftLog files are saved in /root/draftlogs/.
 ### Exporting:
 
-	- MTGO-Tracker creates (3) tables: 'Matches', 'Games', 'Plays'. 
+	- MTGO-Tracker creates (5) tables: 'Matches', 'Games', 'Plays', 'Drafts', 'Draft Picks'.
 	- Use the 'Export' Menu to save any or all of your tables as either .csv or .xlsx files.
 	- Filtered tables can be exported.
 ### Inverse Joined Table Export:
