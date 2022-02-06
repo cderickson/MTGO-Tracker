@@ -108,7 +108,7 @@ def parse_draft_log(file,initial):
 		elif player_bool:
 			if len(i.split()) > 1:
 				HERO = i.split("--> ")[1]
-				DRAFT_ID = f"{DATE}_{HERO}_{FORMAT}_{EVENT_NUM}"
+				DRAFT_ID = f"{year}{month}{day}{hour}{minute}_{HERO}_{FORMAT}_{EVENT_NUM}"
 			else:
 				PLAYER_LIST.append(i.split()[0])
 		elif card_bool:

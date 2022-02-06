@@ -429,15 +429,15 @@ def startup():
                     y.append(i)
                 last = i
     else:
-        input_options["Constructed Match Types"] = modo.match_types()
-        input_options["Booster Draft Match Types"] = modo.match_type_booster()
-        input_options["Sealed Match Types"] = modo.match_type_sealed()
+        input_options["Constructed Match Types"] = modo.match_types(con=True)
+        input_options["Booster Draft Match Types"] = modo.match_types(booster=True)
+        input_options["Sealed Match Types"] = modo.match_types(sealed=True)
         input_options["Archetypes"] = modo.archetypes()
-        input_options["Constructed Formats"] = modo.con_formats()
-        input_options["Limited Formats"] = modo.limited_formats()
-        input_options["Cube Formats"] = modo.cube_formats()
-        input_options["Booster Draft Formats"] = modo.draft_formats()
-        input_options["Sealed Formats"] = modo.sealed_formats()
+        input_options["Constructed Formats"] = modo.formats(con=True)
+        input_options["Limited Formats"] = modo.formats(lim=True)
+        input_options["Cube Formats"] = modo.formats(cube=True)
+        input_options["Booster Draft Formats"] = modo.formats(booster=True)
+        input_options["Sealed Formats"] = modo.formats(sealed=True)
     
     filepath_root = os.getcwd()
     filepath_decks = None
@@ -634,15 +634,15 @@ def print_data(data,headers,update_status,start_index,apply_filter):
     if isinstance(data, pd.DataFrame):
         df = data
     elif data == None:
-        df = df = modo.to_dataframe([],modo.header(display))
+        df = df = pd.DataFrame([],columns=modo.header(display))
     elif (hero != "") & (display == "Matches"):
-        df = modo.to_dataframe(all_data_inverted[0],modo.header("Matches"))
+        df = pd.DataFrame(all_data_inverted[0],columns=modo.header("Matches"))
         df = df[(df.P1 == hero)]
     elif (hero != "") & (display == "Games"):
-        df = modo.to_dataframe(all_data_inverted[1],modo.header("Games"))
+        df = pd.DataFrame(all_data_inverted[1],columns=modo.header("Games"))
         df = df[(df.P1 == hero)]
     else:
-        df = modo.to_dataframe(data,modo.header(display))
+        df = pd.DataFrame(data,columns=modo.header(display))
     total = df.shape[0]
 
     if apply_filter:
@@ -764,7 +764,7 @@ def input_missing_data():
             (i[mformat_index] == "NA") or (i[mtype_index] == "NA") or \
             ((i[mformat_index] in input_options["Limited Formats"]) & (i[lformat_index] == "NA")): 
             count += 1
-            df = modo.to_dataframe(all_data[2],modo.header("Plays"))
+            df = pd.DataFrame(all_data[2],columns=modo.header("Plays"))
             df = df[(df.Match_ID == i[0])]
             players = [i[modo.header("Matches").index("P1")],i[modo.header("Matches").index("P2")]]
             cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
@@ -805,7 +805,7 @@ def deck_data_guess(update_type):
     p1_sa_index = modo.header("Matches").index("P1_Subarch")
     p2_sa_index = modo.header("Matches").index("P2_Subarch")
     format_index = modo.header("Matches").index("Format")
-    df2 = modo.to_dataframe(all_data[2],modo.header("Plays"))
+    df2 = pd.DataFrame(all_data[2],columns=modo.header("Plays"))
 
     for i in all_data[0]:
         yyyy_mm = i[date_index][0:4] + "-" + i[date_index][5:7]
@@ -1291,15 +1291,15 @@ def export(file_type,data_type,inverted):
     # Create Dataframe and apply filters.
     if data_type == 4:
         if display == "Matches":
-            df_filtered = modo.to_dataframe(data_to_write[0],modo.header("Matches"))
+            df_filtered = pd.DataFrame(data_to_write[0],columns=modo.header("Matches"))
             headers = modo.header("Matches")
             file_names = ["matches"]
         elif display == "Games":
-            df_filtered = modo.to_dataframe(data_to_write[1],modo.header("Games"))
+            df_filtered = pd.DataFrame(data_to_write[1],columns=modo.header("Games"))
             headers = modo.header("Games")
             file_names = ["games"]
         elif display == "Plays":
-            df_filtered = modo.to_dataframe(data_to_write[2],modo.header("Plays"))
+            df_filtered = pd.DataFrame(data_to_write[2],columns=modo.header("Plays"))
             headers = modo.header("Plays")
             file_names = ["plays"]
         if hero != "":
@@ -1322,17 +1322,17 @@ def export(file_type,data_type,inverted):
                 elif i[0] == "<":
                     df_filtered = df_filtered[(df_filtered[key] < value)]
     elif data_type == 3:
-        df_filtered_0 = modo.to_dataframe(data_to_write[0],modo.header("Matches"))
-        df_filtered_1 = modo.to_dataframe(data_to_write[1],modo.header("Games"))
-        df_filtered_2 = modo.to_dataframe(data_to_write[2],modo.header("Plays"))
+        df_filtered_0 = pd.DataFrame(data_to_write[0],columns=modo.header("Matches"))
+        df_filtered_1 = pd.DataFrame(data_to_write[1],columns=modo.header("Games"))
+        df_filtered_2 = pd.DataFrame(data_to_write[2],columns=modo.header("Plays"))
         if (hero != "") & (inverted == False):
             df_filtered_0 = df_filtered_0[(df_filtered_0.P1 == hero)]
             df_filtered_1 = df_filtered_1[(df_filtered_1.P1 == hero)]
         df_list = [df_filtered_0,df_filtered_1,df_filtered_2]
     elif data_type == 2:
-        df_filtered = modo.to_dataframe(data_to_write[data_type],all_headers[data_type])     
+        df_filtered = pd.DataFrame(data_to_write[data_type],columns=all_headers[data_type])    
     elif data_type < 2:
-        df_filtered = modo.to_dataframe(data_to_write[data_type],all_headers[data_type])
+        df_filtered = pd.DataFrame(data_to_write[data_type],columns=all_headers[data_type])
         if (hero != "") & (inverted == False):
             df_filtered = df_filtered[(df_filtered.P1 == hero)]
 
@@ -1436,7 +1436,7 @@ def set_default_hero():
         hero_window.grab_release()
         hero_window.destroy()
     
-    df0_i = modo.to_dataframe(all_data_inverted[0],modo.header("Matches"))
+    df0_i = pd.DataFrame(all_data_inverted[0],columns=modo.header("Matches"))
     hero_options = df0_i.P1.tolist()
     hero_options = sorted(list(set(hero_options)),key=str.casefold)
 
@@ -1829,20 +1829,20 @@ def set_filter():
     # Building dataframe (unfiltered) to give us our dropdown options.
     if hero == "":
         if display == "Matches":
-            df = modo.to_dataframe(all_data[0],modo.header("Matches"))
+            df = pd.DataFrame(all_data[0],columns=modo.header("Matches"))
         elif display == "Games":
-            df = modo.to_dataframe(all_data[1],modo.header("Games"))
+            df = pd.DataFrame(all_data[1],columns=modo.header("Games"))
         elif display == "Plays":
-            df = modo.to_dataframe(all_data[2],modo.header("Plays"))
+            df = pd.DataFrame(all_data[2],columns=modo.header("Plays"))
     else:
         if display == "Matches":
-            df = modo.to_dataframe(all_data_inverted[0],modo.header("Matches"))
+            df = pd.DataFrame(all_data_inverted[0],columns=modo.header("Matches"))
             df = df[(df.P1 == hero)]
         elif display == "Games":
-            df = modo.to_dataframe(all_data_inverted[1],modo.header("Games"))
+            df = pd.DataFrame(all_data_inverted[1],columns=modo.header("Games"))
             df = df[(df.P1 == hero)]
         elif display == "Plays":
-            df = modo.to_dataframe(all_data_inverted[2],modo.header("Plays"))
+            df = pd.DataFrame(all_data_inverted[2],columns=modo.header("Plays"))
 
     if display == "Matches":
         col_options = modo.header("Matches").copy()
@@ -1923,7 +1923,7 @@ def revise_record2():
     p2_arch_index = modo.header("Matches").index("P2_Arch")
     p2_sub_index =  modo.header("Matches").index("P2_Subarch")
 
-    df = modo.to_dataframe(all_data[2],modo.header("Plays"))
+    df = pd.DataFrame(all_data[2],columns=modo.header("Plays"))
     df = df[(df.Match_ID == values[0])]
     players = [values[p1_index],values[p2_index]]
     cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
@@ -2616,7 +2616,7 @@ def get_winners():
     gn_index = modo.header("Games").index("Game_Num")
 
     n = 0
-    df1 =   modo.to_dataframe(all_data[1],modo.header("Games"))
+    df1 =   pd.DataFrame(all_data[1],columns=modo.header("Games"))
     total = df1[(df1.Game_Winner == "NA")].shape[0]
     if total == 0:
         update_status_bar(status="No Games with missing Game_Winner.")
@@ -2755,12 +2755,12 @@ def get_stats():
     mid_frame.grid_columnconfigure(0,weight=1)
     mid_frame.grid_columnconfigure(1,weight=1)
     
-    df0 = modo.to_dataframe(all_data[0],modo.header("Matches"))
-    df1 = modo.to_dataframe(all_data[1],modo.header("Games"))
-    df2 = modo.to_dataframe(all_data[2],modo.header("Plays"))
-    df0_i = modo.to_dataframe(all_data_inverted[0],modo.header("Matches"))
-    df1_i = modo.to_dataframe(all_data_inverted[1],modo.header("Games"))
-    df2_i = modo.to_dataframe(all_data_inverted[2],modo.header("Plays"))
+    df0 = pd.DataFrame(all_data[0],columns=modo.header("Matches"))
+    df1 = pd.DataFrame(all_data[1],columns=modo.header("Games"))
+    df2 = pd.DataFrame(all_data[2],columns=modo.header("Plays"))
+    df0_i = pd.DataFrame(all_data_inverted[0],columns=modo.header("Matches"))
+    df1_i = pd.DataFrame(all_data_inverted[1],columns=modo.header("Games"))
+    df2_i = pd.DataFrame(all_data_inverted[2],columns=modo.header("Plays"))
  
     def clear_frames():
         for widget in mid_frame1.winfo_children():
@@ -2875,7 +2875,7 @@ def get_stats():
         if len(tree1_dates) < 30:
             tree1_count = len(tree1_dates)
         for index,i in enumerate(tree1_format):
-            if i in modo.limited_formats():
+            if i in modo.formats(lim=True):
                 tree1_format[index] += ": " + tree1_lformat[index]
         for index,i in enumerate(tree1_result):
             if i == "P1":
@@ -2902,7 +2902,7 @@ def get_stats():
         if len(tree2_dates) < 30:
             tree2_count = len(tree2_dates)
         for index,i in enumerate(tree2_format):
-            if i in modo.limited_formats():
+            if i in modo.formats(lim=True):
                 tree2_format[index] += ": " + tree2_lformat[index]
         for index,i in enumerate(tree2_result):
             if i == "P1":
@@ -2940,7 +2940,7 @@ def get_stats():
 
         if mformat == "All Formats":
             mid_frame10["text"] = "Choose a Format"
-        elif (mformat in modo.limited_formats()) & (lformat != "All Limited Formats"):
+        elif (mformat in modo.formats(lim=True)) & (lformat != "All Limited Formats"):
             mid_frame10["text"] = "Match History: " + hero + " - " + mformat + ", " + lformat
         else:
             mid_frame10["text"] = "Match History: " + hero + " - " + mformat
@@ -4773,8 +4773,8 @@ def test():
             parsed_draft_dict[i] = parsed_data[2]
 
     os.chdir(filepath_root)
-    #print_data(pd.DataFrame(DRAFTS_TABLE),headers=draft_tracker.header("Drafts"),update_status=True,start_index=display_index,apply_filter=False)
-    print_data(pd.DataFrame(PICKS_TABLE),headers=draft_tracker.header("Picks"),update_status=True,start_index=display_index,apply_filter=False)
+    print_data(pd.DataFrame(DRAFTS_TABLE),headers=draft_tracker.header("Drafts"),update_status=True,start_index=display_index,apply_filter=False)
+    #print_data(pd.DataFrame(PICKS_TABLE),headers=draft_tracker.header("Picks"),update_status=True,start_index=display_index,apply_filter=False)
     # print(parsed_draft_dict)
     #for i in DRAFTS_TABLE:
     #    print(i)
