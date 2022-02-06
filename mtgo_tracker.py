@@ -35,9 +35,9 @@ filepath_logs =     ""
 filepath_copy =     ""
 filepath_drafts =   ""
 hero =              ""
-main_window_size =  ("small",1000,490)
+MAIN_WINDOW_SIZE =  ("small",1000,490)
 
-test_mode =         True
+test_mode =         False
 resize =            False
 input_options =     {}
 filter_dict =       {}
@@ -62,7 +62,10 @@ def save(exit):
     os.chdir(filepath_root + "\\" + "save")
 
     pickle.dump(all_data,open("all_data","wb"))
+    pickle.dump(DRAFTS_TABLE,open("DRAFTS_TABLE","wb"))
+    pickle.dump(PICKS_TABLE,open("PICKS_TABLE","wb"))
     pickle.dump(parsed_file_dict,open("parsed_file_dict","wb"))
+    pickle.dump(PARSED_DRAFT_DICT,open("PARSED_DRAFT_DICT","wb"))
 
     update_status_bar(status="Save complete. Data will be loaded automatically on next startup.")
     os.chdir(filepath_root)
@@ -133,19 +136,19 @@ def set_default_window_size():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def save_main_window_size():
-        global main_window_size
+        global MAIN_WINDOW_SIZE
         global ln_per_page
 
         if window_size.get() == "Small":
-            main_window_size = ("small",1000,490)
+            MAIN_WINDOW_SIZE = ("small",1000,490)
             ln_per_page = 20
         elif window_size.get() == "Large":
-            main_window_size = ("large",1723,780)
+            MAIN_WINDOW_SIZE = ("large",1723,780)
             ln_per_page = 35
 
         os.chdir(filepath_root + "\\" + "save")
-        pickle.dump(main_window_size,open("main_window_size","wb"))
-        window.geometry(str(main_window_size[1]) + "x" + str(main_window_size[2]))
+        pickle.dump(MAIN_WINDOW_SIZE,open("MAIN_WINDOW_SIZE","wb"))
+        window.geometry(str(MAIN_WINDOW_SIZE[1]) + "x" + str(MAIN_WINDOW_SIZE[2]))
         update_status_bar(status="Default Window Size saved.")
         os.chdir(filepath_root)
         set_display(display,update_status=False,start_index=0,reset=False)
@@ -170,9 +173,9 @@ def set_default_window_size():
 
     options = ["Small","Large"]
     window_size = tk.StringVar()
-    if main_window_size[0] == "small":
+    if MAIN_WINDOW_SIZE[0] == "small":
         window_size.set(options[0])
-    elif main_window_size[0] == "large":
+    elif MAIN_WINDOW_SIZE[0] == "large":
         window_size.set(options[1])
 
     menu_1 = tk.OptionMenu(mid_frame,window_size,*options)
@@ -190,7 +193,10 @@ def set_default_window_size():
 def clear_loaded():
     global all_data
     global all_data_inverted
+    global DRAFTS_TABLE
+    global PICKS_TABLE
     global parsed_file_dict
+    global PARSED_DRAFT_DICT
     global hero
     global filter_dict
     global display
@@ -203,7 +209,10 @@ def clear_loaded():
 
     all_data =          [[],[],[],{}]
     all_data_inverted = [[],[],[],{}]
+    DRAFTS_TABLE =      []
+    PICKS_TABLE =       []
     parsed_file_dict.clear()
+    PARSED_DRAFT_DICT.clear()
     hero =              ""
     filter_dict.clear()
     display =           ""
@@ -217,11 +226,14 @@ def clear_loaded():
     match_button["state"] = tk.DISABLED
     game_button["state"] = tk.DISABLED
     play_button["state"] = tk.DISABLED
+    draft_button["state"] = tk.DISABLED
+    pick_button["state"] = tk.DISABLED
     filter_button["state"] = tk.DISABLED
     clear_button["state"] = tk.DISABLED
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
     stats_button["state"] = tk.DISABLED
+    next_button["state"] = tk.DISABLED
     back_button["state"] = tk.DISABLED
     
     text_frame.config(text="Dataframe")
@@ -348,7 +360,7 @@ def delete_session():
         global all_decks
         all_decks.clear()
 
-        save_files = ["all_data","parsed_file_dict","settings","main_window_size"]
+        save_files = ["all_data","parsed_file_dict","settings","MAIN_WINDOW_SIZE"]
         os.chdir(filepath_root + "\\" + "save")   
 
         session_exists = False
@@ -408,7 +420,10 @@ def startup():
     global all_data
     global all_data_inverted
     global all_decks
+    global DRAFTS_TABLE
+    global PICKS_TABLE
     global parsed_file_dict
+    global PARSED_DRAFT_DICT
     global data_loaded
     global input_options
     global ask_to_save
@@ -471,12 +486,15 @@ def startup():
     if os.path.isfile("all_decks"):
         all_decks = pickle.load(open("all_decks","rb"))
 
-    if (os.path.isfile("all_data") == False) or (os.path.isfile("parsed_file_dict") == False):
+    if (os.path.isfile("all_data") == False) & (os.path.isfile("DRAFTS_TABLE") == False):
         update_status_bar(status="No session data to load. Import your MTGO GameLog files to get started.")
         os.chdir(filepath_root)
         return
     all_data = pickle.load(open("all_data","rb"))
+    DRAFTS_TABLE = pickle.load(open("DRAFTS_TABLE","rb"))
+    PICKS_TABLE = pickle.load(open("PICKS_TABLE","rb"))
     parsed_file_dict = pickle.load(open("parsed_file_dict","rb"))
+    PARSED_DRAFT_DICT = pickle.load(open("PARSED_DRAFT_DICT","rb"))
 
     all_data_inverted = modo.invert_join(all_data)
 
@@ -499,7 +517,7 @@ def save_settings():
     os.chdir(filepath_root + "\\" + "save")
     settings = [filepath_root,filepath_export,filepath_decks,filepath_logs,filepath_copy,filepath_drafts,hero]
     pickle.dump(settings,open("settings","wb"))
-    pickle.dump(main_window_size,open("main_window_size","wb"))
+    pickle.dump(MAIN_WINDOW_SIZE,open("MAIN_WINDOW_SIZE","wb"))
     os.chdir(filepath_root)
 def set_display(d,update_status,start_index,reset):
     global display
@@ -528,23 +546,23 @@ def set_display(d,update_status,start_index,reset):
 
     if d == "Matches":
         if resize:
-            if main_window_size[0] == "large":
-                window.geometry("1740x" + str(main_window_size[2]))
+            if MAIN_WINDOW_SIZE[0] == "large":
+                window.geometry("1740x" + str(MAIN_WINDOW_SIZE[2]))
         print_data(all_data[0],modo.header(display),update_status,start_index,apply_filter=True)
     elif d == "Games":
         if resize:
-            if main_window_size[0] == "large":
-                window.geometry("1315x" + str(main_window_size[2]))
+            if MAIN_WINDOW_SIZE[0] == "large":
+                window.geometry("1315x" + str(MAIN_WINDOW_SIZE[2]))
         print_data(all_data[1],modo.header(display),update_status,start_index,apply_filter=True)
     elif d == "Plays":
         if resize:
-            if main_window_size[0] == "large":
-                window.geometry("1665x" + str(main_window_size[2]))
+            if MAIN_WINDOW_SIZE[0] == "large":
+                window.geometry("1665x" + str(MAIN_WINDOW_SIZE[2]))
         print_data(all_data[2],modo.header(display),update_status,start_index,apply_filter=True)
     elif d == "Drafts":
-        print_data(DRAFTS_TABLE,draft_tracker.header(display),update_status,start_index,apply_filter=False)
+        print_data(DRAFTS_TABLE,draft_tracker.header(display),update_status,start_index,apply_filter=True)
     elif d == "Picks":
-        print_data(PICKS_TABLE,draft_tracker.header(display),update_status,start_index,apply_filter=False)
+        print_data(PICKS_TABLE,draft_tracker.header(display),update_status,start_index,apply_filter=True)
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def get_all_data(fp_logs,fp_drafts,copy):
@@ -669,19 +687,19 @@ def print_data(data,headers,update_status,start_index,apply_filter):
     if isinstance(data, pd.DataFrame):
         df = data
     elif data == None:
-        df = df = pd.DataFrame([],columns=modo.header(display))
+        df = df = pd.DataFrame([],columns=headers)
     elif (hero != "") & (display == "Matches"):
-        df = pd.DataFrame(all_data_inverted[0],columns=modo.header("Matches"))
+        df = pd.DataFrame(all_data_inverted[0],columns=headers)
         df = df[(df.P1 == hero)]
     elif (hero != "") & (display == "Games"):
-        df = pd.DataFrame(all_data_inverted[1],columns=modo.header("Games"))
+        df = pd.DataFrame(all_data_inverted[1],columns=headers)
         df = df[(df.P1 == hero)]
     elif (display == "Drafts"):
-        df = pd.DataFrame(DRAFTS_TABLE,columns=draft_tracker.header("Drafts"))
+        df = pd.DataFrame(DRAFTS_TABLE,columns=headers)
     elif (display == "Picks"):
-        df = pd.DataFrame(PICKS_TABLE,columns=draft_tracker.header("Picks"))
+        df = pd.DataFrame(PICKS_TABLE,columns=headers)
     else:
-        df = pd.DataFrame(data,columns=modo.header(display))
+        df = pd.DataFrame(data,columns=headers)
     total = df.shape[0]
     curr_data = df
 
@@ -689,7 +707,8 @@ def print_data(data,headers,update_status,start_index,apply_filter):
         # Apply existing filters.
         filtered_list = []
         for key in filter_dict:
-            if key not in modo.header(display):
+            print(key)
+            if key not in headers:
                 continue
             for i in filter_dict[key]:
                 if i[2:].isnumeric():
@@ -724,9 +743,9 @@ def print_data(data,headers,update_status,start_index,apply_filter):
         elif display == "Plays":
             df = df.sort_values(by=["Match_ID","Game_Num","Play_Num"],ascending=(False,True,True))
         elif display == "Drafts":
-            pass
+            df = df.sort_values(by=["Draft_ID"],ascending=False)
         elif display == "Picks":
-            pass
+            df = df.sort_values(by=["Draft_ID","Pick_Ovr"],ascending=(False,True))
         curr_data = df
 
     df_rows = df.to_numpy().tolist()
@@ -1274,7 +1293,7 @@ def tree_double(event):
     global filter_dict  
     if tree1.focus() == "":
         return None
-    if display == "Plays":
+    if (display == "Plays") or (display == "Picks"):
         return None
     if tree1.identify_region(event.x,event.y) == "separator":
         return None
@@ -1282,12 +1301,16 @@ def tree_double(event):
         return None    
         
     clear_filter(update_status=False,reload_display=False)
-    add_filter_setting("Match_ID",tree1.item(tree1.focus(),"values")[0],"=")
-    if display == "Matches":
+    if (display == "Matches"):
+        add_filter_setting("Match_ID",tree1.item(tree1.focus(),"values")[0],"=")
         set_display("Games",update_status=True,start_index=0,reset=True)
-    elif display == "Games":
+    elif (display == "Games"):
+        add_filter_setting("Match_ID",tree1.item(tree1.focus(),"values")[0],"=")
         add_filter_setting("Game_Num",tree1.item(tree1.focus(),"values")[3],"=")
         set_display("Plays",update_status=True,start_index=0,reset=True)
+    elif (display == "Drafts"):
+        add_filter_setting("Draft_ID",tree1.item(tree1.focus(),"values")[0],"=")
+        set_display("Picks",update_status=True,start_index=0,reset=True)
 def back2():
     global filter_dict
     if "Match_ID" in filter_dict:
@@ -1318,11 +1341,7 @@ def next_page():
         print_data(curr_data,headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
-def export(file_type,data_type,inverted):
-    # File_Type: String, "CSV" or "Excel"
-    # Data_Type: Int, 0=Match,1=Game,2=Play,3=All,4=Filtered
-    # Inverted:  Bool
-
+def export2(matches=False,games=False,plays=False,drafts=False,picks=False,_csv=False,_excel=False,inverted=False,filtered=False):
     global filepath_export
     fp = filepath_export
     if (filepath_export is None) or (filepath_export == ""):
@@ -1330,113 +1349,90 @@ def export(file_type,data_type,inverted):
         filepath_export = os.path.normpath(filepath_export)
     if filepath_export is None:
         return
-    count = 0
 
-    if (hero != "") or (inverted == True):
-        data_to_write = all_data_inverted
-    else:
-        data_to_write = all_data
+    file_names = []
+    header_list = []
+    data_to_write = []
 
-    # Outputting filtered data.
-    # Create Dataframe and apply filters.
-    if data_type == 4:
-        if display == "Matches":
-            df_filtered = pd.DataFrame(data_to_write[0],columns=modo.header("Matches"))
-            headers = modo.header("Matches")
-            file_names = ["matches"]
-        elif display == "Games":
-            df_filtered = pd.DataFrame(data_to_write[1],columns=modo.header("Games"))
-            headers = modo.header("Games")
-            file_names = ["games"]
-        elif display == "Plays":
-            df_filtered = pd.DataFrame(data_to_write[2],columns=modo.header("Plays"))
-            headers = modo.header("Plays")
-            file_names = ["plays"]
-        if hero != "":
-            df_filtered = df_filtered[(df_filtered.P1 == hero)]
-        for key in filter_dict:
-            if key not in headers:
-                break
-            for i in filter_dict[key]:
-                if i[2:].isnumeric():
-                    value = int(i[2:])
-                else:
-                    value = i[2:]
-                if i[0] == "=":
-                    if key == "Date":
-                        df_filtered = df_filtered[(df_filtered[key].str.contains(value[0:10]))]
-                    else:
-                        df_filtered = df_filtered[(df_filtered[key] == value)]
-                elif i[0] == ">":
-                    df_filtered = df_filtered[(df_filtered[key] > value)]
-                elif i[0] == "<":
-                    df_filtered = df_filtered[(df_filtered[key] < value)]
-    elif data_type == 3:
-        df_filtered_0 = pd.DataFrame(data_to_write[0],columns=modo.header("Matches"))
-        df_filtered_1 = pd.DataFrame(data_to_write[1],columns=modo.header("Games"))
-        df_filtered_2 = pd.DataFrame(data_to_write[2],columns=modo.header("Plays"))
-        if (hero != "") & (inverted == False):
-            df_filtered_0 = df_filtered_0[(df_filtered_0.P1 == hero)]
-            df_filtered_1 = df_filtered_1[(df_filtered_1.P1 == hero)]
-        df_list = [df_filtered_0,df_filtered_1,df_filtered_2]
-    elif data_type == 2:
-        df_filtered = pd.DataFrame(data_to_write[data_type],columns=all_headers[data_type])    
-    elif data_type < 2:
-        df_filtered = pd.DataFrame(data_to_write[data_type],columns=all_headers[data_type])
-        if (hero != "") & (inverted == False):
-            df_filtered = df_filtered[(df_filtered.P1 == hero)]
-
-    # Create List of applicable file names.
-    all_file_names = ["matches","games","plays"]
-    if data_type == 3:
-        headers = all_headers
-        file_names = all_file_names
-    elif data_type < 3:
-        headers = [all_headers[data_type]]
-        file_names = [all_file_names[data_type]]
-    for index,i in enumerate(file_names):
-        if file_type == "CSV":
-            file_names[index] = i + ".csv"
+    if matches:
+        file_names.append("Matches")
+        header_list.append(modo.header("Matches"))
+        if (inverted) or ((hero != "") & (filtered)):
+            df = pd.DataFrame(all_data_inverted[0],columns=modo.header("Matches"))
         else:
-            file_names[index] = i + ".xlsx"
+            df = pd.DataFrame(all_data[0],columns=modo.header("Matches"))
+        if ((hero != "") & (filtered)):
+            df = df[(df.P1 == hero)]
+        data_to_write.append(df)
+    if games:
+        file_names.append("Games")
+        header_list.append(modo.header("Games"))
+        if (inverted) or ((hero != "") & (filtered)):
+            df = pd.DataFrame(all_data_inverted[1],columns=modo.header("Games"))
+        else:
+            df = pd.DataFrame(all_data[1],columns=modo.header("Games"))
+        if ((hero != "") & (filtered)):
+            df = df[(df.P1 == hero)]
+        data_to_write.append(df)
+    if plays:
+        file_names.append("Plays")
+        header_list.append(modo.header("Plays"))
+        data_to_write.append(pd.DataFrame(all_data[2],columns=modo.header("Plays")))
+    if drafts:
+        file_names.append("Drafts")
+        header_list.append(draft_tracker.header("Drafts"))
+        data_to_write.append(pd.DataFrame(DRAFTS_TABLE,columns=draft_tracker.header("Drafts")))
+    if picks:
+        file_names.append("Picks")
+        header_list.append(draft_tracker.header("Picks"))
+        data_to_write.append(pd.DataFrame(PICKS_TABLE,columns=draft_tracker.header("Picks")))
 
-    if file_type == "CSV":
-        try:
-            for i in range(len(file_names)):
-                count += 1
-                with open(filepath_export+"/"+file_names[i],"w",encoding="UTF8",newline="") as file:
-                    writer = csv.writer(file)
-                    if data_type == 3:
-                        writer.writerow(headers[i])
-                        df_rows = df_list[i].to_numpy().tolist()
-                        for row in df_rows:
-                            writer.writerow(row)
-                    elif data_type == 4:
-                        writer.writerow(headers)
-                        df_rows = df_filtered.to_numpy().tolist()
-                        for row in df_rows:
-                            writer.writerow(row)
+    if filtered:
+        for index,table in enumerate(data_to_write):
+            for key in filter_dict:
+                if key not in header_list[index]:
+                    break
+                for i in filter_dict[key]:
+                    if i[2:].isnumeric():
+                        value = int(i[2:])
                     else:
-                        writer.writerow(headers[i])
-                        df_rows = df_filtered.to_numpy().tolist()
-                        for row in df_rows:
-                            writer.writerow(row)
-            update_status_bar(status="Exported " + str(count) + " CSV file(s) to " + filepath_export)
+                        value = i[2:]
+                    if i[0] == "=":
+                        if key == "Date":
+                            data_to_write[index] = i[(i[key].str.contains(value[0:10]))]
+                        else:
+                            data_to_write[index] = i[(i[key] == value)]
+                    elif i[0] == ">":
+                        data_to_write[index] = i[(i[key] > value)]
+                    elif i[0] == "<":
+                        data_to_write[index] = i[(i[key] < value)]
+
+    if _csv:
+        for index,i in enumerate(file_names):
+            file_names[index] += ".csv"
+    elif _excel:
+        for index,i in enumerate(file_names):
+            file_names[index] += ".xlsx"
+
+    if _csv:
+        try:
+            for index,i in enumerate(file_names):
+                f = f"{filepath_export}/{i}"
+                with open(f,"w",encoding="UTF8",newline="") as file:
+                    writer = csv.writer(file)
+                    writer.writerow(header_list[index])
+                    df_rows = data_to_write[index].to_numpy().tolist()
+                    for row in df_rows:
+                        writer.writerow(row)
+            update_status_bar(status=f"Exported {len(file_names)} CSV file(s) to {filepath_export}.")
         except PermissionError:
             update_status_bar(status="Permission Error: Common error cause is an open file that can not be overwritten.")
-    elif file_type == "Excel":
+    elif _excel:
         try:
-            for i in range(len(file_names)):
-                count += 1
-                f = filepath_export+"/"+file_names[i]
-                if data_type == 3:
-                    df = df_list[i]
-                elif data_type == 4:
-                    df = df_filtered
-                else:
-                    df = df_filtered
-                df.to_excel(f,index=False)
-            update_status_bar(status="Exported " + str(count) + " Excel file(s) to " + filepath_export)
+            for index,i in enumerate(file_names):
+                f = f"{filepath_export}/{i}"
+                data_to_write[index].to_excel(f,index=False)
+            update_status_bar(status=f"Exported {len(file_names)} Excel file(s) to {filepath_export}.")
         except PermissionError:
             update_status_bar(status="Permission Error: Common error cause is an open file that can not be overwritten.")
     filepath_export = fp
@@ -1674,6 +1670,10 @@ def sort_column2(col,reverse,tree1):
         curr_data.sort_values(by=[col,"Match_ID","Game_Num"],inplace=True,ascending=(reverse,False,True),key=sort_key)
     elif display == "Plays":
         curr_data.sort_values(by=[col,"Match_ID","Game_Num","Play_Num"],inplace=True,ascending=(reverse,False,True,True),key=sort_key)
+    elif display == "Drafts":
+        curr_data.sort_values(by=[col,"Draft_ID"],inplace=True,ascending=(reverse,False),key=sort_key)
+    elif display == "Picks":
+        curr_data.sort_values(by=[col,"Draft_ID","Pick_Ovr"],inplace=True,ascending=(reverse,False,True),key=sort_key)
 
     df_rows = curr_data.to_numpy().tolist()
 
@@ -1751,7 +1751,10 @@ def set_filter():
     height = 300
     width =  550
 
-    print_data(data=None,headers=modo.header(display),update_status=False,start_index=0,apply_filter=False)
+    if (display == "Drafts") or (display == "Picks"):
+        print_data(data=None,headers=draft_tracker.header(display),update_status=False,start_index=0,apply_filter=False)
+    else:
+        print_data(data=None,headers=modo.header(display),update_status=False,start_index=0,apply_filter=False)
     update_status_bar(status=f"Applying Filters to {display} Table.")
 
     filter_window = tk.Toplevel(window)
@@ -1798,7 +1801,6 @@ def set_filter():
 
     def update_combobox():
         key_options = list(df[col.get()].unique())
-
         if isinstance(key_options[0],(int,np.integer)):
             key_options = sorted(list(set(key_options)),key=int)
         else:
@@ -1877,27 +1879,29 @@ def set_filter():
     # Building dataframe (unfiltered) to give us our dropdown options.
     if hero == "":
         if display == "Matches":
-            df = pd.DataFrame(all_data[0],columns=modo.header("Matches"))
+            df = pd.DataFrame(all_data[0],columns=modo.header(display))
         elif display == "Games":
-            df = pd.DataFrame(all_data[1],columns=modo.header("Games"))
+            df = pd.DataFrame(all_data[1],columns=modo.header(display))
         elif display == "Plays":
-            df = pd.DataFrame(all_data[2],columns=modo.header("Plays"))
+            df = pd.DataFrame(all_data[2],columns=modo.header(display))
     else:
         if display == "Matches":
-            df = pd.DataFrame(all_data_inverted[0],columns=modo.header("Matches"))
+            df = pd.DataFrame(all_data_inverted[0],columns=modo.header(display))
             df = df[(df.P1 == hero)]
         elif display == "Games":
-            df = pd.DataFrame(all_data_inverted[1],columns=modo.header("Games"))
+            df = pd.DataFrame(all_data_inverted[1],columns=modo.header(display))
             df = df[(df.P1 == hero)]
         elif display == "Plays":
-            df = pd.DataFrame(all_data_inverted[2],columns=modo.header("Plays"))
+            df = pd.DataFrame(all_data_inverted[2],columns=modo.header(display))
+    if display == "Drafts":
+        df = pd.DataFrame(DRAFTS_TABLE,columns=draft_tracker.header(display))
+    elif display == "Picks":
+        df = pd.DataFrame(PICKS_TABLE,columns=draft_tracker.header(display))
 
-    if display == "Matches":
-        col_options = modo.header("Matches").copy()
-    elif display == "Games":
-        col_options = modo.header("Games").copy()
-    elif display == "Plays":
-        col_options = modo.header("Plays").copy()
+    if (display == "Drafts") or (display == "Picks"):
+        col_options = draft_tracker.header(display).copy()
+    else:
+        col_options = modo.header(display).copy()
     col_options.pop(0)
     
     col = tk.StringVar()
@@ -2622,7 +2626,6 @@ def import_window():
             modo.update_game_wins(all_data)
             all_data_inverted = modo.invert_join(all_data)
         else:
-            print("import new")
             get_all_data(fp_logs=filepath_logs,fp_drafts=filepath_drafts,copy=True)
         clear_filter(update_status=False,reload_display=False)
         if data_loaded != False:
@@ -2632,7 +2635,7 @@ def import_window():
             data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
             data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
             data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
-        save_settings()
+        #save_settings()
         set_display("Matches",update_status=False,start_index=0,reset=True)
         close_import_window()
 
@@ -4627,17 +4630,17 @@ def exit_select():
     else:
         close()
 def load_window_size_setting():
-    global main_window_size
+    global MAIN_WINDOW_SIZE
     global ln_per_page
 
     cwd = os.getcwd()
     if os.path.isdir("save") == True:
         os.chdir(cwd + "\\" + "save")
-        if os.path.isfile("main_window_size"):
-            main_window_size = pickle.load(open("main_window_size","rb"))
-            if main_window_size[0] == "small":
+        if os.path.isfile("MAIN_WINDOW_SIZE"):
+            MAIN_WINDOW_SIZE = pickle.load(open("MAIN_WINDOW_SIZE","rb"))
+            if MAIN_WINDOW_SIZE[0] == "small":
                 ln_per_page = 20
-            elif main_window_size[0] == "large":
+            elif MAIN_WINDOW_SIZE[0] == "large":
                 ln_per_page = 35
         os.chdir(cwd)
 def update_status_bar(status):
@@ -4779,7 +4782,7 @@ def debug():
         txt.write(f"Filepath_Logs: {filepath_logs}\n")
         txt.write(f"Filepath_Copy: {filepath_copy}\n")
         txt.write(f"Hero: {hero}\n")
-        txt.write(f"Main Window Size: {main_window_size}\n")
+        txt.write(f"Main Window Size: {MAIN_WINDOW_SIZE}\n")
         txt.write("\n")
 
         txt.write("Input Options:\n")
@@ -4824,39 +4827,14 @@ def debug():
         txt.write(f"Selected: {selected}\n")
 def test():
     # Test function
-
-    global DRAFTS_TABLE
-    global PICKS_TABLE
-    global PARSED_DRAFT_DICT
-
-    os.chdir(os.getcwd() + "\\" + "draftlogs")
-    for (root,dirs,files) in os.walk(os.getcwd()):
-        break
-    for i in files:
-        if (i in PARSED_DRAFT_DICT):
-            os.chdir(root)
-        else:
-            os.chdir(root)
-            with io.open(i,"r",encoding="ansi") as gamelog:
-                initial = gamelog.read()   
-            parsed_data = draft_tracker.parse_draft_log(i,initial) 
-            DRAFTS_TABLE.extend(parsed_data[0])
-            PICKS_TABLE.extend(parsed_data[1])
-            PARSED_DRAFT_DICT[i] = parsed_data[2]
-    os.chdir(filepath_root)
-
-    draft_button["state"] = tk.NORMAL
-    pick_button["state"] = tk.NORMAL
-
-    #print_data(pd.DataFrame(DRAFTS_TABLE),headers=draft_tracker.header("Drafts"),update_status=True,start_index=display_index,apply_filter=False)
-    #print_data(pd.DataFrame(PICKS_TABLE),headers=draft_tracker.header("Picks"),update_status=True,start_index=display_index,apply_filter=False)
+    pass
 
 window = tk.Tk() 
 window.title("MTGO-Tracker")
 window.iconbitmap(window,"icon.ico")
 
 load_window_size_setting()
-window.geometry(str(main_window_size[1]) + "x" + str(main_window_size[2]))
+window.geometry(str(MAIN_WINDOW_SIZE[1]) + "x" + str(MAIN_WINDOW_SIZE[2]))
 window.resizable(False,False)
 
 window.rowconfigure(0,weight=1)
@@ -4892,8 +4870,6 @@ revise_button = tk.Button(left_frame,text="Revise Record(s)",state=tk.DISABLED,c
 remove_button = tk.Button(left_frame,text="Remove Record(s)",state=tk.DISABLED,command=lambda : remove_select())
 next_button = tk.Button(left_frame,text="Next",command=lambda : next_page())
 back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,command=lambda : back())
-debug_button = tk.Button(left_frame,text="DEBUG BUTTON",command=lambda : debug())
-test_button = tk.Button(left_frame,text="TEST BUTTON",command=lambda : test())
 
 status_label = tk.Label(bottom_frame,text="")
 status_label.grid(row=0,column=0)
@@ -4916,28 +4892,36 @@ export_menu = tk.Menu(menu_bar,tearoff=False)
 menu_bar.add_cascade(label="Export",menu=export_menu)
 
 export_csv = tk.Menu(export_menu,tearoff=False)
-export_csv.add_command(label="Match History",command=lambda : export("CSV",0,False))
-export_csv.add_command(label="Game History",command=lambda : export("CSV",1,False))
-export_csv.add_command(label="Play History",command=lambda : export("CSV",2,False))
-export_csv.add_command(label="All Data (3 Files)",command=lambda : export("CSV",3,False))
+export_csv.add_command(label="Match History",command=lambda : export2(matches=True,_csv=True))
+export_csv.add_command(label="Game History",command=lambda : export2(games=True,_csv=True))
+export_csv.add_command(label="Play History",command=lambda : export2(plays=True,_csv=True))
+export_csv.add_command(label="Draft History",command=lambda : export2(drafts=True,_csv=True))
+export_csv.add_command(label="Draft Pick History",command=lambda : export2(picks=True,_csv=True))
+export_csv.add_command(label="All Data (5 Files)",\
+    command=lambda : export2(matches=True,games=True,plays=True,drafts=True,picks=True,_csv=True))
 export_csv.add_separator()
-export_csv.add_command(label="Match History (Inverse Join)",command=lambda : export("CSV",0,True))
-export_csv.add_command(label="Game History (Inverse Join)",command=lambda : export("CSV",1,True))
-export_csv.add_command(label="All Data (Inverse Join, 3 Files)",command=lambda : export("CSV",3,True))
+export_csv.add_command(label="Match History (Inverse Join)",command=lambda : export2(matches=True,_csv=True,inverted=True))
+export_csv.add_command(label="Game History (Inverse Join)",command=lambda : export2(games=True,_csv=True,inverted=True))
+export_csv.add_command(label="All Data (Inverse Join, 5 Files)",\
+    command=lambda : export2(matches=True,games=True,plays=True,drafts=True,picks=True,_csv=True,inverted=True))
 export_csv.add_separator()
-export_csv.add_command(label="Currently Displayed Data (with Filters)",command=lambda : export("CSV",4,False))
+export_csv.add_command(label="Currently Displayed Data (with Filters)",command=lambda : export2())
 
 export_excel = tk.Menu(export_menu,tearoff=False)
-export_excel.add_command(label="Match History",command=lambda : export("Excel",0,False))
-export_excel.add_command(label="Game History",command=lambda : export("Excel",1,False))
-export_excel.add_command(label="Play History",command=lambda : export("Excel",2,False))
-export_excel.add_command(label="All Data (3 Files)",command=lambda : export("Excel",3,False))
+export_excel.add_command(label="Match History",command=lambda : export2(matches=True,_excel=True))
+export_excel.add_command(label="Game History",command=lambda : export2(games=True,_excel=True))
+export_excel.add_command(label="Play History",command=lambda : export2(plays=True,_excel=True))
+export_excel.add_command(label="Draft History",command=lambda : export2(drafts=True,_excel=True))
+export_excel.add_command(label="Draft Pick History",command=lambda : export2(picks=True,_excel=True))
+export_excel.add_command(label="All Data (5 Files)",\
+    command=lambda : export2(matches=True,games=True,plays=True,drafts=True,picks=True,_excel=True))
 export_excel.add_separator()
-export_excel.add_command(label="Match History (Inverse Join)",command=lambda : export("Excel",0,True))
-export_excel.add_command(label="Game History (Inverse Join)",command=lambda : export("Excel",1,True))
-export_excel.add_command(label="All Data (Inverse Join, 3 Files)",command=lambda : export("Excel",3,True))
+export_excel.add_command(label="Match History (Inverse Join)",command=lambda : export2(matches=True,_excel=True,inverted=True))
+export_excel.add_command(label="Game History (Inverse Join)",command=lambda : export2(games=True,_excel=True,inverted=True))
+export_excel.add_command(label="All Data (Inverse Join, 5 Files)",\
+    command=lambda : export2(matches=True,games=True,plays=True,drafts=True,picks=True,_excel=True,inverted=True))
 export_excel.add_separator()
-export_excel.add_command(label="Currently Displayed Table (with Filters)",command=lambda : export("Excel",4,False))
+export_excel.add_command(label="Currently Displayed Table (with Filters)",command=lambda : export2())
 
 export_menu.add_cascade(label="Export to CSV",menu=export_csv)
 export_menu.add_cascade(label="Export to Excel",menu=export_excel)
@@ -4957,6 +4941,12 @@ data_menu.add_separator()
 data_menu.add_command(label="Clear Loaded Data",command=lambda : clear_window(),state=tk.DISABLED)
 data_menu.add_command(label="Delete Saved Session",command=lambda : delete_session())
 
+if test_mode:
+    test_menu = tk.Menu(menu_bar,tearoff=False)
+    menu_bar.add_cascade(label="Test",menu=test_menu)
+    test_menu.add_command(label="Create Debug Log",command=lambda : debug())
+    test_menu.add_command(label="Test Function",command=lambda : test())
+
 window.config(menu=menu_bar)
 
 match_button.grid(row=1,column=0,sticky="ew",padx=5,pady=(15,5))
@@ -4965,16 +4955,12 @@ play_button.grid(row=3,column=0,sticky="ew",padx=5,pady=(0,5))
 draft_button.grid(row=4,column=0,sticky="ew",padx=5,pady=(0,5))
 pick_button.grid(row=5,column=0,sticky="ew",padx=5,pady=(0,5))
 stats_button.grid(row=6,column=0,sticky="ew",padx=5,pady=(0,5))
-filter_button.grid(row=7,column=0,sticky="ew",padx=5,pady=(35,5))
+filter_button.grid(row=7,column=0,sticky="ew",padx=5,pady=(25,5))
 clear_button.grid(row=8,column=0,sticky="ew",padx=5,pady=(0,5))
-revise_button.grid(row=9,column=0,sticky="ew",padx=5,pady=(35,5))
+revise_button.grid(row=9,column=0,sticky="ew",padx=5,pady=(25,5))
 remove_button.grid(row=10,column=0,sticky="ew",padx=5,pady=(0,5))
-next_button.grid(row=11,column=0,sticky="ew",padx=5,pady=(35,5))
+next_button.grid(row=11,column=0,sticky="ew",padx=5,pady=(25,5))
 back_button.grid(row=12,column=0,sticky="ew",padx=5,pady=(0,5))
-
-if test_mode:
-    debug_button.grid(row=13,column=0,sticky="ew",padx=5,pady=(0,5))
-    test_button.grid(row=14,column=0,sticky="ew",padx=5,pady=(0,5))
 
 tree1 = ttk.Treeview(text_frame,show="tree")
 tree1.grid(row=0,column=0,sticky="nsew")
