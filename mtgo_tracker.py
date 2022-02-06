@@ -22,7 +22,10 @@ all_data =          [[],[],[],{}]
 all_data_inverted = [[],[],[],{}]
 all_headers =       [[],[],[]]
 all_decks =         {}
+DRAFTS_TABLE =      []
+PICKS_TABLE =       []
 parsed_file_dict =  {}
+PARSED_DRAFT_DICT = {}
 
 # Settings imported/saved in save folder:
 filepath_root =     ""
@@ -30,6 +33,7 @@ filepath_export =   ""
 filepath_decks =    ""
 filepath_logs =     ""
 filepath_copy =     ""
+filepath_drafts =   ""
 hero =              ""
 main_window_size =  ("small",1000,490)
 
@@ -399,6 +403,7 @@ def startup():
     global filepath_decks
     global filepath_logs
     global filepath_copy
+    global filepath_drafts
     global hero
     global all_data
     global all_data_inverted
@@ -456,7 +461,8 @@ def startup():
         #filepath_decks = settings[2]
         filepath_logs =   settings[3]
         #filepath_copy =   settings[4]
-        hero =            settings[5]
+        filepath_drafts = settings[5]
+        hero =            settings[6]
 
     all_headers[0] = modo.header("Matches")
     all_headers[1] = modo.header("Games")
@@ -491,7 +497,7 @@ def startup():
     os.chdir(filepath_root)
 def save_settings():
     os.chdir(filepath_root + "\\" + "save")
-    settings = [filepath_root,filepath_export,filepath_decks,filepath_logs,filepath_copy,hero]
+    settings = [filepath_root,filepath_export,filepath_decks,filepath_logs,filepath_copy,filepath_drafts,hero]
     pickle.dump(settings,open("settings","wb"))
     pickle.dump(main_window_size,open("main_window_size","wb"))
     os.chdir(filepath_root)
@@ -512,45 +518,52 @@ def set_display(d,update_status,start_index,reset):
 
     text_frame.config(text=display)
     
-    match_button["state"] = tk.NORMAL
-    game_button["state"] = tk.NORMAL
-    play_button["state"] = tk.NORMAL
+    if len(all_data[0]) > 0:
+        match_button["state"] = tk.NORMAL
+        game_button["state"] = tk.NORMAL
+        play_button["state"] = tk.NORMAL
+    if len(DRAFTS_TABLE) > 0:
+        draft_button["state"] = tk.NORMAL
+        pick_button["state"] = tk.NORMAL
 
     if d == "Matches":
         if resize:
             if main_window_size[0] == "large":
                 window.geometry("1740x" + str(main_window_size[2]))
         print_data(all_data[0],modo.header(display),update_status,start_index,apply_filter=True)
-        revise_button["state"] = tk.DISABLED
-        remove_button["state"] = tk.DISABLED
     elif d == "Games":
         if resize:
             if main_window_size[0] == "large":
                 window.geometry("1315x" + str(main_window_size[2]))
         print_data(all_data[1],modo.header(display),update_status,start_index,apply_filter=True)
-        revise_button["state"] = tk.DISABLED
-        remove_button["state"] = tk.DISABLED
     elif d == "Plays":
         if resize:
             if main_window_size[0] == "large":
                 window.geometry("1665x" + str(main_window_size[2]))
         print_data(all_data[2],modo.header(display),update_status,start_index,apply_filter=True)
-        revise_button["state"] = tk.DISABLED
-        remove_button["state"] = tk.DISABLED
-def get_all_data(fp,copy):
+    elif d == "Drafts":
+        print_data(DRAFTS_TABLE,draft_tracker.header(display),update_status,start_index,apply_filter=False)
+    elif d == "Picks":
+        print_data(PICKS_TABLE,draft_tracker.header(display),update_status,start_index,apply_filter=False)
+    revise_button["state"] = tk.DISABLED
+    remove_button["state"] = tk.DISABLED
+def get_all_data(fp_logs,fp_drafts,copy):
     global all_data
     global all_data_inverted
     global all_headers
-    global data_loaded
+    global DRAFTS_TABLE
+    global PICKS_TABLE
     global parsed_file_dict
+    global PARSED_DRAFT_DICT
+    global data_loaded
     global new_import
     global ask_to_save
-    count = 0
+    match_count = 0
+    draft_count = 0
 
     new_data = [[],[],[],{}]
-    os.chdir(fp)
-    n = 0
-    for (root,dirs,files) in os.walk(fp):
+    os.chdir(fp_logs)
+    for (root,dirs,files) in os.walk(fp_logs):
         for i in files:
             if ("Match_GameLog_" not in i) or (len(i) < 30):
                 pass
@@ -571,8 +584,6 @@ def get_all_data(fp,copy):
                         os.chdir(root)
                     except shutil.SameFileError:
                         pass
-                count += 1
-
                 new_data[0].append(parsed_data[0])
                 for i in parsed_data[1]:
                     new_data[1].append(i)
@@ -580,6 +591,25 @@ def get_all_data(fp,copy):
                     new_data[2].append(i)
                 for i in parsed_data[3]:
                     new_data[3] = new_data[3] | parsed_data[3]
+                match_count += 1
+
+    os.chdir(fp_drafts)
+    for (root,dirs,files) in os.walk(fp_drafts):
+        break
+    for i in files:
+        if (i.count(".") != 3) or (i.count("-") != 4) or (".txt" not in i):
+            pass
+        elif (i in PARSED_DRAFT_DICT):
+            os.chdir(root)
+        else:
+            os.chdir(root)
+            with io.open(i,"r",encoding="ansi") as gamelog:
+                initial = gamelog.read()   
+            parsed_data = draft_tracker.parse_draft_log(i,initial) 
+            DRAFTS_TABLE.extend(parsed_data[0])
+            PICKS_TABLE.extend(parsed_data[1])
+            PARSED_DRAFT_DICT[i] = parsed_data[2]
+            draft_count += 1
 
     new_data_inverted = modo.invert_join(new_data)
     for index in range(3):
@@ -590,15 +620,20 @@ def get_all_data(fp,copy):
     all_data[3] = all_data[3] | new_data[3]
     all_data_inverted[3] = all_data_inverted[3] | new_data_inverted[3]
 
-    if count == 1:
-        update_status_bar(status="Imported " + str(count) + " new Match.")
+    if (match_count == 1) & (draft_count == 1):
+        update_status_bar(status=f"Imported {str(match_count)} new Match and {str(draft_count)} new Draft.")
+    elif (match_count == 1):
+        update_status_bar(status=f"Imported {str(match_count)} new Match and {str(draft_count)} new Drafts.")
+    elif (draft_count == 1):
+        update_status_bar(status=f"Imported {str(match_count)} new Matches and {str(draft_count)} new Draft.")
     else:
-        update_status_bar(status="Imported " + str(count) + " new Matches.")
-    if count > 0:
+        update_status_bar(status=f"Imported {str(match_count)} new Matches and {str(draft_count)} new Drafts.")
+
+    if (match_count > 0) or (draft_count > 0):
         ask_to_save = True
     new_import = True
 
-    if len(all_data[0]) != 0:
+    if (len(all_data[0]) != 0) or (len(DRAFTS_TABLE) != 0):
         filter_button["state"] = tk.NORMAL
         clear_button["state"] = tk.NORMAL
         data_loaded = True
@@ -641,9 +676,14 @@ def print_data(data,headers,update_status,start_index,apply_filter):
     elif (hero != "") & (display == "Games"):
         df = pd.DataFrame(all_data_inverted[1],columns=modo.header("Games"))
         df = df[(df.P1 == hero)]
+    elif (display == "Drafts"):
+        df = pd.DataFrame(DRAFTS_TABLE,columns=draft_tracker.header("Drafts"))
+    elif (display == "Picks"):
+        df = pd.DataFrame(PICKS_TABLE,columns=draft_tracker.header("Picks"))
     else:
         df = pd.DataFrame(data,columns=modo.header(display))
     total = df.shape[0]
+    curr_data = df
 
     if apply_filter:
         # Apply existing filters.
@@ -683,6 +723,10 @@ def print_data(data,headers,update_status,start_index,apply_filter):
             df = df.sort_values(by=["Match_ID","Game_Num"],ascending=(False,True))
         elif display == "Plays":
             df = df.sort_values(by=["Match_ID","Game_Num","Play_Num"],ascending=(False,True,True))
+        elif display == "Drafts":
+            pass
+        elif display == "Picks":
+            pass
         curr_data = df
 
     df_rows = df.to_numpy().tolist()
@@ -1259,13 +1303,19 @@ def back2():
 def back():
     global display_index
     display_index -= ln_per_page
-    print_data(curr_data,headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
+    if (display == "Drafts") or (display == "Picks"):
+        print_data(curr_data,headers=draft_tracker.header(display),update_status=True,start_index=display_index,apply_filter=False)
+    else:
+        print_data(curr_data,headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def next_page():
     global display_index
     display_index += ln_per_page
-    print_data(curr_data,headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
+    if (display == "Drafts") or (display == "Picks"):
+        print_data(curr_data,headers=draft_tracker.header(display),update_status=True,start_index=display_index,apply_filter=False)
+    else:
+        print_data(curr_data,headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def export(file_type,data_type,inverted):
@@ -1470,7 +1520,7 @@ def set_default_hero():
     hero_window.protocol("WM_DELETE_WINDOW", lambda : close_hero_window())
 def set_default_export():
     height = 150
-    width =  300
+    width =  350
     export_window = tk.Toplevel(window)
     export_window.title("Set Default Export Folder")
     export_window.iconbitmap(export_window,"icon.ico")
@@ -1513,7 +1563,7 @@ def set_default_export():
     export_window.rowconfigure(1,minsize=0,weight=1)  
     mid_frame.grid_columnconfigure(0,weight=1)
 
-    if (filepath_export is None) or (filepath_export == ""):
+    if (filepath_export is None) or (filepath_export == "") or (filepath_export == "."):
         label1 = tk.Label(mid_frame,text="No Default Export Folder",wraplength=width,justify="left")
     else:
         label1 = tk.Label(mid_frame,text=filepath_export,wraplength=width,justify="left")
@@ -1541,11 +1591,11 @@ def set_default_import():
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
-    def get_decks_path():
+    def get_drafts_path():
         fp = filedialog.askdirectory()
         fp = os.path.normpath(fp)
         if (fp is None) or (fp == "") or (fp == "."):
-            label1.config(text="No Default Decklists Folder")
+            label1.config(text="No Default DraftLogs Folder")
         else:
             label1.config(text=fp)
 
@@ -1558,12 +1608,12 @@ def set_default_import():
             label2.config(text=fp)
 
     def save_path():
-        global filepath_decks
+        global filepath_drafts
         global filepath_logs
         if label1["text"] == "No Default Decklists Folder":
-            filepath_decks = ""
+            filepath_drafts = ""
         else:
-            filepath_decks = label1["text"]
+            filepath_drafts = label1["text"]
         if label2["text"] == "No Default GameLogs Folder":
             filepath_logs = ""
         else:
@@ -1585,13 +1635,13 @@ def set_default_import():
     import_window.rowconfigure(1,minsize=0,weight=1)  
     mid_frame.grid_columnconfigure(0,weight=1)
 
-    if (filepath_decks is None) or (filepath_decks == "") or (filepath_decks == "."):
-        label1 = tk.Label(mid_frame,text="No Default Decklists Folder",wraplength=width,justify="left")
+    if (filepath_drafts is None) or (filepath_drafts == "") or (filepath_drafts == "."):
+        label1 = tk.Label(mid_frame,text="No Default DraftLogs Folder",wraplength=width,justify="left")
     else:
-        label1 = tk.Label(mid_frame,text=filepath_decks,wraplength=width,justify="left")
-    button1 = tk.Button(mid_frame,text="Get Decklists Folder",width=20,command=lambda : get_decks_path())
+        label1 = tk.Label(mid_frame,text=filepath_drafts,wraplength=width,justify="left")
+    button1 = tk.Button(mid_frame,text="Get DraftLogs Folder",width=20,command=lambda : get_drafts_path())
 
-    if (filepath_logs is None) or (filepath_logs == "") or (filepath_decks == "."):
+    if (filepath_logs is None) or (filepath_logs == "") or (filepath_logs == "."):
         label2 = tk.Label(mid_frame,text="No Default GameLogs Folder",wraplength=width,justify="left")
     else:
         label2 = tk.Label(mid_frame,text=filepath_logs,wraplength=width,justify="left")
@@ -1599,14 +1649,12 @@ def set_default_import():
     button3 = tk.Button(bot_frame,text="Save",width=10,command=lambda : save_path())
     button4 = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_import_window())
 
-    label1.grid(row=0,column=0,pady=(5,5))
+    label1.grid(row=0,column=0,pady=(10,5))
     button1.grid(row=1,column=0,pady=0)
     label2.grid(row=2,column=0,pady=5)
     button2.grid(row=3,column=0,pady=0)
     button3.grid(row=4,column=0,padx=5,pady=5)
     button4.grid(row=4,column=1,padx=5,pady=5)
-    
-    button1["state"] = tk.DISABLED
 
     import_window.protocol("WM_DELETE_WINDOW", lambda : close_import_window())   
 def sort_column2(col,reverse,tree1):
@@ -2505,43 +2553,49 @@ def import_window():
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
-    def get_logs_path():
-        fp_logs = filedialog.askdirectory()
-        fp_logs = os.path.normpath(fp_logs) 
-        if (fp_logs is None) or (fp_logs == "") or (fp_logs == "."):
+    def get_drafts_path():
+        fp = filedialog.askdirectory()
+        fp = os.path.normpath(fp) 
+        if (fp is None) or (fp == "") or (fp == "."):
             label2.config(text="No Default GameLogs Folder")
             button3["state"] = tk.DISABLED
+            button4["state"] = tk.DISABLED
         else:
-            label2.config(text=fp_logs)
+            label1.config(text=fp)
             button3["state"] = tk.NORMAL
+            button4["state"] = tk.NORMAL
+
+    def get_logs_path():
+        fp = filedialog.askdirectory()
+        fp = os.path.normpath(fp) 
+        if (fp is None) or (fp == "") or (fp == "."):
+            label2.config(text="No Default GameLogs Folder")
+            button3["state"] = tk.DISABLED
+            button4["state"] = tk.DISABLED
+        else:
+            label2.config(text=fp)
+            button3["state"] = tk.NORMAL
+            button4["state"] = tk.NORMAL
 
     def import_data(overwrite):
         global all_data
         global all_data_inverted
         global filepath_logs
+        global filepath_drafts
         global hero
 
-        if (label2["text"]  == "No Default GameLogs Folder"):
-            label3["text"] = "Decks and/or GameLogs Folder Location not set."
+        if (label1["text"]  == "No Default DraftLogs Folder") or (label2["text"]  == "No Default GameLogs Folder"):
+            label3["text"] = "DraftLogs and/or GameLogs Folder Location not set."
             return
+        filepath_drafts = label1["text"]
         filepath_logs = label2["text"]
+
         if overwrite:
             h = hero
             match_dict = user_inputs(type="Matches")
             game_dict = user_inputs(type="Games")
             clear_loaded()
-            get_all_data(fp=filepath_copy,copy=False)
-        else:
-            get_all_data(fp=filepath_logs,copy=True)
-        clear_filter(update_status=False,reload_display=False)
-        if data_loaded != False:
-            data_menu.entryconfig("Set Default Hero",state=tk.NORMAL)
-            file_menu.entryconfig("Save Data",state=tk.NORMAL)
-            data_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
-            data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
-            data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
-            data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
-        if overwrite:
+            get_all_data(fp_logs=filepath_copy,fp_drafts=filepath_drafts,copy=False)
             for i in all_data[0]:
                 try:
                     i[modo.header("Matches").index("P1_Arch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P1")]][0]
@@ -2567,7 +2621,18 @@ def import_window():
                 stats_button["state"] = tk.NORMAL
             modo.update_game_wins(all_data)
             all_data_inverted = modo.invert_join(all_data)
-
+        else:
+            print("import new")
+            get_all_data(fp_logs=filepath_logs,fp_drafts=filepath_drafts,copy=True)
+        clear_filter(update_status=False,reload_display=False)
+        if data_loaded != False:
+            data_menu.entryconfig("Set Default Hero",state=tk.NORMAL)
+            file_menu.entryconfig("Save Data",state=tk.NORMAL)
+            data_menu.entryconfig("Clear Loaded Data",state=tk.NORMAL)
+            data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
+            data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
+            data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
+        save_settings()
         set_display("Matches",update_status=False,start_index=0,reset=True)
         close_import_window()
 
@@ -2575,9 +2640,7 @@ def import_window():
         import_window.grab_release()
         import_window.destroy()
     
-    fp_logs = filepath_logs
-
-    mid_frame = tk.LabelFrame(import_window,text="Import Folder Path")
+    mid_frame = tk.LabelFrame(import_window,text="Import Folder Paths")
     bot_frame = tk.Frame(import_window)
     mid_frame.grid(row=1,column=0,sticky="nsew")
     bot_frame.grid(row=2,column=0,sticky="")
@@ -2586,20 +2649,30 @@ def import_window():
     import_window.rowconfigure(1,minsize=0,weight=1)  
     mid_frame.grid_columnconfigure(0,weight=1)
 
+    button1 = tk.Button(mid_frame,text="Get DraftLogs Folder",width=20,command=lambda : get_drafts_path())
     button2 = tk.Button(mid_frame,text="Get GameLogs Folder",width=20,command=lambda : get_logs_path())
     button3 = tk.Button(bot_frame,text="Scan for New Files",width=15,command=lambda : import_data(overwrite=False))
     button4 = tk.Button(bot_frame,text="Re-Import Copies",width=15,command=lambda : import_data(overwrite=True))
     button5 = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_import_window())
-    if (filepath_logs is None) or (filepath_logs == ""):
+    if (filepath_drafts is None) or (filepath_drafts == "") or (filepath_drafts == "."):
+        label1 = tk.Label(mid_frame,text="No Default DraftLogs Folder",wraplength=width,justify="left")
+        button3["state"] = tk.DISABLED
+        button4["state"] = tk.DISABLED
+    else:
+        label1 = tk.Label(mid_frame,text=filepath_drafts,wraplength=width,justify="left")
+    if (filepath_logs is None) or (filepath_logs == "") or (filepath_logs == "."):
         label2 = tk.Label(mid_frame,text="No Default GameLogs Folder",wraplength=width,justify="left")
         button3["state"] = tk.DISABLED
+        button4["state"] = tk.DISABLED
     else:
         label2 = tk.Label(mid_frame,text=filepath_logs,wraplength=width,justify="left")
     label3 = tk.Label(mid_frame,text="Select folder containing your MTGO GameLog files.",wraplength=width,pady=(20,),justify="left")
 
-    label2.grid(row=0,column=0,pady=(20,5))
-    button2.grid(row=1,column=0,pady=0)
-    label3.grid(row=2,column=0,pady=5)
+    label1.grid(row=0,column=0,pady=(10,5))
+    button1.grid(row=1,column=0,pady=0)
+    label2.grid(row=2,column=0,pady=5)
+    button2.grid(row=3,column=0,pady=0)
+    #label3.grid(row=2,column=0,pady=5)
     button3.grid(row=0,column=0,padx=5,pady=5)
     button4.grid(row=0,column=1,padx=5,pady=5)
     button5.grid(row=0,column=2,padx=5,pady=5)
@@ -4752,16 +4825,15 @@ def debug():
 def test():
     # Test function
 
-    DRAFTS_TABLE = []
-    PICKS_TABLE = []
-    parsed_draft_dict = {}
+    global DRAFTS_TABLE
+    global PICKS_TABLE
+    global PARSED_DRAFT_DICT
 
     os.chdir(os.getcwd() + "\\" + "draftlogs")
     for (root,dirs,files) in os.walk(os.getcwd()):
         break
     for i in files:
-        print(i)
-        if (i in parsed_draft_dict):
+        if (i in PARSED_DRAFT_DICT):
             os.chdir(root)
         else:
             os.chdir(root)
@@ -4770,17 +4842,14 @@ def test():
             parsed_data = draft_tracker.parse_draft_log(i,initial) 
             DRAFTS_TABLE.extend(parsed_data[0])
             PICKS_TABLE.extend(parsed_data[1])
-            parsed_draft_dict[i] = parsed_data[2]
-
+            PARSED_DRAFT_DICT[i] = parsed_data[2]
     os.chdir(filepath_root)
-    print_data(pd.DataFrame(DRAFTS_TABLE),headers=draft_tracker.header("Drafts"),update_status=True,start_index=display_index,apply_filter=False)
-    #print_data(pd.DataFrame(PICKS_TABLE),headers=draft_tracker.header("Picks"),update_status=True,start_index=display_index,apply_filter=False)
-    # print(parsed_draft_dict)
-    #for i in DRAFTS_TABLE:
-    #    print(i)
-    # for i in PICKS_TABLE:
-    #     print(i)
 
+    draft_button["state"] = tk.NORMAL
+    pick_button["state"] = tk.NORMAL
+
+    #print_data(pd.DataFrame(DRAFTS_TABLE),headers=draft_tracker.header("Drafts"),update_status=True,start_index=display_index,apply_filter=False)
+    #print_data(pd.DataFrame(PICKS_TABLE),headers=draft_tracker.header("Picks"),update_status=True,start_index=display_index,apply_filter=False)
 
 window = tk.Tk() 
 window.title("MTGO-Tracker")
@@ -4806,12 +4875,16 @@ text_frame.grid_rowconfigure(0,weight=1)
 text_frame.grid_rowconfigure(1,weight=0)
 bottom_frame.grid_columnconfigure(0,weight=1)
 
-match_button = tk.Button(left_frame,text="Match Data",state=tk.DISABLED,\
+match_button = tk.Button(left_frame,text="Matches",state=tk.DISABLED,\
     command=lambda : set_display("Matches",update_status=True,start_index=0,reset=True))
-game_button = tk.Button(left_frame,text="Game Data",state=tk.DISABLED,\
+game_button = tk.Button(left_frame,text="Games",state=tk.DISABLED,\
     command=lambda : set_display("Games",update_status=True,start_index=0,reset=True))
-play_button = tk.Button(left_frame,text="Play Data",state=tk.DISABLED,\
+play_button = tk.Button(left_frame,text="Plays",state=tk.DISABLED,\
     command=lambda : set_display("Plays",update_status=True,start_index=0,reset=True))
+draft_button = tk.Button(left_frame,text="Drafts",state=tk.DISABLED,\
+    command=lambda : set_display("Drafts",update_status=True,start_index=0,reset=True))
+pick_button = tk.Button(left_frame,text="Draft Picks",state=tk.DISABLED,\
+    command=lambda : set_display("Picks",update_status=True,start_index=0,reset=True))
 stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,command=lambda : get_stats())
 filter_button = tk.Button(left_frame,text="Filter",state=tk.DISABLED,command=lambda : set_filter())
 clear_button = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,command=lambda : clear_filter(update_status=True,reload_display=True))
@@ -4889,17 +4962,19 @@ window.config(menu=menu_bar)
 match_button.grid(row=1,column=0,sticky="ew",padx=5,pady=(15,5))
 game_button.grid(row=2,column=0,sticky="ew",padx=5,pady=(0,5))
 play_button.grid(row=3,column=0,sticky="ew",padx=5,pady=(0,5))
-stats_button.grid(row=4,column=0,sticky="ew",padx=5,pady=(0,5))
-filter_button.grid(row=5,column=0,sticky="ew",padx=5,pady=(35,5))
-clear_button.grid(row=6,column=0,sticky="ew",padx=5,pady=(0,5))
-revise_button.grid(row=7,column=0,sticky="ew",padx=5,pady=(35,5))
-remove_button.grid(row=8,column=0,sticky="ew",padx=5,pady=(0,5))
-next_button.grid(row=9,column=0,sticky="ew",padx=5,pady=(35,5))
-back_button.grid(row=10,column=0,sticky="ew",padx=5,pady=(0,5))
+draft_button.grid(row=4,column=0,sticky="ew",padx=5,pady=(0,5))
+pick_button.grid(row=5,column=0,sticky="ew",padx=5,pady=(0,5))
+stats_button.grid(row=6,column=0,sticky="ew",padx=5,pady=(0,5))
+filter_button.grid(row=7,column=0,sticky="ew",padx=5,pady=(35,5))
+clear_button.grid(row=8,column=0,sticky="ew",padx=5,pady=(0,5))
+revise_button.grid(row=9,column=0,sticky="ew",padx=5,pady=(35,5))
+remove_button.grid(row=10,column=0,sticky="ew",padx=5,pady=(0,5))
+next_button.grid(row=11,column=0,sticky="ew",padx=5,pady=(35,5))
+back_button.grid(row=12,column=0,sticky="ew",padx=5,pady=(0,5))
 
 if test_mode:
-    debug_button.grid(row=11,column=0,sticky="ew",padx=5,pady=(0,5))
-    test_button.grid(row=12,column=0,sticky="ew",padx=5,pady=(0,5))
+    debug_button.grid(row=13,column=0,sticky="ew",padx=5,pady=(0,5))
+    test_button.grid(row=14,column=0,sticky="ew",padx=5,pady=(0,5))
 
 tree1 = ttk.Treeview(text_frame,show="tree")
 tree1.grid(row=0,column=0,sticky="nsew")
