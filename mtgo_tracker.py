@@ -28,13 +28,13 @@ parsed_file_dict =  {}
 PARSED_DRAFT_DICT = {}
 
 # Settings imported/saved in save folder:
-filepath_root =     ""
-filepath_export =   ""
-filepath_decks =    ""
-filepath_logs =     ""
-filepath_copy =     ""
-filepath_drafts =   ""
-hero =              ""
+filepath_root =          ""
+filepath_export =        ""
+filepath_logs =          ""
+filepath_logs_copy =     ""
+filepath_drafts =        ""
+filepath_drafts_copy =   ""
+hero =                   ""
 MAIN_WINDOW_SIZE =  ("small",1000,490)
 
 test_mode =         False
@@ -360,7 +360,7 @@ def delete_session():
         global all_decks
         all_decks.clear()
 
-        save_files = ["all_data","parsed_file_dict","settings","MAIN_WINDOW_SIZE"]
+        save_files = ["all_data","DRAFTS_TABLE","PICKS_TABLE","parsed_file_dict","PARSED_DRAFT_DICT","settings","MAIN_WINDOW_SIZE"]
         os.chdir(filepath_root + "\\" + "save")   
 
         session_exists = False
@@ -369,7 +369,12 @@ def delete_session():
                 session_exists = True
                 os.remove(i)
 
-        os.chdir(filepath_root + "\\" + "logs")
+        os.chdir(filepath_logs_copy)
+        for (root,dirs,files) in os.walk(os.getcwd()):
+            for i in files:
+                os.remove(i)
+        
+        os.chdir(filepath_drafts_copy)
         for (root,dirs,files) in os.walk(os.getcwd()):
             for i in files:
                 os.remove(i) 
@@ -412,10 +417,10 @@ def delete_session():
 def startup():
     global filepath_root
     global filepath_export
-    global filepath_decks
     global filepath_logs
-    global filepath_copy
+    global filepath_logs_copy
     global filepath_drafts
+    global filepath_drafts_copy
     global hero
     global all_data
     global all_data_inverted
@@ -460,24 +465,28 @@ def startup():
         input_options["Sealed Formats"] = modo.formats(sealed=True)
     
     filepath_root = os.getcwd()
-    filepath_decks = None
-
     if os.path.isdir("save") == False:
         os.mkdir(filepath_root + "\\" + "save")
-    if os.path.isdir("logs") == False:
-        os.mkdir(filepath_root + "\\" + "logs")
-    filepath_copy = filepath_root + "\\" + "logs"
+    if os.path.isdir("export") == False:
+        os.mkdir(filepath_root + "\\" + "export") 
+    if os.path.isdir("gamelogs") == False:
+        os.mkdir(filepath_root + "\\" + "gamelogs")
+    if os.path.isdir("draftlogs") == False:
+        os.mkdir(filepath_root + "\\" + "draftlogs")
+    filepath_export = filepath_root + "\\" + "export"
+    filepath_logs_copy = filepath_root + "\\" + "gamelogs"
+    filepath_drafts_copy = filepath_root + "\\" + "draftlogs"
     os.chdir(filepath_root + "\\" + "save")
 
     if os.path.isfile("settings"):
         settings = pickle.load(open("settings","rb"))
-        #filepath_root   = settings[0]
-        filepath_export = settings[1]
-        #filepath_decks = settings[2]
-        filepath_logs =   settings[3]
-        #filepath_copy =   settings[4]
-        filepath_drafts = settings[5]
-        hero =            settings[6]
+        #filepath_root   =     settings[0]
+        filepath_export =      settings[1]
+        filepath_logs =        settings[2]
+        #filepath_logs_copy =  settings[3]
+        filepath_drafts =      settings[4]
+        #filepath_drafts_copy = settings[5]
+        hero =                 settings[6]
 
     all_headers[0] = modo.header("Matches")
     all_headers[1] = modo.header("Games")
@@ -515,7 +524,7 @@ def startup():
     os.chdir(filepath_root)
 def save_settings():
     os.chdir(filepath_root + "\\" + "save")
-    settings = [filepath_root,filepath_export,filepath_decks,filepath_logs,filepath_copy,filepath_drafts,hero]
+    settings = [filepath_root,filepath_export,filepath_logs,filepath_logs_copy,filepath_drafts,filepath_drafts_copy,hero]
     pickle.dump(settings,open("settings","wb"))
     pickle.dump(MAIN_WINDOW_SIZE,open("MAIN_WINDOW_SIZE","wb"))
     os.chdir(filepath_root)
@@ -596,8 +605,8 @@ def get_all_data(fp_logs,fp_drafts,copy):
                 parsed_file_dict[i] = (parsed_data[0][0],datetime.datetime.strptime(mtime,"%a %b %d %H:%M:%S %Y"))
                 if copy:
                     try:
-                        shutil.copy(i,filepath_copy)
-                        os.chdir(filepath_copy)
+                        shutil.copy(i,filepath_logs_copy)
+                        os.chdir(filepath_logs_copy)
                         os.utime(i,(datetime.datetime.now().timestamp(),parsed_file_dict[i][1].timestamp()))
                         os.chdir(root)
                     except shutil.SameFileError:
@@ -627,6 +636,13 @@ def get_all_data(fp_logs,fp_drafts,copy):
             DRAFTS_TABLE.extend(parsed_data[0])
             PICKS_TABLE.extend(parsed_data[1])
             PARSED_DRAFT_DICT[i] = parsed_data[2]
+            if copy:
+                try:
+                    shutil.copy(i,filepath_drafts_copy)
+                    os.chdir(filepath_drafts_copy)
+                    os.chdir(root)
+                except shutil.SameFileError:
+                    pass
             draft_count += 1
 
     new_data_inverted = modo.invert_join(new_data)
@@ -1341,7 +1357,7 @@ def next_page():
         print_data(curr_data,headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
-def export2(matches=False,games=False,plays=False,drafts=False,picks=False,_csv=False,_excel=False,inverted=False,filtered=False):
+def export2(current=False,matches=False,games=False,plays=False,drafts=False,picks=False,_csv=False,_excel=False,inverted=False,filtered=False):
     global filepath_export
     fp = filepath_export
     if (filepath_export is None) or (filepath_export == ""):
@@ -1354,6 +1370,31 @@ def export2(matches=False,games=False,plays=False,drafts=False,picks=False,_csv=
     header_list = []
     data_to_write = []
 
+    if current:
+        file_names.append("Current")
+        if (display == "Drafts") or (display == "Picks"):
+            header_list.append(draft_tracker.header(display))
+        else:
+            header_list.append(modo.header(display))
+        if display == "Matches":
+            if ((hero != "") & (filtered)):
+                df = pd.DataFrame(all_data_inverted[0],columns=modo.header(display))
+                df = df[(df.P1 == hero)]
+            else:
+                df = pd.DataFrame(all_data[0],columns=modo.header(display))
+        elif display == "Games":
+            if ((hero != "") & (filtered)):
+                df = pd.DataFrame(all_data_inverted[1],columns=modo.header(display))
+                df = df[(df.P1 == hero)]
+            else:
+                df = pd.DataFrame(all_data[1],columns=modo.header(display))            
+        elif display == "Plays":
+            df = pd.DataFrame(all_data[2],columns=modo.header(display))
+        elif display == "Drafts":
+            df = pd.DataFrame(DRAFTS_TABLE,columns=draft_tracker.header(display))
+        elif display == "Picks":
+            df = pd.DataFrame(PICKS_TABLE,columns=draft_tracker.header(display))
+        data_to_write.append(df)
     if matches:
         file_names.append("Matches")
         header_list.append(modo.header("Matches"))
@@ -1386,7 +1427,6 @@ def export2(matches=False,games=False,plays=False,drafts=False,picks=False,_csv=
         file_names.append("Picks")
         header_list.append(draft_tracker.header("Picks"))
         data_to_write.append(pd.DataFrame(PICKS_TABLE,columns=draft_tracker.header("Picks")))
-
     if filtered:
         for index,table in enumerate(data_to_write):
             for key in filter_dict:
@@ -1406,15 +1446,9 @@ def export2(matches=False,games=False,plays=False,drafts=False,picks=False,_csv=
                         data_to_write[index] = i[(i[key] > value)]
                     elif i[0] == "<":
                         data_to_write[index] = i[(i[key] < value)]
-
     if _csv:
         for index,i in enumerate(file_names):
             file_names[index] += ".csv"
-    elif _excel:
-        for index,i in enumerate(file_names):
-            file_names[index] += ".xlsx"
-
-    if _csv:
         try:
             for index,i in enumerate(file_names):
                 f = f"{filepath_export}/{i}"
@@ -1428,6 +1462,8 @@ def export2(matches=False,games=False,plays=False,drafts=False,picks=False,_csv=
         except PermissionError:
             update_status_bar(status="Permission Error: Common error cause is an open file that can not be overwritten.")
     elif _excel:
+        for index,i in enumerate(file_names):
+            file_names[index] += ".xlsx"
         try:
             for index,i in enumerate(file_names):
                 f = f"{filepath_export}/{i}"
@@ -2599,7 +2635,7 @@ def import_window():
             match_dict = user_inputs(type="Matches")
             game_dict = user_inputs(type="Games")
             clear_loaded()
-            get_all_data(fp_logs=filepath_copy,fp_drafts=filepath_drafts,copy=False)
+            get_all_data(fp_logs=filepath_logs_copy,fp_drafts=filepath_drafts_copy,copy=False)
             for i in all_data[0]:
                 try:
                     i[modo.header("Matches").index("P1_Arch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P1")]][0]
@@ -4778,9 +4814,10 @@ def debug():
         txt.write("Settings:\n")
         txt.write(f"Filepath_Root: {filepath_root}\n")
         txt.write(f"Filepath_Export: {filepath_export}\n")
-        txt.write(f"Filepath_Decks: {filepath_decks}\n")
         txt.write(f"Filepath_Logs: {filepath_logs}\n")
-        txt.write(f"Filepath_Copy: {filepath_copy}\n")
+        txt.write(f"Filepath_Logs_Copy: {filepath_logs_copy}\n")
+        txt.write(f"Filepath_Drafts: {filepath_drafts}\n")
+        txt.write(f"Filepath_Drafts_Copy: {filepath_drafts_copy}\n")
         txt.write(f"Hero: {hero}\n")
         txt.write(f"Main Window Size: {MAIN_WINDOW_SIZE}\n")
         txt.write("\n")
@@ -4905,7 +4942,7 @@ export_csv.add_command(label="Game History (Inverse Join)",command=lambda : expo
 export_csv.add_command(label="All Data (Inverse Join, 5 Files)",\
     command=lambda : export2(matches=True,games=True,plays=True,drafts=True,picks=True,_csv=True,inverted=True))
 export_csv.add_separator()
-export_csv.add_command(label="Currently Displayed Data (with Filters)",command=lambda : export2())
+export_csv.add_command(label="Currently Displayed Data (with Filters)",command=lambda : export2(current=True,_csv=True,filtered=True))
 
 export_excel = tk.Menu(export_menu,tearoff=False)
 export_excel.add_command(label="Match History",command=lambda : export2(matches=True,_excel=True))
@@ -4921,7 +4958,7 @@ export_excel.add_command(label="Game History (Inverse Join)",command=lambda : ex
 export_excel.add_command(label="All Data (Inverse Join, 5 Files)",\
     command=lambda : export2(matches=True,games=True,plays=True,drafts=True,picks=True,_excel=True,inverted=True))
 export_excel.add_separator()
-export_excel.add_command(label="Currently Displayed Table (with Filters)",command=lambda : export2())
+export_excel.add_command(label="Currently Displayed Table (with Filters)",command=lambda : export2(current=True,_excel=True,filtered=True))
 
 export_menu.add_cascade(label="Export to CSV",menu=export_csv)
 export_menu.add_cascade(label="Export to Excel",menu=export_excel)
