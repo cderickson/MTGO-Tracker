@@ -17,28 +17,27 @@ import pickle
 import shutil
 
 # Saved data:
-all_data =          [[],[],[],{}]
-all_data_inverted = [[],[],[],{}]
-all_headers =       [[],[],[]]
-all_decks =         {}
+ALL_DATA =          [[],[],[],{}]
+ALL_DATA_INVERTED = [[],[],[],{}]
+ALL_DECKS =         {}
 DRAFTS_TABLE =      []
 PICKS_TABLE =       []
-parsed_file_dict =  {}
+PARSED_FILE_DICT =  {}
 PARSED_DRAFT_DICT = {}
 
 # Settings imported/saved in save folder:
-filepath_root =          ""
-filepath_export =        ""
-filepath_logs =          ""
-filepath_logs_copy =     ""
-filepath_drafts =        ""
-filepath_drafts_copy =   ""
-hero =                   ""
+FILEPATH_ROOT =          ""
+FILEPATH_EXPORT =        ""
+FILEPATH_LOGS =          ""
+FILEPATH_LOGS_COPY =     ""
+FILEPATH_DRAFTS =        ""
+FILEPATH_DRAFTS_COPY =   ""
+HERO =                   ""
+INPUT_OPTIONS =          {}
 MAIN_WINDOW_SIZE =  ("small",1000,490)
 
-test_mode =         False
+test_mode =         True
 resize =            False
-input_options =     {}
 filter_dict =       {}
 display =           ""
 prev_display =      ""
@@ -58,16 +57,16 @@ def save(exit):
     ask_to_save = False
 
     save_settings()
-    os.chdir(filepath_root + "\\" + "save")
+    os.chdir(FILEPATH_ROOT + "\\" + "save")
 
-    pickle.dump(all_data,open("all_data","wb"))
+    pickle.dump(ALL_DATA,open("ALL_DATA","wb"))
     pickle.dump(DRAFTS_TABLE,open("DRAFTS_TABLE","wb"))
     pickle.dump(PICKS_TABLE,open("PICKS_TABLE","wb"))
-    pickle.dump(parsed_file_dict,open("parsed_file_dict","wb"))
+    pickle.dump(PARSED_FILE_DICT,open("PARSED_FILE_DICT","wb"))
     pickle.dump(PARSED_DRAFT_DICT,open("PARSED_DRAFT_DICT","wb"))
 
     update_status_bar(status="Save complete. Data will be loaded automatically on next startup.")
-    os.chdir(filepath_root)
+    os.chdir(FILEPATH_ROOT)
 
     if exit:
         close()
@@ -145,11 +144,11 @@ def set_default_window_size():
             MAIN_WINDOW_SIZE = ("large",1723,780)
             ln_per_page = 35
 
-        os.chdir(filepath_root + "\\" + "save")
+        os.chdir(FILEPATH_ROOT + "\\" + "save")
         pickle.dump(MAIN_WINDOW_SIZE,open("MAIN_WINDOW_SIZE","wb"))
         window.geometry(str(MAIN_WINDOW_SIZE[1]) + "x" + str(MAIN_WINDOW_SIZE[2]))
         update_status_bar(status="Default Window Size saved.")
-        os.chdir(filepath_root)
+        os.chdir(FILEPATH_ROOT)
         set_display(display,update_status=False,start_index=0,reset=False)
         close_window()
 
@@ -190,13 +189,13 @@ def set_default_window_size():
     
     popup.protocol("WM_DELETE_WINDOW", lambda : close_window())
 def clear_loaded():
-    global all_data
-    global all_data_inverted
+    global ALL_DATA
+    global ALL_DATA_INVERTED
     global DRAFTS_TABLE
     global PICKS_TABLE
-    global parsed_file_dict
+    global PARSED_FILE_DICT
     global PARSED_DRAFT_DICT
-    global hero
+    global HERO
     global filter_dict
     global display
     global data_loaded
@@ -206,13 +205,13 @@ def clear_loaded():
     global new_import
     global ask_to_save
 
-    all_data =          [[],[],[],{}]
-    all_data_inverted = [[],[],[],{}]
+    ALL_DATA =          [[],[],[],{}]
+    ALL_DATA_INVERTED = [[],[],[],{}]
     DRAFTS_TABLE =      []
     PICKS_TABLE =       []
-    parsed_file_dict.clear()
+    PARSED_FILE_DICT.clear()
     PARSED_DRAFT_DICT.clear()
-    hero =              ""
+    HERO =              ""
     filter_dict.clear()
     display =           ""
     prev_display =      ""
@@ -356,11 +355,11 @@ def delete_session():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def del_session():
-        global all_decks
-        all_decks.clear()
+        global ALL_DECKS
+        ALL_DECKS.clear()
 
-        save_files = ["all_data","DRAFTS_TABLE","PICKS_TABLE","parsed_file_dict","PARSED_DRAFT_DICT","settings","MAIN_WINDOW_SIZE"]
-        os.chdir(filepath_root + "\\" + "save")   
+        save_files = ["ALL_DATA","DRAFTS_TABLE","PICKS_TABLE","PARSED_FILE_DICT","PARSED_DRAFT_DICT","SETTINGS","MAIN_WINDOW_SIZE"]
+        os.chdir(FILEPATH_ROOT + "\\" + "save")   
 
         session_exists = False
         for i in save_files:
@@ -368,12 +367,12 @@ def delete_session():
                 session_exists = True
                 os.remove(i)
 
-        os.chdir(filepath_logs_copy)
+        os.chdir(FILEPATH_LOGS_COPY)
         for (root,dirs,files) in os.walk(os.getcwd()):
             for i in files:
                 os.remove(i)
         
-        os.chdir(filepath_drafts_copy)
+        os.chdir(FILEPATH_DRAFTS_COPY)
         for (root,dirs,files) in os.walk(os.getcwd()):
             for i in files:
                 os.remove(i) 
@@ -383,7 +382,7 @@ def delete_session():
         else:
             update_status_bar(status="No saved session data was found.")
 
-        os.chdir(filepath_root)
+        os.chdir(FILEPATH_ROOT)
         close_del_window()
 
     def close_del_window():
@@ -414,30 +413,30 @@ def delete_session():
     
     del_window.protocol("WM_DELETE_WINDOW", lambda : close_del_window())
 def startup():
-    global filepath_root
-    global filepath_export
-    global filepath_logs
-    global filepath_logs_copy
-    global filepath_drafts
-    global filepath_drafts_copy
-    global hero
-    global all_data
-    global all_data_inverted
-    global all_decks
+    global FILEPATH_ROOT
+    global FILEPATH_EXPORT
+    global FILEPATH_LOGS
+    global FILEPATH_LOGS_COPY
+    global FILEPATH_DRAFTS
+    global FILEPATH_DRAFTS_COPY
+    global HERO
+    global ALL_DATA
+    global ALL_DATA_INVERTED
+    global ALL_DECKS
     global DRAFTS_TABLE
     global PICKS_TABLE
-    global parsed_file_dict
+    global PARSED_FILE_DICT
     global PARSED_DRAFT_DICT
+    global INPUT_OPTIONS
     global data_loaded
-    global input_options
     global ask_to_save
 
-    if os.path.isfile("input_options.txt"):
+    if os.path.isfile("INPUT_OPTIONS.txt"):
         in_header = False
         in_instr = True
         x = ""
         y = []
-        with io.open("input_options.txt","r",encoding="ansi") as file:
+        with io.open("INPUT_OPTIONS.txt","r",encoding="ansi") as file:
             initial = file.read().split("\n")
             for i in initial:
                 if i == "-----------------------------":
@@ -447,68 +446,64 @@ def startup():
                     if in_header == False:
                         x = last.split(":")[0].split("# ")[1]
                     elif x != "":
-                        input_options[x] = y
+                        INPUT_OPTIONS[x] = y
                         y = []                        
                 elif (in_header == False) and (i != "") and (in_instr == False):
                     y.append(i)
                 last = i
     else:
-        input_options["Constructed Match Types"] = modo.match_types(con=True)
-        input_options["Booster Draft Match Types"] = modo.match_types(booster=True)
-        input_options["Sealed Match Types"] = modo.match_types(sealed=True)
-        input_options["Archetypes"] = modo.archetypes()
-        input_options["Constructed Formats"] = modo.formats(con=True)
-        input_options["Limited Formats"] = modo.formats(lim=True)
-        input_options["Cube Formats"] = modo.formats(cube=True)
-        input_options["Booster Draft Formats"] = modo.formats(booster=True)
-        input_options["Sealed Formats"] = modo.formats(sealed=True)
+        INPUT_OPTIONS["Constructed Match Types"] = modo.match_types(con=True)
+        INPUT_OPTIONS["Booster Draft Match Types"] = modo.match_types(booster=True)
+        INPUT_OPTIONS["Sealed Match Types"] = modo.match_types(sealed=True)
+        INPUT_OPTIONS["Archetypes"] = modo.archetypes()
+        INPUT_OPTIONS["Constructed Formats"] = modo.formats(con=True)
+        INPUT_OPTIONS["Limited Formats"] = modo.formats(lim=True)
+        INPUT_OPTIONS["Cube Formats"] = modo.formats(cube=True)
+        INPUT_OPTIONS["Booster Draft Formats"] = modo.formats(booster=True)
+        INPUT_OPTIONS["Sealed Formats"] = modo.formats(sealed=True)
     
-    filepath_root = os.getcwd()
+    FILEPATH_ROOT = os.getcwd()
     if os.path.isdir("save") == False:
-        os.mkdir(filepath_root + "\\" + "save")
+        os.mkdir(FILEPATH_ROOT + "\\" + "save")
     if os.path.isdir("export") == False:
-        os.mkdir(filepath_root + "\\" + "export") 
+        os.mkdir(FILEPATH_ROOT + "\\" + "export") 
     if os.path.isdir("gamelogs") == False:
-        os.mkdir(filepath_root + "\\" + "gamelogs")
+        os.mkdir(FILEPATH_ROOT + "\\" + "gamelogs")
     if os.path.isdir("draftlogs") == False:
-        os.mkdir(filepath_root + "\\" + "draftlogs")
-    filepath_export = filepath_root + "\\" + "export"
-    filepath_logs_copy = filepath_root + "\\" + "gamelogs"
-    filepath_drafts_copy = filepath_root + "\\" + "draftlogs"
-    os.chdir(filepath_root + "\\" + "save")
+        os.mkdir(FILEPATH_ROOT + "\\" + "draftlogs")
+    FILEPATH_EXPORT = FILEPATH_ROOT + "\\" + "export"
+    FILEPATH_LOGS_COPY = FILEPATH_ROOT + "\\" + "gamelogs"
+    FILEPATH_DRAFTS_COPY = FILEPATH_ROOT + "\\" + "draftlogs"
+    os.chdir(FILEPATH_ROOT + "\\" + "save")
 
-    if os.path.isfile("settings"):
-        settings = pickle.load(open("settings","rb"))
-        #filepath_root   =     settings[0]
-        filepath_export =      settings[1]
-        filepath_logs =        settings[2]
-        #filepath_logs_copy =  settings[3]
-        filepath_drafts =      settings[4]
-        #filepath_drafts_copy = settings[5]
-        hero =                 settings[6]
+    if os.path.isfile("SETTINGS"):
+        SETTINGS = pickle.load(open("SETTINGS","rb"))
+        #FILEPATH_ROOT   =     SETTINGS[0]
+        FILEPATH_EXPORT =      SETTINGS[1]
+        FILEPATH_LOGS =        SETTINGS[2]
+        #FILEPATH_LOGS_COPY =  SETTINGS[3]
+        FILEPATH_DRAFTS =      SETTINGS[4]
+        #FILEPATH_DRAFTS_COPY = SETTINGS[5]
+        HERO =                 SETTINGS[6]
 
-    all_headers[0] = modo.header("Matches")
-    all_headers[1] = modo.header("Games")
-    all_headers[2] = modo.header("Plays")
+    if os.path.isfile("ALL_DECKS"):
+        ALL_DECKS = pickle.load(open("ALL_DECKS","rb"))
 
-    if os.path.isfile("all_decks"):
-        all_decks = pickle.load(open("all_decks","rb"))
-
-    if (os.path.isfile("all_data") == False) & (os.path.isfile("DRAFTS_TABLE") == False):
+    if (os.path.isfile("ALL_DATA") == False) & (os.path.isfile("DRAFTS_TABLE") == False):
         update_status_bar(status="No session data to load. Import your MTGO GameLog files to get started.")
-        os.chdir(filepath_root)
+        os.chdir(FILEPATH_ROOT)
         return
-    all_data = pickle.load(open("all_data","rb"))
+    ALL_DATA = pickle.load(open("ALL_DATA","rb"))
     DRAFTS_TABLE = pickle.load(open("DRAFTS_TABLE","rb"))
     PICKS_TABLE = pickle.load(open("PICKS_TABLE","rb"))
-    parsed_file_dict = pickle.load(open("parsed_file_dict","rb"))
+    PARSED_FILE_DICT = pickle.load(open("PARSED_FILE_DICT","rb"))
     PARSED_DRAFT_DICT = pickle.load(open("PARSED_DRAFT_DICT","rb"))
 
-    all_data_inverted = modo.invert_join(all_data)
+    ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
 
     filter_button["state"] = tk.NORMAL
     clear_button["state"] = tk.NORMAL
-    if hero != "":
+    if HERO != "":
         stats_button["state"] = tk.NORMAL
     data_loaded = True
 
@@ -520,13 +515,13 @@ def startup():
     data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
     data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
     ask_to_save = False
-    os.chdir(filepath_root)
+    os.chdir(FILEPATH_ROOT)
 def save_settings():
-    os.chdir(filepath_root + "\\" + "save")
-    settings = [filepath_root,filepath_export,filepath_logs,filepath_logs_copy,filepath_drafts,filepath_drafts_copy,hero]
-    pickle.dump(settings,open("settings","wb"))
+    os.chdir(FILEPATH_ROOT + "\\" + "save")
+    SETTINGS = [FILEPATH_ROOT,FILEPATH_EXPORT,FILEPATH_LOGS,FILEPATH_LOGS_COPY,FILEPATH_DRAFTS,FILEPATH_DRAFTS_COPY,HERO]
+    pickle.dump(SETTINGS,open("SETTINGS","wb"))
     pickle.dump(MAIN_WINDOW_SIZE,open("MAIN_WINDOW_SIZE","wb"))
-    os.chdir(filepath_root)
+    os.chdir(FILEPATH_ROOT)
 def set_display(d,update_status,start_index,reset):
     global display
     global prev_display
@@ -544,7 +539,7 @@ def set_display(d,update_status,start_index,reset):
 
     text_frame.config(text=display)
     
-    if len(all_data[0]) > 0:
+    if len(ALL_DATA[0]) > 0:
         match_button["state"] = tk.NORMAL
         game_button["state"] = tk.NORMAL
         play_button["state"] = tk.NORMAL
@@ -563,17 +558,17 @@ def set_display(d,update_status,start_index,reset):
         if resize:
             if MAIN_WINDOW_SIZE[0] == "large":
                 window.geometry("1740x" + str(MAIN_WINDOW_SIZE[2]))
-        print_data(all_data[0],modo.header(display),update_status,start_index,apply_filter=True)
+        print_data(ALL_DATA[0],modo.header(display),update_status,start_index,apply_filter=True)
     elif d == "Games":
         if resize:
             if MAIN_WINDOW_SIZE[0] == "large":
                 window.geometry("1315x" + str(MAIN_WINDOW_SIZE[2]))
-        print_data(all_data[1],modo.header(display),update_status,start_index,apply_filter=True)
+        print_data(ALL_DATA[1],modo.header(display),update_status,start_index,apply_filter=True)
     elif d == "Plays":
         if resize:
             if MAIN_WINDOW_SIZE[0] == "large":
                 window.geometry("1665x" + str(MAIN_WINDOW_SIZE[2]))
-        print_data(all_data[2],modo.header(display),update_status,start_index,apply_filter=True)
+        print_data(ALL_DATA[2],modo.header(display),update_status,start_index,apply_filter=True)
     elif d == "Drafts":
         print_data(DRAFTS_TABLE,modo.header(display),update_status,start_index,apply_filter=True)
     elif d == "Picks":
@@ -581,12 +576,11 @@ def set_display(d,update_status,start_index,reset):
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def get_all_data(fp_logs,fp_drafts,copy):
-    global all_data
-    global all_data_inverted
-    global all_headers
+    global ALL_DATA
+    global ALL_DATA_INVERTED
     global DRAFTS_TABLE
     global PICKS_TABLE
-    global parsed_file_dict
+    global PARSED_FILE_DICT
     global PARSED_DRAFT_DICT
     global data_loaded
     global new_import
@@ -600,7 +594,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
             for i in files:
                 if ("Match_GameLog_" not in i) or (len(i) < 30):
                     pass
-                elif (i in parsed_file_dict):
+                elif (i in PARSED_FILE_DICT):
                     os.chdir(root)
                 else:
                     os.chdir(root)
@@ -608,12 +602,12 @@ def get_all_data(fp_logs,fp_drafts,copy):
                         initial = gamelog.read()
                         mtime = time.ctime(os.path.getmtime(i))
                     parsed_data = modo.get_all_data(initial,mtime)
-                    parsed_file_dict[i] = (parsed_data[0][0],datetime.datetime.strptime(mtime,"%a %b %d %H:%M:%S %Y"))
+                    PARSED_FILE_DICT[i] = (parsed_data[0][0],datetime.datetime.strptime(mtime,"%a %b %d %H:%M:%S %Y"))
                     if copy:
                         try:
-                            shutil.copy(i,filepath_logs_copy)
-                            os.chdir(filepath_logs_copy)
-                            os.utime(i,(datetime.datetime.now().timestamp(),parsed_file_dict[i][1].timestamp()))
+                            shutil.copy(i,FILEPATH_LOGS_COPY)
+                            os.chdir(FILEPATH_LOGS_COPY)
+                            os.utime(i,(datetime.datetime.now().timestamp(),PARSED_FILE_DICT[i][1].timestamp()))
                             os.chdir(root)
                         except shutil.SameFileError:
                             pass
@@ -628,11 +622,11 @@ def get_all_data(fp_logs,fp_drafts,copy):
         new_data_inverted = modo.invert_join(new_data)
         for index in range(3):
             for j in new_data[index]:
-                all_data[index].append(j)
+                ALL_DATA[index].append(j)
             for j in new_data_inverted[index]:
-                all_data_inverted[index].append(j)
-        all_data[3] = all_data[3] | new_data[3]
-        all_data_inverted[3] = all_data_inverted[3] | new_data_inverted[3]
+                ALL_DATA_INVERTED[index].append(j)
+        ALL_DATA[3] = ALL_DATA[3] | new_data[3]
+        ALL_DATA_INVERTED[3] = ALL_DATA_INVERTED[3] | new_data_inverted[3]
 
     if (fp_drafts != "No Default DraftLogs Folder"):
         os.chdir(fp_drafts)
@@ -653,8 +647,8 @@ def get_all_data(fp_logs,fp_drafts,copy):
                 PARSED_DRAFT_DICT[i] = parsed_data[2]
                 if copy:
                     try:
-                        shutil.copy(i,filepath_drafts_copy)
-                        os.chdir(filepath_drafts_copy)
+                        shutil.copy(i,FILEPATH_DRAFTS_COPY)
+                        os.chdir(FILEPATH_DRAFTS_COPY)
                         os.chdir(root)
                     except shutil.SameFileError:
                         pass
@@ -673,11 +667,11 @@ def get_all_data(fp_logs,fp_drafts,copy):
         ask_to_save = True
     new_import = True
 
-    if (len(all_data[0]) != 0) or (len(DRAFTS_TABLE) != 0):
+    if (len(ALL_DATA[0]) != 0) or (len(DRAFTS_TABLE) != 0):
         filter_button["state"] = tk.NORMAL
         clear_button["state"] = tk.NORMAL
         data_loaded = True
-    os.chdir(filepath_root)
+    os.chdir(FILEPATH_ROOT)
 def print_data(data,headers,update_status,start_index,apply_filter):
     global new_import
     global curr_data
@@ -710,12 +704,12 @@ def print_data(data,headers,update_status,start_index,apply_filter):
         df = data
     elif data == None:
         df = df = pd.DataFrame([],columns=headers)
-    elif (hero != "") & (display == "Matches"):
-        df = pd.DataFrame(all_data_inverted[0],columns=headers)
-        df = df[(df.P1 == hero)]
-    elif (hero != "") & (display == "Games"):
-        df = pd.DataFrame(all_data_inverted[1],columns=headers)
-        df = df[(df.P1 == hero)]
+    elif (HERO != "") & (display == "Matches"):
+        df = pd.DataFrame(ALL_DATA_INVERTED[0],columns=headers)
+        df = df[(df.P1 == HERO)]
+    elif (HERO != "") & (display == "Games"):
+        df = pd.DataFrame(ALL_DATA_INVERTED[1],columns=headers)
+        df = df[(df.P1 == HERO)]
     elif (display == "Drafts"):
         df = pd.DataFrame(DRAFTS_TABLE,columns=headers)
     elif (display == "Picks"):
@@ -792,7 +786,7 @@ def print_data(data,headers,update_status,start_index,apply_filter):
     elif update_status == True:
         update_status_bar(status=f"Displaying: {str(start_index + 1)}-{str(end_index)} of {str(len(df_rows))} total records.")
 def get_lists():
-    global all_decks
+    global ALL_DECKS
     global ask_to_save
     errors = []
 
@@ -809,7 +803,7 @@ def get_lists():
             if deck == None:
                 errors.append((i,j))
             month_decks.append(deck)
-        all_decks[i] = month_decks
+        ALL_DECKS[i] = month_decks
     ask_to_save = True
 
     label = f"Imported Sample Decklists. {str(len(errors))} error(s) found"
@@ -823,10 +817,10 @@ def get_lists():
             label += i[0] + "/" + i[1]
     update_status_bar(status=label)
     
-    os.chdir(filepath_root)
+    os.chdir(FILEPATH_ROOT)
 def input_missing_data():
-    global all_data
-    global all_data_inverted
+    global ALL_DATA
+    global ALL_DATA_INVERTED
   
     mformat_index = modo.header("Matches").index("Format")
     lformat_index = modo.header("Matches").index("Limited_Format")
@@ -838,8 +832,8 @@ def input_missing_data():
 
     n = 0
     count = 0
-    total = len(all_data[0])
-    for i in all_data[0]:    # Iterate through matches.
+    total = len(ALL_DATA[0])
+    for i in ALL_DATA[0]:    # Iterate through matches.
         n += 1
         
         # Match record is missing some data.
@@ -847,9 +841,9 @@ def input_missing_data():
             (i[p2_arch_index] == "NA") or (i[p2_sub_index] == "NA") or \
             (i[p1_sub_index] == "Unknown") or (i[p2_sub_index] == "Unknown") or \
             (i[mformat_index] == "NA") or (i[mtype_index] == "NA") or \
-            ((i[mformat_index] in input_options["Limited Formats"]) & (i[lformat_index] == "NA")): 
+            ((i[mformat_index] in INPUT_OPTIONS["Limited Formats"]) & (i[lformat_index] == "NA")): 
             count += 1
-            df = pd.DataFrame(all_data[2],columns=modo.header("Plays"))
+            df = pd.DataFrame(ALL_DATA[2],columns=modo.header("Plays"))
             df = df[(df.Match_ID == i[0])]
             players = [i[modo.header("Matches").index("P1")],i[modo.header("Matches").index("P2")]]
             cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
@@ -877,11 +871,11 @@ def input_missing_data():
     if count == 0:
         update_status_bar(status="No Matches with Missing Data.")
     else:
-        all_data_inverted = modo.invert_join(all_data)
+        ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
         set_display("Matches",update_status=True,start_index=0,reset=True)
 def deck_data_guess(update_type):
-    global all_data
-    global all_data_inverted
+    global ALL_DATA
+    global ALL_DATA_INVERTED
     global ask_to_save
 
     date_index = modo.header("Matches").index("Date")
@@ -890,15 +884,15 @@ def deck_data_guess(update_type):
     p1_sa_index = modo.header("Matches").index("P1_Subarch")
     p2_sa_index = modo.header("Matches").index("P2_Subarch")
     format_index = modo.header("Matches").index("Format")
-    df2 = pd.DataFrame(all_data[2],columns=modo.header("Plays"))
+    df2 = pd.DataFrame(ALL_DATA[2],columns=modo.header("Plays"))
 
-    for i in all_data[0]:
+    for i in ALL_DATA[0]:
         yyyy_mm = i[date_index][0:4] + "-" + i[date_index][5:7]
         players = [i[p1_index],i[p2_index]]
 
         # Update P1_Subarch, P2_Subarch for all Limited Matches.
         if update_type == "Limited":
-            if i[format_index] in input_options["Limited Formats"]:
+            if i[format_index] in INPUT_OPTIONS["Limited Formats"]:
                 ask_to_save = True
                 cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
                 cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
@@ -907,12 +901,12 @@ def deck_data_guess(update_type):
 
         # Update P1_Subarch, P2_Subarch for all Constructed Matches.
         elif update_type == "Constructed":
-            if i[format_index] in input_options["Constructed Formats"]:
+            if i[format_index] in INPUT_OPTIONS["Constructed Formats"]:
                 ask_to_save = True
                 cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
                 cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                p1_data = modo.closest_list(set(cards1),all_decks,yyyy_mm)
-                p2_data = modo.closest_list(set(cards2),all_decks,yyyy_mm)
+                p1_data = modo.closest_list(set(cards1),ALL_DECKS,yyyy_mm)
+                p2_data = modo.closest_list(set(cards2),ALL_DECKS,yyyy_mm)
                 i[p1_sa_index] = p1_data[0]
                 i[p2_sa_index] = p2_data[0]
 
@@ -921,12 +915,12 @@ def deck_data_guess(update_type):
             ask_to_save = True
             cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
             cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-            if i[format_index] in input_options["Limited Formats"]:
+            if i[format_index] in INPUT_OPTIONS["Limited Formats"]:
                 i[p1_sa_index] = modo.get_limited_subarch(cards1)
                 i[p2_sa_index] = modo.get_limited_subarch(cards2)
             else: 
-                p1_data = modo.closest_list(set(cards1),all_decks,yyyy_mm)
-                p2_data = modo.closest_list(set(cards2),all_decks,yyyy_mm)
+                p1_data = modo.closest_list(set(cards1),ALL_DECKS,yyyy_mm)
+                p2_data = modo.closest_list(set(cards2),ALL_DECKS,yyyy_mm)
                 i[p1_sa_index] = p1_data[0]
                 i[p2_sa_index] = p2_data[0]
 
@@ -935,21 +929,21 @@ def deck_data_guess(update_type):
             if (i[p1_sa_index] == "Unknown") or (i[p1_sa_index] == "NA"):
                 ask_to_save = True
                 cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                if i[format_index] in input_options["Limited Formats"]:
+                if i[format_index] in INPUT_OPTIONS["Limited Formats"]:
                     i[p1_sa_index] = modo.get_limited_subarch(cards1)
                 else:
-                    p1_data = modo.closest_list(set(cards1),all_decks,yyyy_mm)
+                    p1_data = modo.closest_list(set(cards1),ALL_DECKS,yyyy_mm)
                     i[p1_sa_index] = p1_data[0]
             if (i[p2_sa_index] == "Unknown") or (i[p2_sa_index] == "NA"):
                 ask_to_save = True
                 cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                if i[format_index] in input_options["Limited Formats"]:
+                if i[format_index] in INPUT_OPTIONS["Limited Formats"]:
                     i[p2_sa_index] = modo.get_limited_subarch(cards2)
                 else:
-                    p2_data = modo.closest_list(set(cards2),all_decks,yyyy_mm)
+                    p2_data = modo.closest_list(set(cards2),ALL_DECKS,yyyy_mm)
                     i[p2_sa_index] = p2_data[0]
 
-    all_data_inverted = modo.invert_join(all_data)
+    ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
 def rerun_decks_window():
     height = 200
     width =  400
@@ -966,37 +960,37 @@ def rerun_decks_window():
 
     def guess(mode):
         if mode == "NA/Unknown":
-            t = "Updated the P1_Subarch, P2_Subarch columns for Unknown Decks in the Date Range: " + list(all_decks.keys())[0]
+            t = "Updated the P1_Subarch, P2_Subarch columns for Unknown Decks in the Date Range: " + list(ALL_DECKS.keys())[0]
             deck_data_guess(update_type="Unknowns")
         elif mode == "Limited":
-            t = "Updated the P1_Subarch, P2_Subarch columns for Limited Matches in the Date Range: " + list(all_decks.keys())[0]
+            t = "Updated the P1_Subarch, P2_Subarch columns for Limited Matches in the Date Range: " + list(ALL_DECKS.keys())[0]
             deck_data_guess(update_type="Limited")
         elif mode == "Constructed":
-            t = "Updated the P1_Subarch, P2_Subarch columns for Constructed Matches in the Date Range: " + list(all_decks.keys())[0]
+            t = "Updated the P1_Subarch, P2_Subarch columns for Constructed Matches in the Date Range: " + list(ALL_DECKS.keys())[0]
             deck_data_guess(update_type="Constructed")
         elif mode == "Overwrite All":
-            t = "Updated the P1_Subarch, P2_Subarch columns for each Match in the Date Range: " + list(all_decks.keys())[0]
+            t = "Updated the P1_Subarch, P2_Subarch columns for each Match in the Date Range: " + list(ALL_DECKS.keys())[0]
             deck_data_guess(update_type="All")
 
         set_display("Matches",update_status=False,start_index=0,reset=True)
-        if len(all_decks) > 1:
-            t += " to " + list(all_decks.keys())[-1]
+        if len(ALL_DECKS) > 1:
+            t += " to " + list(ALL_DECKS.keys())[-1]
         update_status_bar(status=t)
         close_window()
 
     def import_decks():
-        global all_decks
+        global ALL_DECKS
 
-        all_decks.clear()
+        ALL_DECKS.clear()
         get_lists()
-        if len(all_decks) == 0:
+        if len(ALL_DECKS) == 0:
             label2["text"] = "Sample decklists loaded: NONE"
             button_apply["state"] = tk.DISABLED
-        elif len(all_decks) == 1:
-            label2["text"] = "Sample decklists loaded: " + list(all_decks.keys())[0]
+        elif len(ALL_DECKS) == 1:
+            label2["text"] = "Sample decklists loaded: " + list(ALL_DECKS.keys())[0]
             button_apply["state"] = tk.NORMAL
         else:
-            label2["text"] = "Sample decklists loaded: " + list(all_decks.keys())[0] + " to " + list(all_decks.keys())[-1]
+            label2["text"] = "Sample decklists loaded: " + list(ALL_DECKS.keys())[0] + " to " + list(ALL_DECKS.keys())[-1]
             button_apply["state"] = tk.NORMAL
 
         button2["state"] = tk.DISABLED
@@ -1028,12 +1022,12 @@ def rerun_decks_window():
     button_apply = tk.Button(bot_frame,text="Apply",width=10,command=lambda : guess(apply_mode.get()))
     button_close = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_window())
 
-    if len(all_decks) == 0:
+    if len(ALL_DECKS) == 0:
         label2["text"] = "Sample decklists loaded: NONE"
-    elif len(all_decks) == 1:
-        label2["text"] = "Sample decklists loaded: " + list(all_decks.keys())[0]
+    elif len(ALL_DECKS) == 1:
+        label2["text"] = "Sample decklists loaded: " + list(ALL_DECKS.keys())[0]
     else:
-        label2["text"] = "Sample decklists loaded: " + list(all_decks.keys())[0] + " to " + list(all_decks.keys())[-1]
+        label2["text"] = "Sample decklists loaded: " + list(ALL_DECKS.keys())[0] + " to " + list(ALL_DECKS.keys())[-1]
 
     label2.grid(row=1,column=0,padx=10,pady=(20,0),sticky="nsew")
     button2.grid(row=2,column=0,padx=10,pady=5) 
@@ -1043,7 +1037,7 @@ def rerun_decks_window():
     button_apply.grid(row=0,column=1,padx=10,pady=10)
     button_close.grid(row=0,column=2,padx=10,pady=10)   
 
-    if len(all_decks) == 0:
+    if len(ALL_DECKS) == 0:
         button_apply["state"] = tk.DISABLED
 
     # Comment out if we want to add back ability to import sample decklists from .txt files.
@@ -1112,26 +1106,26 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
         menu = match_type["menu"]
         menu.delete(0,"end")
         if mformat.get() == "NA":
-            l = ["NA"] + input_options["Constructed Match Types"] + input_options["Booster Draft Match Types"] + input_options["Sealed Match Types"]
+            l = ["NA"] + INPUT_OPTIONS["Constructed Match Types"] + INPUT_OPTIONS["Booster Draft Match Types"] + INPUT_OPTIONS["Sealed Match Types"]
             for i in l:
                 menu.add_command(label=i,command=lambda x=i: mtype.set(x))
-        elif mformat.get() in input_options["Constructed Formats"]:
-            l = ["NA"] + input_options["Constructed Match Types"]
+        elif mformat.get() in INPUT_OPTIONS["Constructed Formats"]:
+            l = ["NA"] + INPUT_OPTIONS["Constructed Match Types"]
             for i in l:
                 menu.add_command(label=i,command=lambda x=i: mtype.set(x))
         elif (mformat.get() == "Cube") or (mformat.get() == "Booster Draft"):
-            l = ["NA"] + input_options["Booster Draft Match Types"]
+            l = ["NA"] + INPUT_OPTIONS["Booster Draft Match Types"]
             for i in l:
                 menu.add_command(label=i,command=lambda x=i: mtype.set(x))
         elif mformat.get() == "Sealed Deck":
-            l = ["NA"] + input_options["Sealed Match Types"]
+            l = ["NA"] + INPUT_OPTIONS["Sealed Match Types"]
             for i in l:
                 menu.add_command(label=i,command=lambda x=i: mtype.set(x))
         
         if mtype.get() not in l:
             mtype.set("Select Match Type")
 
-        if mformat.get() in input_options["Limited Formats"]:
+        if mformat.get() in INPUT_OPTIONS["Limited Formats"]:
             draft_format["state"] = tk.NORMAL
             arch_options = ["Limited"]
 
@@ -1148,13 +1142,13 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
             menu = draft_format["menu"]
             menu.delete(0,"end")
             if mformat.get() == "Cube":
-                for i in input_options["Cube Formats"]:
+                for i in INPUT_OPTIONS["Cube Formats"]:
                     menu.add_command(label=i,command=lambda x=i: dformat.set(x))
             elif mformat.get() == "Booster Draft":
-                for i in input_options["Booster Draft Formats"]:
+                for i in INPUT_OPTIONS["Booster Draft Formats"]:
                     menu.add_command(label=i,command=lambda x=i: dformat.set(x))
             elif mformat.get() == "Sealed Deck":
-                for i in input_options["Sealed Formats"]:
+                for i in INPUT_OPTIONS["Sealed Formats"]:
                     menu.add_command(label=i,command=lambda x=i: dformat.set(x))            
 
             p1_arch.set(arch_options[0])
@@ -1163,7 +1157,7 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
         elif (p1_arch.get() == "Limited"):
             draft_format["state"] = tk.DISABLED
             dformat.set("Select Limited Format")
-            arch_options = ["NA"] + input_options["Archetypes"]
+            arch_options = ["NA"] + INPUT_OPTIONS["Archetypes"]
 
             menu = p1_arch_menu["menu"]
             menu.delete(0,"end")
@@ -1224,7 +1218,7 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     p2_arch = tk.StringVar()
     p2_arch.set("P2 Archetype")
 
-    format_options = ["NA"] + input_options["Constructed Formats"] + input_options["Limited Formats"]
+    format_options = ["NA"] + INPUT_OPTIONS["Constructed Formats"] + INPUT_OPTIONS["Limited Formats"]
     mformat = tk.StringVar()
     mformat.set("Select Format")
 
@@ -1236,10 +1230,10 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     dformat = tk.StringVar()
     dformat.set("Select Limited Format")
 
-    if mdata[modo.header("Matches").index("Format")] in input_options["Limited Formats"]:
+    if mdata[modo.header("Matches").index("Format")] in INPUT_OPTIONS["Limited Formats"]:
         arch_options = ["Limited"]
     else:
-        arch_options += input_options["Archetypes"]
+        arch_options += INPUT_OPTIONS["Archetypes"]
 
     if mdata[modo.header("Matches").index("P1_Arch")] != "NA":
         p1_arch.set(mdata[modo.header("Matches").index("P1_Arch")])
@@ -1253,18 +1247,18 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
         mtype.set(mdata[modo.header("Matches").index("Match_Type")])
     
     if mformat.get() == "Cube":
-        draft_format_options += input_options["Cube Formats"]
-        type_options += input_options["Booster Draft Match Types"]
+        draft_format_options += INPUT_OPTIONS["Cube Formats"]
+        type_options += INPUT_OPTIONS["Booster Draft Match Types"]
     elif mformat.get() == "Booster Draft":
-        draft_format_options += input_options["Booster Draft Formats"]
-        type_options += input_options["Booster Draft Match Types"]
+        draft_format_options += INPUT_OPTIONS["Booster Draft Formats"]
+        type_options += INPUT_OPTIONS["Booster Draft Match Types"]
     elif mformat.get() == "Sealed Deck":
-        draft_format_options += input_options["Sealed Formats"]
-        type_options += input_options["Sealed Match Types"]
-    elif mformat.get() in input_options["Constructed Formats"]:
-        type_options += input_options["Constructed Match Types"]
+        draft_format_options += INPUT_OPTIONS["Sealed Formats"]
+        type_options += INPUT_OPTIONS["Sealed Match Types"]
+    elif mformat.get() in INPUT_OPTIONS["Constructed Formats"]:
+        type_options += INPUT_OPTIONS["Constructed Match Types"]
     elif mformat.get() == "Select Format":
-        type_options += input_options["Constructed Match Types"] + input_options["Booster Draft Match Types"] + input_options["Sealed Match Types"]
+        type_options += INPUT_OPTIONS["Constructed Match Types"] + INPUT_OPTIONS["Booster Draft Match Types"] + INPUT_OPTIONS["Sealed Match Types"]
 
     p1_arch_menu = tk.OptionMenu(mid_frame1,p1_arch,*arch_options)
     p1_sub =  tk.Entry(mid_frame1)
@@ -1303,7 +1297,7 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     match_type.config(width=25)
     submit_button.grid(row=0,column=3,padx=5,pady=5)
 
-    if mformat.get() not in input_options["Limited Formats"]:
+    if mformat.get() not in INPUT_OPTIONS["Limited Formats"]:
         draft_format["state"] = tk.DISABLED
     if progress == 0:
         button_skip["state"] = tk.DISABLED
@@ -1466,12 +1460,12 @@ def next_page():
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def export2(current=False,matches=False,games=False,plays=False,drafts=False,picks=False,_csv=False,_excel=False,inverted=False,filtered=False):
-    global filepath_export
-    fp = filepath_export
-    if (filepath_export is None) or (filepath_export == ""):
-        filepath_export = filedialog.askdirectory()
-        filepath_export = os.path.normpath(filepath_export)
-    if filepath_export is None:
+    global FILEPATH_EXPORT
+    fp = FILEPATH_EXPORT
+    if (FILEPATH_EXPORT is None) or (FILEPATH_EXPORT == ""):
+        FILEPATH_EXPORT = filedialog.askdirectory()
+        FILEPATH_EXPORT = os.path.normpath(FILEPATH_EXPORT)
+    if FILEPATH_EXPORT is None:
         return
 
     file_names = []
@@ -1485,19 +1479,19 @@ def export2(current=False,matches=False,games=False,plays=False,drafts=False,pic
         else:
             header_list.append(modo.header(display))
         if display == "Matches":
-            if ((hero != "") & (filtered)):
-                df = pd.DataFrame(all_data_inverted[0],columns=modo.header(display))
-                df = df[(df.P1 == hero)]
+            if ((HERO != "") & (filtered)):
+                df = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header(display))
+                df = df[(df.P1 == HERO)]
             else:
-                df = pd.DataFrame(all_data[0],columns=modo.header(display))
+                df = pd.DataFrame(ALL_DATA[0],columns=modo.header(display))
         elif display == "Games":
-            if ((hero != "") & (filtered)):
-                df = pd.DataFrame(all_data_inverted[1],columns=modo.header(display))
-                df = df[(df.P1 == hero)]
+            if ((HERO != "") & (filtered)):
+                df = pd.DataFrame(ALL_DATA_INVERTED[1],columns=modo.header(display))
+                df = df[(df.P1 == HERO)]
             else:
-                df = pd.DataFrame(all_data[1],columns=modo.header(display))            
+                df = pd.DataFrame(ALL_DATA[1],columns=modo.header(display))            
         elif display == "Plays":
-            df = pd.DataFrame(all_data[2],columns=modo.header(display))
+            df = pd.DataFrame(ALL_DATA[2],columns=modo.header(display))
         elif display == "Drafts":
             df = pd.DataFrame(DRAFTS_TABLE,columns=modo.header(display))
         elif display == "Picks":
@@ -1506,27 +1500,27 @@ def export2(current=False,matches=False,games=False,plays=False,drafts=False,pic
     if matches:
         file_names.append("Matches")
         header_list.append(modo.header("Matches"))
-        if (inverted) or ((hero != "") & (filtered)):
-            df = pd.DataFrame(all_data_inverted[0],columns=modo.header("Matches"))
+        if (inverted) or ((HERO != "") & (filtered)):
+            df = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
         else:
-            df = pd.DataFrame(all_data[0],columns=modo.header("Matches"))
-        if ((hero != "") & (filtered)):
-            df = df[(df.P1 == hero)]
+            df = pd.DataFrame(ALL_DATA[0],columns=modo.header("Matches"))
+        if ((HERO != "") & (filtered)):
+            df = df[(df.P1 == HERO)]
         data_to_write.append(df)
     if games:
         file_names.append("Games")
         header_list.append(modo.header("Games"))
-        if (inverted) or ((hero != "") & (filtered)):
-            df = pd.DataFrame(all_data_inverted[1],columns=modo.header("Games"))
+        if (inverted) or ((HERO != "") & (filtered)):
+            df = pd.DataFrame(ALL_DATA_INVERTED[1],columns=modo.header("Games"))
         else:
-            df = pd.DataFrame(all_data[1],columns=modo.header("Games"))
-        if ((hero != "") & (filtered)):
-            df = df[(df.P1 == hero)]
+            df = pd.DataFrame(ALL_DATA[1],columns=modo.header("Games"))
+        if ((HERO != "") & (filtered)):
+            df = df[(df.P1 == HERO)]
         data_to_write.append(df)
     if plays:
         file_names.append("Plays")
         header_list.append(modo.header("Plays"))
-        data_to_write.append(pd.DataFrame(all_data[2],columns=modo.header("Plays")))
+        data_to_write.append(pd.DataFrame(ALL_DATA[2],columns=modo.header("Plays")))
     if drafts:
         file_names.append("Drafts")
         header_list.append(modo.header("Drafts"))
@@ -1559,14 +1553,14 @@ def export2(current=False,matches=False,games=False,plays=False,drafts=False,pic
             file_names[index] += ".csv"
         try:
             for index,i in enumerate(file_names):
-                f = f"{filepath_export}/{i}"
+                f = f"{FILEPATH_EXPORT}/{i}"
                 with open(f,"w",encoding="UTF8",newline="") as file:
                     writer = csv.writer(file)
                     writer.writerow(header_list[index])
                     df_rows = data_to_write[index].to_numpy().tolist()
                     for row in df_rows:
                         writer.writerow(row)
-            update_status_bar(status=f"Exported {len(file_names)} CSV file(s) to {filepath_export}.")
+            update_status_bar(status=f"Exported {len(file_names)} CSV file(s) to {FILEPATH_EXPORT}.")
         except PermissionError:
             update_status_bar(status="Permission Error: Common error cause is an open file that can not be overwritten.")
     elif _excel:
@@ -1574,12 +1568,12 @@ def export2(current=False,matches=False,games=False,plays=False,drafts=False,pic
             file_names[index] += ".xlsx"
         try:
             for index,i in enumerate(file_names):
-                f = f"{filepath_export}/{i}"
+                f = f"{FILEPATH_EXPORT}/{i}"
                 data_to_write[index].to_excel(f,index=False)
-            update_status_bar(status=f"Exported {len(file_names)} Excel file(s) to {filepath_export}.")
+            update_status_bar(status=f"Exported {len(file_names)} Excel file(s) to {FILEPATH_EXPORT}.")
         except PermissionError:
             update_status_bar(status="Permission Error: Common error cause is an open file that can not be overwritten.")
-    filepath_export = fp
+    FILEPATH_EXPORT = fp
 def set_default_hero():
     height = 100
     width =  275
@@ -1595,13 +1589,13 @@ def set_default_hero():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def set_hero():
-        global hero
+        global HERO
         entry_str = entry.get()
         entry_str = entry_str.strip()
         entry_str = entry_str.replace(".","*")
         entry_str = entry_str.replace(" ","+")
         if entry_str == "":
-            hero = ""
+            HERO = ""
             save_settings()
             update_status_bar(status="Cleared Setting: Hero")
             if display != "Plays":
@@ -1609,9 +1603,9 @@ def set_default_hero():
             stats_button["state"] = tk.DISABLED
             close_hero_window()
         elif entry_str in hero_options:
-            hero = entry_str
+            HERO = entry_str
             save_settings()
-            update_status_bar(status="Updated Hero to " + hero + ".")
+            update_status_bar(status="Updated Hero to " + HERO + ".")
             if display != "Plays":
                 set_display(display,update_status=False,start_index=0,reset=True)
             stats_button["state"] = tk.NORMAL
@@ -1626,7 +1620,7 @@ def set_default_hero():
         hero_window.grab_release()
         hero_window.destroy()
     
-    df0_i = pd.DataFrame(all_data_inverted[0],columns=modo.header("Matches"))
+    df0_i = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
     hero_options = df0_i.P1.tolist()
     hero_options = sorted(list(set(hero_options)),key=str.casefold)
 
@@ -1644,7 +1638,7 @@ def set_default_hero():
 
     label1 = tk.Label(mid_frame,text="Enter 'Hero' Username.",wraplength=width,justify="left")
     entry = tk.Entry(mid_frame)
-    entry.insert(0,hero)
+    entry.insert(0,HERO)
     label2 = tk.Label(mid_frame,text="",wraplength=width,justify="left")
     button1 = tk.Button(bot_frame,text="Save",width=10,command=lambda : set_hero())
     button2 = tk.Button(bot_frame,text="Clear",width=10,command=lambda : clear_hero())
@@ -1681,11 +1675,11 @@ def set_default_export():
             label1.config(text=fp)
 
     def save_path():
-        global filepath_export
+        global FILEPATH_EXPORT
         if label1["text"] == "No Default Export Folder":
-            filepath_export = ""
+            FILEPATH_EXPORT = ""
         else:
-            filepath_export = label1["text"]
+            FILEPATH_EXPORT = label1["text"]
         save_settings()
         update_status_bar(status="Updated export folder location.")
         close_export_window()
@@ -1703,10 +1697,10 @@ def set_default_export():
     export_window.rowconfigure(1,minsize=0,weight=1)  
     mid_frame.grid_columnconfigure(0,weight=1)
 
-    if (filepath_export is None) or (filepath_export == "") or (filepath_export == "."):
+    if (FILEPATH_EXPORT is None) or (FILEPATH_EXPORT == "") or (FILEPATH_EXPORT == "."):
         label1 = tk.Label(mid_frame,text="No Default Export Folder",wraplength=width,justify="left")
     else:
-        label1 = tk.Label(mid_frame,text=filepath_export,wraplength=width,justify="left")
+        label1 = tk.Label(mid_frame,text=FILEPATH_EXPORT,wraplength=width,justify="left")
     button1 = tk.Button(mid_frame,text="Set Default Export Folder",width=20,command=lambda : get_export_path())
     button3 = tk.Button(bot_frame,text="Save",width=10,command=lambda : save_path())
     button4 = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_export_window())
@@ -1748,16 +1742,16 @@ def set_default_import():
             label2.config(text=fp)
 
     def save_path():
-        global filepath_drafts
-        global filepath_logs
+        global FILEPATH_DRAFTS
+        global FILEPATH_LOGS
         if label1["text"] == "No Default Decklists Folder":
-            filepath_drafts = ""
+            FILEPATH_DRAFTS = ""
         else:
-            filepath_drafts = label1["text"]
+            FILEPATH_DRAFTS = label1["text"]
         if label2["text"] == "No Default GameLogs Folder":
-            filepath_logs = ""
+            FILEPATH_LOGS = ""
         else:
-            filepath_logs = label2["text"]
+            FILEPATH_LOGS = label2["text"]
         save_settings()
         update_status_bar(status="Updated default import folder locations.")
         close_import_window()
@@ -1775,16 +1769,16 @@ def set_default_import():
     import_window.rowconfigure(1,minsize=0,weight=1)  
     mid_frame.grid_columnconfigure(0,weight=1)
 
-    if (filepath_drafts is None) or (filepath_drafts == "") or (filepath_drafts == "."):
+    if (FILEPATH_DRAFTS is None) or (FILEPATH_DRAFTS == "") or (FILEPATH_DRAFTS == "."):
         label1 = tk.Label(mid_frame,text="No Default DraftLogs Folder",wraplength=width,justify="left")
     else:
-        label1 = tk.Label(mid_frame,text=filepath_drafts,wraplength=width,justify="left")
+        label1 = tk.Label(mid_frame,text=FILEPATH_DRAFTS,wraplength=width,justify="left")
     button1 = tk.Button(mid_frame,text="Get DraftLogs Folder",width=20,command=lambda : get_drafts_path())
 
-    if (filepath_logs is None) or (filepath_logs == "") or (filepath_logs == "."):
+    if (FILEPATH_LOGS is None) or (FILEPATH_LOGS == "") or (FILEPATH_LOGS == "."):
         label2 = tk.Label(mid_frame,text="No Default GameLogs Folder",wraplength=width,justify="left")
     else:
-        label2 = tk.Label(mid_frame,text=filepath_logs,wraplength=width,justify="left")
+        label2 = tk.Label(mid_frame,text=FILEPATH_LOGS,wraplength=width,justify="left")
     button2 = tk.Button(mid_frame,text="Get GameLogs Folder",width=20,command=lambda : get_logs_path())
     button3 = tk.Button(bot_frame,text="Save",width=10,command=lambda : save_path())
     button4 = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_import_window())
@@ -2021,22 +2015,22 @@ def set_filter():
     filter_init = filter_dict.copy()
 
     # Building dataframe (unfiltered) to give us our dropdown options.
-    if hero == "":
+    if HERO == "":
         if display == "Matches":
-            df = pd.DataFrame(all_data[0],columns=modo.header(display))
+            df = pd.DataFrame(ALL_DATA[0],columns=modo.header(display))
         elif display == "Games":
-            df = pd.DataFrame(all_data[1],columns=modo.header(display))
+            df = pd.DataFrame(ALL_DATA[1],columns=modo.header(display))
         elif display == "Plays":
-            df = pd.DataFrame(all_data[2],columns=modo.header(display))
+            df = pd.DataFrame(ALL_DATA[2],columns=modo.header(display))
     else:
         if display == "Matches":
-            df = pd.DataFrame(all_data_inverted[0],columns=modo.header(display))
-            df = df[(df.P1 == hero)]
+            df = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header(display))
+            df = df[(df.P1 == HERO)]
         elif display == "Games":
-            df = pd.DataFrame(all_data_inverted[1],columns=modo.header(display))
-            df = df[(df.P1 == hero)]
+            df = pd.DataFrame(ALL_DATA_INVERTED[1],columns=modo.header(display))
+            df = df[(df.P1 == HERO)]
         elif display == "Plays":
-            df = pd.DataFrame(all_data_inverted[2],columns=modo.header(display))
+            df = pd.DataFrame(ALL_DATA_INVERTED[2],columns=modo.header(display))
     if display == "Drafts":
         df = pd.DataFrame(DRAFTS_TABLE,columns=modo.header(display))
     elif display == "Picks":
@@ -2099,9 +2093,10 @@ def set_filter():
     update_filter_text()
     filter_window.protocol("WM_DELETE_WINDOW", lambda : close_filter_window())
 def revise_record2():
-    global all_data
-    global all_data_inverted
+    global ALL_DATA
+    global ALL_DATA_INVERTED
     global selected
+
     if tree1.focus() == "":
         return
 
@@ -2119,7 +2114,7 @@ def revise_record2():
     p2_arch_index = modo.header("Matches").index("P2_Arch")
     p2_sub_index =  modo.header("Matches").index("P2_Subarch")
 
-    df = pd.DataFrame(all_data[2],columns=modo.header("Plays"))
+    df = pd.DataFrame(ALL_DATA[2],columns=modo.header("Plays"))
     df = df[(df.Match_ID == values[0])]
     players = [values[p1_index],values[p2_index]]
     cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
@@ -2134,7 +2129,7 @@ def revise_record2():
     if (missing_data == "Exit") or (missing_data == "Skip"):
         return
 
-    for i in all_data[0]:
+    for i in ALL_DATA[0]:
         if i[0] == values[0]:
             if i[p1_index] == values[p1_index]:
                 i[p1_arch_index] = missing_data[0]
@@ -2151,7 +2146,7 @@ def revise_record2():
             i[mtype_index] =   missing_data[6]  
             break
 
-    all_data_inverted = modo.invert_join(all_data)
+    ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
     set_display("Matches",update_status=True,start_index=display_index,reset=False)
     revise_button["state"] = tk.NORMAL
     remove_button["state"] = tk.NORMAL
@@ -2163,8 +2158,8 @@ def revise_record2():
             selected = i
             break
 def revise_record3():
-    global all_data
-    global all_data_inverted
+    global ALL_DATA
+    global ALL_DATA_INVERTED
     global selected
     if tree1.focus() == "":
         return
@@ -2242,19 +2237,19 @@ def revise_record():
         menu = match_type_entry["menu"]
         menu.delete(0,"end")
         if match_format.get() == "NA":
-            for i in ["NA"] + input_options["Constructed Match Types"] + input_options["Booster Draft Match Types"] + input_options["Sealed Match Types"]:
+            for i in ["NA"] + INPUT_OPTIONS["Constructed Match Types"] + INPUT_OPTIONS["Booster Draft Match Types"] + INPUT_OPTIONS["Sealed Match Types"]:
                 menu.add_command(label=i,command=lambda x=i: match_type.set(x))
-        elif match_format.get() in input_options["Constructed Formats"]:
-            for i in ["NA"] + input_options["Constructed Match Types"]:
+        elif match_format.get() in INPUT_OPTIONS["Constructed Formats"]:
+            for i in ["NA"] + INPUT_OPTIONS["Constructed Match Types"]:
                 menu.add_command(label=i,command=lambda x=i: match_type.set(x))
         elif (match_format.get() == "Cube") or (match_format.get() == "Booster Draft"):
-            for i in ["NA"] + input_options["Booster Draft Match Types"]:
+            for i in ["NA"] + INPUT_OPTIONS["Booster Draft Match Types"]:
                 menu.add_command(label=i,command=lambda x=i: match_type.set(x))
         elif match_format.get() == "Sealed Deck":
-            for i in ["NA"] + input_options["Sealed Match Types"]:
+            for i in ["NA"] + INPUT_OPTIONS["Sealed Match Types"]:
                 menu.add_command(label=i,command=lambda x=i: match_type.set(x))
 
-        if match_format.get() in input_options["Limited Formats"]:
+        if match_format.get() in INPUT_OPTIONS["Limited Formats"]:
             arch_options = ["Limited"]
             draft_type_entry["state"] = tk.NORMAL
 
@@ -2271,19 +2266,19 @@ def revise_record():
             menu = draft_type_entry["menu"]
             menu.delete(0,"end")
             if match_format.get() == "Cube":
-                for i in ["NA"] + input_options["Cube Formats"]:
+                for i in ["NA"] + INPUT_OPTIONS["Cube Formats"]:
                     menu.add_command(label=i,command=lambda x=i: limited_format.set(x))
             elif match_format.get() == "Booster Draft":
-                for i in ["NA"] + input_options["Booster Draft Formats"]:
+                for i in ["NA"] + INPUT_OPTIONS["Booster Draft Formats"]:
                     menu.add_command(label=i,command=lambda x=i: limited_format.set(x))
             elif match_format.get() == "Sealed Deck":
-                for i in ["NA"] + input_options["Sealed Formats"]:
+                for i in ["NA"] + INPUT_OPTIONS["Sealed Formats"]:
                     menu.add_command(label=i,command=lambda x=i: limited_format.set(x))
 
             p1_arch_type.set(arch_options[0])
             p2_arch_type.set(arch_options[0])
         elif (p1_arch_type.get() == "Limited"):
-            arch_options = ["NA"] + input_options["Archetypes"]
+            arch_options = ["NA"] + INPUT_OPTIONS["Archetypes"]
             limited_format.set("NA")
             draft_type_entry["state"] = tk.DISABLED
 
@@ -2305,8 +2300,8 @@ def revise_record():
                 p2_arch_type.set(values[modo.header("Matches").index("P2_Arch")])
 
     def close_revise_window():
-        global all_data_inverted
-        for count,i in enumerate(all_data[0]):
+        global ALL_DATA_INVERTED
+        for count,i in enumerate(ALL_DATA[0]):
             if i[0] == values[0]:
                 if i[modo.header("Matches").index("P1")] == values[modo.header("Matches").index("P1")]:
                     i[modo.header("Matches").index("P1_Arch")] = p1_arch_type.get()
@@ -2321,7 +2316,7 @@ def revise_record():
                 i[modo.header("Matches").index("Format")] = match_format.get()
                 i[modo.header("Matches").index("Limited_Format")] = limited_format.get()
                 i[modo.header("Matches").index("Match_Type")] = match_type.get()                   
-                all_data_inverted = modo.invert_join(all_data)
+                ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
                 set_display("Matches",update_status=True,start_index=0,reset=True)
                 break
         revise_window.grab_release()
@@ -2334,25 +2329,25 @@ def revise_record():
     selected = tree1.focus()
     values = list(tree1.item(selected,"values"))
 
-    format_options = ["NA"] + input_options["Constructed Formats"] + input_options["Limited Formats"]
+    format_options = ["NA"] + INPUT_OPTIONS["Constructed Formats"] + INPUT_OPTIONS["Limited Formats"]
     match_format = tk.StringVar()
     match_format.set(values[modo.header("Matches").index("Format")])
 
     if match_format.get() == "Cube":
-        limited_options = input_options["Cube Formats"]
-        match_options = ["NA"] + input_options["Booster Draft Match Types"]
+        limited_options = INPUT_OPTIONS["Cube Formats"]
+        match_options = ["NA"] + INPUT_OPTIONS["Booster Draft Match Types"]
     elif match_format.get() == "Booster Draft":
-        limited_options = input_options["Booster Draft Formats"]
-        match_options = ["NA"] + input_options["Booster Draft Match Types"]
+        limited_options = INPUT_OPTIONS["Booster Draft Formats"]
+        match_options = ["NA"] + INPUT_OPTIONS["Booster Draft Match Types"]
     elif match_format.get() == "Sealed Deck":
-        limited_options = input_options["Sealed Formats"]
-        match_options = ["NA"] + input_options["Sealed Match Types"]
-    elif match_format.get() in input_options["Constructed Formats"]:
+        limited_options = INPUT_OPTIONS["Sealed Formats"]
+        match_options = ["NA"] + INPUT_OPTIONS["Sealed Match Types"]
+    elif match_format.get() in INPUT_OPTIONS["Constructed Formats"]:
         limited_options = ["NA"]
-        match_options = ["NA"] + input_options["Constructed Match Types"]
+        match_options = ["NA"] + INPUT_OPTIONS["Constructed Match Types"]
     elif match_format.get() == "NA":
         limited_options = ["NA"]
-        match_options = ["NA"] + input_options["Constructed Match Types"] + input_options["Booster Draft Match Types"] + input_options["Sealed Match Types"]
+        match_options = ["NA"] + INPUT_OPTIONS["Constructed Match Types"] + INPUT_OPTIONS["Booster Draft Match Types"] + INPUT_OPTIONS["Sealed Match Types"]
 
     limited_format = tk.StringVar()
     limited_format.set(values[modo.header("Matches").index("Limited_Format")])
@@ -2360,10 +2355,10 @@ def revise_record():
     match_type = tk.StringVar()
     match_type.set(values[modo.header("Matches").index("Match_Type")])
 
-    if values[modo.header("Matches").index("Format")] in input_options["Limited Formats"]:
+    if values[modo.header("Matches").index("Format")] in INPUT_OPTIONS["Limited Formats"]:
         arch_options = ["Limited"]
     else:
-        arch_options = input_options["Archetypes"]
+        arch_options = INPUT_OPTIONS["Archetypes"]
     p1_arch_type = tk.StringVar()
     p1_arch_type.set(values[modo.header("Matches").index("P1_Arch")])
 
@@ -2448,7 +2443,7 @@ def revise_record():
     button4.grid(row=0,column=1,padx=10,pady=10)
 
     mid_frame["text"] = "Match_ID: " + values[0]
-    if match_format.get() not in input_options["Limited Formats"]:
+    if match_format.get() not in INPUT_OPTIONS["Limited Formats"]:
         draft_type_entry["state"] = tk.DISABLED
 
     match_format.trace("w",update_arch)
@@ -2562,20 +2557,20 @@ def revise_record_multi():
             match_type_entry.config(width=20)
 
     def format_updated(*argv):
-        if match_format.get() in input_options["Limited Formats"]:
+        if match_format.get() in INPUT_OPTIONS["Limited Formats"]:
             lim_format_entry["state"] = tk.NORMAL
             lim_format.set("NA")
 
             menu = lim_format_entry["menu"]
             menu.delete(0,"end")
             if match_format.get() == "Cube":
-                for i in input_options["Cube Formats"]:
+                for i in INPUT_OPTIONS["Cube Formats"]:
                     menu.add_command(label=i,command=lambda x=i: lim_format.set(x))
             elif match_format.get() == "Booster Draft":
-                for i in input_options["Booster Draft Formats"]:
+                for i in INPUT_OPTIONS["Booster Draft Formats"]:
                     menu.add_command(label=i,command=lambda x=i: lim_format.set(x))
             elif match_format.get() == "Sealed Deck":
-                for i in input_options["Sealed Formats"]:
+                for i in INPUT_OPTIONS["Sealed Formats"]:
                     menu.add_command(label=i,command=lambda x=i: lim_format.set(x))    
         else:
             lim_format.set("NA")
@@ -2587,7 +2582,7 @@ def revise_record_multi():
         ask_to_save = True
         for i in selected:
             values = list(tree1.item(i,"values"))
-            for index,j in enumerate(itertools.chain(*[all_data[0],all_data_inverted[0]])):
+            for index,j in enumerate(itertools.chain(*[ALL_DATA[0],ALL_DATA_INVERTED[0]])):
                 if values[0] == j[0]:
                     if field == "P1 Deck":
                         if values[modo.header("Matches").index("P1")] == j[modo.header("Matches").index("P1")]:
@@ -2606,10 +2601,10 @@ def revise_record_multi():
                     elif field == "Format":
                         j[modo.header("Matches").index("Format")] = match_format.get()
                         j[modo.header("Matches").index("Limited_Format")] = lim_format.get()
-                        if match_format.get() in input_options["Limited Formats"]:
+                        if match_format.get() in INPUT_OPTIONS["Limited Formats"]:
                             j[modo.header("Matches").index("P1_Arch")] = "Limited"
                             j[modo.header("Matches").index("P2_Arch")] = "Limited"
-                        elif match_format.get() in input_options["Constructed Formats"]:
+                        elif match_format.get() in INPUT_OPTIONS["Constructed Formats"]:
                             if j[modo.header("Matches").index("P1_Arch")] == "Limited":
                                 j[modo.header("Matches").index("P1_Arch")] = "NA"
                             if j[modo.header("Matches").index("P2_Arch")] == "Limited":
@@ -2640,14 +2635,14 @@ def revise_record_multi():
     for i in selected:
         format_i = list(tree1.item(i,"values"))[format_index]
         sel_matchid.append(list(tree1.item(i,"values"))[0])
-        if format_i in input_options["Constructed Formats"]:
+        if format_i in INPUT_OPTIONS["Constructed Formats"]:
             sel_formats["constructed"] = True
         elif (format_i == "Booster Draft") or (format_i == "Cube"):
             sel_formats["booster"] = True
         elif format_i == "Sealed Deck":
             sel_formats["sealed"] = True
 
-    format_options = ["NA"] + input_options["Constructed Formats"] + input_options["Limited Formats"]
+    format_options = ["NA"] + INPUT_OPTIONS["Constructed Formats"] + INPUT_OPTIONS["Limited Formats"]
     match_format = tk.StringVar()
     match_format.set(format_options[0])
 
@@ -2657,13 +2652,13 @@ def revise_record_multi():
 
     match_options = ["NA"]
     if (sel_formats["constructed"] == True) and (sel_formats["booster"] == False) and (sel_formats["sealed"] == False):
-        match_options += input_options["Constructed Match Types"]
+        match_options += INPUT_OPTIONS["Constructed Match Types"]
     elif (sel_formats["constructed"] == False) and (sel_formats["booster"] == True) and (sel_formats["sealed"] == False):
-        match_options += input_options["Booster Draft Match Types"]
+        match_options += INPUT_OPTIONS["Booster Draft Match Types"]
     elif (sel_formats["constructed"] == False) and (sel_formats["booster"] == False) and (sel_formats["sealed"] == True):
-        match_options += input_options["Sealed Match Types"]
+        match_options += INPUT_OPTIONS["Sealed Match Types"]
     elif (sel_formats["constructed"] == False) and (sel_formats["booster"] == False) and (sel_formats["sealed"] == False):
-        match_options += input_options["Constructed Match Types"] + input_options["Booster Draft Match Types"] + input_options["Sealed Match Types"]
+        match_options += INPUT_OPTIONS["Constructed Match Types"] + INPUT_OPTIONS["Booster Draft Match Types"] + INPUT_OPTIONS["Sealed Match Types"]
     match_type = tk.StringVar()
     match_type.set(match_options[0])
 
@@ -2678,7 +2673,7 @@ def revise_record_multi():
     field_menu.grid(row=0,column=0,pady=10,sticky="")
     field_menu.config(width=15)
 
-    arch_options = ["NA"] + ["Limited"] + input_options["Archetypes"]
+    arch_options = ["NA"] + ["Limited"] + INPUT_OPTIONS["Archetypes"]
 
     p1_arch_type = tk.StringVar()
     p1_arch_type.set(arch_options[0])
@@ -2771,22 +2766,22 @@ def import_window():
             button3["state"] = tk.NORMAL
 
     def import_data(overwrite):
-        global all_data
-        global all_data_inverted
-        global filepath_logs
-        global filepath_drafts
-        global hero
+        global ALL_DATA
+        global ALL_DATA_INVERTED
+        global FILEPATH_LOGS
+        global FILEPATH_DRAFTS
+        global HERO
 
-        filepath_drafts = label1["text"]
-        filepath_logs = label2["text"]
+        FILEPATH_DRAFTS = label1["text"]
+        FILEPATH_LOGS = label2["text"]
 
         if overwrite:
-            h = hero
+            h = HERO
             match_dict = user_inputs(type="Matches")
             game_dict = user_inputs(type="Games")
             clear_loaded()
-            get_all_data(fp_logs=filepath_logs_copy,fp_drafts=filepath_drafts_copy,copy=False)
-            for i in all_data[0]:
+            get_all_data(fp_logs=FILEPATH_LOGS_COPY,fp_drafts=FILEPATH_DRAFTS_COPY,copy=False)
+            for i in ALL_DATA[0]:
                 try:
                     i[modo.header("Matches").index("P1_Arch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P1")]][0]
                     i[modo.header("Matches").index("P1_Subarch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P1")]][1]
@@ -2798,7 +2793,7 @@ def import_window():
                 # Found new Match for which we don't have user inputs.
                 except KeyError:
                     pass
-            for i in all_data[1]:
+            for i in ALL_DATA[1]:
                 key = i[0] + "-" + str(i[modo.header("Games").index("Game_Num")])
                 try:
                     if (i[modo.header("Games").index("P1")] == game_dict[key][0]):
@@ -2806,13 +2801,17 @@ def import_window():
                 # Found new Game for which we don't have user inputs.
                 except KeyError:
                     pass
-            hero = h
-            if hero != "":
+                # Delete RawData for Games that have a manually entered Game_Winner.
+                if key in ALL_DATA[3]:
+                    if i[modo.header("Games").index("Game_Winner")] != "NA":
+                        ALL_DATA[3].pop(key)
+            HERO = h
+            if HERO != "":
                 stats_button["state"] = tk.NORMAL
-            modo.update_game_wins(all_data)
-            all_data_inverted = modo.invert_join(all_data)
+            modo.update_game_wins(ALL_DATA)
+            ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
         else:
-            get_all_data(fp_logs=filepath_logs,fp_drafts=filepath_drafts,copy=True)
+            get_all_data(fp_logs=FILEPATH_LOGS,fp_drafts=FILEPATH_DRAFTS,copy=True)
         clear_filter(update_status=False,reload_display=False)
         if data_loaded != False:
             data_menu.entryconfig("Set Default Hero",state=tk.NORMAL)
@@ -2843,14 +2842,14 @@ def import_window():
     button3 = tk.Button(bot_frame,text="Scan for New Files",width=15,command=lambda : import_data(overwrite=False))
     button4 = tk.Button(bot_frame,text="Re-Import Copies",width=15,command=lambda : import_data(overwrite=True))
     button5 = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_import_window())
-    if (filepath_drafts is None) or (filepath_drafts == "") or (filepath_drafts == "."):
+    if (FILEPATH_DRAFTS is None) or (FILEPATH_DRAFTS == "") or (FILEPATH_DRAFTS == "."):
         label1 = tk.Label(mid_frame,text="No Default DraftLogs Folder",wraplength=width,justify="left")
     else:
-        label1 = tk.Label(mid_frame,text=filepath_drafts,wraplength=width,justify="left")
-    if (filepath_logs is None) or (filepath_logs == "") or (filepath_logs == "."):
+        label1 = tk.Label(mid_frame,text=FILEPATH_DRAFTS,wraplength=width,justify="left")
+    if (FILEPATH_LOGS is None) or (FILEPATH_LOGS == "") or (FILEPATH_LOGS == "."):
         label2 = tk.Label(mid_frame,text="No Default GameLogs Folder",wraplength=width,justify="left")
     else:
-        label2 = tk.Label(mid_frame,text=filepath_logs,wraplength=width,justify="left")
+        label2 = tk.Label(mid_frame,text=FILEPATH_LOGS,wraplength=width,justify="left")
     if (label1["text"]  == "No Default DraftLogs Folder") & (label2["text"]  == "No Default GameLogs Folder"):
         button3["state"] = tk.DISABLED
     else:
@@ -2866,39 +2865,44 @@ def import_window():
 
     import_window.protocol("WM_DELETE_WINDOW", lambda : close_import_window())
 def get_winners():
-    global all_data
-    global all_data_inverted
+    global ALL_DATA
+    global ALL_DATA_INVERTED
     global uaw
+    global ask_to_save
 
     gw_index = modo.header("Games").index("Game_Winner")
     p1_index = modo.header("Games").index("P1")
     p2_index = modo.header("Games").index("P2")
     gn_index = modo.header("Games").index("Game_Num")
-
-    n = 0
-    df1 =   pd.DataFrame(all_data[1],columns=modo.header("Games"))
-    total = df1[(df1.Game_Winner == "NA")].shape[0]
-    if total == 0:
-        update_status_bar(status="No Games with missing Game_Winner.")
-    else:
-        for count,i in enumerate(all_data[1]):    # Iterate through games.
-            if i[gw_index] == "NA": # Game record does not have a winner.
-                n += 1
-                p1 = i[p1_index]
-                p2 = i[p2_index]
-                raw_data_key = f"{i[0]}-{i[gn_index]}"
-                ask_for_winner(all_data[3][raw_data_key],p1,p2,n,total)
-                if uaw == "Exit.":
+  
+    exit = False
+    raw_dict_new = {}
+    for count,key in enumerate(ALL_DATA[3]):
+        match_id = key.split("-")[0]
+        game_num = key.split("-")[1]
+        if exit == False:
+            for i in ALL_DATA[1]:
+                if (i[0] == match_id) & (str(i[gn_index]) == game_num) & (i[gw_index] == "NA"):
+                    ask_for_winner(ALL_DATA[3][key],i[p1_index],i[p2_index],count+1,len(ALL_DATA[3]))
+                    if uaw == "Exit.":
+                        exit = True
+                        raw_dict_new[key] = ALL_DATA[3][key]
+                    elif uaw == "NA":
+                        raw_dict_new[key] = ALL_DATA[3][key]
+                    else:
+                        i[gw_index] = uaw
                     break
-                if uaw == "NA":
-                    pass
-                else:
-                    all_data[3].pop(raw_data_key)
-                    ask_to_save = True
-                i[gw_index] = uaw
-        modo.update_game_wins(all_data)
-        all_data_inverted = modo.invert_join(all_data)
-        set_display("Matches",update_status=True,start_index=0,reset=True)
+        if exit:
+            raw_dict_new[key] = ALL_DATA[3][key]
+
+    if len(ALL_DATA[3]) > len(raw_dict_new):
+        ALL_DATA[3] = raw_dict_new
+        modo.update_game_wins(ALL_DATA)
+        ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
+        ask_to_save = True
+
+    update_status_bar(status=f"{len(ALL_DATA[3])} Game(s) with missing Game_Winner.")
+    set_display("Matches",update_status=False,start_index=0,reset=True)
 def ask_for_winner(ga_list,p1,p2,n,total):
     # List of game actions (Strings)
     # String = P1
@@ -3015,12 +3019,12 @@ def get_stats():
     mid_frame.grid_columnconfigure(0,weight=1)
     mid_frame.grid_columnconfigure(1,weight=1)
     
-    df0 = pd.DataFrame(all_data[0],columns=modo.header("Matches"))
-    df1 = pd.DataFrame(all_data[1],columns=modo.header("Games"))
-    df2 = pd.DataFrame(all_data[2],columns=modo.header("Plays"))
-    df0_i = pd.DataFrame(all_data_inverted[0],columns=modo.header("Matches"))
-    df1_i = pd.DataFrame(all_data_inverted[1],columns=modo.header("Games"))
-    df2_i = pd.DataFrame(all_data_inverted[2],columns=modo.header("Plays"))
+    df0 = pd.DataFrame(ALL_DATA[0],columns=modo.header("Matches"))
+    df1 = pd.DataFrame(ALL_DATA[1],columns=modo.header("Games"))
+    df2 = pd.DataFrame(ALL_DATA[2],columns=modo.header("Plays"))
+    df0_i = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
+    df1_i = pd.DataFrame(ALL_DATA_INVERTED[1],columns=modo.header("Games"))
+    df2_i = pd.DataFrame(ALL_DATA_INVERTED[2],columns=modo.header("Plays"))
  
     def clear_frames():
         for widget in mid_frame1.winfo_children():
@@ -3261,7 +3265,7 @@ def get_stats():
         hero_n =  df0_i_f.shape[0] # Matches played by hero
         df0_i_f = df0_i_f[(df0_i_f.Date > date_range[0]) & (df0_i_f.Date < date_range[1])]
 
-        if mformat in input_options["Limited Formats"]:
+        if mformat in INPUT_OPTIONS["Limited Formats"]:
             formats_played = df0_i_f[(df0_i_f.Format == mformat)].Limited_Format.value_counts().keys().tolist()
         elif mformat != "All Formats":
             formats_played = [mformat]
@@ -3275,7 +3279,7 @@ def get_stats():
             format_wr = [to_percent(format_wins[0]/(format_wins[0]+format_losses[0]),1) + "%"]    #adding overall in L[0]
 
         for i in formats_played:
-            if mformat in input_options["Limited Formats"]:
+            if mformat in INPUT_OPTIONS["Limited Formats"]:
                 wins  =  df0_i_f[(df0_i_f.Limited_Format == i) & (df0_i_f.Match_Winner == "P1")].shape[0]
                 losses = df0_i_f[(df0_i_f.Limited_Format == i) & (df0_i_f.Match_Winner == "P2")].shape[0]
             else:
@@ -3395,7 +3399,7 @@ def get_stats():
             if lformat != "All Limited Formats":
                 mid_frame3["text"] = mformat + " - " + lformat + ": " + deck + " vs. " + opp_deck
             else:
-                if mformat in input_options["Constructed Formats"]:
+                if mformat in INPUT_OPTIONS["Constructed Formats"]:
                     mid_frame3["text"] = mformat + ": " + deck + " vs. " + opp_deck               
         elif lformat != "All Limited Formats":
             mid_frame3["text"] = "Decks Played: " + mformat + " - " + lformat
@@ -3433,7 +3437,7 @@ def get_stats():
             if lformat != "All Limited Formats":
                 mid_frame4["text"] = mformat + " - " + lformat + ": " + deck + " vs. " + opp_deck
             else:
-                if mformat in input_options["Constructed Formats"]:
+                if mformat in INPUT_OPTIONS["Constructed Formats"]:
                     mid_frame4["text"] = mformat + ": " + deck + " vs. " + opp_deck  
         elif lformat != "All Limited Formats":
             mid_frame4["text"] = "Observed Metagame: " + mformat + " - " + lformat
@@ -4567,7 +4571,7 @@ def get_stats():
         mformat.set(format_options[0]) 
 
     def update_hero(*argv):
-        hero = player.get()
+        HERO = player.get()
         update_format_menu()
         update_deck_menu()
         update_opp_deck_menu()
@@ -4590,7 +4594,7 @@ def get_stats():
         opponent.set(opponents[0])
 
     def update_format(*argv):
-        if mformat.get() in input_options["Limited Formats"]:
+        if mformat.get() in INPUT_OPTIONS["Limited Formats"]:
             lim_format.set("All Limited Formats")
             menu_3["state"] = "readonly"
             menu_3.grid(row=0,column=2,padx=5,pady=10)
@@ -4616,11 +4620,11 @@ def get_stats():
     def update_deck_menu(*argv):
         if mformat.get() == "All Formats":
             df = df0_i[(df0_i.P1 == player.get())]
-        elif mformat.get() in input_options["Constructed Formats"]:
+        elif mformat.get() in INPUT_OPTIONS["Constructed Formats"]:
             df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())]
-        elif (mformat.get() in input_options["Limited Formats"]) & (lim_format.get() == "All Limited Formats"):
+        elif (mformat.get() in INPUT_OPTIONS["Limited Formats"]) & (lim_format.get() == "All Limited Formats"):
             df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())]
-        elif (mformat.get() in input_options["Limited Formats"]) & (lim_format.get() != "All Limited Formats"):
+        elif (mformat.get() in INPUT_OPTIONS["Limited Formats"]) & (lim_format.get() != "All Limited Formats"):
             df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get()) & (df0_i.Limited_Format == lim_format.get())]
         else:
             df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())]
@@ -4641,11 +4645,11 @@ def get_stats():
     def update_opp_deck_menu(*argv):
         if mformat.get() == "All Formats":
             df = df0_i[(df0_i.P1 == player.get())]
-        elif mformat.get() in input_options["Constructed Formats"]:
+        elif mformat.get() in INPUT_OPTIONS["Constructed Formats"]:
             df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())]
-        elif (mformat.get() in input_options["Limited Formats"]) & (lim_format.get() == "All Limited Formats"):
+        elif (mformat.get() in INPUT_OPTIONS["Limited Formats"]) & (lim_format.get() == "All Limited Formats"):
             df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())]
-        elif (mformat.get() in input_options["Limited Formats"]) & (lim_format.get() != "All Limited Formats"):
+        elif (mformat.get() in INPUT_OPTIONS["Limited Formats"]) & (lim_format.get() != "All Limited Formats"):
             df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get()) & (df0_i.Limited_Format == lim_format.get())]
         else:
             df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())]
@@ -4730,7 +4734,7 @@ def get_stats():
     stat_types = ["Match History","Match Stats","Game Stats","Play Stats","Opponent Stats","Card Data"]
     
     player = tk.StringVar()
-    player.set(hero)
+    player.set(HERO)
     opponent = tk.StringVar()
     opponent.set("Opponent")
     mformat = tk.StringVar()
@@ -4800,7 +4804,7 @@ def get_stats():
     date_entry_1.bind("<<DateEntrySelected>>",load_data)
     date_entry_2.bind("<<DateEntrySelected>>",load_data)
 
-    player.set(hero)
+    player.set(HERO)
     update_s_type(s_type.get())
 
     stats_window.title("Statistics - Match Data: " + player.get())
@@ -4831,11 +4835,11 @@ def update_status_bar(status):
     status_label.config(text=status)
     print(status)
 def remove_record(ignore):
-    global all_data
-    global all_data_inverted
+    global ALL_DATA
+    global ALL_DATA_INVERTED
     global DRAFTS_TABLE
     global PICKS_TABLE
-    global parsed_file_dict
+    global PARSED_FILE_DICT
     global PARSED_DRAFT_DICT
     global ask_to_save
     global selected
@@ -4852,14 +4856,14 @@ def remove_record(ignore):
 
     # Remove records from our table data and get table size differences.
     if display == "Matches":
-        precounts = [len(all_data[0]),len(all_data[1]),len(all_data[2])]
-        all_data[0] = [i for i in all_data[0] if i[0] not in sel_matchid]
-        all_data[1] = [i for i in all_data[1] if i[0] not in sel_matchid]
-        all_data[2] = [i for i in all_data[2] if i[0] not in sel_matchid]
-        all_data_inverted[0] = [i for i in all_data_inverted[0] if i[0] not in sel_matchid]
-        all_data_inverted[1] = [i for i in all_data_inverted[1] if i[0] not in sel_matchid]
-        all_data_inverted[2] = [i for i in all_data_inverted[2] if i[0] not in sel_matchid]
-        counts = [precounts[0]-len(all_data[0]),precounts[1]-len(all_data[1]),precounts[2]-len(all_data[2])]
+        precounts = [len(ALL_DATA[0]),len(ALL_DATA[1]),len(ALL_DATA[2])]
+        ALL_DATA[0] = [i for i in ALL_DATA[0] if i[0] not in sel_matchid]
+        ALL_DATA[1] = [i for i in ALL_DATA[1] if i[0] not in sel_matchid]
+        ALL_DATA[2] = [i for i in ALL_DATA[2] if i[0] not in sel_matchid]
+        ALL_DATA_INVERTED[0] = [i for i in ALL_DATA_INVERTED[0] if i[0] not in sel_matchid]
+        ALL_DATA_INVERTED[1] = [i for i in ALL_DATA_INVERTED[1] if i[0] not in sel_matchid]
+        ALL_DATA_INVERTED[2] = [i for i in ALL_DATA_INVERTED[2] if i[0] not in sel_matchid]
+        counts = [precounts[0]-len(ALL_DATA[0]),precounts[1]-len(ALL_DATA[1]),precounts[2]-len(ALL_DATA[2])]
     elif display == "Drafts":
         precounts = [len(DRAFTS_TABLE),len(PICKS_TABLE)]
         DRAFTS_TABLE = [i for i in DRAFTS_TABLE if i[0] not in sel_matchid]
@@ -4870,9 +4874,9 @@ def remove_record(ignore):
     if ignore == False:
         if display == "Matches":
             for i in sel_matchid:
-                for j in parsed_file_dict:
-                    if parsed_file_dict[j][0] in sel_matchid:
-                        parsed_file_dict.pop(j)
+                for j in PARSED_FILE_DICT:
+                    if PARSED_FILE_DICT[j][0] in sel_matchid:
+                        PARSED_FILE_DICT.pop(j)
                         break
         elif display == "Drafts":
             for i in sel_matchid:
@@ -4965,59 +4969,60 @@ def user_inputs(type):
     gw_index = modo.header("Games").index("Game_Winner")
 
     if type == "Matches":
-        for i in all_data[0]:
+        for i in ALL_DATA[0]:
             player_dict = {}
             player_dict[i[p1_index]] = [i[p1_arch_index],i[p1_sub_index]]
             player_dict[i[p2_index]] = [i[p2_arch_index],i[p2_sub_index]]
             match_dict[i[0]] = [player_dict,i[format_index],i[lformat_index],i[match_type_index]]
         return match_dict
     elif type == "Games":
-        for i in all_data[1]:
+        for i in ALL_DATA[1]:
             key = f"{i[0]}-{i[gn_index]}"
             game_dict[key] = [i[modo.header("Games").index("P1")],i[modo.header("Games").index("P2")],i[gw_index]]
         return game_dict
 def debug():
-    os.chdir(filepath_root)
-    with open("debug.txt","w",encoding="utf-8") as txt:
-        txt.write("Settings:\n")
-        txt.write(f"Filepath_Root: {filepath_root}\n")
-        txt.write(f"Filepath_Export: {filepath_export}\n")
-        txt.write(f"Filepath_Logs: {filepath_logs}\n")
-        txt.write(f"Filepath_Logs_Copy: {filepath_logs_copy}\n")
-        txt.write(f"Filepath_Drafts: {filepath_drafts}\n")
-        txt.write(f"Filepath_Drafts_Copy: {filepath_drafts_copy}\n")
-        txt.write(f"Hero: {hero}\n")
-        txt.write(f"Main Window Size: {MAIN_WINDOW_SIZE}\n")
+    os.chdir(FILEPATH_ROOT)
+    with open("DEBUG.txt","w",encoding="utf-8") as txt:
+        txt.write("SETTINGS:\n")
+        txt.write(f"FILEPATH_ROOT: {FILEPATH_ROOT}\n")
+        txt.write(f"FILEPATH_EXPORT: {FILEPATH_EXPORT}\n")
+        txt.write(f"FILEPATH_LOGS: {FILEPATH_LOGS}\n")
+        txt.write(f"FILEPATH_LOGS_COPY: {FILEPATH_LOGS_COPY}\n")
+        txt.write(f"FILEPATH_DRAFTS: {FILEPATH_DRAFTS}\n")
+        txt.write(f"FILEPATH_DRAFTS_COPY: {FILEPATH_DRAFTS_COPY}\n")
+        txt.write(f"HERO: {HERO}\n")
+        txt.write(f"MAIN_WINDOW_SIZE: {MAIN_WINDOW_SIZE}\n")
         txt.write("\n")
 
-        txt.write("Input Options:\n")
-        for i in input_options:
-            txt.write(f"{i}: {input_options[i]}\n")
+        txt.write("INPUT_OPTIONS:\n")
+        for i in INPUT_OPTIONS:
+            txt.write(f"{i}: {INPUT_OPTIONS[i]}\n")
         txt.write("\n")
-        txt.write(f"Parsed_File_Dict ({str(len(parsed_file_dict))} files):\n")
-        for i in parsed_file_dict:
-            txt.write(f"{i}: {parsed_file_dict[i]}\n")
+        txt.write(f"PARSED_FILE_DICT ({str(len(PARSED_FILE_DICT))} files):\n")
+        for i in PARSED_FILE_DICT:
+            txt.write(f"{i}: {PARSED_FILE_DICT[i]}\n")
         txt.write("\n")
-
-        txt.write(f"Matches: {str(len(all_data[0]))}\n")
-        txt.write(f"Games: {str(len(all_data[1]))}\n")
-        txt.write(f"Plays: {str(len(all_data[2]))}\n")
-        txt.write(f"Raw: {str(len(all_data[3]))}\n")
-        txt.write(f"Matches (Inverse): {str(len(all_data_inverted[0]))} (should be {str(len(all_data[0])*2)})\n")
-        txt.write(f"Games (Inverse): {str(len(all_data_inverted[1]))} (should be {str(len(all_data[1])*2)})\n")
-        txt.write(f"Plays (Inverse): {str(len(all_data_inverted[2]))} (should be {str(len(all_data[2]))})\n")
-        txt.write(f"Raw (Inverse): {str(len(all_data_inverted[3]))}\n")
+        txt.write(f"PARSED_DRAFT_DICT ({str(len(PARSED_DRAFT_DICT))} files):\n")
+        for i in PARSED_DRAFT_DICT:
+            txt.write(f"{i}: {PARSED_DRAFT_DICT[i]}\n")
         txt.write("\n")
 
-        txt.write("All Decks:\n")
-        txt.write(f"{list(all_decks.keys())[0]} to {list(all_decks.keys())[-1]}\n")
-        for i in all_decks:
-            txt.write(f"{i}: {str(len(all_decks[i]))}\n")
+        txt.write(f"Matches: {str(len(ALL_DATA[0]))}\n")
+        txt.write(f"Games: {str(len(ALL_DATA[1]))}\n")
+        txt.write(f"Plays: {str(len(ALL_DATA[2]))}\n")
+        txt.write(f"Drafts: {str(len(DRAFTS_TABLE))}\n")
+        txt.write(f"Picks: {str(len(PICKS_TABLE))}\n")
+        txt.write(f"Raw: {str(len(ALL_DATA[3]))}\n")
+        txt.write(f"Matches (Inverse): {str(len(ALL_DATA_INVERTED[0]))} (should be {str(len(ALL_DATA[0])*2)})\n")
+        txt.write(f"Games (Inverse): {str(len(ALL_DATA_INVERTED[1]))} (should be {str(len(ALL_DATA[1])*2)})\n")
+        txt.write(f"Plays (Inverse): {str(len(ALL_DATA_INVERTED[2]))} (should be {str(len(ALL_DATA[2]))})\n")
+        txt.write(f"Raw (Inverse): {str(len(ALL_DATA_INVERTED[3]))}\n")
         txt.write("\n")
 
-        txt.write("Headers:\n")
-        for i in all_headers:
-            txt.write(f"{i}\n")
+        txt.write("ALL_DECKS:\n")
+        txt.write(f"{list(ALL_DECKS.keys())[0]} to {list(ALL_DECKS.keys())[-1]}\n")
+        for i in ALL_DECKS:
+            txt.write(f"{i}: {str(len(ALL_DECKS[i]))}\n")
         txt.write("\n")
 
         txt.write("Other Variables:\n")
