@@ -134,6 +134,7 @@ def header(table):
 
     if table == "Matches":
         return ["Match_ID",
+                "Draft_ID",
                 "P1",
                 "P1_Arch",
                 "P1_Subarch",
@@ -302,7 +303,9 @@ def update_game_wins(ad):
             if i[p1wins_index] > i[p2wins_index]:
                 i[mw_index] = "P1"
             elif i[p2wins_index] > i[p1wins_index]:
-                i[mw_index] = "P2"    
+                i[mw_index] = "P2"
+            else:
+                i[mw_index] = "NA"
 def players(init):
     # Input:  String or List[Strings]
     # Output: List[Strings]
@@ -483,11 +486,11 @@ def parse_draft_log(file,initial):
         elif (i.find("Pack ") != -1) & (i.find(" pick ") != -1) & (len(i.split()) == 4):
             card_bool = True
         elif player_bool:
-            if len(i.split()) > 1:
-                HERO = i.split("--> ")[1]
+            if (i.find("--> ") != -1):
+                HERO = i[4:]
                 DRAFT_ID = f"{year}{month}{day}{hour}{minute}_{HERO}_{FORMAT}_{EVENT_NUM}"
             else:
-                PLAYER_LIST.append(i.split()[0])
+                PLAYER_LIST.append(i[4:])
         elif card_bool:
             if i.find("--> ") != -1:
                 CARD = i.split("--> ")[1]
@@ -592,7 +595,7 @@ def match_data(ga,gd,pd):
             if i.find(" rolled a ") != -1:
                 tlist = tstring.split(" rolled a ")
                 if len(tlist[1]) == 1:
-                    rolls[tlist[0].replace(" ","+")] = int(tlist[1])          
+                    rolls[tlist[0].replace(" ","+")] = int(tlist[1])
         return rolls
 
     MATCH_DATA =    []
@@ -612,6 +615,7 @@ def match_data(ga,gd,pd):
     MATCH_TYPE =    "NA"
     DATE =          f"{ga[0][0:4]}-{ga[0][4:6]}-{ga[0][6:8]}-{ga[0][8:10]}:{ga[0][10:]}"
     MATCH_ID =      f"{ga[0]}_{P1}_{P2}"
+    DRAFT_ID =      "NA"
 
     player_count =  len(players(ga))
     prev_string =   ""
@@ -622,9 +626,9 @@ def match_data(ga,gd,pd):
         ROLL_WINNER = "P2"
     
     for i in gd:
-        if i[0] == MATCH_ID and i[11] == "P1":
+        if i[0] == MATCH_ID and i[header("Games").index("Game_Winner")] == "P1":
             P1_WINS += 1
-        elif i[0] == MATCH_ID and i[11] == "P2":
+        elif i[0] == MATCH_ID and i[header("Games").index("Game_Winner")] == "P2":
             P2_WINS += 1
        
     if P1_WINS > P2_WINS:
@@ -635,6 +639,7 @@ def match_data(ga,gd,pd):
         MATCH_WINNER = "NA"
 
     MATCH_DATA.extend((MATCH_ID,
+                       DRAFT_ID,
                        alter(P1,original=True),
                        P1_ARCH,
                        P1_SUBARCH,
