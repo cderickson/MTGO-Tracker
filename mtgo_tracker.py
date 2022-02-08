@@ -141,7 +141,7 @@ def set_default_window_size():
             MAIN_WINDOW_SIZE = ("small",1000,490)
             ln_per_page = 20
         elif window_size.get() == "Large":
-            MAIN_WINDOW_SIZE = ("large",1723,780)
+            MAIN_WINDOW_SIZE = ("large",1823,780)
             ln_per_page = 35
 
         os.chdir(FILEPATH_ROOT + "\\" + "save")
@@ -242,6 +242,7 @@ def clear_loaded():
     data_menu.entryconfig("Input Missing Match Data",state=tk.DISABLED)
     data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.DISABLED)
     data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.DISABLED)
+    data_menu.entryconfig("Apply Associated Draft_IDs to Matches",state=tk.DISABLED)
 
     # Clear existing data in tree.
     tree1.delete(*tree1.get_children())
@@ -514,6 +515,7 @@ def startup():
     data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
     data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
     data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
+    data_menu.entryconfig("Apply Associated Draft_IDs to Matches",state=tk.NORMAL)
     ask_to_save = False
     os.chdir(FILEPATH_ROOT)
 def save_settings():
@@ -1054,8 +1056,12 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
             missing_data = [p1_arch.get(),p1_sub.get().strip(),p2_arch.get(),p2_sub.get().strip(),mformat.get(),dformat.get(),mtype.get()]
             if missing_data[0] == "P1 Archetype":
                 missing_data[0] = "NA"
+            if missing_data[1] == "":
+                missing_data[1] = "NA"
             if missing_data[2] == "P2 Archetype":
                 missing_data[2] = "NA"
+            if missing_data[3] == "":
+                missing_data[3] = "NA"
             if missing_data[4] == "Select Format":
                 missing_data[4] = "NA"
             if missing_data[5] == "Select Limited Format":
@@ -1063,24 +1069,24 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
             if missing_data[6] == "Select Match Type":
                 missing_data[6] = "NA"
             ask_to_save = True
-        gf.grab_release()
-        gf.destroy()
+        subwindow.grab_release()
+        subwindow.destroy()
              
     height = 450
     width =  650                
-    gf = tk.Toplevel(window)
+    subwindow = tk.Toplevel(window)
     if progress == 0:
-        gf.title("Revise Entry")
+        subwindow.title("Revise Entry")
     else:
-        gf.title("Input Missing Data - " + str(progress[0]) + "/" + str(progress[1]) + " Matches.")
-    gf.iconbitmap(gf,"icon.ico")        
-    gf.minsize(width,height)
-    gf.resizable(False,False)
-    gf.attributes("-topmost",True)
-    gf.grab_set()
-    gf.focus_force()
+        subwindow.title("Input Missing Data - " + str(progress[0]) + "/" + str(progress[1]) + " Matches.")
+    subwindow.iconbitmap(subwindow,"icon.ico")        
+    subwindow.minsize(width,height)
+    subwindow.resizable(False,False)
+    subwindow.attributes("-topmost",True)
+    subwindow.grab_set()
+    subwindow.focus_force()
 
-    gf.geometry("+%d+%d" %
+    subwindow.geometry("+%d+%d" %
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
     message = "Date Played: " + mdata[modo.header("Matches").index("Date")]
@@ -1178,10 +1184,10 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
             else:
                 p2_arch.set(mdata[modo.header("Matches").index("P2_Arch")])
 
-    top_frame = tk.Frame(gf)
-    mid_frame = tk.Frame(gf)
-    bot_frame1 = tk.Frame(gf)
-    bot_frame2 = tk.Frame(gf)
+    top_frame = tk.Frame(subwindow)
+    mid_frame = tk.Frame(subwindow)
+    bot_frame1 = tk.Frame(subwindow)
+    bot_frame2 = tk.Frame(subwindow)
     top_frame.grid(row=0,column=0,sticky="")
     mid_frame.grid(row=1,column=0,sticky="nsew")
     bot_frame1.grid(row=2,column=0,sticky="")
@@ -1192,8 +1198,8 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     mid_frame1.grid(row=0,column=0,sticky="nsew")
     mid_frame2.grid(row=0,column=1,sticky="nsew")
     
-    gf.grid_columnconfigure(0,weight=1)
-    gf.rowconfigure(1,minsize=0,weight=1)
+    subwindow.grid_columnconfigure(0,weight=1)
+    subwindow.rowconfigure(1,minsize=0,weight=1)
     mid_frame.grid_columnconfigure(0,weight=1)
     mid_frame.grid_columnconfigure(1,weight=1)
     mid_frame.grid_rowconfigure(0,weight=1)
@@ -1303,8 +1309,8 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
         button_skip["state"] = tk.DISABLED
     mformat.trace("w",update_arch)
 
-    gf.protocol("WM_DELETE_WINDOW", lambda : close_format_window("Exit"))
-    gf.wait_window()
+    subwindow.protocol("WM_DELETE_WINDOW", lambda : close_format_window("Exit"))
+    subwindow.wait_window()
 def revise_draft_window(picks,progress,mdata):
     def close_format_window(*argv):
         global missing_data
@@ -1319,24 +1325,24 @@ def revise_draft_window(picks,progress,mdata):
             if missing_data[1] == "Match Losses":
                 missing_data[1] = "0"
             ask_to_save = True
-        gf.grab_release()
-        gf.destroy()
+        subwindow.grab_release()
+        subwindow.destroy()
              
     height = 450
     width =  650                
-    gf = tk.Toplevel(window)
+    subwindow = tk.Toplevel(window)
     if progress == 0:
-        gf.title("Revise Entry")
+        subwindow.title("Revise Entry")
     else:
-        gf.title("Input Missing Data - " + str(progress[0]) + "/" + str(progress[1]) + " Matches.")
-    gf.iconbitmap(gf,"icon.ico")        
-    gf.minsize(width,height)
-    gf.resizable(False,False)
-    gf.attributes("-topmost",True)
-    gf.grab_set()
-    gf.focus_force()
+        subwindow.title("Input Missing Data - " + str(progress[0]) + "/" + str(progress[1]) + " Matches.")
+    subwindow.iconbitmap(subwindow,"icon.ico")        
+    subwindow.minsize(width,height)
+    subwindow.resizable(False,False)
+    subwindow.attributes("-topmost",True)
+    subwindow.grab_set()
+    subwindow.focus_force()
 
-    gf.geometry("+%d+%d" %
+    subwindow.geometry("+%d+%d" %
         (window.winfo_x()+(window.winfo_width()/2)-(width/2),
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
     message = "Date Drafted: " + mdata[modo.header("Drafts").index("Date")]
@@ -1350,18 +1356,18 @@ def revise_draft_window(picks,progress,mdata):
             card_string += card
         string_list.append(card_string)
 
-    top_frame = tk.Frame(gf)
-    mid_frame = tk.Frame(gf)
-    bot_frame2 = tk.Frame(gf)
+    top_frame = tk.Frame(subwindow)
+    mid_frame = tk.Frame(subwindow)
+    bot_frame2 = tk.Frame(subwindow)
     top_frame.grid(row=0,column=0,sticky="")
     mid_frame.grid(row=1,column=0,sticky="nsew")
     bot_frame2.grid(row=3,column=0,sticky="")
     
-    mid_frame1 = tk.LabelFrame(mid_frame,text="Mid Frame1")
+    mid_frame1 = tk.LabelFrame(mid_frame,text="Draft Picks")
     mid_frame1.grid(row=0,column=0,sticky="nsew")
     
-    gf.grid_columnconfigure(0,weight=1)
-    gf.rowconfigure(1,minsize=0,weight=1)
+    subwindow.grid_columnconfigure(0,weight=1)
+    subwindow.rowconfigure(1,minsize=0,weight=1)
     mid_frame.grid_columnconfigure(0,weight=1)
     mid_frame.grid_rowconfigure(0,weight=1)
     mid_frame1.grid_columnconfigure(0,weight=1)
@@ -1405,8 +1411,8 @@ def revise_draft_window(picks,progress,mdata):
     if progress == 0:
         button_skip["state"] = tk.DISABLED
 
-    gf.protocol("WM_DELETE_WINDOW", lambda : close_format_window("Exit"))
-    gf.wait_window()
+    subwindow.protocol("WM_DELETE_WINDOW", lambda : close_format_window("Exit"))
+    subwindow.wait_window()
 def tree_double(event):
     global filter_dict  
     if tree1.focus() == "":
@@ -2193,7 +2199,7 @@ def revise_record3():
 
     set_display(display,update_status=True,start_index=display_index,reset=False)
     revise_button["state"] = tk.NORMAL
-    # remove_button["state"] = tk.NORMAL
+    remove_button["state"] = tk.NORMAL
 
     for i in tree1.get_children():
         if list(tree1.item(i,"values"))[0] == sel_matchid:
@@ -2587,17 +2593,29 @@ def revise_record_multi():
                     if field == "P1 Deck":
                         if values[modo.header("Matches").index("P1")] == j[modo.header("Matches").index("P1")]:
                             j[modo.header("Matches").index("P1_Arch")] = p1_arch_type.get()
-                            j[modo.header("Matches").index("P1_Subarch")] = p1_subarch_entry.get().strip()
+                            if p1_subarch_entry.get().strip() == "":
+                                j[modo.header("Matches").index("P1_Subarch")] = "NA"
+                            else:
+                                j[modo.header("Matches").index("P1_Subarch")] = p1_subarch_entry.get().strip()
                         else:
                             j[modo.header("Matches").index("P2_Arch")] = p1_arch_type.get()
-                            j[modo.header("Matches").index("P2_Subarch")] = p1_subarch_entry.get().strip()                   
+                            if p1_subarch_entry.get().strip() == "":
+                                j[modo.header("Matches").index("P2_Subarch")] = "NA"
+                            else:
+                                j[modo.header("Matches").index("P2_Subarch")] = p1_subarch_entry.get().strip()                   
                     elif field == "P2 Deck":
                         if values[modo.header("Matches").index("P2")] == j[modo.header("Matches").index("P2")]:
                             j[modo.header("Matches").index("P2_Arch")] = p2_arch_type.get()
-                            j[modo.header("Matches").index("P2_Subarch")] = p2_subarch_entry.get().strip()
+                            if p2_subarch_entry.get().strip() == "":
+                                j[modo.header("Matches").index("P2_Subarch")] = "NA"
+                            else:
+                                j[modo.header("Matches").index("P2_Subarch")] = p2_subarch_entry.get().strip()
                         else:
                             j[modo.header("Matches").index("P1_Arch")] = p2_arch_type.get()
-                            j[modo.header("Matches").index("P1_Subarch")] = p2_subarch_entry.get().strip()
+                            if p2_subarch_entry.get().strip() == "":
+                                j[modo.header("Matches").index("P1_Subarch")] = "NA"
+                            else:
+                                j[modo.header("Matches").index("P1_Subarch")] = p2_subarch_entry.get().strip()
                     elif field == "Format":
                         j[modo.header("Matches").index("Format")] = match_format.get()
                         j[modo.header("Matches").index("Limited_Format")] = lim_format.get()
@@ -2716,16 +2734,19 @@ def activate_revise(event):
         return
     if data_loaded == False:
         return
-    if (display == "Matches") or (display == "Drafts"):
+    if (display == "Matches"):
         revise_button["state"] = tk.NORMAL
         remove_button["state"] = tk.NORMAL
+    # elif (display == "Drafts"):
+    #     revise_button["state"] = tk.NORMAL
+    #     remove_button["state"] = tk.NORMAL
 def revise_method_select():
     if (len(tree1.selection()) > 1) & (display == "Matches"):
         revise_record_multi()
     elif (display == "Matches"):
         revise_record2()
-    elif (display == "Drafts"):
-        revise_record3()
+    # elif (display == "Drafts"):
+    #     revise_record3()
 def import_window():
     height = 200
     width =  350
@@ -2820,6 +2841,7 @@ def import_window():
             data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
             data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
             data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
+            data_menu.entryconfig("Apply Associated Draft_IDs to Matches",state=tk.NORMAL)
         #save_settings()
         set_display("Matches",update_status=False,start_index=0,reset=True)
         close_import_window()
@@ -2874,7 +2896,9 @@ def get_winners():
     p1_index = modo.header("Games").index("P1")
     p2_index = modo.header("Games").index("P2")
     gn_index = modo.header("Games").index("Game_Num")
-  
+    changed = 0
+    total = 0
+
     exit = False
     raw_dict_new = {}
     for count,key in enumerate(ALL_DATA[3]):
@@ -2884,6 +2908,7 @@ def get_winners():
             for i in ALL_DATA[1]:
                 if (i[0] == match_id) & (str(i[gn_index]) == game_num) & (i[gw_index] == "NA"):
                     ask_for_winner(ALL_DATA[3][key],i[p1_index],i[p2_index],count+1,len(ALL_DATA[3]))
+                    total += 1
                     if uaw == "Exit.":
                         exit = True
                         raw_dict_new[key] = ALL_DATA[3][key]
@@ -2891,6 +2916,7 @@ def get_winners():
                         raw_dict_new[key] = ALL_DATA[3][key]
                     else:
                         i[gw_index] = uaw
+                        changed += 1
                     break
         if exit:
             raw_dict_new[key] = ALL_DATA[3][key]
@@ -2901,7 +2927,12 @@ def get_winners():
         ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
         ask_to_save = True
 
-    update_status_bar(status=f"{len(ALL_DATA[3])} Game(s) with missing Game_Winner.")
+    if total == 0:
+        update_status_bar(status=f"No Applicable Games found.")
+    elif changed == 1:
+        update_status_bar(status=f"Game_Winner updated for {changed} Game.")
+    else:
+        update_status_bar(status=f"Game_Winner updated for {changed} Games.")
     set_display("Matches",update_status=False,start_index=0,reset=True)
 def ask_for_winner(ga_list,p1,p2,n,total):
     # List of game actions (Strings)
@@ -3180,6 +3211,7 @@ def get_stats():
         mid_frame9["text"] = "Match History: " + hero
         tree1.tag_configure("win",background="#a3ffb1")
         tree1.tag_configure("lose",background="#ffa3a3")
+        tree1.tag_configure("na",background="#cccccc")
         tree1.delete(*tree1.get_children())
         tree1["column"] = ["Date","Opponent","Deck","Opp. Deck","Match Result","Format"]
         for i in tree1["column"]:
@@ -3194,13 +3226,20 @@ def get_stats():
                                               tree1_oppdecks[i],
                                               tree1_result[i],
                                               tree1_format[i]],tags=("win",))
-            else:
+            elif "Loss" in tree1_result[i]:
                 tree1.insert("","end",values=[tree1_dates[i],
                                               tree1_opp[i],
                                               tree1_decks[i],
                                               tree1_oppdecks[i],
                                               tree1_result[i],
                                               tree1_format[i]],tags=("lose",))
+            else:
+                tree1.insert("","end",values=[tree1_dates[i],
+                                              tree1_opp[i],
+                                              tree1_decks[i],
+                                              tree1_oppdecks[i],
+                                              tree1_result[i],
+                                              tree1_format[i]],tags=("na",))
 
         if mformat == "All Formats":
             mid_frame10["text"] = "Choose a Format"
@@ -3210,6 +3249,7 @@ def get_stats():
             mid_frame10["text"] = "Match History: " + hero + " - " + mformat
         tree2.tag_configure("win",background="#a3ffb1")
         tree2.tag_configure("lose",background="#ffa3a3")
+        tree2.tag_configure("na",background="#cccccc")
         tree2.delete(*tree2.get_children())
         tree2["column"] = ["Date","Opponent","Deck","Opp. Deck","Match Result","Format"]
         for i in tree2["column"]:
@@ -3224,13 +3264,20 @@ def get_stats():
                                               tree2_oppdecks[i],
                                               tree2_result[i],
                                               tree2_format[i]],tags=("win",))
-            else:
+            elif "Loss" in tree2_result[i]:
                 tree2.insert("","end",values=[tree2_dates[i],
                                               tree2_opp[i],
                                               tree2_decks[i],
                                               tree2_oppdecks[i],
                                               tree2_result[i],
                                               tree2_format[i]],tags=("lose",))
+            else:
+                tree2.insert("","end",values=[tree2_dates[i],
+                                              tree2_opp[i],
+                                              tree2_decks[i],
+                                              tree2_oppdecks[i],
+                                              tree2_result[i],
+                                              tree2_format[i]],tags=("na",))
 
     def match_stats(hero,opp,mformat,lformat,deck,opp_deck,date_range,s_type):
         stats_window.title("Statistics - Match Data: " + hero)
@@ -4115,7 +4162,10 @@ def get_stats():
             losses = df0_i_f[(df0_i_f.Format == i) & (df0_i_f.Match_Winner == "P2")].shape[0]
             format_wins.append(str(wins))
             format_losses.append(str(losses))
-            format_wr.append(to_percent(wins/(wins+losses),1) + "%")
+            if (wins + losses) == 0:
+                format_wr.append(to_percent(0,1) + "%")
+            else:
+                format_wr.append(to_percent(wins/(wins+losses),1) + "%")
         formats_played.insert(0,"Match Format")
 
         formats_played.extend(["","Match Type"])
@@ -4130,7 +4180,10 @@ def get_stats():
             formats_played.append(i)
             format_wins.append(mt_wins)
             format_losses.append(mt_losses)
-            format_wr.append(to_percent(mt_wins/(mt_wins+mt_losses),1) + "%")
+            if (mt_wins + mt_losses) == 0:
+                format_wr.append(to_percent(0,1) + "%")
+            else:
+                format_wr.append(to_percent(mt_wins/(mt_wins+mt_losses),1) + "%")
 
         filtered_n =        df0_i_f.shape[0] 
         meta_deck_wr =      []
@@ -4148,6 +4201,7 @@ def get_stats():
         mid_frame1["text"] = "Match History: vs. " + opp
         tree1.tag_configure("win",background="#a3ffb1")
         tree1.tag_configure("lose",background="#ffa3a3")
+        tree1.tag_configure("na",background="#cccccc")
         tree1.delete(*tree1.get_children())
         tree1["column"] = ["Date","Deck","Opp. Deck","Match Result"]
         for i in tree1["column"]:
@@ -4162,11 +4216,16 @@ def get_stats():
                                               tree1_decks[i],
                                               tree1_oppdecks[i],
                                               tree1_result[i]],tags=("win",))
-            else:
+            elif "Loss" in tree1_result[i]:
                 tree1.insert("","end",values=[tree1_dates[i],
                                               tree1_decks[i],
                                               tree1_oppdecks[i],
                                               tree1_result[i]],tags=("lose",))
+            else:
+                tree1.insert("","end",values=[tree1_dates[i],
+                                              tree1_decks[i],
+                                              tree1_oppdecks[i],
+                                              tree1_result[i]],tags=("na",))
 
         mid_frame2["text"] = "Overall Performance: vs. " + opp
         tree2.tag_configure("colored",background="#cccccc")
@@ -4980,6 +5039,226 @@ def user_inputs(type):
             key = f"{i[0]}-{i[gn_index]}"
             game_dict[key] = [i[modo.header("Games").index("P1")],i[modo.header("Games").index("P2")],i[gw_index]]
         return game_dict
+def get_associated_draftid(mode):
+    global ALL_DATA
+    global ALL_DATA_INVERTED
+    global DRAFTS_TABLE
+
+    draftid_index = modo.header("Matches").index("Draft_ID")
+    hero_index = modo.header("Drafts").index("Hero")
+    count = 0
+
+    df_matches = pd.DataFrame(ALL_DATA[0],columns=modo.header("Matches"))
+    df_plays = pd.DataFrame(ALL_DATA[2],columns=modo.header("Plays"))
+    df_drafts = pd.DataFrame(DRAFTS_TABLE,columns=modo.header("Drafts"))
+    df_picks = pd.DataFrame(PICKS_TABLE,columns=modo.header("Picks"))
+
+    all_drafts = df_drafts.Draft_ID.tolist()
+    draft_picks_dict = {}
+    for i in all_drafts:
+        hero = df_drafts[(df_drafts.Draft_ID == i)].Hero.tolist()[0]
+        date = df_drafts[(df_drafts.Draft_ID == i)].Date.tolist()[0]
+        draft_picks_dict[i] = (hero,date,set(df_picks[(df_picks.Draft_ID == i)].Card.unique()))
+
+    df_matches = df_matches[df_matches.Format.isin(INPUT_OPTIONS["Limited Formats"])]
+    if mode == "NA":    
+        df_matches = df_matches[(df_matches.Draft_ID == "NA")]
+    limited_matches = df_matches.Match_ID.tolist()
+    
+    list_to_process = []
+    for i in limited_matches:
+        acceptable = []
+        cards_dict = {}
+        p1 = df_matches[(df_matches.Match_ID == i)].P1.tolist()[0]
+        p2 = df_matches[(df_matches.Match_ID == i)].P2.tolist()[0]
+        match_date = df_matches[(df_matches.Match_ID == i)].Date.tolist()[0]
+        df = df_plays[(df_plays.Match_ID == i)]
+        cards1 =  set(df[(df.Casting_Player == p1) & (df.Action == "Casts")].Primary_Card.unique())
+        cards2 =  set(df[(df.Casting_Player == p2) & (df.Action == "Casts")].Primary_Card.unique())
+        try:
+            cards1.remove("NA")
+        except KeyError:
+            pass
+        try:
+            cards2.remove("NA")
+        except KeyError:
+            pass
+        cards_dict[p1] = cards1
+        cards_dict[p2] = cards2
+        for key in draft_picks_dict:
+            if draft_picks_dict[key][0] in cards_dict:
+                subset = cards_dict[draft_picks_dict[key][0]]
+                fullset = draft_picks_dict[key][2]
+                if (subset.issubset(fullset)) & (match_date > draft_picks_dict[key][1]):
+                    acceptable.append(key)
+        if len(acceptable) > 0:
+            list_to_process.append([p1,p2,cards1,cards2,acceptable,i,match_date])
+
+    if len(list_to_process) > 0:
+        for index,i in enumerate(list_to_process):
+            associated_draftid_window(i,index=index+1,total=len(list_to_process))
+            if (missing_data == "Exit"):
+                break
+            elif (missing_data == "Skip"):
+                continue
+            else:
+                count += 1
+                for match in ALL_DATA[0]:
+                    if match[0] == i[5]:
+                        match[draftid_index] = missing_data
+                        break
+        ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
+
+        df_inverted = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
+        for i in DRAFTS_TABLE:
+            wins = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[hero_index]) & (df_inverted.Match_Winner == "P1")].shape[0]
+            losses = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[hero_index]) & (df_inverted.Match_Winner == "P2")].shape[0]
+            i[modo.header("Drafts").index("Match_Wins")] = wins
+            i[modo.header("Drafts").index("Match_Losses")] = losses
+
+        if count == 1:
+            update_status_bar(f"Draft_ID applied to {count} Match.")
+        else:
+            update_status_bar(f"Draft_ID applied to {count} Matches.")
+        set_display("Matches",update_status=False,start_index=0,reset=True)
+    else:
+        update_status_bar(f"No Applicable Matches found.")
+def get_associated_draftid_pre():
+    height = 115
+    width =  315
+    sub_window = tk.Toplevel(window)
+    sub_window.title("Apply Draft_IDs")
+    sub_window.iconbitmap(sub_window,"icon.ico")
+    sub_window.minsize(width,height)
+    sub_window.resizable(False,False)
+    sub_window.grab_set()
+    sub_window.focus()
+    sub_window.geometry("+%d+%d" % 
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+
+    def close_sub_window():
+        sub_window.grab_release()
+        sub_window.destroy()
+
+    mid_frame = tk.LabelFrame(sub_window,text="")
+    bot_frame = tk.Frame(sub_window)
+
+    mid_frame.grid(row=0,column=0,sticky="nsew")
+    bot_frame.grid(row=1,column=0,sticky="")
+
+    sub_window.grid_columnconfigure(0,weight=1)
+    sub_window.rowconfigure(0,weight=1)
+    mid_frame.grid_columnconfigure(0,weight=1)
+    mid_frame.grid_rowconfigure(0,weight=1) 
+    bot_frame.grid_columnconfigure(0,weight=1)
+    bot_frame.grid_rowconfigure(0,weight=1)
+    bot_frame.grid_rowconfigure(1,weight=1)
+
+    t = "Apply Draft_IDs to:\n    - All Limited Matches?\n    - Only Limited Matches without Draft_IDs?"
+        
+    label1 = tk.Label(mid_frame,text=t,wraplength=width,justify="left")
+    button_all = tk.Button(bot_frame,text="All",width=10,command=lambda : [close_sub_window(),get_associated_draftid(mode="All")])
+    button_na =  tk.Button(bot_frame,text="Only 'NA'",width=10,command=lambda : [close_sub_window(),get_associated_draftid(mode="NA")])
+    button_close = tk.Button(bot_frame,text="Cancel",width=10,command=lambda : close_sub_window())
+    
+    label1.grid(row=0,column=0,sticky="nsew")       
+    button_all.grid(row=0,column=0,padx=5,pady=5)
+    button_na.grid(row=0,column=1,padx=5,pady=5)
+    button_close.grid(row=0,column=2,padx=5,pady=5)
+    
+    sub_window.protocol("WM_DELETE_WINDOW", lambda : close_sub_window())
+def associated_draftid_window(list_to_process,index,total):
+    def close_format_window(*argv):
+        global missing_data
+        global ask_to_save
+
+        if len(argv) > 0:
+            missing_data = argv[0]
+        else:
+            missing_data = draft_id.get()
+            if missing_data == "Select from Applicable Draft_IDs":
+                missing_data = "NA"
+            ask_to_save = True
+        subwindow.grab_release()
+        subwindow.destroy()
+             
+    height = 375
+    width =  450                
+    subwindow = tk.Toplevel(window)
+    subwindow.title(f"Apply Draft_ID to Match Record - {index}/{total} Matches.")
+    subwindow.iconbitmap(subwindow,"icon.ico")        
+    subwindow.minsize(width,height)
+    subwindow.resizable(False,False)
+    subwindow.attributes("-topmost",True)
+    subwindow.grab_set()
+    subwindow.focus_force()
+
+    subwindow.geometry("+%d+%d" %
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+    message = f"Date Played: {list_to_process[6]}" 
+    str1 = str2 = ""
+    for index,i in enumerate(list_to_process[2]):
+        if index > 0:
+            str1 += "\n"
+        str1 += i
+    for index,i in enumerate(list_to_process[3]):
+        if index > 0:
+            str2 += "\n"
+        str2 += i
+
+    top_frame = tk.Frame(subwindow)
+    mid_frame = tk.Frame(subwindow)
+    bot_frame1 = tk.Frame(subwindow)
+    bot_frame2 = tk.Frame(subwindow)
+    top_frame.grid(row=0,column=0,sticky="")
+    mid_frame.grid(row=1,column=0,sticky="nsew")
+    bot_frame1.grid(row=2,column=0,sticky="")
+    
+    mid_frame1 = tk.LabelFrame(mid_frame,text=f"P1: {list_to_process[0]}")
+    mid_frame2 = tk.LabelFrame(mid_frame,text=f"P2: {list_to_process[1]}")
+    mid_frame1.grid(row=0,column=0,sticky="nsew")
+    mid_frame2.grid(row=0,column=1,sticky="nsew")
+    
+    subwindow.grid_columnconfigure(0,weight=1)
+    subwindow.rowconfigure(1,minsize=0,weight=1)
+    mid_frame.grid_columnconfigure(0,weight=1)
+    mid_frame.grid_columnconfigure(1,weight=1)
+    mid_frame.grid_rowconfigure(0,weight=1)
+    mid_frame1.grid_columnconfigure(0,weight=1)
+    mid_frame1.grid_rowconfigure(0,weight=1)
+    mid_frame2.grid_columnconfigure(0,weight=1)
+    mid_frame2.grid_rowconfigure(0,weight=1)
+
+    label_message = tk.Label(top_frame,text=message)
+    label1 = tk.Label(mid_frame1,text=str1,anchor="n",wraplength=width/2,justify="left")
+    label2 = tk.Label(mid_frame2,text=str2,anchor="n",wraplength=width/2,justify="left")
+    submit_button = tk.Button(bot_frame1,text="Apply",width=10,command=lambda : [close_format_window()])
+
+    draft_id = tk.StringVar()
+    if (len(list_to_process[4]) == 1):
+        draft_id.set(list_to_process[4][0])
+    else:
+        draft_id.set("Select from Applicable Draft_IDs")
+    draftid_menu = tk.OptionMenu(bot_frame1,draft_id,*list_to_process[4])
+
+    button_skip = tk.Button(top_frame,text="Skip Match",width=10,command=lambda : [close_format_window("Skip")])
+    button_exit = tk.Button(top_frame,text="Exit",width=10,command=lambda : [close_format_window("Exit")])
+    
+    label1.grid(row=0,column=0,sticky="nsew",padx=5,pady=5)
+    label2.grid(row=0,column=0,sticky="nsew",padx=5,pady=5)
+  
+    button_skip.grid(row=0,column=0,padx=10,pady=10)
+    label_message.grid(row=0,column=1,padx=10,pady=10)
+    button_exit.grid(row=0,column=2,padx=10,pady=10)
+
+    draftid_menu.grid(row=0,column=0,padx=5,pady=5)
+    draftid_menu.config(width=45)
+    submit_button.grid(row=0,column=1,padx=5,pady=5)
+
+    subwindow.protocol("WM_DELETE_WINDOW", lambda : close_format_window("Exit"))
+    subwindow.wait_window()
 def debug():
     os.chdir(FILEPATH_ROOT)
     with open("DEBUG.txt","w",encoding="utf-8") as txt:
@@ -5026,15 +5305,15 @@ def debug():
         txt.write("\n")
 
         txt.write("Other Variables:\n")
-        txt.write(f"Display: {display}\n")
-        txt.write(f"Previous Display: {prev_display}\n")
-        txt.write(f"UAW: {uaw}\n")
-        txt.write(f"Field: {field}\n")
-        txt.write(f"New_Import: {new_import}\n")
-        txt.write(f"Data_Loaded: {data_loaded}\n")
-        txt.write(f"Filter_Changed: {filter_changed}\n")
-        txt.write(f"Ask_To_Save: {ask_to_save}\n")
-        txt.write(f"Selected: {selected}\n")
+        txt.write(f"    display: {display}\n")
+        txt.write(f"    prev_display: {prev_display}\n")
+        txt.write(f"    uaw: {uaw}\n")
+        txt.write(f"    field: {field}\n")
+        txt.write(f"    new_import: {new_import}\n")
+        txt.write(f"    data_loaded: {data_loaded}\n")
+        txt.write(f"    filter_changed: {filter_changed}\n")
+        txt.write(f"    ask_to_save: {ask_to_save}\n")
+        txt.write(f"    selected: {selected}\n")
 def test():
     # Test function
     pass
@@ -5145,6 +5424,8 @@ data_menu.add_command(label="Input Missing Match Data",command=lambda : input_mi
 data_menu.add_command(label="Input Missing Game_Winner Data",command=lambda : get_winners(),state=tk.DISABLED)
 data_menu.add_command(label="Apply Best Guess for Deck Names",command=lambda : rerun_decks_window(),state=tk.DISABLED)
 data_menu.add_separator()
+data_menu.add_command(label="Apply Associated Draft_IDs to Matches",command=lambda : get_associated_draftid_pre(),state=tk.DISABLED)
+data_menu.add_separator()
 data_menu.add_command(label="Set Default Hero",command=lambda : set_default_hero(),state=tk.DISABLED)
 data_menu.add_command(label="Set Default Import Folders",command=lambda : set_default_import())
 data_menu.add_separator()
@@ -5164,12 +5445,12 @@ game_button.grid(row=2,column=0,sticky="ew",padx=5,pady=(0,5))
 play_button.grid(row=3,column=0,sticky="ew",padx=5,pady=(0,5))
 draft_button.grid(row=4,column=0,sticky="ew",padx=5,pady=(0,5))
 pick_button.grid(row=5,column=0,sticky="ew",padx=5,pady=(0,5))
-stats_button.grid(row=6,column=0,sticky="ew",padx=5,pady=(0,5))
-filter_button.grid(row=7,column=0,sticky="ew",padx=5,pady=(25,5))
+stats_button.grid(row=6,column=0,sticky="ew",padx=5,pady=(20,5))
+filter_button.grid(row=7,column=0,sticky="ew",padx=5,pady=(20,5))
 clear_button.grid(row=8,column=0,sticky="ew",padx=5,pady=(0,5))
-revise_button.grid(row=9,column=0,sticky="ew",padx=5,pady=(25,5))
+revise_button.grid(row=9,column=0,sticky="ew",padx=5,pady=(20,5))
 remove_button.grid(row=10,column=0,sticky="ew",padx=5,pady=(0,5))
-next_button.grid(row=11,column=0,sticky="ew",padx=5,pady=(25,5))
+next_button.grid(row=11,column=0,sticky="ew",padx=5,pady=(20,5))
 back_button.grid(row=12,column=0,sticky="ew",padx=5,pady=(0,5))
 
 tree1 = ttk.Treeview(text_frame,show="tree")
