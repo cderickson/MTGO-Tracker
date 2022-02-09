@@ -242,7 +242,7 @@ def clear_loaded():
     data_menu.entryconfig("Input Missing Match Data",state=tk.DISABLED)
     data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.DISABLED)
     data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.DISABLED)
-    data_menu.entryconfig("Apply Associated Draft_IDs to Matches",state=tk.DISABLED)
+    data_menu.entryconfig("Apply Associated Draft_IDs to Limited Matches",state=tk.DISABLED)
 
     # Clear existing data in tree.
     tree1.delete(*tree1.get_children())
@@ -515,7 +515,7 @@ def startup():
     data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
     data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
     data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
-    data_menu.entryconfig("Apply Associated Draft_IDs to Matches",state=tk.NORMAL)
+    data_menu.entryconfig("Apply Associated Draft_IDs to Limited Matches",state=tk.NORMAL)
     ask_to_save = False
     os.chdir(FILEPATH_ROOT)
 def save_settings():
@@ -2737,9 +2737,9 @@ def activate_revise(event):
     if (display == "Matches"):
         revise_button["state"] = tk.NORMAL
         remove_button["state"] = tk.NORMAL
-    # elif (display == "Drafts"):
-    #     revise_button["state"] = tk.NORMAL
-    #     remove_button["state"] = tk.NORMAL
+    elif (display == "Drafts"):
+        # revise_button["state"] = tk.NORMAL
+        remove_button["state"] = tk.NORMAL
 def revise_method_select():
     if (len(tree1.selection()) > 1) & (display == "Matches"):
         revise_record_multi()
@@ -2841,7 +2841,7 @@ def import_window():
             data_menu.entryconfig("Input Missing Match Data",state=tk.NORMAL)
             data_menu.entryconfig("Input Missing Game_Winner Data",state=tk.NORMAL)
             data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
-            data_menu.entryconfig("Apply Associated Draft_IDs to Matches",state=tk.NORMAL)
+            data_menu.entryconfig("Apply Associated Draft_IDs to Limited Matches",state=tk.NORMAL)
         #save_settings()
         set_display("Matches",update_status=False,start_index=0,reset=True)
         close_import_window()
@@ -5122,7 +5122,7 @@ def get_associated_draftid(mode):
             update_status_bar(f"Draft_ID applied to {count} Matches.")
         set_display("Matches",update_status=False,start_index=0,reset=True)
     else:
-        update_status_bar(f"No Applicable Matches found.")
+        update_status_bar(f"No Matches with Applicable Draft_IDs found.")
 def get_associated_draftid_pre():
     height = 115
     width =  315
@@ -5424,7 +5424,7 @@ data_menu.add_command(label="Input Missing Match Data",command=lambda : input_mi
 data_menu.add_command(label="Input Missing Game_Winner Data",command=lambda : get_winners(),state=tk.DISABLED)
 data_menu.add_command(label="Apply Best Guess for Deck Names",command=lambda : rerun_decks_window(),state=tk.DISABLED)
 data_menu.add_separator()
-data_menu.add_command(label="Apply Associated Draft_IDs to Matches",command=lambda : get_associated_draftid_pre(),state=tk.DISABLED)
+data_menu.add_command(label="Apply Associated Draft_IDs to Limited Matches",command=lambda : get_associated_draftid_pre(),state=tk.DISABLED)
 data_menu.add_separator()
 data_menu.add_command(label="Set Default Hero",command=lambda : set_default_hero(),state=tk.DISABLED)
 data_menu.add_command(label="Set Default Import Folders",command=lambda : set_default_import())
