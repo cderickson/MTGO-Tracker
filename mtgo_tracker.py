@@ -1,20 +1,22 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from tkinter import filedialog
+from tkinter import messagebox
+from tkinter import ttk
+from tkcalendar import DateEntry
+import csv
 import modo
 import os
 import time
 import io
-import pandas as pd
-import csv
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import numpy as np
-pd.options.mode.chained_assignment = None
-from tkcalendar import DateEntry
 import datetime
 import itertools
 import pickle
 import shutil
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+pd.options.mode.chained_assignment = None
 
 # Saved data:
 ALL_DATA =          [[],[],[],{}]
@@ -36,7 +38,7 @@ HERO =                   ""
 INPUT_OPTIONS =          {}
 MAIN_WINDOW_SIZE =  ("small",1000,490)
 
-test_mode =         True
+test_mode =         False
 resize =            False
 filter_dict =       {}
 display =           ""
@@ -5352,13 +5354,20 @@ draft_button = tk.Button(left_frame,text="Drafts",state=tk.DISABLED,\
     command=lambda : set_display("Drafts",update_status=True,start_index=0,reset=True))
 pick_button = tk.Button(left_frame,text="Draft Picks",state=tk.DISABLED,\
     command=lambda : set_display("Picks",update_status=True,start_index=0,reset=True))
-stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,command=lambda : get_stats())
-filter_button = tk.Button(left_frame,text="Filter",state=tk.DISABLED,command=lambda : set_filter())
-clear_button = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,command=lambda : clear_filter(update_status=True,reload_display=True))
-revise_button = tk.Button(left_frame,text="Revise Record(s)",state=tk.DISABLED,command=lambda : revise_method_select())
-remove_button = tk.Button(left_frame,text="Remove Record(s)",state=tk.DISABLED,command=lambda : remove_select())
-next_button = tk.Button(left_frame,text="Next",command=lambda : next_page())
-back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,command=lambda : back())
+stats_button = tk.Button(left_frame,text="Statistics",state=tk.DISABLED,\
+    command=lambda : get_stats())
+filter_button = tk.Button(left_frame,text="Filter",state=tk.DISABLED,\
+    command=lambda : set_filter())
+clear_button = tk.Button(left_frame,text="Clear Filter",state=tk.DISABLED,\
+    command=lambda : clear_filter(update_status=True,reload_display=True))
+revise_button = tk.Button(left_frame,text="Revise Record(s)",\
+    state=tk.DISABLED,command=lambda : revise_method_select())
+remove_button = tk.Button(left_frame,text="Remove Record(s)",\
+    state=tk.DISABLED,command=lambda : remove_select())
+next_button = tk.Button(left_frame,text="Next",\
+    command=lambda : next_page())
+back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,\
+    command=lambda : back())
 
 status_label = tk.Label(bottom_frame,text="")
 status_label.grid(row=0,column=0)
