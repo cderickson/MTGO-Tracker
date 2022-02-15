@@ -5062,7 +5062,7 @@ def get_associated_draftid(mode):
         date = df_drafts[(df_drafts.Draft_ID == i)].Date.tolist()[0]
         draft_picks_dict[i] = (hero,date,set(df_picks[(df_picks.Draft_ID == i)].Card.unique()))
 
-    df_matches = df_matches[df_matches.Format.isin(INPUT_OPTIONS["Limited Formats"])]
+    df_matches = df_matches[df_matches.Limited_Format.isin(INPUT_OPTIONS["Cube Formats"] + INPUT_OPTIONS["Booster Draft Formats"])]
     if mode == "NA":    
         df_matches = df_matches[(df_matches.Draft_ID == "NA")]
     limited_matches = df_matches.Match_ID.tolist()
