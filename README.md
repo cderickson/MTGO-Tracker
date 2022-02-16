@@ -153,16 +153,16 @@ Continue importing data as you play more matches on MTGO!
 	- This will cycle through Matches that have been set to Booster Draft or Cube.
 	- The cards played will be compared against cards picked in each Draft to find Applicable Draft_IDs.
 	- Choose from the list of Applicable Draft_IDs to apply the Draft_ID to the Match.
-	- Match results will automatically be applied to the match result columns in the Draft Table.
+	- Match results will automatically be applied to the match result columns in the 'Drafts' Table.
 ### Revise Record(s) Button:
 	- Selected row(s) in the 'Matches' table can be manually revised.
 	- If multiple rows are selected, the revision will apply to all selected rows.
-	- This is only applicable to rows in the 'Matches' table.
+	- This is only applicable to rows in the 'Matches' or 'Drafts' tables.
 ### Remove Record(s) Button:
 	- Selected row(s) in the 'Matches' table can be removed from your database.
 	- All associated Games and Plays data will also be removed.
 	- Removed Matches can be ignored, meaning they will not be included in future imports.
-	- This is only applicable to rows in the 'Matches' table.
+	- This is only applicable to rows in the 'Matches' or 'Drafts' tables.
 ### Input Options File
 	- Control the dropdown menu options available when making revisions.
 	- Add or delete options under their respective header.
