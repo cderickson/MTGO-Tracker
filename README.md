@@ -151,9 +151,9 @@ Continue importing data as you play more matches on MTGO!
 
 	- Choose whether to cycle through all Limited Matches or only those with Draft_ID set to 'NA'.
 	- This will cycle through Matches that have been set to Booster Draft or Cube.
-	- For each Match, the cards played will be compared against the cards picked in each Draft to find Applicable Draft_IDs.
+	- The cards played will be compared against cards picked in each Draft to find Applicable Draft_IDs.
 	- Choose from the list of Applicable Draft_IDs to apply the Draft_ID to the Match.
-	- The match result of the revised Match record will automatically be applied to the match result in the Draft Table.
+	- Match results will automatically be applied to the match result columns in the Draft Table.
 ### Revise Record(s) Button:
 	- Selected row(s) in the 'Matches' table can be manually revised.
 	- If multiple rows are selected, the revision will apply to all selected rows.
