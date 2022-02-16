@@ -146,6 +146,14 @@ Continue importing data as you play more matches on MTGO!
 	- Clicking 'Apply to All' will overwrite any existing P1/P2_Subarch values.
 	- Click 'Apply to Unknowns' if you do not wish to overwrite your previous changes to these columns.
 	- Matches with Format set to Draft/Sealed/Cube will have deck name set to colors played (eg. WU/RG/etc.)
+### Associated Draft_IDs:
+**Data => Apply Associated Draft_IDs to Limited Matches**
+
+	- Choose whether to cycle through all Limited Matches or only those with Draft_ID set to 'NA'.
+	- This will cycle through Matches that have been set to Booster Draft or Cube.
+	- For each Match, the cards played will be compared against the cards picked in each Draft to find Applicable Draft_IDs.
+	- Choose from the list of Applicable Draft_IDs to apply the Draft_ID to the Match.
+	- The match result of the revised Match record will automatically be applied to the match result in the Draft Table.
 ### Revise Record(s) Button:
 	- Selected row(s) in the 'Matches' table can be manually revised.
 	- If multiple rows are selected, the revision will apply to all selected rows.
