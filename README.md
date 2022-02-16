@@ -212,6 +212,7 @@ Continue importing data as you play more matches on MTGO!
 	<p><b>Export => Set Default Export Folder</b></p>
 	
 	- The folder where exported .csv and .xlsx files will be saved.
+	- Defaults to /root/export/ folder.
 </details>
 <details>
 	<summary><b>Main Window Size</b></summary>
@@ -245,6 +246,7 @@ Continue importing data as you play more matches on MTGO!
 	- MTGO-Tracker creates (5) tables: 'Matches', 'Games', 'Plays', 'Drafts', 'Draft Picks'.
 	- Use the 'Export' Menu to save any or all of your tables as either .csv or .xlsx files.
 	- Filtered tables can be exported.
+	- Exports to /root/export/ by default.
 ### Inverse Joined Table Export:
 
 	- MTGO randomly sets each player to P1 or P2 at the beginning of each match. 
