@@ -2798,7 +2798,7 @@ def import_window():
         FILEPATH_DRAFTS = label1["text"]
         FILEPATH_LOGS = label2["text"]
 
-        if overwrite:
+        if overwrite == True:
             h = HERO
             match_dict = user_inputs(type="Matches")
             game_dict = user_inputs(type="Games")
@@ -2806,13 +2806,14 @@ def import_window():
             get_all_data(fp_logs=FILEPATH_LOGS_COPY,fp_drafts=FILEPATH_DRAFTS_COPY,copy=False)
             for i in ALL_DATA[0]:
                 try:
+                    i[modo.header("Matches").index("Draft_ID")] = match_dict[i[0]][1]
                     i[modo.header("Matches").index("P1_Arch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P1")]][0]
                     i[modo.header("Matches").index("P1_Subarch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P1")]][1]
                     i[modo.header("Matches").index("P2_Arch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P2")]][0]
                     i[modo.header("Matches").index("P2_Subarch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P2")]][1]
-                    i[modo.header("Matches").index("Format")] = match_dict[i[0]][1]
-                    i[modo.header("Matches").index("Limited_Format")] = match_dict[i[0]][2]
-                    i[modo.header("Matches").index("Match_Type")] = match_dict[i[0]][3]
+                    i[modo.header("Matches").index("Format")] = match_dict[i[0]][2]
+                    i[modo.header("Matches").index("Limited_Format")] = match_dict[i[0]][3]
+                    i[modo.header("Matches").index("Match_Type")] = match_dict[i[0]][4]
                 # Found new Match for which we don't have user inputs.
                 except KeyError:
                     pass
@@ -5016,6 +5017,7 @@ def user_inputs(type):
     game_dict = {}
     player_dict = {}
 
+    draftid_index = modo.header("Matches").index("Draft_ID")
     p1_index = modo.header("Matches").index("P1")
     p2_index = modo.header("Matches").index("P2")
     p1_arch_index = modo.header("Matches").index("P1_Arch")
@@ -5034,7 +5036,7 @@ def user_inputs(type):
             player_dict = {}
             player_dict[i[p1_index]] = [i[p1_arch_index],i[p1_sub_index]]
             player_dict[i[p2_index]] = [i[p2_arch_index],i[p2_sub_index]]
-            match_dict[i[0]] = [player_dict,i[format_index],i[lformat_index],i[match_type_index]]
+            match_dict[i[0]] = [player_dict,i[draftid_index],i[format_index],i[lformat_index],i[match_type_index]]
         return match_dict
     elif type == "Games":
         for i in ALL_DATA[1]:
