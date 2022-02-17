@@ -503,6 +503,11 @@ def parse_draft_log(file,initial):
     DRAFTS_TABLE.append([DRAFT_ID,HERO] + PLAYER_LIST + [0,0,FORMAT,DATE])
 
     return (DRAFTS_TABLE,PICKS_TABLE,DRAFT_ID)
+def check_timeout(ga):
+    for i in ga:
+        if i.find(" has lost the game due to disconnection") != -1:
+            return (True,i.split(" has lost the game due to disconnection")[0])
+    return (False,None)
 def game_actions(init,time):
     # Input:  String,String
     # Output: List[Strings]
@@ -637,6 +642,14 @@ def match_data(ga,gd,pd):
         MATCH_WINNER = "P2"
     else:
         MATCH_WINNER = "NA"
+        # timeout = check_timeout(ga)
+        # if timeout[0] == True:
+        #     if timeout[1] == P1:
+        #         MATCH_WINNER = "P2"
+        #     else:
+        #         MATCH_WINNER = "P1"
+        # else:
+        #     MATCH_WINNER = "NA"
 
     MATCH_DATA.extend((MATCH_ID,
                        DRAFT_ID,
