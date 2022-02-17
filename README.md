@@ -146,15 +146,23 @@ Continue importing data as you play more matches on MTGO!
 	- Clicking 'Apply to All' will overwrite any existing P1/P2_Subarch values.
 	- Click 'Apply to Unknowns' if you do not wish to overwrite your previous changes to these columns.
 	- Matches with Format set to Draft/Sealed/Cube will have deck name set to colors played (eg. WU/RG/etc.)
+### Associated Draft_IDs:
+**Data => Apply Associated Draft_IDs to Limited Matches**
+
+	- Choose whether to cycle through all Limited Matches or only those with Draft_ID set to 'NA'.
+	- This will cycle through Matches that have been set to Booster Draft or Cube.
+	- The cards played will be compared against cards picked in each Draft to find Applicable Draft_IDs.
+	- Choose from the list of Applicable Draft_IDs to apply the Draft_ID to the Match.
+	- Match results will automatically be applied to the match result columns in the 'Drafts' Table.
 ### Revise Record(s) Button:
 	- Selected row(s) in the 'Matches' table can be manually revised.
 	- If multiple rows are selected, the revision will apply to all selected rows.
-	- This is only applicable to rows in the 'Matches' table.
+	- This is only applicable to rows in the 'Matches' or 'Drafts' tables.
 ### Remove Record(s) Button:
 	- Selected row(s) in the 'Matches' table can be removed from your database.
 	- All associated Games and Plays data will also be removed.
 	- Removed Matches can be ignored, meaning they will not be included in future imports.
-	- This is only applicable to rows in the 'Matches' table.
+	- This is only applicable to rows in the 'Matches' or 'Drafts' tables.
 ### Input Options File
 	- Control the dropdown menu options available when making revisions.
 	- Add or delete options under their respective header.
@@ -204,6 +212,7 @@ Continue importing data as you play more matches on MTGO!
 	<p><b>Export => Set Default Export Folder</b></p>
 	
 	- The folder where exported .csv and .xlsx files will be saved.
+	- Defaults to /root/export/ folder.
 </details>
 <details>
 	<summary><b>Main Window Size</b></summary>
@@ -237,6 +246,7 @@ Continue importing data as you play more matches on MTGO!
 	- MTGO-Tracker creates (5) tables: 'Matches', 'Games', 'Plays', 'Drafts', 'Draft Picks'.
 	- Use the 'Export' Menu to save any or all of your tables as either .csv or .xlsx files.
 	- Filtered tables can be exported.
+	- Exports to /root/export/ by default.
 ### Inverse Joined Table Export:
 
 	- MTGO randomly sets each player to P1 or P2 at the beginning of each match. 
