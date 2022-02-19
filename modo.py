@@ -279,10 +279,12 @@ def invert_join(ad):
     ad_inverted[1] += ad[1]
 
     return ad_inverted
-def update_game_wins(ad):
+def update_game_wins(ad,timeout):
     #Input:  List[Matches,Games,Plays]
     #Output: List[Matches,Games,Plays]
     
+    p1_index = header("Matches").index("P1")
+    p2_index = header("Matches").index("P2")
     p1wins_index = header("Matches").index("P1_Wins")
     p2wins_index = header("Matches").index("P2_Wins")
     mw_index = header("Matches").index("Match_Winner")
@@ -300,12 +302,16 @@ def update_game_wins(ad):
                     i[p2wins_index] += 1
                 elif j[gw_index] == "NA":
                     pass
-            if i[p1wins_index] > i[p2wins_index]:
-                i[mw_index] = "P1"
-            elif i[p2wins_index] > i[p1wins_index]:
-                i[mw_index] = "P2"
-            else:
-                i[mw_index] = "NA"
+        if i[p1wins_index] > i[p2wins_index]:
+            i[mw_index] = "P1"
+        elif i[p2wins_index] > i[p1wins_index]:
+            i[mw_index] = "P2"
+        else:
+            if i[0] in timeout:
+                if i[p1_index] == timeout[i[0]]:
+                    i[mw_index] = "P2"
+                elif i[p2_index] == timeout[i[0]]:
+                    i[mw_index] = "P1"
 def players(init):
     # Input:  String or List[Strings]
     # Output: List[Strings]
@@ -641,15 +647,14 @@ def match_data(ga,gd,pd):
     elif P2_WINS > P1_WINS:
         MATCH_WINNER = "P2"
     else:
-        MATCH_WINNER = "NA"
-        # timeout = check_timeout(ga)
-        # if timeout[0] == True:
-        #     if timeout[1] == P1:
-        #         MATCH_WINNER = "P2"
-        #     else:
-        #         MATCH_WINNER = "P1"
-        # else:
-        #     MATCH_WINNER = "NA"
+        timeout = check_timeout(ga)
+        if timeout[0] == True:
+            if timeout[1] == P1:
+                MATCH_WINNER = "P2"
+            else:
+                MATCH_WINNER = "P1"
+        else:
+            MATCH_WINNER = "NA"
 
     MATCH_DATA.extend((MATCH_ID,
                        DRAFT_ID,
@@ -1069,5 +1074,6 @@ def get_all_data(init,mtime):
     gamedata = game_data(gameactions)
     playdata = play_data(gameactions)
     matchdata = match_data(gameactions,gamedata[0],playdata)
+    timeout = check_timeout(gameactions)
 
-    return [matchdata,gamedata[0],playdata,gamedata[1]]
+    return [matchdata,gamedata[0],playdata,gamedata[1],timeout]

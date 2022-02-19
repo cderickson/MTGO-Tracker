@@ -22,6 +22,7 @@ pd.options.mode.chained_assignment = None
 ALL_DATA =          [[],[],[],{}]
 ALL_DATA_INVERTED = [[],[],[],{}]
 ALL_DECKS =         {}
+TIMEOUT =           {}
 DRAFTS_TABLE =      []
 PICKS_TABLE =       []
 PARSED_FILE_DICT =  {}
@@ -62,11 +63,11 @@ def save(exit):
     os.chdir(FILEPATH_ROOT + "\\" + "save")
 
     pickle.dump(ALL_DATA,open("ALL_DATA","wb"))
+    pickle.dump(TIMEOUT,open("TIMEOUT","wb"))
     pickle.dump(DRAFTS_TABLE,open("DRAFTS_TABLE","wb"))
     pickle.dump(PICKS_TABLE,open("PICKS_TABLE","wb"))
     pickle.dump(PARSED_FILE_DICT,open("PARSED_FILE_DICT","wb"))
     pickle.dump(PARSED_DRAFT_DICT,open("PARSED_DRAFT_DICT","wb"))
-
     update_status_bar(status="Save complete. Data will be loaded automatically on next startup.")
     os.chdir(FILEPATH_ROOT)
 
@@ -426,6 +427,7 @@ def startup():
     global ALL_DATA
     global ALL_DATA_INVERTED
     global ALL_DECKS
+    global TIMEOUT
     global DRAFTS_TABLE
     global PICKS_TABLE
     global PARSED_FILE_DICT
@@ -497,6 +499,7 @@ def startup():
         os.chdir(FILEPATH_ROOT)
         return
     ALL_DATA = pickle.load(open("ALL_DATA","rb"))
+    TIMEOUT = pickle.load(open("TIMEOUT","rb"))
     DRAFTS_TABLE = pickle.load(open("DRAFTS_TABLE","rb"))
     PICKS_TABLE = pickle.load(open("PICKS_TABLE","rb"))
     PARSED_FILE_DICT = pickle.load(open("PARSED_FILE_DICT","rb"))
@@ -582,6 +585,7 @@ def set_display(d,update_status,start_index,reset):
 def get_all_data(fp_logs,fp_drafts,copy):
     global ALL_DATA
     global ALL_DATA_INVERTED
+    global TIMEOUT
     global DRAFTS_TABLE
     global PICKS_TABLE
     global PARSED_FILE_DICT
@@ -589,6 +593,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
     global data_loaded
     global new_import
     global ask_to_save
+
     match_count = 0
     draft_count = 0
     if (fp_logs != "No Default GameLogs Folder"):
@@ -622,6 +627,8 @@ def get_all_data(fp_logs,fp_drafts,copy):
                         new_data[2].append(i)
                     for i in parsed_data[3]:
                         new_data[3] = new_data[3] | parsed_data[3]
+                    if parsed_data[4][0] == True:
+                        TIMEOUT[parsed_data[0][0]] = parsed_data[4][1]
                     match_count += 1
         new_data_inverted = modo.invert_join(new_data)
         for index in range(3):
@@ -2832,7 +2839,7 @@ def import_window():
             HERO = h
             if HERO != "":
                 stats_button["state"] = tk.NORMAL
-            modo.update_game_wins(ALL_DATA)
+            modo.update_game_wins(ALL_DATA,TIMEOUT)
             ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
         else:
             get_all_data(fp_logs=FILEPATH_LOGS,fp_drafts=FILEPATH_DRAFTS,copy=True)
@@ -2926,7 +2933,7 @@ def get_winners():
 
     if len(ALL_DATA[3]) > len(raw_dict_new):
         ALL_DATA[3] = raw_dict_new
-        modo.update_game_wins(ALL_DATA)
+        modo.update_game_wins(ALL_DATA,TIMEOUT)
         ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
         ask_to_save = True
 
