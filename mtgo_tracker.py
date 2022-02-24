@@ -2798,6 +2798,7 @@ def import_window():
     def import_data(overwrite):
         global ALL_DATA
         global ALL_DATA_INVERTED
+        global DRAFTS_TABLE
         global FILEPATH_LOGS
         global FILEPATH_DRAFTS
         global HERO
@@ -2840,7 +2841,15 @@ def import_window():
             if HERO != "":
                 stats_button["state"] = tk.NORMAL
             modo.update_game_wins(ALL_DATA,TIMEOUT)
+
             ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
+
+            df_inverted = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
+            for i in DRAFTS_TABLE:
+                wins = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[modo.header("Drafts").index("Hero")]) & (df_inverted.Match_Winner == "P1")].shape[0]
+                losses = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[modo.header("Drafts").index("Hero")]) & (df_inverted.Match_Winner == "P2")].shape[0]
+                i[modo.header("Drafts").index("Match_Wins")] = wins
+                i[modo.header("Drafts").index("Match_Losses")] = losses
         else:
             get_all_data(fp_logs=FILEPATH_LOGS,fp_drafts=FILEPATH_DRAFTS,copy=True)
         clear_filter(update_status=False,reload_display=False)
@@ -2899,6 +2908,7 @@ def import_window():
 def get_winners():
     global ALL_DATA
     global ALL_DATA_INVERTED
+    global DRAFTS_TABLE
     global uaw
     global ask_to_save
 
@@ -2935,6 +2945,14 @@ def get_winners():
         ALL_DATA[3] = raw_dict_new
         modo.update_game_wins(ALL_DATA,TIMEOUT)
         ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
+
+        df_inverted = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
+        for i in DRAFTS_TABLE:
+            wins = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[hero_index]) & (df_inverted.Match_Winner == "P1")].shape[0]
+            losses = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[hero_index]) & (df_inverted.Match_Winner == "P2")].shape[0]
+            i[modo.header("Drafts").index("Match_Wins")] = wins
+            i[modo.header("Drafts").index("Match_Losses")] = losses
+
         ask_to_save = True
 
     if total == 0:
