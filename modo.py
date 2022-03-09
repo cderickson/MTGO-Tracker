@@ -10,6 +10,70 @@ import copy
 # Add the option to the appropriate list below.
 # Add the option under the appropriate header in the input_options.txt file.
 
+def split_cards():
+    all_split = ["Alive/Well","Appeal/Authority","Armed/Dangerous","Assault/Battery","Assure/Assemble","Beck/Call","Bedeck/Bedazzle","Boom/Bust",
+            "Bound/Determined","Breaking/Entering","Carnival/Carnage","Catch/Release","Claim/Fame","Collision/Colossus","Commit/Memory","Connive/Concoct",
+            "Consecrate/Consume","Consign/Oblivion","Crime/Punishment","Cut/Ribbons","Dead/Gone","Depose/Deploy","Destined/Lead","Discovery/Dispersal",
+            "Down/Dirty","Driven/Despair","Dusk/Dawn","Expansion/Explosion","Failure/Comply","Far/Away","Farm/Market","Fast/Furious",
+            "Find/Finality","Fire/Ice","Flesh/Blood","Flower/Flourish","Give/Take","Grind/Dust","Heaven/Earth","Hide/Seek",
+            "Hit/Run","Illusion/Reality","Incubation/Incongruity","Insult/Injury","Integrity/Intervention","Invert/Invent","Leave/Chance","Life/Death",
+            "Mouth/Feed","Never/Return","Night/Day","Odds/Ends","Onward/Victory","Order/Chaos","Pain/Suffering","Prepare/Fight",
+            "Profit/Loss","Protect/Serve","Pure/Simple","Rags/Riches","Ready/Willing","Reason/Believe","Reduce/Rubble","Refuse/Cooperate",
+            "Repudiate/Replicate","Research/Development","Response/Resurgence","Revival/Revenge","Rise/Fall","Road/Ruin","Rough/Tumble","Said/Done",
+            "Spite/Malice","Spring/Mind","Stand/Deliver","Start/Finish","Status/Statue","Struggle/Survive","Supply/Demand","Thrash/Threat",
+            "Toil/Trouble","Trial/Error","Turn/Burn","Warrant/Warden","Wax/Wane","Wear/Tear"]
+    split_dict = {}
+    for i in all_split:
+        half1 = i.split("/")[0]
+        half2 = i.split("/")[1]
+        split_dict[half1] = i
+        split_dict[half2] = i
+    return split_dict
+def adv_cards():
+    return {"Bring to Life" : "Animating Faerie",
+            "Dizzying Swoop" : "Ardenvale Tactician",
+            "Fertile Footsteps" : "Beanstalk Giant",
+            "Stomp" : "Bonecrusher Giant",
+            "Petty Theft" : "Brazen Borrower",
+            "Treats to Share" : "Curious Pair",
+            "Battle Display" : "Embereth Shieldbreaker",
+            "Granted" : "Fae of Wishes",
+            "Gift of the Fae" : "Faerie Guidemother",
+            "Welcome Home" : "Flaxen Intruder",
+            "Profane Insight" : "Foulmire Knight",
+            "Shield's Might" : "Garenbrig Carver",
+            "Chop Down" : "Giant Killer",
+            "Mesmeric Glare" : "Hypnotic Sprite",
+            "Rider in Need" : "Lonesome Unicorn",
+            "Heart's Desire" : "Lovestruck Beast",
+            "Haggle" : "Merchant of the Vale",
+            "Venture Deeper" : "Merfolk Secretkeeper",
+            "Swift End" : "Murderous Rider",
+            "Bring Back" : "Oakhame Ranger",
+            "Alter Fate" : "Order of Midnight",
+            "Rage of Winter" : "Queen of Ice",
+            "Cast Off" : "Realm-Cloaked Giant",
+            "Harvest Fear" : "Reaper of Night",
+            "Boulder Rush" : "Rimrock Knight",
+            "Seasonal Ritual" : "Rosethorn Acolyte",
+            "Usher to Safety" : "Shepherd of the Flock",
+            "On Alert" : "Silverflame Squire",
+            "Curry Favor" : "Smitten Swordmaster",
+            "Oaken Boon" : "Tuinvale Treefolk"}
+def clean_card_set(card_set):
+    cards = card_set
+    split_dict = split_cards()
+    adv_dict = adv_cards()
+    for i in list(cards):
+        if i == "NA":
+            cards.remove(i)
+        elif i in split_dict:
+            cards.add(split_dict[i])
+            cards.remove(i)
+        elif i in adv_dict:
+            cards.add(adv_dict[i])
+            cards.remove(i)
+    return cards
 def formats(lim=False,con=False,cube=False,booster=False,sealed=False):
     formats = []
     lim_formats =  ["Booster Draft",
@@ -467,12 +531,16 @@ def parse_draft_log(file,initial):
             day = i.split("/")[1]
             hour = i.split()[2].split(":")[0]
             minute = i.split()[2].split(":")[1]
+            if (i.split()[-1] == "AM") & (hour == "12"):
+                hour = "00"
+            if (i.split()[-1] == "PM") & (hour != "12"):
+                hour = str(int(hour) + 12)
             if len(month) == 1:
                 month = "0" + month
             if len(day) == 1:
                 day = "0" + day
             if len(hour) == 1:
-                hour = "0" + hour                       
+                hour = "0" + hour
             DATE = f"{year}-{month}-{day}-{hour}:{minute}"
         elif i == "Players:":
             player_bool = True
