@@ -5093,7 +5093,7 @@ def get_associated_draftid(mode):
     if mode == "NA":    
         df_matches = df_matches[(df_matches.Draft_ID == "NA")]
     limited_matches = df_matches.Match_ID.tolist()
-    
+
     list_to_process = []
     for i in limited_matches:
         acceptable = []
@@ -5104,14 +5104,8 @@ def get_associated_draftid(mode):
         df = df_plays[(df_plays.Match_ID == i)]
         cards1 =  set(df[(df.Casting_Player == p1) & (df.Action == "Casts")].Primary_Card.unique())
         cards2 =  set(df[(df.Casting_Player == p2) & (df.Action == "Casts")].Primary_Card.unique())
-        try:
-            cards1.remove("NA")
-        except KeyError:
-            pass
-        try:
-            cards2.remove("NA")
-        except KeyError:
-            pass
+        cards1 = modo.clean_card_set(cards1)
+        cards2 = modo.clean_card_set(cards2)
         cards_dict[p1] = cards1
         cards_dict[p2] = cards2
         for key in draft_picks_dict:
