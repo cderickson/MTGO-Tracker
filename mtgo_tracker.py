@@ -360,7 +360,7 @@ def delete_session():
 
     def del_session():
         global ALL_DECKS
-        ALL_DECKS.clear()
+        # ALL_DECKS.clear()
 
         save_files = ["ALL_DATA","DRAFTS_TABLE","PICKS_TABLE","PARSED_FILE_DICT","PARSED_DRAFT_DICT","SETTINGS","MAIN_WINDOW_SIZE"]
         os.chdir(FILEPATH_ROOT + "\\" + "save")   
@@ -380,6 +380,8 @@ def delete_session():
         for (root,dirs,files) in os.walk(os.getcwd()):
             for i in files:
                 os.remove(i) 
+
+        clear_loaded()
 
         if session_exists == True:
             update_status_bar(status="Saved session data has been deleted.")
@@ -5385,7 +5387,7 @@ revise_button = tk.Button(left_frame,text="Revise Record(s)",\
     state=tk.DISABLED,command=lambda : revise_method_select())
 remove_button = tk.Button(left_frame,text="Remove Record(s)",\
     state=tk.DISABLED,command=lambda : remove_select())
-next_button = tk.Button(left_frame,text="Next",\
+next_button = tk.Button(left_frame,text="Next",state=tk.DISABLED,\
     command=lambda : next_page())
 back_button = tk.Button(left_frame,text="Back",state=tk.DISABLED,\
     command=lambda : back())
