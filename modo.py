@@ -609,7 +609,8 @@ def game_actions(init,time):
 
     gameactions.append(format_time(time))
     for i in initial:
-        fullstring = i.split(".")[0]
+        fullstring = i.replace(" (Alt.)", "")
+        fullstring = fullstring.split(".")[0]
         # Player joined game header.
         if count == 0:
             count += 1
@@ -684,8 +685,11 @@ def match_data(ga,gd,pd):
     P2 =            players(ga)[1]
     P2_ARCH =       "NA"
     P2_SUBARCH =    "NA"
-    P1_ROLL =       high_roll(ga)[P1]
-    P2_ROLL =       high_roll(ga)[P2]
+    try:
+        P1_ROLL =       high_roll(ga)[P1]
+        P2_ROLL =       high_roll(ga)[P2]
+    except KeyError:
+        return "High Rolls not Found."
     P1_WINS =       0
     P2_WINS =       0
     MATCH_WINNER =  ""
@@ -776,7 +780,6 @@ def game_data(ga):
             elif lastline.split()[0] == p2:
                 return "P2"
         # Could not determine a winner.
-        #print(curr_game_list)
         return "NA" 
 
     GAME_DATA =     []
@@ -795,8 +798,11 @@ def game_data(ga):
     TURNS =         0
     GAME_WINNER =   ""
 
-    P1 =            players(ga)[0]
-    P2 =            players(ga)[1]
+    try:
+        P1 =            players(ga)[0]
+        P2 =            players(ga)[1]
+    except IndexError:
+        return "Players not Found."
     curr_game_list =[]
     player_count =  len(players(ga))
     prev_string =   ""
@@ -1140,8 +1146,12 @@ def get_all_data(init,mtime):
     
     gameactions = game_actions(init,mtime)
     gamedata = game_data(gameactions)
+    if isinstance(gamedata, str):
+        return gamedata
     playdata = play_data(gameactions)
     matchdata = match_data(gameactions,gamedata[0],playdata)
+    if isinstance(matchdata, str):
+        return matchdata
     timeout = check_timeout(gameactions)
 
     return [matchdata,gamedata[0],playdata,gamedata[1],timeout]
