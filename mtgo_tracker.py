@@ -359,10 +359,7 @@ def delete_session():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def del_session():
-        global ALL_DECKS
-        # ALL_DECKS.clear()
-
-        save_files = ["ALL_DATA","DRAFTS_TABLE","PICKS_TABLE","PARSED_FILE_DICT","PARSED_DRAFT_DICT","SETTINGS","MAIN_WINDOW_SIZE"]
+        save_files = ["ALL_DATA","DRAFTS_TABLE","PICKS_TABLE","TIMEOUT","PARSED_FILE_DICT","PARSED_DRAFT_DICT","SETTINGS","MAIN_WINDOW_SIZE"]
         os.chdir(FILEPATH_ROOT + "\\" + "save")   
 
         session_exists = False
@@ -371,17 +368,17 @@ def delete_session():
                 session_exists = True
                 os.remove(i)
 
-        os.chdir(FILEPATH_LOGS_COPY)
-        for (root,dirs,files) in os.walk(os.getcwd()):
-            for i in files:
-                os.remove(i)
+        # os.chdir(FILEPATH_LOGS_COPY)
+        # for (root,dirs,files) in os.walk(os.getcwd()):
+        #     for i in files:
+        #         os.remove(i)
         
-        os.chdir(FILEPATH_DRAFTS_COPY)
-        for (root,dirs,files) in os.walk(os.getcwd()):
-            for i in files:
-                os.remove(i) 
+        # os.chdir(FILEPATH_DRAFTS_COPY)
+        # for (root,dirs,files) in os.walk(os.getcwd()):
+        #     for i in files:
+        #         os.remove(i) 
 
-        clear_loaded()
+        # clear_loaded()
 
         if session_exists == True:
             update_status_bar(status="Saved session data has been deleted.")
@@ -598,6 +595,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
 
     match_count = 0
     draft_count = 0
+    skip_dict = {}
     if (fp_logs != "No Default GameLogs Folder"):
         new_data = [[],[],[],{}]
         os.chdir(fp_logs)
@@ -613,6 +611,9 @@ def get_all_data(fp_logs,fp_drafts,copy):
                         initial = gamelog.read()
                         mtime = time.ctime(os.path.getmtime(i))
                     parsed_data = modo.get_all_data(initial,mtime)
+                    if isinstance(parsed_data, str):
+                        skip_dict[i] = parsed_data
+                        continue
                     PARSED_FILE_DICT[i] = (parsed_data[0][0],datetime.datetime.strptime(mtime,"%a %b %d %H:%M:%S %Y"))
                     if copy:
                         try:
@@ -675,6 +676,8 @@ def get_all_data(fp_logs,fp_drafts,copy):
         update_status_bar(status=f"Imported {str(match_count)} new Matches and {str(draft_count)} new Draft.")
     else:
         update_status_bar(status=f"Imported {str(match_count)} new Matches and {str(draft_count)} new Drafts.")
+
+    print(skip_dict)
 
     if (match_count > 0) or (draft_count > 0):
         ask_to_save = True
