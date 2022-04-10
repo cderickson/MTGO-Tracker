@@ -636,19 +636,20 @@ def game_actions(init,time):
                         newstring += " " + alter(j,original=False)
             gameactions.append(newstring)
         # Skip game state changes.
-        elif i.count(".") == 0:
+        elif (i.count(".") == 0) and (i.count("is being attacked") == 0):
+            #print(i)
             continue
         # Remove tags from cards and rules text
-        elif fullstring.count("[") > 0:
+        elif (fullstring.count("@[") > 0) and (fullstring.count("@]") > 0):
             newstring = ""
-            while fullstring.count("[") > 0:
+            while (fullstring.count("@[") > 0) and (fullstring.count("@]") > 0):
                 tlist = fullstring.split("@",1)
                 newstring += tlist[0]
                 fullstring = tlist[1]
                 tlist = fullstring.split("@",1)
-                newstring += tlist[0] + "]"
+                newstring += "@" + tlist[0] + "@]"
                 fullstring = tlist[1]
-                tlist = fullstring.split("]",1)
+                tlist = fullstring.split("@]",1)
                 fullstring = tlist[1]        
             newstring += tlist[1]
             newstring = newstring.split("(")[0]
@@ -966,10 +967,10 @@ def play_data(ga):
     
     def get_cards(play):
         cards = []
-        count = play.count("[")
+        count = play.count("@[")
         while count > 0:
-            play = play.split("[",1)
-            play = play[1].split("]",1)
+            play = play.split("@[",1)
+            play = play[1].split("@]",1)
             cards.append(play[0])
             play = play[1]
             count -= 1  
