@@ -1,0 +1,149 @@
+- This file controls the dropdown menu options available in revision windows.
+- Add or delete options under their respective header.
+- Each option MUST be on it's own line.
+- Do not alter headers in this file.
+-----------------------------
+# Matches.Match_Type Options
+# Constructed Match Types:
+-----------------------------
+League
+Preliminary
+Challenge
+Premier Constructed
+2-Man
+Practice
+Open Play BO1
+
+-----------------------------
+# Matches.Match_Type Options
+# Booster Draft Match Types:
+-----------------------------
+Draft League
+Swiss Draft
+Elimination Draft
+
+-----------------------------
+# Matches.Match_Type Options
+# Sealed Match Types:
+-----------------------------
+Friendly Sealed League
+Competitive Sealed League
+Premier Sealed
+
+-----------------------------
+# Matches.P1/P2_Arch Options
+# Archetypes:
+-----------------------------
+Aggro
+Midrange
+Control
+Combo
+Prison
+Tempo
+Ramp
+Rogue
+
+-----------------------------
+# Matches.Format Options
+# Constructed Formats:
+-----------------------------
+Vintage
+Legacy
+Modern
+Standard
+Pioneer
+Pauper
+Other Constructed
+
+-----------------------------
+# Matches.Format Options
+# Limited Formats:
+-----------------------------
+Booster Draft
+Sealed Deck
+Cube
+
+-----------------------------
+# Matches.Limited_Format Options
+# Cube Formats:
+-----------------------------
+Cube-Other
+Vintage Cube
+Legacy Cube
+Modern Cube
+
+-----------------------------
+# Matches.Limited_Format Options
+# Booster Draft Formats:
+-----------------------------
+NEONEONEO
+DBLDBLDBL
+VOWVOWVOW
+MIDMIDMID
+AFRAFRAFR
+MH2MH2MH2
+STXSTXSTX
+TSRTSRTSR
+KHMKHMKHM
+ZNRZNRZNR
+2XM2XM2XM
+M21M21M21
+IKOIKOIKO
+THBTHBTHB
+ELDELDELD
+M20M20M20
+MH1MH1MH1
+WARWARWAR
+RNARNARNA
+UMAUMAUMA
+GRNGRNGRN
+M19M19M19
+DOMDOMDOM
+A25A25A25
+RIXRIXRIX
+IMAIMAIMA
+XLNXLNXLN
+HOUHOUHOU
+AKHAKHAKH
+MM3MM3MM3
+AERAERAER
+VMAVMAVMA
+Other Draft
+
+-----------------------------
+# Matches.Limited_Format Options
+# Sealed Formats:
+-----------------------------
+NEO x6
+VOW x6
+MID x6
+AFR x6
+MH2 x6
+STX x6
+TSR x6
+KHM x6
+ZNR x6
+2XM x6
+M21 x6
+IKO x6
+THB x6
+ELD x6
+M20 x6
+MH1 x6
+WAR x6
+RNA x6
+UMA x6
+GRN x6
+M19 x6
+DOM x6
+A25 x6
+RIX x6
+IMA x6
+XLN x6
+HOU x6
+AKH x6
+MM3 x6
+AER x6
+Other Sealed
+
+-----------------------------

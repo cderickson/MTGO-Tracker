@@ -6,11 +6,9 @@ exe_command.txt
 build_mtgo_tracker.bat
 
 # AUXILIARY FILES
-icon.ico
 lists/
 save/
 export/
 gamelogs/
 draftlogs/
-input_options.txt
 debug.txt
