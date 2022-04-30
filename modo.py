@@ -885,7 +885,7 @@ def game_data(ga):
     GAME_WINNER = get_winner(curr_game_list,P1,P2)
     if GAME_WINNER == "NA":
         ALL_GAMES_GA[f"{MATCH_ID}-{GAME_NUM}"] = curr_game_list
-    if GAME_NUM == 1:
+    if (GAME_NUM == 1) and (len(G1) == 0):
         G1.extend((MATCH_ID,
                    alter(P1,original=True),
                    alter(P2,original=True),
@@ -899,7 +899,7 @@ def game_data(ga):
                    TURNS,
                    GAME_WINNER))
         GAME_DATA.append(G1)
-    elif GAME_NUM == 2:
+    elif (GAME_NUM == 2) and (len(G2) == 0):
         G2.extend((MATCH_ID,
                    alter(P1,original=True),
                    alter(P2,original=True),
@@ -913,7 +913,7 @@ def game_data(ga):
                    TURNS,
                    GAME_WINNER))
         GAME_DATA.append(G2)
-    elif GAME_NUM == 3:
+    elif (GAME_NUM == 3) and (len(G3) == 0):
         G3.extend((MATCH_ID,
                    alter(P1,original=True),
                    alter(P2,original=True),
