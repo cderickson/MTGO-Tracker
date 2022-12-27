@@ -1,0 +1,835 @@
+SPLIT
+Alive // Well
+Appeal // Authority
+Armed // Dangerous
+Assault // Battery
+Assure // Assemble
+Beck // Call
+Bedeck // Bedazzle
+Boom // Bust
+Bound // Determined
+Breaking // Entering
+Carnival // Carnage
+Catch // Release
+Claim // Fame
+Collision // Colossus
+Commit // Memory
+Connive // Concoct
+Consecrate // Consume
+Consign // Oblivion
+Crime // Punishment
+Cut // Ribbons
+Dead // Gone
+Depose // Deploy
+Destined // Lead
+Discovery // Dispersal
+Down // Dirty
+Driven // Despair
+Dusk // Dawn
+Expansion // Explosion
+Failure // Comply
+Far // Away
+Farm // Market
+Fast // Furious
+Find // Finality
+Fire // Ice
+Flesh // Blood
+Flower // Flourish
+Give // Take
+Grind // Dust
+Heaven // Earth
+Hide // Seek
+Hit // Run
+Illusion // Reality
+Incubation // Incongruity
+Indulge // Excess
+Insult // Injury
+Integrity // Intervention
+Invert // Invent
+Leave // Chance
+Life // Death
+Mouth // Feed
+Never // Return
+Night // Day
+Odds // Ends
+Onward // Victory
+Order // Chaos
+Pain // Suffering
+Prepare // Fight
+Profit // Loss
+Protect // Serve
+Pure // Simple
+Rags // Riches
+Ready // Willing
+Reason // Believe
+Reduce // Rubble
+Refuse // Cooperate
+Repudiate // Replicate
+Research // Development
+Response // Resurgence
+Revival // Revenge
+Rise // Fall
+Road // Ruin
+Rough // Tumble
+Said // Done
+Spite // Malice
+Spring // Mind
+Stand // Deliver
+Start // Finish
+Status // Statue
+Struggle // Survive
+Supply // Demand
+Thrash // Threat
+Toil // Trouble
+Trial // Error
+Turn // Burn
+Warrant // Warden
+Wax // Wane
+Wear // Tear
+Who // What
+
+TRANSFORM
+Aberrant Researcher // Perfected Form
+Accursed Witch // Infectious Curse
+Afflicted Deserter // Werewolf Ransacker
+Alluring Suitor // Deadly Dancer
+Ambitious Farmhand // Seasoned Cathar
+Arcee, Sharpshooter // Arcee, Acrobatic Coupe
+Archangel Avacyn // Avacyn, the Purifier
+Arguel's Blood Fast // Temple of Aclazotz
+Arlinn Kord // Arlinn, Embraced by the Moon
+Arlinn, the Pack's Hope // Arlinn, the Moon's Fury
+Autumnal Gloom // Ancient of the Equinox
+Avabruck Caretaker // Hollowhenge Huntmaster
+Avacynian Missionaries // Lunarch Inquisitors
+Azor's Gateway // Sanctum of the Sun
+Azusa's Many Journeys // Likeness of the Seeker
+Baithook Angler // Hook-Haunt Drifter
+Ballista Watcher // Ballista Wielder
+Baneblade Scoundrel // Baneclaw Marauder
+Befriending the Moths // Imperial Moth
+Behold the Unspeakable // Vision of the Unspeakable
+Beloved Beggar // Generous Soul
+Bereaved Survivor // Dauntless Avenger
+Binding Geist // Spectral Binding
+Biolume Egg // Biolume Serpent
+Bird Admirer // Wing Shredder
+Blaster, Combat DJ // Blaster, Morale Booster
+Blitzwing, Cruel Tormentor // Blitzwing, Adaptive Assailant
+Bloodline Keeper // Lord of Lineage
+Bloodsworn Squire // Bloodsworn Knight
+Boseiju Reaches Skyward // Branch of Boseiju
+Breakneck Rider // Neck Breaker
+Brine Comber // Brinebound Gift
+Brutal Cathar // Moonrage Brute
+Burly Breaker // Dire-Strain Demolisher
+Catapult Fodder // Catapult Captain
+Chalice of Life // Chalice of Death
+Chandra, Fire of Kaladesh // Chandra, Roaring Flame
+Chaplain of Alms // Chapel Shieldgeist
+Child of the Pack // Savage Packmate
+Chosen of Markov // Markov's Servant
+Civilized Scholar // Homicidal Brute
+Cloistered Youth // Unholy Fiend
+Concealing Curtains // Revealing Eye
+Conduit of Storms // Conduit of Emrakul
+Conqueror's Galleon // Conqueror's Foothold
+Convicted Killer // Branded Howler
+Covert Cutpurse // Covetous Geist
+Covetous Castaway // Ghostly Castigator
+Cryptolith Fragment // Aurora of Emrakul
+Curious Homunculus // Voracious Reader
+Curse of Leeches // Leeching Lurker
+Cyclonus, the Saboteur // Cyclonus, Cybertronian Fighter
+Daring Sleuth // Bearer of Overwhelming Truths
+Daybreak Ranger // Nightfall Predator
+Deathbonnet Sprout // Deathbonnet Hulk
+Delver of Secrets // Insectile Aberration
+Dennick, Pious Apprentice // Dennick, Pious Apparition
+Desperate Farmer // Depraved Harvester
+Devoted Grafkeeper // Departed Soulkeeper
+Distracting Geist // Clever Distraction
+Docent of Perfection // Final Iteration
+Dormant Grove // Gnarled Grovestrider
+Dorothea, Vengeful Victim // Dorothea's Retribution
+Dowsing Dagger // Lost Vale
+Drogskol Infantry // Drogskol Armaments
+Duskwatch Recruiter // Krallenhorde Howler
+Ecstatic Awakener // Awoken Demon
+Edgar, Charmed Groom // Edgar Markov's Coffin
+Elbrus, the Binding Blade // Withengar Unbound
+Elusive Tormentor // Insidious Mist
+Enduring Angel // Angelic Enforcer
+Era of Enlightenment // Hand of Enlightenment
+Extricator of Sin // Extricator of Flesh
+Fable of the Mirror-Breaker // Reflection of Kiki-Jiki
+Faithbound Judge // Sinner's Judgment
+Fangblade Brigand // Fangblade Eviscerator
+Fearful Villager // Fearsome Werewolf
+Flame Channeler // Embodiment of Flame
+Flamewar, Brash Veteran // Flamewar, Streetwise Operative
+Foreboding Statue // Forsaken Thresher
+Galedrifter // Waildrifter
+Garruk Relentless // Garruk, the Veil-Cursed
+Gatstaf Arsonists // Gatstaf Ravagers
+Gatstaf Shepherd // Gatstaf Howler
+Geier Reach Bandit // Vildin-Pack Alpha
+Goldbug, Humanity's Ally // Goldbug, Scrappy Scout
+Golden Guardian // Gold-Forge Garrison
+Graveyard Trespasser // Graveyard Glutton
+Grizzled Angler // Grisly Anglerfish
+Grizzled Outcasts // Krallenhorde Wantons
+Growing Rites of Itlimoc // Itlimoc, Cradle of the Sun
+Gutter Skulker // Gutter Shortcut
+Hadana's Climb // Winged Temple of Orazca
+Hanweir Militia Captain // Westvale Cult Leader
+Hanweir Watchkeep // Bane of Hanweir
+Harvest Hand // Scrounged Scythe
+Harvesttide Infiltrator // Harvesttide Assailant
+Havengul Laboratory // Havengul Mystery
+Heirloom Mirror // Inherited Fiend
+Heir of Falkenrath // Heir to the Night
+Henrika Domnathi // Henrika, Infernal Seer
+Hermit of the Natterknolls // Lone Wolf of the Natterknolls
+Hidetsugu Consumes All // Vessel of the All-Consuming
+Hinterland Hermit // Hinterland Scourge
+Hinterland Logger // Timber Shredder
+Hookhand Mariner // Riphook Raider
+Hostile Hostel // Creeping Inn
+Hound Tamer // Untamed Pup
+Howlpack Piper // Wildsong Howler
+Huntmaster of the Fells // Ravager of the Fells
+Ill-Tempered Loner // Howlpack Avenger
+Infestation Expert // Infested Werewolf
+Innocent Traveler // Malicious Invader
+Instigator Gang // Wildblood Pack
+Inventive Iteration // Living Breakthrough
+Jace, Vryn's Prodigy // Jace, Telepath Unbound
+Jacob Hauken, Inspector // Hauken's Insight
+Jerren, Corrupted Bishop // Ormendahl, the Corrupter
+Jetfire, Ingenious Scientist // Jetfire, Air Guardian
+Journey to Eternity // Atzal, Cave of Eternity
+Jugan Defends the Temple // Remnant of the Rising Star
+Katilda, Dawnhart Martyr // Katilda's Rising Dawn
+Kessig Forgemaster // Flameheart Werewolf
+Kessig Naturalist // Lord of the Ulvenwald
+Kessig Prowler // Sinuous Predator
+Kindly Ancestor // Ancestor's Embrace
+Kindly Stranger // Demon-Possessed Witch
+Kruin Outlaw // Terror of Kruin Pass
+Kumano Faces Kakkazan // Etching of Kumano
+Kytheon, Hero of Akros // Gideon, Battle-Forged
+Lambholt Elder // Silverpelt Werewolf
+Lambholt Pacifist // Lambholt Butcher
+Lambholt Raconteur // Lambholt Ravager
+Lantern Bearer // Lanterns' Lift
+Legion's Landing // Adanto, the First Fort
+Life of Toshiro Umezawa // Memory of Toshiro
+Liliana, Heretical Healer // Liliana, Defiant Necromancer
+Lone Rider // It That Rides as One
+Loyal Cathar // Unhallowed Cathar
+Ludevic, Necrogenius // Olag, Ludevic's Hubris
+Ludevic's Test Subject // Ludevic's Abomination
+Lunarch Veteran // Luminous Phantom
+Malevolent Hermit // Benevolent Geist
+Mayor of Avabruck // Howlpack Alpha
+Megatron, Tyrant // Megatron, Destructive Force
+Michiko's Reign of Truth // Portrait of Michiko
+Mirrorhall Mimic // Ghastly Mimicry
+Mischievous Catgeist // Catlike Curiosity
+Mondronen Shaman // Tovolar's Magehunter
+Mourning Patrol // Morning Apparition
+Mysterious Tome // Chilling Chronicle
+Mystic Skull // Mystic Monstrosity
+Neglected Heirloom // Ashmouth Blade
+Nicol Bolas, the Ravager // Nicol Bolas, the Arisen
+Nissa, Vastwood Seer // Nissa, Sage Animist
+Oakshade Stalker // Moonlit Ambusher
+Okiba Reckoner Raid // Nezumi Road Captain
+Optimus Prime, Hero // Optimus Prime, Autobot Leader
+Outland Liberator // Frenzied Trapbreaker
+Overwhelmed Archivist // Archive Haunt
+Panicked Bystander // Cackling Culprit
+Path of Mettle // Metzali, Tower of Triumph
+Pious Evangel // Wayward Disciple
+Poppet Stitcher // Poppet Factory
+Primal Amulet // Primal Wellspring
+Profane Procession // Tomb of the Dusk Rose
+Prowl, Stoic Strategist // Prowl, Pursuit Vehicle
+Radiant Grace // Radiant Restraints
+Ragged Recluse // Odious Witch
+Rahilda, Wanted Cutthroat // Rahilda, Feral Outlaw
+Ratchet, Field Medic // Ratchet, Rescue Racer
+Ravenous Demon // Archdemon of Greed
+Reckless Stormseeker // Storm-Charged Slasher
+Reckless Waif // Merciless Predator
+Restless Bloodseeker // Bloodsoaked Reveler
+Runo Stromkirk // Krothuss, Lord of the Deep
+Sage of Ancient Lore // Werewolf of Ancient Hunger
+Scorned Villager // Moonscarred Werewolf
+Screeching Bat // Stalking Vampire
+Search for Azcanta // Azcanta, the Sunken Ruin
+Shady Traveler // Stalking Predator
+Shrill Howler // Howling Chorus
+Skin Invasion // Skin Shedder
+Slicer, Hired Muscle // Slicer, High-Speed Antagonist
+Smoldering Egg // Ashmouth Dragon
+Smoldering Werewolf // Erupting Dreadwolf
+Solitary Hunter // One of the Pack
+Soulcipher Board // Cipherbound Spirit
+Soul Seizer // Ghastly Haunting
+Soundwave, Sonic Spy // Soundwave, Superior Captain
+Spellrune Painter // Spellrune Howler
+Starscream, Power Hungry // Starscream, Seeker Leader
+Startled Awake // Persistent Nightmare
+Storm the Vault // Vault of Catlacan
+Suspicious Stowaway // Seafaring Werewolf
+Tales of Master Seshiro // Seshiro's Living Legacy
+Tangleclaw Werewolf // Fibrous Entangler
+Tavern Ruffian // Tavern Smasher
+Teachings of the Kirin // Kirin-Touched Orochi
+Thaumatic Compass // Spires of Orazca
+The Dragon-Kami Reborn // Dragon-Kami's Egg
+The Fall of Lord Konda // Fragment of Konda
+The Kami War // O-Kagachi Made Manifest
+The Long Reach of Night // Animus of Night's Reach
+The Modern Age // Vector Glider
+The Restoration of Eiganjo // Architect of Restoration
+The Shattered States Era // Nameless Conqueror
+Thing in the Ice // Awoken Horror
+Thraben Gargoyle // Stonewing Antagonizer
+Thraben Sentry // Thraben Militia
+Tireless Hauler // Dire-Strain Brawler
+Tormented Pariah // Rampaging Werewolf
+Tovolar, Dire Overlord // Tovolar, the Midnight Scourge
+Tovolar's Huntmaster // Tovolar's Packleader
+Town Gossipmonger // Incited Rabble
+Treasure Map // Treasure Cove
+Tribute to Horobi // Echo of Death's Wail
+Twinblade Geist // Twinblade Invocation
+Ulrich of the Krallenhorde // Ulrich, Uncontested Alpha
+Ultra Magnus, Tactician // Ultra Magnus, Armored Carrier
+Ulvenwald Captive // Ulvenwald Abomination
+Ulvenwald Mystics // Ulvenwald Primordials
+Ulvenwald Oddity // Ulvenwald Behemoth
+Uninvited Geist // Unimpeded Trespasser
+Vance's Blasting Cannons // Spitfire Bastion
+Vengeful Strangler // Strangling Grasp
+Vildin-Pack Outcast // Dronepack Kindred
+Village Ironsmith // Ironfang
+Village Messenger // Moonrise Intruder
+Villagers of Estwald // Howlpack of Estwald
+Village Watch // Village Reavers
+Volatile Arsonist // Dire-Strain Anarchist
+Voldaren Bloodcaster // Bloodbat Summoner
+Voldaren Pariah // Abolisher of Bloodlines
+Voltaic Visionary // Volt-Charged Berserker
+Weary Prisoner // Wrathful Jailbreaker
+Weaver of Blossoms // Blossom-Clad Werewolf
+Wedding Announcement // Wedding Festivity
+Westvale Abbey // Ormendahl, Profane Prince
+Wolfbitten Captive // Krallenhorde Killer
+Wolfkin Outcast // Wedding Crasher
+
+DFC
+A-Alrund, God of the Cosmos // A-Hakka, Whispering Raven
+Aberrant Researcher // Perfected Form
+Accursed Witch // Infectious Curse
+Afflicted Deserter // Werewolf Ransacker
+Agadeem's Awakening // Agadeem, the Undercrypt
+Akoum Warrior // Akoum Teeth
+Alluring Suitor // Deadly Dancer
+Alrund, God of the Cosmos // Hakka, Whispering Raven
+Ambitious Farmhand // Seasoned Cathar
+Angel // Demon
+Arcee, Sharpshooter // Arcee, Acrobatic Coupe
+Archangel Avacyn // Avacyn, the Purifier
+Arguel's Blood Fast // Temple of Aclazotz
+Arlinn Kord // Arlinn, Embraced by the Moon
+Arlinn, the Pack's Hope // Arlinn, the Moon's Fury
+A-Rowan, Scholar of Sparks // A-Will, Scholar of Frost
+Augmenter Pugilist // Echoing Equation
+Autumnal Gloom // Ancient of the Equinox
+Avabruck Caretaker // Hollowhenge Huntmaster
+Avacynian Missionaries // Lunarch Inquisitors
+Azor's Gateway // Sanctum of the Sun
+Azusa's Many Journeys // Likeness of the Seeker
+Baithook Angler // Hook-Haunt Drifter
+Bala Ged Recovery // Bala Ged Sanctuary
+Baleful Beholder // Beholder
+Ballista Watcher // Ballista Wielder
+Baneblade Scoundrel // Baneclaw Marauder
+Barkchannel Pathway // Tidechannel Pathway
+Base Race // Base Race (cont'd)
+Befriending the Moths // Imperial Moth
+Behold the Unspeakable // Vision of the Unspeakable
+Beloved Beggar // Generous Soul
+Bereaved Survivor // Dauntless Avenger
+Beyeen Veil // Beyeen Coast
+Binding Geist // Spectral Binding
+Biolume Egg // Biolume Serpent
+Bird Admirer // Wing Shredder
+Birgi, God of Storytelling // Harnfel, Horn of Bounty
+Blackbloom Rogue // Blackbloom Bog
+Blaster, Combat DJ // Blaster, Morale Booster
+Blex, Vexing Pest // Search for Blex
+Blightstep Pathway // Searstep Pathway
+Blitzwing, Cruel Tormentor // Blitzwing, Adaptive Assailant
+Bloodline Keeper // Lord of Lineage
+Bloodsworn Squire // Bloodsworn Knight
+Booster Sleuth // Booster Sleuth (cont'd)
+Boseiju Reaches Skyward // Branch of Boseiju
+Branchloft Pathway // Boulderloft Pathway
+Breakneck Rider // Neck Breaker
+Brightclimb Pathway // Grimclimb Pathway
+Brine Comber // Brinebound Gift
+Brutal Cathar // Moonrage Brute
+Burly Breaker // Dire-Strain Demolisher
+Careful Study (minigame) // Careful Study (cont'd)
+Catapult Fodder // Catapult Captain
+Chalice of Life // Chalice of Death
+Chandra, Fire of Kaladesh // Chandra, Roaring Flame
+Chaplain of Alms // Chapel Shieldgeist
+Child of the Pack // Savage Packmate
+Chosen of Markov // Markov's Servant
+City's Blessing // Elemental
+Civilized Scholar // Homicidal Brute
+Clearwater Pathway // Murkwater Pathway
+Cloistered Youth // Unholy Fiend
+Concealing Curtains // Revealing Eye
+Conduit of Storms // Conduit of Emrakul
+Conqueror's Galleon // Conqueror's Foothold
+Convicted Killer // Branded Howler
+Copy // Horror
+Cosima, God of the Voyage // The Omenkeel
+Covert Cutpurse // Covetous Geist
+Covetous Castaway // Ghostly Castigator
+Cragcrown Pathway // Timbercrown Pathway
+Cryptolith Fragment // Aurora of Emrakul
+Curious Homunculus // Voracious Reader
+Curse of Leeches // Leeching Lurker
+Cyber Simulacrum // Cyber Simulacrum (cont'd)
+Cyclonus, the Saboteur // Cyclonus, Cybertronian Fighter
+Daring Sleuth // Bearer of Overwhelming Truths
+Darkbore Pathway // Slitherbore Pathway
+Daybreak Ranger // Nightfall Predator
+Day // Night
+Deathbonnet Sprout // Deathbonnet Hulk
+Delver of Secrets // Insectile Aberration
+Demon's Due (minigame) // Demon's Due (cont'd)
+Dennick, Pious Apprentice // Dennick, Pious Apparition
+Desperate Farmer // Depraved Harvester
+Devoted Grafkeeper // Departed Soulkeeper
+Dinosaur // Treasure
+Distracting Geist // Clever Distraction
+Docent of Perfection // Final Iteration
+Dominarioes // Dominarioes (cont'd)
+Dormant Grove // Gnarled Grovestrider
+Dorothea, Vengeful Victim // Dorothea's Retribution
+Dowsing Dagger // Lost Vale
+Drogskol Infantry // Drogskol Armaments
+Duskwatch Recruiter // Krallenhorde Howler
+Ecstatic Awakener // Awoken Demon
+Edgar, Charmed Groom // Edgar Markov's Coffin
+Egon, God of Death // Throne of Death
+Elbrus, the Binding Blade // Withengar Unbound
+Elemental // Centaur
+Elusive Tormentor // Insidious Mist
+Emeria's Call // Emeria, Shattered Skyclave
+Enduring Angel // Angelic Enforcer
+Era of Enlightenment // Hand of Enlightenment
+Esika, God of the Tree // The Prismatic Bridge
+Extricator of Sin // Extricator of Flesh
+Extus, Oriq Overlord // Awaken the Blood Avatar
+Fable of the Mirror-Breaker // Reflection of Kiki-Jiki
+Faithbound Judge // Sinner's Judgment
+Fangblade Brigand // Fangblade Eviscerator
+Fearful Villager // Fearsome Werewolf
+Fish // Kraken
+Flame Channeler // Embodiment of Flame
+Flamescroll Celebrant // Revel in Silence
+Flamewar, Brash Veteran // Flamewar, Streetwise Operative
+Foraging Squirrels // Foraging Squirrels (cont'd)
+Foreboding Statue // Forsaken Thresher
+Galedrifter // Waildrifter
+Garruk Relentless // Garruk, the Veil-Cursed
+Gatstaf Arsonists // Gatstaf Ravagers
+Gatstaf Shepherd // Gatstaf Howler
+Geier Reach Bandit // Vildin-Pack Alpha
+Glasspool Mimic // Glasspool Shore
+Goblin // Soldier
+Goldbug, Humanity's Ally // Goldbug, Scrappy Scout
+Golden Guardian // Gold-Forge Garrison
+Graveyard Trespasser // Graveyard Glutton
+Gremlin // Energy Reserve
+Grimlock, Dinobot Leader // Grimlock, Ferocious King
+Grizzled Angler // Grisly Anglerfish
+Grizzled Outcasts // Krallenhorde Wantons
+Growing Rites of Itlimoc // Itlimoc, Cradle of the Sun
+Gutter Skulker // Gutter Shortcut
+Hadana's Climb // Winged Temple of Orazca
+Hagra Mauling // Hagra Broodpit
+Halvar, God of Battle // Sword of the Realms
+Hanweir Militia Captain // Westvale Cult Leader
+Hanweir Watchkeep // Bane of Hanweir
+Harvest Hand // Scrounged Scythe
+Harvesttide Infiltrator // Harvesttide Assailant
+Havengul Laboratory // Havengul Mystery
+Heirloom Mirror // Inherited Fiend
+Heir of Falkenrath // Heir to the Night
+Hengegate Pathway // Mistgate Pathway
+Henrika Domnathi // Henrika, Infernal Seer
+Hermit of the Natterknolls // Lone Wolf of the Natterknolls
+Hidetsugu Consumes All // Vessel of the All-Consuming
+Hinterland Hermit // Hinterland Scourge
+Hinterland Logger // Timber Shredder
+Hobgoblin Bandit Lord // Hobgoblin
+Hookhand Mariner // Riphook Raider
+Hostile Hostel // Creeping Inn
+Hound Tamer // Untamed Pup
+Howlpack Piper // Wildsong Howler
+Human // Wolf
+Huntmaster of the Fells // Ravager of the Fells
+Ill-Tempered Loner // Howlpack Avenger
+Illusion // Saproling
+Infestation Expert // Infested Werewolf
+Innocent Traveler // Malicious Invader
+Instigator Gang // Wildblood Pack
+Inventive Iteration // Living Breakthrough
+Jace, Vryn's Prodigy // Jace, Telepath Unbound
+Jacob Hauken, Inspector // Hauken's Insight
+Jadzi, Oracle of Arcavios // Journey to the Oracle
+Jerren, Corrupted Bishop // Ormendahl, the Corrupter
+Jetfire, Ingenious Scientist // Jetfire, Air Guardian
+Jorn, God of Winter // Kaldring, the Rimestaff
+Journey to Eternity // Atzal, Cave of Eternity
+Jugan Defends the Temple // Remnant of the Rising Star
+Jwari Disruption // Jwari Ruins
+Kabira Takedown // Kabira Plateau
+Katilda, Dawnhart Martyr // Katilda's Rising Dawn
+Kazandu Mammoth // Kazandu Valley
+Kazuul's Fury // Kazuul's Cliffs
+Kessig Forgemaster // Flameheart Werewolf
+Kessig Naturalist // Lord of the Ulvenwald
+Kessig Prowler // Sinuous Predator
+Khalni Ambush // Khalni Territory
+Kianne, Dean of Substance // Imbraham, Dean of Theory
+Kindly Ancestor // Ancestor's Embrace
+Kindly Stranger // Demon-Possessed Witch
+Kolvori, God of Kinship // The Ringhart Crest
+Kruin Outlaw // Terror of Kruin Pass
+Kumano Faces Kakkazan // Etching of Kumano
+Kytheon, Hero of Akros // Gideon, Battle-Forged
+Lambholt Elder // Silverpelt Werewolf
+Lambholt Pacifist // Lambholt Butcher
+Lambholt Raconteur // Lambholt Ravager
+Lantern Bearer // Lanterns' Lift
+Legion's Landing // Adanto, the First Fort
+Life of Toshiro Umezawa // Memory of Toshiro
+Liliana, Heretical Healer // Liliana, Defiant Necromancer
+Loathsome Troll // Troll
+Lone Rider // It That Rides as One
+Loyal Cathar // Unhallowed Cathar
+Ludevic, Necrogenius // Olag, Ludevic's Hubris
+Ludevic's Test Subject // Ludevic's Abomination
+Lunarch Veteran // Luminous Phantom
+Lurking Roper // Roper
+Magic and Minions // Magic and Minions (cont'd)
+Makindi Stampede // Makindi Mesas
+Malakir Rebirth // Malakir Mire
+Malevolent Hermit // Benevolent Geist
+Mayor of Avabruck // Howlpack Alpha
+Megatron, Tyrant // Megatron, Destructive Force
+Merfolk // Treasure
+Michiko's Reign of Truth // Portrait of Michiko
+Mila, Crafty Companion // Lukka, Wayward Bonder
+Mimic Match // Mimic Match (cont'd)
+Mini-Master // Mini-Master (cont'd)
+Minion of the Mighty // Kobold
+Mirrorhall Mimic // Ghastly Mimicry
+Mischievous Catgeist // Catlike Curiosity
+Mishra's Manufactory // Mishra's Manufactory (cont'd)
+Mondronen Shaman // Tovolar's Magehunter
+Monster of the Week // Monster of the Week (cont'd)
+Mourning Patrol // Morning Apparition
+Mysterious Tome // Chilling Chronicle
+Mystic Skull // Mystic Monstrosity
+Needleverge Pathway // Pillarverge Pathway
+Neglected Heirloom // Ashmouth Blade
+Nicol Bolas, the Ravager // Nicol Bolas, the Arisen
+Nightmare Moon // Princess Luna
+Nissa, Vastwood Seer // Nissa, Sage Animist
+Oakshade Stalker // Moonlit Ambusher
+Okiba Reckoner Raid // Nezumi Road Captain
+Ondu Inversion // Ondu Skyruins
+Optimus Prime, Hero // Optimus Prime, Autobot Leader
+Outland Liberator // Frenzied Trapbreaker
+Overwhelmed Archivist // Archive Haunt
+Panicked Bystander // Cackling Culprit
+Path of Mettle // Metzali, Tower of Triumph
+Pelakka Predation // Pelakka Caverns
+Pestilent Cauldron // Restorative Burst
+Pious Evangel // Wayward Disciple
+Pirate // Treasure
+Plargg, Dean of Chaos // Augusta, Dean of Order
+Poppet Stitcher // Poppet Factory
+Power of Persuasion // Ettin
+Primal Amulet // Primal Wellspring
+Profane Procession // Tomb of the Dusk Rose
+Prowl, Stoic Strategist // Prowl, Pursuit Vehicle
+Radiant Grace // Radiant Restraints
+Ragged Recluse // Odious Witch
+Rahilda, Wanted Cutthroat // Rahilda, Feral Outlaw
+Ratchet, Field Medic // Ratchet, Rescue Racer
+Ravenous Demon // Archdemon of Greed
+Reckless Stormseeker // Storm-Charged Slasher
+Reckless Waif // Merciless Predator
+Reidane, God of the Worthy // Valkmira, Protector's Shield
+Restless Bloodseeker // Bloodsoaked Reveler
+Rimeshield Frost Giant // Frost Giant
+Riverglide Pathway // Lavaglide Pathway
+Roil Royale // Roil Royale (cont'd)
+Roll for Initiative // Roll for Initiative (cont'd)
+Rowan, Scholar of Sparks // Will, Scholar of Frost
+Runo Stromkirk // Krothuss, Lord of the Deep
+Sage of Ancient Lore // Werewolf of Ancient Hunger
+Saproling // Insect
+Scorned Villager // Moonscarred Werewolf
+Screeching Bat // Stalking Vampire
+Sea Gate Restoration // Sea Gate, Reborn
+Search for Azcanta // Azcanta, the Sunken Ruin
+Sejiri Shelter // Sejiri Glacier
+Selfless Glyphweaver // Deadly Vanity
+Servo // Thopter
+Shady Traveler // Stalking Predator
+Shaile, Dean of Radiance // Embrose, Dean of Shadow
+Shatterskull Smashing // Shatterskull, the Hammer Pass
+Shrill Howler // Howling Chorus
+Silundi Vision // Silundi Isle
+Skin Invasion // Skin Shedder
+Skyclave Cleric // Skyclave Basilica
+Slicer, Hired Muscle // Slicer, High-Speed Antagonist
+Smoldering Egg // Ashmouth Dragon
+Smoldering Werewolf // Erupting Dreadwolf
+Snake // Zombie
+Soldier // Goblin
+Solitary Hunter // One of the Pack
+Song-Mad Treachery // Song-Mad Ruins
+Soulcipher Board // Cipherbound Spirit
+Soul Seizer // Ghastly Haunting
+Soundwave, Sonic Spy // Soundwave, Superior Captain
+Spellrune Painter // Spellrune Howler
+Spikefield Hazard // Spikefield Cave
+Starscream, Power Hungry // Starscream, Seeker Leader
+Startled Awake // Persistent Nightmare
+Storm the Vault // Vault of Catlacan
+Strictly Better // Strictly Better (cont'd)
+Suspicious Stowaway // Seafaring Werewolf
+Swarming Goblins // Goblin
+Tales of Master Seshiro // Seshiro's Living Legacy
+Tangleclaw Werewolf // Fibrous Entangler
+Tangled Florahedron // Tangled Vale
+Tavern Ruffian // Tavern Smasher
+Teachings of the Kirin // Kirin-Touched Orochi
+Tergrid, God of Fright // Tergrid's Lantern
+Thaumatic Compass // Spires of Orazca
+The Dragon-Kami Reborn // Dragon-Kami's Egg
+The Fall of Lord Konda // Fragment of Konda
+The Initiative // Undercity
+The Kami War // O-Kagachi Made Manifest
+The Long Reach of Night // Animus of Night's Reach
+The Modern Age // Vector Glider
+The Restoration of Eiganjo // Architect of Restoration
+The Shattered States Era // Nameless Conqueror
+The Tarrasque // Tarrasque
+Thing in the Ice // Awoken Horror
+Thraben Gargoyle // Stonewing Antagonizer
+Thraben Sentry // Thraben Militia
+Tireless Hauler // Dire-Strain Brawler
+Toralf, God of Fury // Toralf's Hammer
+Tormented Pariah // Rampaging Werewolf
+Torrent Sculptor // Flamethrower Sonata
+Totally Lost in Translation // Totally Lost in Translation (cont'd)
+Tovolar, Dire Overlord // Tovolar, the Midnight Scourge
+Tovolar's Huntmaster // Tovolar's Packleader
+Town Gossipmonger // Incited Rabble
+Treasure Map // Treasure Cove
+Tribute to Horobi // Echo of Death's Wail
+Turntimber Symbiosis // Turntimber, Serpentine Wood
+Twinblade Geist // Twinblade Invocation
+Ulrich of the Krallenhorde // Ulrich, Uncontested Alpha
+Ultra Magnus, Tactician // Ultra Magnus, Armored Carrier
+Ulvenwald Captive // Ulvenwald Abomination
+Ulvenwald Mystics // Ulvenwald Primordials
+Ulvenwald Oddity // Ulvenwald Behemoth
+Umara Wizard // Umara Skyfalls
+Underdark Basilisk // Basilisk
+Uninvited Geist // Unimpeded Trespasser
+Urza's Blueprints (minigame) // Urza's Blueprints (cont'd)
+Uvilda, Dean of Perfection // Nassari, Dean of Expression
+Valakut Awakening // Valakut Stoneforge
+Valentin, Dean of the Vein // Lisette, Dean of the Root
+Valki, God of Lies // Tibalt, Cosmic Impostor
+Vampire // Treasure
+Vampire Wedding Planner // Vampire Wedding Planner (cont'd)
+Vance's Blasting Cannons // Spitfire Bastion
+Vastwood Fortification // Vastwood Thicket
+Vengeful Strangler // Strangling Grasp
+Vildin-Pack Outcast // Dronepack Kindred
+Village Ironsmith // Ironfang
+Village Messenger // Moonrise Intruder
+Villagers of Estwald // Howlpack of Estwald
+Village Watch // Village Reavers
+Voja // Saproling
+Volatile Arsonist // Dire-Strain Anarchist
+Voldaren Bloodcaster // Bloodbat Summoner
+Voldaren Pariah // Abolisher of Bloodlines
+Voltaic Visionary // Volt-Charged Berserker
+Wandering Archaic // Explore the Vastlands
+Weary Prisoner // Wrathful Jailbreaker
+Weaver of Blossoms // Blossom-Clad Werewolf
+Wedding Announcement // Wedding Festivity
+Weird // Goblin
+Westvale Abbey // Ormendahl, Profane Prince
+Winchester Draft // Winchester Draft (cont'd)
+Wolfbitten Captive // Krallenhorde Killer
+Wolfkin Outcast // Wedding Crasher
+Wurm // Saproling
+Zof Consumption // Zof Bloodbog
+
+MDFC
+A-Alrund, God of the Cosmos // A-Hakka, Whispering Raven
+Agadeem's Awakening // Agadeem, the Undercrypt
+Akoum Warrior // Akoum Teeth
+Alrund, God of the Cosmos // Hakka, Whispering Raven
+A-Rowan, Scholar of Sparks // A-Will, Scholar of Frost
+Augmenter Pugilist // Echoing Equation
+Bala Ged Recovery // Bala Ged Sanctuary
+Barkchannel Pathway // Tidechannel Pathway
+Beyeen Veil // Beyeen Coast
+Birgi, God of Storytelling // Harnfel, Horn of Bounty
+Blackbloom Rogue // Blackbloom Bog
+Blex, Vexing Pest // Search for Blex
+Blightstep Pathway // Searstep Pathway
+Branchloft Pathway // Boulderloft Pathway
+Brightclimb Pathway // Grimclimb Pathway
+Clearwater Pathway // Murkwater Pathway
+Cosima, God of the Voyage // The Omenkeel
+Cragcrown Pathway // Timbercrown Pathway
+Darkbore Pathway // Slitherbore Pathway
+Egon, God of Death // Throne of Death
+Emeria's Call // Emeria, Shattered Skyclave
+Esika, God of the Tree // The Prismatic Bridge
+Extus, Oriq Overlord // Awaken the Blood Avatar
+Flamescroll Celebrant // Revel in Silence
+Glasspool Mimic // Glasspool Shore
+Hagra Mauling // Hagra Broodpit
+Halvar, God of Battle // Sword of the Realms
+Hengegate Pathway // Mistgate Pathway
+Jadzi, Oracle of Arcavios // Journey to the Oracle
+Jorn, God of Winter // Kaldring, the Rimestaff
+Jwari Disruption // Jwari Ruins
+Kabira Takedown // Kabira Plateau
+Kazandu Mammoth // Kazandu Valley
+Kazuul's Fury // Kazuul's Cliffs
+Khalni Ambush // Khalni Territory
+Kianne, Dean of Substance // Imbraham, Dean of Theory
+Kolvori, God of Kinship // The Ringhart Crest
+Makindi Stampede // Makindi Mesas
+Malakir Rebirth // Malakir Mire
+Mila, Crafty Companion // Lukka, Wayward Bonder
+Needleverge Pathway // Pillarverge Pathway
+Ondu Inversion // Ondu Skyruins
+Pelakka Predation // Pelakka Caverns
+Pestilent Cauldron // Restorative Burst
+Plargg, Dean of Chaos // Augusta, Dean of Order
+Reidane, God of the Worthy // Valkmira, Protector's Shield
+Riverglide Pathway // Lavaglide Pathway
+Rowan, Scholar of Sparks // Will, Scholar of Frost
+Sea Gate Restoration // Sea Gate, Reborn
+Sejiri Shelter // Sejiri Glacier
+Selfless Glyphweaver // Deadly Vanity
+Shaile, Dean of Radiance // Embrose, Dean of Shadow
+Shatterskull Smashing // Shatterskull, the Hammer Pass
+Silundi Vision // Silundi Isle
+Skyclave Cleric // Skyclave Basilica
+Song-Mad Treachery // Song-Mad Ruins
+Spikefield Hazard // Spikefield Cave
+Tangled Florahedron // Tangled Vale
+Tergrid, God of Fright // Tergrid's Lantern
+Toralf, God of Fury // Toralf's Hammer
+Torrent Sculptor // Flamethrower Sonata
+Turntimber Symbiosis // Turntimber, Serpentine Wood
+Umara Wizard // Umara Skyfalls
+Uvilda, Dean of Perfection // Nassari, Dean of Expression
+Valakut Awakening // Valakut Stoneforge
+Valentin, Dean of the Vein // Lisette, Dean of the Root
+Valki, God of Lies // Tibalt, Cosmic Impostor
+Vastwood Fortification // Vastwood Thicket
+Wandering Archaic // Explore the Vastlands
+Zof Consumption // Zof Bloodbog
+
+ADVENTURE
+A-Blessed Hippogriff // A-Tyr's Blessing
+A-Emerald Dragon // A-Dissonant Wave
+Altar of Bhaal // Bone Offering
+Amethyst Dragon // Explosive Crystal
+A-Monster Manual // A-Zoological Study
+Animating Faerie // Bring to Life
+Ardenvale Tactician // Dizzying Swoop
+A-Young Blue Dragon // A-Sand Augury
+A-Young Red Dragon // A-Bathe in Gold
+Beanstalk Giant // Fertile Footsteps
+Blessed Hippogriff // Tyr's Blessing
+Bonecrusher Giant // Stomp
+Brazen Borrower // Petty Theft
+Colossal Badger // Dig Deep
+Crystal Dragon // Rob the Hoard
+Curious Pair // Treats to Share
+Dread Linnorm // Scale Deflection
+Embereth Shieldbreaker // Battle Display
+Emerald Dragon // Dissonant Wave
+Ettercap // Web Shot
+Fae of Wishes // Granted
+Faerie Guidemother // Gift of the Fae
+Fang Dragon // Forktail Sweep
+Flaxen Intruder // Welcome Home
+Foulmire Knight // Profane Insight
+Garenbrig Carver // Shield's Might
+Ghost Lantern // Bind Spirit
+Giant Killer // Chop Down
+Gray Slaad // Entropic Decay
+Guardian Naga // Banishing Coils
+Hezrou // Demonic Stench
+Horn of Valhalla // Ysgard's Call
+Hypnotic Sprite // Mesmeric Glare
+Illithid Harvester // Plant Tadpoles
+Lonesome Unicorn // Rider in Need
+Lovestruck Beast // Heart's Desire
+Merchant of the Vale // Haggle
+Merfolk Secretkeeper // Venture Deeper
+Monster Manual // Zoological Study
+Moonshae Pixie // Pixie Dust
+Murderous Rider // Swift End
+Oakhame Ranger // Bring Back
+Omniclown Colossus // Pie-roclasm
+Order of Midnight // Alter Fate
+Pegasus Guardian // Rescue the Foal
+Queen of Ice // Rage of Winter
+Realm-Cloaked Giant // Cast Off
+Reaper of Night // Harvest Fear
+Rimrock Knight // Boulder Rush
+Rosethorn Acolyte // Seasonal Ritual
+Sapphire Dragon // Psionic Pulse
+Sea Hag // Aquatic Ingress
+Shepherd of the Flock // Usher to Safety
+Silverflame Squire // On Alert
+Smitten Swordmaster // Curry Favor
+Sword Coast Serpent // Capsizing Wave
+Tlincalli Hunter // Retrieve Prey
+Topaz Dragon // Entropic Cloud
+Tuinvale Treefolk // Oaken Boon
+Two-Handed Axe // Sweeping Cleave
+Young Blue Dragon // Sand Augury
+Young Red Dragon // Bathe in Gold
+

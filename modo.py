@@ -10,68 +10,28 @@ import copy
 # Add the option to the appropriate list below.
 # Add the option under the appropriate header in the input_options.txt file.
 
-def split_cards():
-    all_split = ["Alive/Well","Appeal/Authority","Armed/Dangerous","Assault/Battery","Assure/Assemble","Beck/Call","Bedeck/Bedazzle","Boom/Bust",
-            "Bound/Determined","Breaking/Entering","Carnival/Carnage","Catch/Release","Claim/Fame","Collision/Colossus","Commit/Memory","Connive/Concoct",
-            "Consecrate/Consume","Consign/Oblivion","Crime/Punishment","Cut/Ribbons","Dead/Gone","Depose/Deploy","Destined/Lead","Discovery/Dispersal",
-            "Down/Dirty","Driven/Despair","Dusk/Dawn","Expansion/Explosion","Failure/Comply","Far/Away","Farm/Market","Fast/Furious",
-            "Find/Finality","Fire/Ice","Flesh/Blood","Flower/Flourish","Give/Take","Grind/Dust","Heaven/Earth","Hide/Seek",
-            "Hit/Run","Illusion/Reality","Incubation/Incongruity","Insult/Injury","Integrity/Intervention","Invert/Invent","Leave/Chance","Life/Death",
-            "Mouth/Feed","Never/Return","Night/Day","Odds/Ends","Onward/Victory","Order/Chaos","Pain/Suffering","Prepare/Fight",
-            "Profit/Loss","Protect/Serve","Pure/Simple","Rags/Riches","Ready/Willing","Reason/Believe","Reduce/Rubble","Refuse/Cooperate",
-            "Repudiate/Replicate","Research/Development","Response/Resurgence","Revival/Revenge","Rise/Fall","Road/Ruin","Rough/Tumble","Said/Done",
-            "Spite/Malice","Spring/Mind","Stand/Deliver","Start/Finish","Status/Statue","Struggle/Survive","Supply/Demand","Thrash/Threat",
-            "Toil/Trouble","Trial/Error","Turn/Burn","Warrant/Warden","Wax/Wane","Wear/Tear"]
-    split_dict = {}
-    for i in all_split:
-        half1 = i.split("/")[0]
-        half2 = i.split("/")[1]
-        split_dict[half1] = i
-        split_dict[half2] = i
-    return split_dict
-def adv_cards():
-    return {"Bring to Life" : "Animating Faerie",
-            "Dizzying Swoop" : "Ardenvale Tactician",
-            "Fertile Footsteps" : "Beanstalk Giant",
-            "Stomp" : "Bonecrusher Giant",
-            "Petty Theft" : "Brazen Borrower",
-            "Treats to Share" : "Curious Pair",
-            "Battle Display" : "Embereth Shieldbreaker",
-            "Granted" : "Fae of Wishes",
-            "Gift of the Fae" : "Faerie Guidemother",
-            "Welcome Home" : "Flaxen Intruder",
-            "Profane Insight" : "Foulmire Knight",
-            "Shield's Might" : "Garenbrig Carver",
-            "Chop Down" : "Giant Killer",
-            "Mesmeric Glare" : "Hypnotic Sprite",
-            "Rider in Need" : "Lonesome Unicorn",
-            "Heart's Desire" : "Lovestruck Beast",
-            "Haggle" : "Merchant of the Vale",
-            "Venture Deeper" : "Merfolk Secretkeeper",
-            "Swift End" : "Murderous Rider",
-            "Bring Back" : "Oakhame Ranger",
-            "Alter Fate" : "Order of Midnight",
-            "Rage of Winter" : "Queen of Ice",
-            "Cast Off" : "Realm-Cloaked Giant",
-            "Harvest Fear" : "Reaper of Night",
-            "Boulder Rush" : "Rimrock Knight",
-            "Seasonal Ritual" : "Rosethorn Acolyte",
-            "Usher to Safety" : "Shepherd of the Flock",
-            "On Alert" : "Silverflame Squire",
-            "Curry Favor" : "Smitten Swordmaster",
-            "Oaken Boon" : "Tuinvale Treefolk"}
-def clean_card_set(card_set):
+def clean_card_set(card_set, MULTIFACED_CARDS):
     cards = card_set
-    split_dict = split_cards()
-    adv_dict = adv_cards()
     for i in list(cards):
         if i == "NA":
             cards.remove(i)
-        elif i in split_dict:
-            cards.add(split_dict[i])
+        elif i in MULTIFACED_CARDS['SPLIT']:
+            cards.add(i + '/' + MULTIFACED_CARDS['SPLIT'][i])
             cards.remove(i)
-        elif i in adv_dict:
-            cards.add(adv_dict[i])
+        elif i in list(MULTIFACED_CARDS['SPLIT'].values()):
+            for key, value in MULTIFACED_CARDS['SPLIT'].items():
+                if value == i:
+                    cards.add(f'{key}/{value}')
+            cards.remove(i)
+        elif i in list(MULTIFACED_CARDS['MDFC'].values()):
+            for key, value in MULTIFACED_CARDS['MDFC'].items():
+                if value == i:
+                    cards.add(key)
+            cards.remove(i)
+        elif i in list(MULTIFACED_CARDS['ADVENTURE'].values()):
+            for key, value in MULTIFACED_CARDS['ADVENTURE'].items():
+                if value == i:
+                    cards.add(key)
             cards.remove(i)
     return cards
 def formats(lim=False,con=False,cube=False,booster=False,sealed=False):
@@ -516,6 +476,7 @@ def parse_draft_log(file,initial):
     PICK_NUM = 0
     PICK_OVR = 0
     FORMAT = file.split("-")[-1].split(".")[0]
+    EVENT_ID = file.split('-')[-2]
 
     player_bool = False
     card_bool = False
@@ -562,7 +523,7 @@ def parse_draft_log(file,initial):
         elif player_bool:
             if (i.find("--> ") != -1):
                 HERO = i[4:]
-                DRAFT_ID = f"{year}{month}{day}{hour}{minute}_{HERO}_{FORMAT}_{EVENT_NUM}"
+                DRAFT_ID = f"{year}{month}{day}{hour}{minute}_{HERO}_{FORMAT}_{EVENT_ID}"
             else:
                 PLAYER_LIST.append(i[4:])
         elif card_bool:
@@ -1016,19 +977,25 @@ def play_data(ga):
         elif is_play(i):
             if curr_list[1] == "plays":
                 CASTING_PLAYER = curr_list[0]
-                try:
-                    PRIMARY_CARD = get_cards(i)[0]
-                # MODO Bug Encountered. Primary_Card = "NA"
-                except IndexError:
-                    pass
+                if curr_list[2] in [P1, P2]:
+                    PRIMARY_CARD = 'NA'
+                else:
+                    try:
+                        PRIMARY_CARD = get_cards(i)[0]
+                    # MODO Bug Encountered. Primary_Card = "NA"
+                    except IndexError:
+                        pass
                 ACTION = "Land Drop"
             elif curr_list[1] == "casts":
                 CASTING_PLAYER = curr_list[0]
-                try:
-                    PRIMARY_CARD = get_cards(i)[0]
-                # MODO Bug Encountered. Primary_Card = "NA"
-                except IndexError:
-                    pass
+                if curr_list[2] in [P1, P2]:
+                    PRIMARY_CARD = 'NA'
+                else:
+                    try:
+                        PRIMARY_CARD = get_cards(i)[0]
+                    # MODO Bug Encountered. Primary_Card = "NA"
+                    except IndexError:
+                        pass
                 ACTION = curr_list[1].capitalize()
                 if i.find("targeting") != -1:
                     targets = get_cards(i.split("targeting")[1])

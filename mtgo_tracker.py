@@ -27,6 +27,8 @@ DRAFTS_TABLE =      []
 PICKS_TABLE =       []
 PARSED_FILE_DICT =  {}
 PARSED_DRAFT_DICT = {}
+SKIP_FILES =        []
+SKIP_DRAFTS =       []
 
 # Settings imported/saved in save folder:
 FILEPATH_ROOT =          ""
@@ -37,6 +39,7 @@ FILEPATH_DRAFTS =        ""
 FILEPATH_DRAFTS_COPY =   ""
 HERO =                   ""
 INPUT_OPTIONS =          {}
+MULTIFACED_CARDS =       {}
 MAIN_WINDOW_SIZE =  ("small",1000,490)
 
 test_mode =         False
@@ -68,6 +71,8 @@ def save(exit):
     pickle.dump(PICKS_TABLE,open("PICKS_TABLE","wb"))
     pickle.dump(PARSED_FILE_DICT,open("PARSED_FILE_DICT","wb"))
     pickle.dump(PARSED_DRAFT_DICT,open("PARSED_DRAFT_DICT","wb"))
+    pickle.dump(SKIP_FILES,open("SKIP_FILES","wb"))
+    pickle.dump(SKIP_DRAFTS,open("SKIP_DRAFTS","wb"))
     update_status_bar(status="Save complete. Data will be loaded automatically on next startup.")
     os.chdir(FILEPATH_ROOT)
 
@@ -431,9 +436,22 @@ def startup():
     global PICKS_TABLE
     global PARSED_FILE_DICT
     global PARSED_DRAFT_DICT
+    global SKIP_FILES
+    global SKIP_DRAFTS
     global INPUT_OPTIONS
+    global MULTIFACED_CARDS
     global data_loaded
     global ask_to_save
+
+    if os.path.isfile("MULTIFACED_CARDS.txt"):
+        with io.open("MULTIFACED_CARDS.txt","r",encoding="ansi") as file:
+            initial = file.read().split("\n")
+            for i in initial:
+                if i.isupper():
+                    MULTIFACED_CARDS[i] = {}
+                    last = i
+                if ' // ' in i:
+                    MULTIFACED_CARDS[last][i.split(' // ')[0]] = i.split(' // ')[1]
 
     if os.path.isfile("INPUT_OPTIONS.txt"):
         in_header = False
@@ -490,19 +508,25 @@ def startup():
         #FILEPATH_DRAFTS_COPY = SETTINGS[5]
         HERO =                 SETTINGS[6]
 
-    if os.path.isfile("ALL_DECKS"):
-        ALL_DECKS = pickle.load(open("ALL_DECKS","rb"))
+    for file in os.listdir(os.getcwd()):
+        if file.startswith('ALL_DECKS'):
+            ALL_DECKS = pickle.load(open(file,"rb"))
 
     if (os.path.isfile("ALL_DATA") == False) & (os.path.isfile("DRAFTS_TABLE") == False):
         update_status_bar(status="No session data to load. Import your MTGO GameLog files to get started.")
         os.chdir(FILEPATH_ROOT)
         return
-    ALL_DATA = pickle.load(open("ALL_DATA","rb"))
-    TIMEOUT = pickle.load(open("TIMEOUT","rb"))
-    DRAFTS_TABLE = pickle.load(open("DRAFTS_TABLE","rb"))
-    PICKS_TABLE = pickle.load(open("PICKS_TABLE","rb"))
-    PARSED_FILE_DICT = pickle.load(open("PARSED_FILE_DICT","rb"))
-    PARSED_DRAFT_DICT = pickle.load(open("PARSED_DRAFT_DICT","rb"))
+    try:
+        ALL_DATA = pickle.load(open("ALL_DATA","rb"))
+        TIMEOUT = pickle.load(open("TIMEOUT","rb"))
+        DRAFTS_TABLE = pickle.load(open("DRAFTS_TABLE","rb"))
+        PICKS_TABLE = pickle.load(open("PICKS_TABLE","rb"))
+        PARSED_FILE_DICT = pickle.load(open("PARSED_FILE_DICT","rb"))
+        PARSED_DRAFT_DICT = pickle.load(open("PARSED_DRAFT_DICT","rb"))
+        SKIP_FILES = pickle.load(open("SKIP_FILES","rb"))
+        SKIP_DRAFTS = pickle.load(open("SKIP_DRAFTS","rb"))
+    except FileNotFoundError:
+        pass
 
     ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
 
@@ -589,6 +613,8 @@ def get_all_data(fp_logs,fp_drafts,copy):
     global PICKS_TABLE
     global PARSED_FILE_DICT
     global PARSED_DRAFT_DICT
+    global SKIP_FILES
+    global SKIP_DRAFTS
     global data_loaded
     global new_import
     global ask_to_save
@@ -611,6 +637,8 @@ def get_all_data(fp_logs,fp_drafts,copy):
                         initial = gamelog.read()
                         mtime = time.ctime(os.path.getmtime(i))
                     parsed_data = modo.get_all_data(initial,mtime)
+                    if parsed_data[0][0] in SKIP_FILES:
+                        continue
                     if isinstance(parsed_data, str):
                         skip_dict[i] = parsed_data
                         continue
@@ -656,6 +684,8 @@ def get_all_data(fp_logs,fp_drafts,copy):
                 with io.open(i,"r",encoding="ansi") as gamelog:
                     initial = gamelog.read()   
                 parsed_data = modo.parse_draft_log(i,initial) 
+                if parsed_data[0][0][0] in SKIP_DRAFTS:
+                    continue
                 DRAFTS_TABLE.extend(parsed_data[0])
                 PICKS_TABLE.extend(parsed_data[1])
                 PARSED_DRAFT_DICT[i] = parsed_data[2]
@@ -676,8 +706,6 @@ def get_all_data(fp_logs,fp_drafts,copy):
         update_status_bar(status=f"Imported {str(match_count)} new Matches and {str(draft_count)} new Draft.")
     else:
         update_status_bar(status=f"Imported {str(match_count)} new Matches and {str(draft_count)} new Drafts.")
-
-    print(skip_dict)
 
     if (match_count > 0) or (draft_count > 0):
         ask_to_save = True
@@ -2135,7 +2163,7 @@ def revise_record2():
     p2_sub_index =  modo.header("Matches").index("P2_Subarch")
 
     df = pd.DataFrame(ALL_DATA[2],columns=modo.header("Plays"))
-    df = df[(df.Match_ID == values[0])]
+    df = df[(df.Match_ID == values[0]) & (df.Primary_Card != 'NA')]
     players = [values[p1_index],values[p2_index]]
     cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
     cards2 =  df[(df.Casting_Player == players[0]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
@@ -2804,6 +2832,8 @@ def import_window():
         global ALL_DATA
         global ALL_DATA_INVERTED
         global DRAFTS_TABLE
+        global PARSED_FILE_DICT
+        global PARSED_DRAFT_DICT
         global FILEPATH_LOGS
         global FILEPATH_DRAFTS
         global HERO
@@ -2953,8 +2983,8 @@ def get_winners():
 
         df_inverted = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
         for i in DRAFTS_TABLE:
-            wins = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[hero_index]) & (df_inverted.Match_Winner == "P1")].shape[0]
-            losses = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[hero_index]) & (df_inverted.Match_Winner == "P2")].shape[0]
+            wins = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[1]) & (df_inverted.Match_Winner == "P1")].shape[0]
+            losses = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[1]) & (df_inverted.Match_Winner == "P2")].shape[0]
             i[modo.header("Drafts").index("Match_Wins")] = wins
             i[modo.header("Drafts").index("Match_Losses")] = losses
 
@@ -3014,7 +3044,7 @@ def ask_for_winner(ga_list,p1,p2,n,total):
     mid_frame.columnconfigure(0,minsize=0,weight=1)
     
     label1 = tk.Label(top_frame,text=message,anchor="center",wraplength=width)
-    label2 = tk.Label(mid_frame,text=all_ga,anchor="center",wraplength=width,justify="left")
+    label2 = tk.Label(mid_frame,text=all_ga.replace('@[','').replace('@]',''),anchor="center",wraplength=width,justify="left")
 
     button_skip = tk.Button(top_frame,text="Skip Game",width=10,command=lambda : close_gw_window("NA"))
     button_exit = tk.Button(top_frame,text="Exit",width=10,command=lambda : close_gw_window("Exit."))    
@@ -4933,6 +4963,8 @@ def remove_record(ignore):
     global PICKS_TABLE
     global PARSED_FILE_DICT
     global PARSED_DRAFT_DICT
+    global SKIP_FILES
+    global SKIP_DRAFTS
     global ask_to_save
     global selected
 
@@ -4948,6 +4980,7 @@ def remove_record(ignore):
 
     # Remove records from our table data and get table size differences.
     if display == "Matches":
+        SKIP_FILES += sel_matchid
         precounts = [len(ALL_DATA[0]),len(ALL_DATA[1]),len(ALL_DATA[2])]
         ALL_DATA[0] = [i for i in ALL_DATA[0] if i[0] not in sel_matchid]
         ALL_DATA[1] = [i for i in ALL_DATA[1] if i[0] not in sel_matchid]
@@ -4957,6 +4990,13 @@ def remove_record(ignore):
         ALL_DATA_INVERTED[2] = [i for i in ALL_DATA_INVERTED[2] if i[0] not in sel_matchid]
         counts = [precounts[0]-len(ALL_DATA[0]),precounts[1]-len(ALL_DATA[1]),precounts[2]-len(ALL_DATA[2])]
     elif display == "Drafts":
+        SKIP_DRAFTS += sel_matchid
+        for i in ALL_DATA[0]:
+            if i[1] in SKIP_DRAFTS:
+                i[1] = 'NA'
+        for i in ALL_DATA_INVERTED[0]:
+            if i[1] in SKIP_DRAFTS:
+                i[1] = 'NA'
         precounts = [len(DRAFTS_TABLE),len(PICKS_TABLE)]
         DRAFTS_TABLE = [i for i in DRAFTS_TABLE if i[0] not in sel_matchid]
         PICKS_TABLE = [i for i in PICKS_TABLE if i[0] not in sel_matchid]
@@ -4966,12 +5006,14 @@ def remove_record(ignore):
     if ignore == False:
         if display == "Matches":
             for i in sel_matchid:
+                SKIP_FILES.remove(i)
                 for j in PARSED_FILE_DICT:
                     if PARSED_FILE_DICT[j][0] in sel_matchid:
                         PARSED_FILE_DICT.pop(j)
                         break
         elif display == "Drafts":
             for i in sel_matchid:
+                SKIP_DRAFTS.remove(i)
                 for j in PARSED_DRAFT_DICT:
                     if PARSED_DRAFT_DICT[j] in sel_matchid:
                         PARSED_DRAFT_DICT.pop(j)
@@ -5077,6 +5119,7 @@ def get_associated_draftid(mode):
     global ALL_DATA
     global ALL_DATA_INVERTED
     global DRAFTS_TABLE
+    global ask_to_save
 
     draftid_index = modo.header("Matches").index("Draft_ID")
     hero_index = modo.header("Drafts").index("Hero")
@@ -5109,8 +5152,8 @@ def get_associated_draftid(mode):
         df = df_plays[(df_plays.Match_ID == i)]
         cards1 =  set(df[(df.Casting_Player == p1) & (df.Action == "Casts")].Primary_Card.unique())
         cards2 =  set(df[(df.Casting_Player == p2) & (df.Action == "Casts")].Primary_Card.unique())
-        cards1 = modo.clean_card_set(cards1)
-        cards2 = modo.clean_card_set(cards2)
+        cards1 = modo.clean_card_set(cards1, MULTIFACED_CARDS)
+        cards2 = modo.clean_card_set(cards2, MULTIFACED_CARDS)
         cards_dict[p1] = cards1
         cards_dict[p2] = cards2
         for key in draft_picks_dict:
@@ -5124,6 +5167,14 @@ def get_associated_draftid(mode):
 
     if len(list_to_process) > 0:
         for index,i in enumerate(list_to_process):
+            if len(i[4]) == 1:
+                count += 1
+                for match in ALL_DATA[0]:
+                    if match[0] == i[5]:
+                        match[draftid_index] = i[4][0]
+                        break
+                ask_to_save = True
+                continue
             associated_draftid_window(i,index=index+1,total=len(list_to_process))
             if (missing_data == "Exit"):
                 break
@@ -5513,6 +5564,4 @@ s.map("Treeview",
 startup()
 window.protocol("WM_DELETE_WINDOW", lambda : exit_select())
 
-# Event loop: listens for events (keypress, etc.)
-# Blocks code after from running until window is closed.
 window.mainloop()
