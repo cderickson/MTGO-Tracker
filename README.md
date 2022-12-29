@@ -4,7 +4,7 @@ MTGO-Tracker will break down your play history on Magic Online into a personal d
 Five (5) tables are created: **Matches, Games, Plays, Drafts, Draft Picks**. These tables will help you not only track and analyze your results, but your play patterns as well.
 
 <p align="center">
-<img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_img.png?raw=true" width="808" height="469">
+<img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_img.PNG?raw=true">
 </p>
 
 ## Getting Started
@@ -192,7 +192,7 @@ Continue importing data as you play more matches on MTGO!
 	- Choose to view Match, Game, Play, Opponent, Time, or Card Data using the top right dropdown menu.
 	- Statistics can be filtered using the Format, Deck, and Date Range menus across the top of the window.
 <p align="center">
-<img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_image2.jpg?raw=true" width="808" height="469">
+<img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_image2.jpg?raw=true">
 </p>
 
 - - - -
