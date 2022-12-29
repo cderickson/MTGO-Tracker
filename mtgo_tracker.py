@@ -57,6 +57,7 @@ selected =          ()
 display_index =     0
 ln_per_page =       20
 curr_data =         pd.DataFrame()
+debug_str =         'Version 4.0\n\n'
 
 def save(exit):
     global ask_to_save
@@ -443,6 +444,8 @@ def startup():
     global data_loaded
     global ask_to_save
 
+    all_decks_loaded = False
+
     if os.path.isfile("MULTIFACED_CARDS.txt"):
         with io.open("MULTIFACED_CARDS.txt","r",encoding="ansi") as file:
             initial = file.read().split("\n")
@@ -496,7 +499,18 @@ def startup():
     FILEPATH_EXPORT = FILEPATH_ROOT + "\\" + "export"
     FILEPATH_LOGS_COPY = FILEPATH_ROOT + "\\" + "gamelogs"
     FILEPATH_DRAFTS_COPY = FILEPATH_ROOT + "\\" + "draftlogs"
+    
+    for file in os.listdir(os.getcwd()):
+        if file.startswith('ALL_DECKS'):
+            ALL_DECKS = pickle.load(open(file,"rb"))
+            all_decks_loaded = True
+
     os.chdir(FILEPATH_ROOT + "\\" + "save")
+
+    if all_decks_loaded == False:
+        for file in os.listdir(os.getcwd()):
+            if file.startswith('ALL_DECKS'):
+                ALL_DECKS = pickle.load(open(file,"rb"))
 
     if os.path.isfile("SETTINGS"):
         SETTINGS = pickle.load(open("SETTINGS","rb"))
@@ -507,10 +521,6 @@ def startup():
         FILEPATH_DRAFTS =      SETTINGS[4]
         #FILEPATH_DRAFTS_COPY = SETTINGS[5]
         HERO =                 SETTINGS[6]
-
-    for file in os.listdir(os.getcwd()):
-        if file.startswith('ALL_DECKS'):
-            ALL_DECKS = pickle.load(open(file,"rb"))
 
     if (os.path.isfile("ALL_DATA") == False) & (os.path.isfile("DRAFTS_TABLE") == False):
         update_status_bar(status="No session data to load. Import your MTGO GameLog files to get started.")
@@ -618,7 +628,9 @@ def get_all_data(fp_logs,fp_drafts,copy):
     global data_loaded
     global new_import
     global ask_to_save
+    global debug_str
 
+    error_count = 0
     match_count = 0
     draft_count = 0
     skip_dict = {}
@@ -636,21 +648,30 @@ def get_all_data(fp_logs,fp_drafts,copy):
                     with io.open(i,"r",encoding="ansi") as gamelog:
                         initial = gamelog.read()
                         mtime = time.ctime(os.path.getmtime(i))
-                    parsed_data = modo.get_all_data(initial,mtime)
+                    if copy:
+                        try:
+                            shutil.copy(i,FILEPATH_LOGS_COPY)
+                            os.chdir(FILEPATH_LOGS_COPY)
+                            os.utime(i,(datetime.datetime.now().timestamp(),datetime.datetime.strptime(mtime,"%a %b %d %H:%M:%S %Y").timestamp()))
+                            os.chdir(root)
+                            debug_str += f'Copied GameLog: {i}\n'
+                        except shutil.SameFileError:
+                            debug_str += f'Same File Error While Copying GameLog: {i}\n'
+                            pass
+                    try:
+                        parsed_data = modo.get_all_data(initial,mtime)
+                        debug_str += f'Parsed GameLog: {i}\n'
+                    except Exception as error:
+                        debug_str += f'Error while parsing GameLog: {i}: {error.message}\n'
+                        error_count += 1
+                        continue
                     if parsed_data[0][0] in SKIP_FILES:
+                        debug_str += f'Skipped GameLog (in SKIP_FILES): {i}\n'
                         continue
                     if isinstance(parsed_data, str):
                         skip_dict[i] = parsed_data
                         continue
                     PARSED_FILE_DICT[i] = (parsed_data[0][0],datetime.datetime.strptime(mtime,"%a %b %d %H:%M:%S %Y"))
-                    if copy:
-                        try:
-                            shutil.copy(i,FILEPATH_LOGS_COPY)
-                            os.chdir(FILEPATH_LOGS_COPY)
-                            os.utime(i,(datetime.datetime.now().timestamp(),PARSED_FILE_DICT[i][1].timestamp()))
-                            os.chdir(root)
-                        except shutil.SameFileError:
-                            pass
                     new_data[0].append(parsed_data[0])
                     for i in parsed_data[1]:
                         new_data[1].append(i)
@@ -681,31 +702,43 @@ def get_all_data(fp_logs,fp_drafts,copy):
                 os.chdir(root)
             else:
                 os.chdir(root)
-                with io.open(i,"r",encoding="ansi") as gamelog:
-                    initial = gamelog.read()   
-                parsed_data = modo.parse_draft_log(i,initial) 
-                if parsed_data[0][0][0] in SKIP_DRAFTS:
-                    continue
-                DRAFTS_TABLE.extend(parsed_data[0])
-                PICKS_TABLE.extend(parsed_data[1])
-                PARSED_DRAFT_DICT[i] = parsed_data[2]
                 if copy:
                     try:
                         shutil.copy(i,FILEPATH_DRAFTS_COPY)
                         os.chdir(FILEPATH_DRAFTS_COPY)
                         os.chdir(root)
+                        debug_str += f'Copied DraftLog: {i}\n'
                     except shutil.SameFileError:
+                        debug_str += f'Same File Error While Copying DraftLog: {i}\n'
                         pass
+                with io.open(i,"r",encoding="ansi") as gamelog:
+                    initial = gamelog.read()
+                try:
+                    parsed_data = modo.parse_draft_log(i,initial)
+                    debug_str += f'Parsed DraftLog: {i}\n'
+                except Exception as error:
+                    debug_str += f'Error while parsing DraftLog: {i}: {error.message}\n'
+                    error_count += 1
+                    continue
+                if parsed_data[0][0][0] in SKIP_DRAFTS:
+                    debug_str += f'Skipped DraftLog (in SKIP_DRAFTS): {i}\n'
+                    continue
+                DRAFTS_TABLE.extend(parsed_data[0])
+                PICKS_TABLE.extend(parsed_data[1])
+                PARSED_DRAFT_DICT[i] = parsed_data[2]
                 draft_count += 1
 
     if (match_count == 1) & (draft_count == 1):
-        update_status_bar(status=f"Imported {str(match_count)} new Match and {str(draft_count)} new Draft.")
+        status_text = f"Imported {str(match_count)} new Match and {str(draft_count)} new Draft."
     elif (match_count == 1):
-        update_status_bar(status=f"Imported {str(match_count)} new Match and {str(draft_count)} new Drafts.")
+        status_text = f"Imported {str(match_count)} new Match and {str(draft_count)} new Drafts."
     elif (draft_count == 1):
-        update_status_bar(status=f"Imported {str(match_count)} new Matches and {str(draft_count)} new Draft.")
+        status_text = f"Imported {str(match_count)} new Matches and {str(draft_count)} new Draft."
     else:
-        update_status_bar(status=f"Imported {str(match_count)} new Matches and {str(draft_count)} new Drafts.")
+        status_text = f"Imported {str(match_count)} new Matches and {str(draft_count)} new Drafts."
+    if error_count > 0:
+        status_text += f' Skipped {error_count} files due to error. See DEBUG.txt for details.'
+    update_status_bar(status=status_text)
 
     if (match_count > 0) or (draft_count > 0):
         ask_to_save = True
@@ -4818,6 +4851,7 @@ def get_stats():
         load_data()
 
     def load_data(*argv):
+        global debug_str
         if date_entry_1.get() < date_entry_2.get():
             dr = [date_entry_1.get() + "-00:00",date_entry_2.get() + "-23:59"]
         else:
@@ -4836,8 +4870,10 @@ def get_stats():
             time_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())
         elif s_type.get() == "Card Data":
             card_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())      
-        print("Loaded Data:"+player.get()+","+opponent.get()+","+mformat.get()+","+lim_format.get()+","+deck.get()+","+opp_deck.get()+","+dr[0]+","+dr[1]+","+s_type.get())
-
+        
+        status_text = "Loaded Data:"+player.get()+","+opponent.get()+","+mformat.get()+","+lim_format.get()+","+deck.get()+","+opp_deck.get()+","+dr[0]+","+dr[1]+","+s_type.get()
+        print(status_text)
+        debug_str += status_text + '\n'
     def close_stats_window():
         window.deiconify()
         stats_window.destroy()
@@ -4933,6 +4969,7 @@ def get_stats():
     stats_window.protocol("WM_DELETE_WINDOW", lambda : close_stats_window())
 def close():
     # Close window and exit program.
+    debug()
     window.destroy()
 def exit_select():
     if ask_to_save:
@@ -4954,7 +4991,9 @@ def load_window_size_setting():
                 ln_per_page = 35
         os.chdir(cwd)
 def update_status_bar(status):
+    global debug_str
     status_label.config(text=status)
+    debug_str += f'{status}\n'
     print(status)
 def remove_record(ignore):
     global ALL_DATA
@@ -5341,6 +5380,7 @@ def associated_draftid_window(list_to_process,index,total):
 def debug():
     os.chdir(FILEPATH_ROOT)
     with open("DEBUG.txt","w",encoding="utf-8") as txt:
+        txt.write(debug_str + '\n')
         txt.write("SETTINGS:\n")
         txt.write(f"FILEPATH_ROOT: {FILEPATH_ROOT}\n")
         txt.write(f"FILEPATH_EXPORT: {FILEPATH_EXPORT}\n")
@@ -5354,15 +5394,30 @@ def debug():
 
         txt.write("INPUT_OPTIONS:\n")
         for i in INPUT_OPTIONS:
-            txt.write(f"{i}: {INPUT_OPTIONS[i]}\n")
+            txt.write(f'{i}:\n')
+            for j in INPUT_OPTIONS[i]:
+                txt.write(f'{j}\n')
+            txt.write('\n')
         txt.write("\n")
+
         txt.write(f"PARSED_FILE_DICT ({str(len(PARSED_FILE_DICT))} files):\n")
         for i in PARSED_FILE_DICT:
             txt.write(f"{i}: {PARSED_FILE_DICT[i]}\n")
         txt.write("\n")
+
         txt.write(f"PARSED_DRAFT_DICT ({str(len(PARSED_DRAFT_DICT))} files):\n")
         for i in PARSED_DRAFT_DICT:
             txt.write(f"{i}: {PARSED_DRAFT_DICT[i]}\n")
+        txt.write("\n")
+
+        txt.write(f"SKIP_FILES ({str(len(SKIP_FILES))} files):\n")
+        for i in SKIP_FILES:
+            txt.write(f"{i}\n")
+        txt.write("\n")
+
+        txt.write(f"SKIP_DRAFTS ({str(len(SKIP_DRAFTS))} files):\n")
+        for i in SKIP_DRAFTS:
+            txt.write(f"{i}\n")
         txt.write("\n")
 
         txt.write(f"Matches: {str(len(ALL_DATA[0]))}\n")
