@@ -8,13 +8,21 @@ Five (5) tables are created: **Matches, Games, Plays, Drafts, Draft Picks**. The
 </p>
 
 ## Getting Started
-Import your data by clicking **'File => Import MTGO GameLogs'** and navigating to the folder containing your GameLog and/or DraftLog files. MTGO saves these files in **"C:\Users\\[User]\AppData\Local\Apps\2.0"** and **"C:\Users\\[User]\Documents"** respectively.
+### Import your data:
+	- File => Import MTGO GameLogs 
+	- Navigate to the folder containing your GameLog and/or DraftLog files.
+		- C:\Users\\[User]\AppData\Local\Apps\2.0
+		- C:\Users\\[User]\Documents
 
-Set the default Hero to your MTGO username by clicking **'Data => Set Default Hero'**. This will make an individualized dataset more readable. The statistics window will also become accessible from the left-panel, allowing you to view general statistics regarding your personal performance.
+### Set the default Hero to your MTGO username:
 
-Complete your dataset by using the **Data Cleaning** methods described below to fill in information for attributes such as Deck Archetype, Deck Name, Match Format, and more.
+	- Data => Set Default Hero
+This will make an individualized dataset more readable. The statistics window will also become accessible from the left-panel, allowing you to view general statistics regarding your personal performance.
 
-Continue importing data as you play more matches on MTGO!
+### Complete Your Dataset
+Use the **Data Cleaning** methods described below to fill in information for attributes such as Deck Archetype, Deck Name, Match Format, and more.
+
+### Continue importing data as you play more matches on MTGO!
 ## Column Descriptions
 <details>
 <summary><b>Matches Table</b></summary>
@@ -185,69 +193,79 @@ Continue importing data as you play more matches on MTGO!
 </details>
 
 - - - -
-## Statistics Window
-	- 'Hero' setting must be applied before Statistics Window can be viewed.
-	
+## Dashboards
+<details>
+<summary><b>Statistics Window</b></summary>
+
+### 'Hero' setting must be applied before Statistics Window can be viewed.
 	- View descriptive statistics and basic analysis. 
 	- Choose to view Match, Game, Play, Opponent, Time, or Card Data using the top right dropdown menu.
 	- Statistics can be filtered using the Format, Deck, and Date Range menus across the top of the window.
 <p align="center">
 <img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_image2.jpg?raw=true">
 </p>
+</details>
 
 - - - -
 ## Settings
 <details>
-	<summary><b>GameLogs and DraftLogs Folder</b></summary>
-	<p></p>
-	<p><b>Data => Set Default Import Folders</b></p>
-	
+<summary><b>GameLogs and DraftLogs Folder</b></summary>
+
+### Data => Set Default Import Folders
 	- The folders containing your MTGO GameLog and DraftLog files.
 	- MTGO saves GameLog files in "C:\Users\[User]\AppData\Local\Apps\2.0" by default.
 	- MTGO saves DraftLog files in "C:\Users\[User]\Documents" by default.
 </details>
 <details>
-	<summary><b>Export Folder</b></summary>
-	<p></p>
-	<p><b>Export => Set Default Export Folder</b></p>
-	
+<summary><b>Export Folder</b></summary>
+
+### Export => Set Default Export Folder
 	- The folder where exported .csv and .xlsx files will be saved.
 	- Defaults to /root/export/ folder.
 </details>
 <details>
-	<summary><b>Main Window Size</b></summary>
-	<p></p>
-	<p><b>File => Set Default Window Size</b></p>
-	
+<summary><b>Main Window Size</b></summary>
+
+### File => Set Default Window Size
 	- Small: 1000x500
 	- Large: 1750x750
 </details>
 <details>
-	<summary><b>Hero</b></summary>
-	<p></p>
-	<p><b>Data => Set Default Hero</b></p>
-	
+<summary><b>Hero</b></summary>
+
+### Data => Set Default Hero
 	- Setting a default 'Hero' moves the Hero's username into the P1 column by default. 
 	- Data in the 'Statistics' window will be shown from the Hero's perspective.
 </details>
 
 - - - -
 ## Saving and Exporting
-### Session Data:
-- **File => Save Data**
-- **Data => Delete Saved Session**
-### Previously Imported Files:
+<details>
+<summary><b>Save/Delete Session Data</b></summary>
+
+	- File => Save Data
+	- Data => Delete Saved Session
+</details>
+
+<details>
+<summary><b>Copies of Previously Imported Files</b></summary>
 
 	- Previously imported GameLog and DraftLog files are copied and saved.
 	- Copied GameLog files are saved in /root/gamelogs/.
 	- Copied DraftLog files are saved in /root/draftlogs/.
-### Exporting:
+</details>
+
+<details>
+<summary><b>Exporting Tables</b></summary>
 
 	- MTGO-Tracker creates (5) tables: 'Matches', 'Games', 'Plays', 'Drafts', 'Draft Picks'.
 	- Use the 'Export' Menu to save any or all of your tables as either .csv or .xlsx files.
 	- Filtered tables can be exported.
 	- Exports to /root/export/ by default.
-### Inverse Joined Table Export:
+</details>
+
+<details>
+<summary><b>Exporting Tables (Inverse Joined)</b></summary>
 
 	- MTGO randomly sets each player to P1 or P2 at the beginning of each match. 
 	- This makes it difficult to view data for specific players.
@@ -255,4 +273,6 @@ Continue importing data as you play more matches on MTGO!
 	- The Inverse Join table creates a second row for each Match/Game with P1 and P2 reversed.
 	- This allows filtering on either the P1 or P2 columns to display all games involving a specific player.
 	- Keep in mind the tables exported with this option will be twice as large.
+</details>
+
 - - - -
