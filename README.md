@@ -31,7 +31,7 @@ These tables will help you not only track and analyze your results, but your pla
 This will make an individualized dataset more readable. The statistics window will also become accessible from the left-panel, allowing you to view general statistics regarding your personal performance.
 <br><br>
 
-## Complete Your Dataset
+## Complete your dataset
 Use the **Data Cleaning** methods described below to fill in information for attributes such as Deck Archetype, Deck Name, Match Format, and more.
 <br><br>
 
