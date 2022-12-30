@@ -365,7 +365,8 @@ def delete_session():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def del_session():
-        save_files = ["ALL_DATA","DRAFTS_TABLE","PICKS_TABLE","TIMEOUT","PARSED_FILE_DICT","PARSED_DRAFT_DICT","SETTINGS","MAIN_WINDOW_SIZE"]
+        save_files = ['ALL_DATA', 'DRAFTS_TABLE', 'PICKS_TABLE', 'TIMEOUT', 'PARSED_FILE_DICT',
+                      'PARSED_DRAFT_DICT', 'SETTINGS', 'MAIN_WINDOW_SIZE', 'SKIP_FILES', 'SKIP_DRAFTS']
         os.chdir(FILEPATH_ROOT + "\\" + "save")   
 
         session_exists = False
