@@ -19,13 +19,15 @@ These tables will help you not only track and analyze your results, but your pla
 
 # Getting Started
 ## Import your data
-	- File -> Import MTGO GameLogs 
+<b>File -> Import MTGO GameLogs</b>
+
 	- Navigate to the folder containing your GameLog and/or DraftLog files:
 		- C:\Users\[User]\AppData\Local\Apps\2.0
 		- C:\Users\[User]\Documents
 
 ## Set the default Hero to your MTGO username
-	- Data -> Set Default Hero
+<b>Data -> Set Default Hero</b>
+
 This will make an individualized dataset more readable. The statistics window will also become accessible from the left-panel, allowing you to view general statistics regarding your personal performance.
 <br><br>
 
