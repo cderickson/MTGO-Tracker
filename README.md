@@ -13,7 +13,6 @@ These tables will help you not only track and analyze your results, but your pla
 <p align="center">
 <img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_img.PNG?raw=true">
 </p>
-View the <b><a href=https://github.com/cderickson/MTGO-Tracker/wiki>Wiki</a></b> for more information and usage instructions.
 <br><br>
 
 - - - -
@@ -35,3 +34,5 @@ Use the **Data Cleaning** methods described below to fill in information for att
 <br><br>
 
 ## Continue importing data as you play more matches on MTGO!
+View the <b><a href=https://github.com/cderickson/MTGO-Tracker/wiki>Wiki</a></b> for more information and usage instructions.
+<br><br>
