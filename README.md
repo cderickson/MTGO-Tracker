@@ -22,8 +22,8 @@ View the <b><a href=https://github.com/cderickson/MTGO-Tracker/wiki>Wiki</a></b>
 ## Import your data
 	- File -> Import MTGO GameLogs 
 	- Navigate to the folder containing your GameLog and/or DraftLog files:
-		- C:\Users\\[User]\AppData\Local\Apps\2.0
-		- C:\Users\\[User]\Documents
+		- C:\Users\[User]\AppData\Local\Apps\2.0
+		- C:\Users\[User]\Documents
 
 ## Set the default Hero to your MTGO username
 	- Data -> Set Default Hero
