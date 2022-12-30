@@ -443,6 +443,7 @@ def startup():
     global MULTIFACED_CARDS
     global data_loaded
     global ask_to_save
+    global debug_str
 
     all_decks_loaded = False
 
@@ -455,6 +456,7 @@ def startup():
                     last = i
                 if ' // ' in i:
                     MULTIFACED_CARDS[last][i.split(' // ')[0]] = i.split(' // ')[1]
+        debug_str += 'Loaded MULTIFACED_CARDS from file.\n'
 
     if os.path.isfile("INPUT_OPTIONS.txt"):
         in_header = False
@@ -476,6 +478,7 @@ def startup():
                 elif (in_header == False) and (i != "") and (in_instr == False):
                     y.append(i)
                 last = i
+        debug_str += 'Loaded INPUT_OPTIONS from file.\n'
     else:
         INPUT_OPTIONS["Constructed Match Types"] = modo.match_types(con=True)
         INPUT_OPTIONS["Booster Draft Match Types"] = modo.match_types(booster=True)
@@ -486,16 +489,21 @@ def startup():
         INPUT_OPTIONS["Cube Formats"] = modo.formats(cube=True)
         INPUT_OPTIONS["Booster Draft Formats"] = modo.formats(booster=True)
         INPUT_OPTIONS["Sealed Formats"] = modo.formats(sealed=True)
+        debug_str += 'Loaded INPUT_OPTIONS from modo.py.\n'
     
     FILEPATH_ROOT = os.getcwd()
     if os.path.isdir("save") == False:
         os.mkdir(FILEPATH_ROOT + "\\" + "save")
+        debug_str += 'Created save directory.\n'
     if os.path.isdir("export") == False:
-        os.mkdir(FILEPATH_ROOT + "\\" + "export") 
+        os.mkdir(FILEPATH_ROOT + "\\" + "export")
+        debug_str += 'Created export directory.\n'
     if os.path.isdir("gamelogs") == False:
         os.mkdir(FILEPATH_ROOT + "\\" + "gamelogs")
+        debug_str += 'Created gamelogs directory.\n'
     if os.path.isdir("draftlogs") == False:
         os.mkdir(FILEPATH_ROOT + "\\" + "draftlogs")
+        debug_str += 'Created draftlogs directory.\n'
     FILEPATH_EXPORT = FILEPATH_ROOT + "\\" + "export"
     FILEPATH_LOGS_COPY = FILEPATH_ROOT + "\\" + "gamelogs"
     FILEPATH_DRAFTS_COPY = FILEPATH_ROOT + "\\" + "draftlogs"
@@ -504,6 +512,7 @@ def startup():
         if file.startswith('ALL_DECKS'):
             ALL_DECKS = pickle.load(open(file,"rb"))
             all_decks_loaded = True
+            debug_str += 'Loaded ALL_DECKS file from root folder.\n'
 
     os.chdir(FILEPATH_ROOT + "\\" + "save")
 
@@ -511,6 +520,7 @@ def startup():
         for file in os.listdir(os.getcwd()):
             if file.startswith('ALL_DECKS'):
                 ALL_DECKS = pickle.load(open(file,"rb"))
+                debug_str += 'Loaded ALL_DECKS file from save folder.\n'
 
     if os.path.isfile("SETTINGS"):
         SETTINGS = pickle.load(open("SETTINGS","rb"))
@@ -521,6 +531,7 @@ def startup():
         FILEPATH_DRAFTS =      SETTINGS[4]
         #FILEPATH_DRAFTS_COPY = SETTINGS[5]
         HERO =                 SETTINGS[6]
+        debug_str += 'Loaded SETTINGS file from save folder.\n'
 
     if (os.path.isfile("ALL_DATA") == False) & (os.path.isfile("DRAFTS_TABLE") == False):
         update_status_bar(status="No session data to load. Import your MTGO GameLog files to get started.")
@@ -535,7 +546,9 @@ def startup():
         PARSED_DRAFT_DICT = pickle.load(open("PARSED_DRAFT_DICT","rb"))
         SKIP_FILES = pickle.load(open("SKIP_FILES","rb"))
         SKIP_DRAFTS = pickle.load(open("SKIP_DRAFTS","rb"))
+        debug_str += 'Save files loaded.\n'
     except FileNotFoundError:
+        debug_str += 'ALL_DATA found, but no other save files.\n'
         pass
 
     ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
