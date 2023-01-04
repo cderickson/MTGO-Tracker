@@ -1,5 +1,5 @@
 # MTGO-Tracker
-MTGO-Tracker will break down your play history on Magic Online into a personal database. It will help you format your data for further statistical analysis, or allow you to simply use the built-in descriptive statistics.
+MTGO-Tracker is an analytics tool used to process raw data for Magic: the Gathering Online. Players can import and parse log files created during online play and store resulting information into a local database for self-analysis.
 
 Five (5) tables are created: 
 * Matches
