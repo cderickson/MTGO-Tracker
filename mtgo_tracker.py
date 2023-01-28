@@ -5198,6 +5198,7 @@ def get_associated_draftid(mode):
     list_to_process = []
     for i in limited_matches:
         acceptable = []
+        acceptable2 = []
         cards_dict = {}
         p1 = df_matches[(df_matches.Match_ID == i)].P1.tolist()[0]
         p2 = df_matches[(df_matches.Match_ID == i)].P2.tolist()[0]
@@ -5215,8 +5216,12 @@ def get_associated_draftid(mode):
                 fullset = draft_picks_dict[key][2]
                 if (subset.issubset(fullset)) & (match_date > draft_picks_dict[key][1]):
                     acceptable.append(key)
+                elif match_date > draft_picks_dict[key][1]:
+                    acceptable2.append(key)
         if len(acceptable) > 0:
             list_to_process.append([p1,p2,cards1,cards2,acceptable,i,match_date])
+        elif len(acceptable2) > 0:
+            list_to_process.append([p1,p2,cards1,cards2,acceptable2,i,match_date])
 
     if len(list_to_process) > 0:
         for index,i in enumerate(list_to_process):
