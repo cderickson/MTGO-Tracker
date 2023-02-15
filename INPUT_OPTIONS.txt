@@ -76,6 +76,10 @@ Modern Cube
 # Matches.Limited_Format Options
 # Booster Draft Formats:
 -----------------------------
+ONEONEONE
+BROBROBRO
+DMUDMUDMU
+SNCSNCSNC
 NEONEONEO
 DBLDBLDBL
 VOWVOWVOW
@@ -114,6 +118,10 @@ Other Draft
 # Matches.Limited_Format Options
 # Sealed Formats:
 -----------------------------
+ONE x6
+BRO x6
+DMU x6
+SNC x6
 NEO x6
 VOW x6
 MID x6
