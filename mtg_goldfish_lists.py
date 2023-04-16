@@ -440,12 +440,12 @@ def save_multiple_months(q, months, formats):
         print("starting month: " + yyyy_mm)
         for fmt in formats:
             save_all_lists(fmt, yyyy_mm)
+            q.get()
             if (yyyy_mm == months[-1]) and (fmt == formats[-1]):
                 pass
             else:
                 time.sleep(wait_time)
         print(yyyy_mm + " done.")
-        q.get()
         # save_receipt(yyyy_mm)
 
 
