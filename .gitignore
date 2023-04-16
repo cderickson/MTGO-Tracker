@@ -1,7 +1,8 @@
 __pycache__/
+venv/
+.idea/
 
 # UTILITY FILES
-mtg-goldfish-lists.py
 exe_command.txt
 build_mtgo_tracker.bat
 
@@ -11,4 +12,6 @@ save/
 export/
 gamelogs/
 draftlogs/
+lists/
 debug.txt
+Lists.zip
