@@ -57,7 +57,7 @@ selected =          ()
 display_index =     0
 ln_per_page =       20
 curr_data =         pd.DataFrame()
-debug_str =         'Version 4.0\n\n'
+debug_str =         'Version 12\n\n'
 
 def save(exit):
     global ask_to_save
