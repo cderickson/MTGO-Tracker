@@ -90,10 +90,18 @@ Who // What
 
 TRANSFORM
 Aberrant Researcher // Perfected Form
+A-Binding Geist // A-Spectral Binding
+A-Brine Comber // A-Brinebound Gift
 Accursed Witch // Infectious Curse
+A-Devoted Grafkeeper // A-Departed Soulkeeper
+A-Dorothea, Vengeful Victim // A-Dorothea's Retribution
+Aetherblade Agent // Gitaxian Mindstinger
 Afflicted Deserter // Werewolf Ransacker
+A-Gutter Skulker // A-Gutter Shortcut
+A-Lantern Bearer // A-Lanterns' Lift
 Alluring Suitor // Deadly Dancer
 Ambitious Farmhand // Seasoned Cathar
+A-Mischievous Catgeist // A-Catlike Curiosity
 Arcee, Sharpshooter // Arcee, Acrobatic Coupe
 Archangel Avacyn // Avacyn, the Purifier
 Arguel's Blood Fast // Temple of Aclazotz
@@ -102,6 +110,7 @@ Arlinn, the Pack's Hope // Arlinn, the Moon's Fury
 Autumnal Gloom // Ancient of the Equinox
 Avabruck Caretaker // Hollowhenge Huntmaster
 Avacynian Missionaries // Lunarch Inquisitors
+Ayara, Widow of the Realm // Ayara, Furnace Queen
 Azor's Gateway // Sanctum of the Sun
 Azusa's Many Journeys // Likeness of the Seeker
 Baithook Angler // Hook-Haunt Drifter
@@ -115,14 +124,17 @@ Binding Geist // Spectral Binding
 Biolume Egg // Biolume Serpent
 Bird Admirer // Wing Shredder
 Blaster, Combat DJ // Blaster, Morale Booster
+Blightreaper Thallid // Blightsower Thallid
 Blitzwing, Cruel Tormentor // Blitzwing, Adaptive Assailant
 Bloodline Keeper // Lord of Lineage
 Bloodsworn Squire // Bloodsworn Knight
+Bonded Herdbeast // Plated Kilnbeast
 Boseiju Reaches Skyward // Branch of Boseiju
 Breakneck Rider // Neck Breaker
 Brine Comber // Brinebound Gift
 Brutal Cathar // Moonrage Brute
 Burly Breaker // Dire-Strain Demolisher
+Captive Weird // Compleated Conjurer
 Catapult Fodder // Catapult Captain
 Chalice of Life // Chalice of Death
 Chandra, Fire of Kaladesh // Chandra, Roaring Flame
@@ -150,6 +162,7 @@ Desperate Farmer // Depraved Harvester
 Devoted Grafkeeper // Departed Soulkeeper
 Distracting Geist // Clever Distraction
 Docent of Perfection // Final Iteration
+Doric, Nature's Warden // Doric, Owlbear Avenger
 Dormant Grove // Gnarled Grovestrider
 Dorothea, Vengeful Victim // Dorothea's Retribution
 Dowsing Dagger // Lost Vale
@@ -158,9 +171,11 @@ Duskwatch Recruiter // Krallenhorde Howler
 Ecstatic Awakener // Awoken Demon
 Edgar, Charmed Groom // Edgar Markov's Coffin
 Elbrus, the Binding Blade // Withengar Unbound
+Elesh Norn // The Argent Etchings
 Elusive Tormentor // Insidious Mist
 Enduring Angel // Angelic Enforcer
 Era of Enlightenment // Hand of Enlightenment
+Etali, Primal Conqueror // Etali, Primal Sickness
 Extricator of Sin // Extricator of Flesh
 Fable of the Mirror-Breaker // Reflection of Kiki-Jiki
 Faithbound Judge // Sinner's Judgment
@@ -174,6 +189,7 @@ Garruk Relentless // Garruk, the Veil-Cursed
 Gatstaf Arsonists // Gatstaf Ravagers
 Gatstaf Shepherd // Gatstaf Howler
 Geier Reach Bandit // Vildin-Pack Alpha
+Gnottvold Hermit // Chrome Host Hulk
 Goldbug, Humanity's Ally // Goldbug, Scrappy Scout
 Golden Guardian // Gold-Forge Garrison
 Graveyard Trespasser // Graveyard Glutton
@@ -184,12 +200,15 @@ Gutter Skulker // Gutter Shortcut
 Hadana's Climb // Winged Temple of Orazca
 Hanweir Militia Captain // Westvale Cult Leader
 Hanweir Watchkeep // Bane of Hanweir
+Harried Artisan // Phyrexian Skyflayer
 Harvest Hand // Scrounged Scythe
 Harvesttide Infiltrator // Harvesttide Assailant
 Havengul Laboratory // Havengul Mystery
 Heirloom Mirror // Inherited Fiend
 Heir of Falkenrath // Heir to the Night
+Heliod, the Radiant Dawn // Heliod, the Warped Eclipse
 Henrika Domnathi // Henrika, Infernal Seer
+Herbology Instructor // Malady Invoker
 Hermit of the Natterknolls // Lone Wolf of the Natterknolls
 Hidetsugu Consumes All // Vessel of the All-Consuming
 Hinterland Hermit // Hinterland Scourge
@@ -203,17 +222,55 @@ Ill-Tempered Loner // Howlpack Avenger
 Infestation Expert // Infested Werewolf
 Innocent Traveler // Malicious Invader
 Instigator Gang // Wildblood Pack
+Invasion of Alara // Awaken the Maelstrom
+Invasion of Amonkhet // Lazotep Convert
+Invasion of Arcavios // Invocation of the Founders
+Invasion of Azgol // Ashen Reaper
+Invasion of Belenon // Belenon War Anthem
+Invasion of Dominaria // Serra Faithkeeper
+Invasion of Eldraine // Prickle Faeries
+Invasion of Ergamon // Truga Cliffcharger
+Invasion of Fiora // Marchesa, Resolute Monarch
+Invasion of Gobakhan // Lightshield Array
+Invasion of Ikoria // Zilortha, Apex of Ikoria
+Invasion of Innistrad // Deluge of the Dead
+Invasion of Ixalan // Belligerent Regisaur
+Invasion of Kaladesh // Aetherwing, Golden-Scale Flagship
+Invasion of Kaldheim // Pyre of the World Tree
+Invasion of Kamigawa // Rooftop Saboteurs
+Invasion of Karsus // Refraction Elemental
+Invasion of Kylem // Valor's Reach Tag Team
+Invasion of Lorwyn // Winnowing Forces
+Invasion of Mercadia // Kyren Flamewright
+Invasion of Moag // Bloomwielder Dryads
+Invasion of Muraganda // Primordial Plasm
+Invasion of New Capenna // Holy Frazzle-Cannon
+Invasion of New Phyrexia // Teferi Akosa of Zhalfir
+Invasion of Pyrulea // Gargantuan Slabhorn
+Invasion of Ravnica // Guildpact Paragon
+Invasion of Regatha // Disciples of the Inferno
+Invasion of Segovia // Caetus, Sea Tyrant of Segovia
+Invasion of Shandalar // Leyline Surge
+Invasion of Tarkir // Defiant Thundermaw
+Invasion of Theros // Ephara, Ever-Sheltering
+Invasion of Tolvada // The Broken Sky
+Invasion of Ulgrotha // Grandmother Ravi Sengir
+Invasion of Vryn // Overloaded Mage-Ring
+Invasion of Xerex // Vertex Paladin
+Invasion of Zendikar // Awakened Skyclave
 Inventive Iteration // Living Breakthrough
 Jace, Vryn's Prodigy // Jace, Telepath Unbound
 Jacob Hauken, Inspector // Hauken's Insight
 Jerren, Corrupted Bishop // Ormendahl, the Corrupter
 Jetfire, Ingenious Scientist // Jetfire, Air Guardian
+Jin-Gitaxias // The Great Synthesis
 Journey to Eternity // Atzal, Cave of Eternity
 Jugan Defends the Temple // Remnant of the Rising Star
 Katilda, Dawnhart Martyr // Katilda's Rising Dawn
 Kessig Forgemaster // Flameheart Werewolf
 Kessig Naturalist // Lord of the Ulvenwald
 Kessig Prowler // Sinuous Predator
+Khenra Spellspear // Gitaxian Spellstalker
 Kindly Ancestor // Ancestor's Embrace
 Kindly Stranger // Demon-Possessed Witch
 Kruin Outlaw // Terror of Kruin Pass
@@ -242,20 +299,24 @@ Mourning Patrol // Morning Apparition
 Mysterious Tome // Chilling Chronicle
 Mystic Skull // Mystic Monstrosity
 Neglected Heirloom // Ashmouth Blade
+Nezumi Freewheeler // Hideous Fleshwheeler
 Nicol Bolas, the Ravager // Nicol Bolas, the Arisen
 Nissa, Vastwood Seer // Nissa, Sage Animist
 Oakshade Stalker // Moonlit Ambusher
 Okiba Reckoner Raid // Nezumi Road Captain
 Optimus Prime, Hero // Optimus Prime, Autobot Leader
+Order of the Mirror // Order of the Alabaster Host
 Outland Liberator // Frenzied Trapbreaker
 Overwhelmed Archivist // Archive Haunt
 Panicked Bystander // Cackling Culprit
 Path of Mettle // Metzali, Tower of Triumph
 Pious Evangel // Wayward Disciple
+Polukranos Reborn // Polukranos, Engine of Ruin
 Poppet Stitcher // Poppet Factory
 Primal Amulet // Primal Wellspring
 Profane Procession // Tomb of the Dusk Rose
 Prowl, Stoic Strategist // Prowl, Pursuit Vehicle
+Pyretic Prankster // Glistening Goremonger
 Radiant Grace // Radiant Restraints
 Ragged Recluse // Odious Witch
 Rahilda, Wanted Cutthroat // Rahilda, Feral Outlaw
@@ -264,14 +325,18 @@ Ravenous Demon // Archdemon of Greed
 Reckless Stormseeker // Storm-Charged Slasher
 Reckless Waif // Merciless Predator
 Restless Bloodseeker // Bloodsoaked Reveler
+Rona, Herald of Invasion // Rona, Tolarian Obliterator
 Runo Stromkirk // Krothuss, Lord of the Deep
 Sage of Ancient Lore // Werewolf of Ancient Hunger
 Scorned Villager // Moonscarred Werewolf
 Screeching Bat // Stalking Vampire
 Search for Azcanta // Azcanta, the Sunken Ruin
+Seraph of New Capenna // Seraph of New Phyrexia
 Shady Traveler // Stalking Predator
+Sheoldred // The True Scriptures
 Shrill Howler // Howling Chorus
 Skin Invasion // Skin Shedder
+Skyclave Aerialist // Skyclave Invader
 Slicer, Hired Muscle // Slicer, High-Speed Antagonist
 Smoldering Egg // Ashmouth Dragon
 Smoldering Werewolf // Erupting Dreadwolf
@@ -283,9 +348,11 @@ Spellrune Painter // Spellrune Howler
 Starscream, Power Hungry // Starscream, Seeker Leader
 Startled Awake // Persistent Nightmare
 Storm the Vault // Vault of Catlacan
+Sun-Blessed Guardian // Furnace-Blessed Conqueror
 Suspicious Stowaway // Seafaring Werewolf
 Tales of Master Seshiro // Seshiro's Living Legacy
 Tangleclaw Werewolf // Fibrous Entangler
+Tarkir Duneshaper // Burnished Dunestomper
 Tavern Ruffian // Tavern Smasher
 Teachings of the Kirin // Kirin-Touched Orochi
 Thaumatic Compass // Spires of Orazca
@@ -313,6 +380,7 @@ Ulvenwald Captive // Ulvenwald Abomination
 Ulvenwald Mystics // Ulvenwald Primordials
 Ulvenwald Oddity // Ulvenwald Behemoth
 Uninvited Geist // Unimpeded Trespasser
+Urabrask // The Great Work
 Vance's Blasting Cannons // Spitfire Bastion
 Vengeful Strangler // Strangling Grasp
 Vildin-Pack Outcast // Dronepack Kindred
@@ -324,6 +392,7 @@ Volatile Arsonist // Dire-Strain Anarchist
 Voldaren Bloodcaster // Bloodbat Summoner
 Voldaren Pariah // Abolisher of Bloodlines
 Voltaic Visionary // Volt-Charged Berserker
+Vorinclex // The Grand Evolution
 Weary Prisoner // Wrathful Jailbreaker
 Weaver of Blossoms // Blossom-Clad Werewolf
 Wedding Announcement // Wedding Festivity
@@ -334,13 +403,21 @@ Wolfkin Outcast // Wedding Crasher
 DFC
 A-Alrund, God of the Cosmos // A-Hakka, Whispering Raven
 Aberrant Researcher // Perfected Form
+A-Binding Geist // A-Spectral Binding
+A-Brine Comber // A-Brinebound Gift
 Accursed Witch // Infectious Curse
+A-Devoted Grafkeeper // A-Departed Soulkeeper
+A-Dorothea, Vengeful Victim // A-Dorothea's Retribution
+Aetherblade Agent // Gitaxian Mindstinger
 Afflicted Deserter // Werewolf Ransacker
 Agadeem's Awakening // Agadeem, the Undercrypt
+A-Gutter Skulker // A-Gutter Shortcut
 Akoum Warrior // Akoum Teeth
+A-Lantern Bearer // A-Lanterns' Lift
 Alluring Suitor // Deadly Dancer
 Alrund, God of the Cosmos // Hakka, Whispering Raven
 Ambitious Farmhand // Seasoned Cathar
+A-Mischievous Catgeist // A-Catlike Curiosity
 Angel // Demon
 Arcee, Sharpshooter // Arcee, Acrobatic Coupe
 Archangel Avacyn // Avacyn, the Purifier
@@ -352,6 +429,7 @@ Augmenter Pugilist // Echoing Equation
 Autumnal Gloom // Ancient of the Equinox
 Avabruck Caretaker // Hollowhenge Huntmaster
 Avacynian Missionaries // Lunarch Inquisitors
+Ayara, Widow of the Realm // Ayara, Furnace Queen
 Azor's Gateway // Sanctum of the Sun
 Azusa's Many Journeys // Likeness of the Seeker
 Baithook Angler // Hook-Haunt Drifter
@@ -373,10 +451,12 @@ Birgi, God of Storytelling // Harnfel, Horn of Bounty
 Blackbloom Rogue // Blackbloom Bog
 Blaster, Combat DJ // Blaster, Morale Booster
 Blex, Vexing Pest // Search for Blex
+Blightreaper Thallid // Blightsower Thallid
 Blightstep Pathway // Searstep Pathway
 Blitzwing, Cruel Tormentor // Blitzwing, Adaptive Assailant
 Bloodline Keeper // Lord of Lineage
 Bloodsworn Squire // Bloodsworn Knight
+Bonded Herdbeast // Plated Kilnbeast
 Booster Sleuth // Booster Sleuth (cont'd)
 Boseiju Reaches Skyward // Branch of Boseiju
 Branchloft Pathway // Boulderloft Pathway
@@ -385,6 +465,7 @@ Brightclimb Pathway // Grimclimb Pathway
 Brine Comber // Brinebound Gift
 Brutal Cathar // Moonrage Brute
 Burly Breaker // Dire-Strain Demolisher
+Captive Weird // Compleated Conjurer
 Careful Study (minigame) // Careful Study (cont'd)
 Catapult Fodder // Catapult Captain
 Chalice of Life // Chalice of Death
@@ -414,6 +495,7 @@ Daring Sleuth // Bearer of Overwhelming Truths
 Darkbore Pathway // Slitherbore Pathway
 Daybreak Ranger // Nightfall Predator
 Day // Night
+Day Vs. Night // Day vs. Night (cont'd)
 Deathbonnet Sprout // Deathbonnet Hulk
 Delver of Secrets // Insectile Aberration
 Demon's Due (minigame) // Demon's Due (cont'd)
@@ -424,6 +506,7 @@ Dinosaur // Treasure
 Distracting Geist // Clever Distraction
 Docent of Perfection // Final Iteration
 Dominarioes // Dominarioes (cont'd)
+Doric, Nature's Warden // Doric, Owlbear Avenger
 Dormant Grove // Gnarled Grovestrider
 Dorothea, Vengeful Victim // Dorothea's Retribution
 Dowsing Dagger // Lost Vale
@@ -434,11 +517,13 @@ Edgar, Charmed Groom // Edgar Markov's Coffin
 Egon, God of Death // Throne of Death
 Elbrus, the Binding Blade // Withengar Unbound
 Elemental // Centaur
+Elesh Norn // The Argent Etchings
 Elusive Tormentor // Insidious Mist
 Emeria's Call // Emeria, Shattered Skyclave
 Enduring Angel // Angelic Enforcer
 Era of Enlightenment // Hand of Enlightenment
 Esika, God of the Tree // The Prismatic Bridge
+Etali, Primal Conqueror // Etali, Primal Sickness
 Extricator of Sin // Extricator of Flesh
 Extus, Oriq Overlord // Awaken the Blood Avatar
 Fable of the Mirror-Breaker // Reflection of Kiki-Jiki
@@ -457,6 +542,7 @@ Gatstaf Arsonists // Gatstaf Ravagers
 Gatstaf Shepherd // Gatstaf Howler
 Geier Reach Bandit // Vildin-Pack Alpha
 Glasspool Mimic // Glasspool Shore
+Gnottvold Hermit // Chrome Host Hulk
 Goblin // Soldier
 Goldbug, Humanity's Ally // Goldbug, Scrappy Scout
 Golden Guardian // Gold-Forge Garrison
@@ -472,13 +558,16 @@ Hagra Mauling // Hagra Broodpit
 Halvar, God of Battle // Sword of the Realms
 Hanweir Militia Captain // Westvale Cult Leader
 Hanweir Watchkeep // Bane of Hanweir
+Harried Artisan // Phyrexian Skyflayer
 Harvest Hand // Scrounged Scythe
 Harvesttide Infiltrator // Harvesttide Assailant
 Havengul Laboratory // Havengul Mystery
 Heirloom Mirror // Inherited Fiend
 Heir of Falkenrath // Heir to the Night
+Heliod, the Radiant Dawn // Heliod, the Warped Eclipse
 Hengegate Pathway // Mistgate Pathway
 Henrika Domnathi // Henrika, Infernal Seer
+Herbology Instructor // Malady Invoker
 Hermit of the Natterknolls // Lone Wolf of the Natterknolls
 Hidetsugu Consumes All // Vessel of the All-Consuming
 Hinterland Hermit // Hinterland Scourge
@@ -492,15 +581,54 @@ Human // Wolf
 Huntmaster of the Fells // Ravager of the Fells
 Ill-Tempered Loner // Howlpack Avenger
 Illusion // Saproling
+Incubator // Phyrexian
 Infestation Expert // Infested Werewolf
 Innocent Traveler // Malicious Invader
 Instigator Gang // Wildblood Pack
+Into the Story: Horror Edition // Into the Story (cont'd)
+Invasion of Alara // Awaken the Maelstrom
+Invasion of Amonkhet // Lazotep Convert
+Invasion of Arcavios // Invocation of the Founders
+Invasion of Azgol // Ashen Reaper
+Invasion of Belenon // Belenon War Anthem
+Invasion of Dominaria // Serra Faithkeeper
+Invasion of Eldraine // Prickle Faeries
+Invasion of Ergamon // Truga Cliffcharger
+Invasion of Fiora // Marchesa, Resolute Monarch
+Invasion of Gobakhan // Lightshield Array
+Invasion of Ikoria // Zilortha, Apex of Ikoria
+Invasion of Innistrad // Deluge of the Dead
+Invasion of Ixalan // Belligerent Regisaur
+Invasion of Kaladesh // Aetherwing, Golden-Scale Flagship
+Invasion of Kaldheim // Pyre of the World Tree
+Invasion of Kamigawa // Rooftop Saboteurs
+Invasion of Karsus // Refraction Elemental
+Invasion of Kylem // Valor's Reach Tag Team
+Invasion of Lorwyn // Winnowing Forces
+Invasion of Mercadia // Kyren Flamewright
+Invasion of Moag // Bloomwielder Dryads
+Invasion of Muraganda // Primordial Plasm
+Invasion of New Capenna // Holy Frazzle-Cannon
+Invasion of New Phyrexia // Teferi Akosa of Zhalfir
+Invasion of Pyrulea // Gargantuan Slabhorn
+Invasion of Ravnica // Guildpact Paragon
+Invasion of Regatha // Disciples of the Inferno
+Invasion of Segovia // Caetus, Sea Tyrant of Segovia
+Invasion of Shandalar // Leyline Surge
+Invasion of Tarkir // Defiant Thundermaw
+Invasion of Theros // Ephara, Ever-Sheltering
+Invasion of Tolvada // The Broken Sky
+Invasion of Ulgrotha // Grandmother Ravi Sengir
+Invasion of Vryn // Overloaded Mage-Ring
+Invasion of Xerex // Vertex Paladin
+Invasion of Zendikar // Awakened Skyclave
 Inventive Iteration // Living Breakthrough
 Jace, Vryn's Prodigy // Jace, Telepath Unbound
 Jacob Hauken, Inspector // Hauken's Insight
 Jadzi, Oracle of Arcavios // Journey to the Oracle
 Jerren, Corrupted Bishop // Ormendahl, the Corrupter
 Jetfire, Ingenious Scientist // Jetfire, Air Guardian
+Jin-Gitaxias // The Great Synthesis
 Jorn, God of Winter // Kaldring, the Rimestaff
 Journey to Eternity // Atzal, Cave of Eternity
 Jugan Defends the Temple // Remnant of the Rising Star
@@ -513,6 +641,7 @@ Kessig Forgemaster // Flameheart Werewolf
 Kessig Naturalist // Lord of the Ulvenwald
 Kessig Prowler // Sinuous Predator
 Khalni Ambush // Khalni Territory
+Khenra Spellspear // Gitaxian Spellstalker
 Kianne, Dean of Substance // Imbraham, Dean of Theory
 Kindly Ancestor // Ancestor's Embrace
 Kindly Stranger // Demon-Possessed Witch
@@ -529,6 +658,7 @@ Life of Toshiro Umezawa // Memory of Toshiro
 Liliana, Heretical Healer // Liliana, Defiant Necromancer
 Loathsome Troll // Troll
 Lone Rider // It That Rides as One
+Look at Us, We're R&D // Look at Us, We're R&D (cont'd)
 Loyal Cathar // Unhallowed Cathar
 Ludevic, Necrogenius // Olag, Ludevic's Hubris
 Ludevic's Test Subject // Ludevic's Abomination
@@ -556,6 +686,7 @@ Mysterious Tome // Chilling Chronicle
 Mystic Skull // Mystic Monstrosity
 Needleverge Pathway // Pillarverge Pathway
 Neglected Heirloom // Ashmouth Blade
+Nezumi Freewheeler // Hideous Fleshwheeler
 Nicol Bolas, the Ravager // Nicol Bolas, the Arisen
 Nightmare Moon // Princess Luna
 Nissa, Vastwood Seer // Nissa, Sage Animist
@@ -563,6 +694,7 @@ Oakshade Stalker // Moonlit Ambusher
 Okiba Reckoner Raid // Nezumi Road Captain
 Ondu Inversion // Ondu Skyruins
 Optimus Prime, Hero // Optimus Prime, Autobot Leader
+Order of the Mirror // Order of the Alabaster Host
 Outland Liberator // Frenzied Trapbreaker
 Overwhelmed Archivist // Archive Haunt
 Panicked Bystander // Cackling Culprit
@@ -572,11 +704,13 @@ Pestilent Cauldron // Restorative Burst
 Pious Evangel // Wayward Disciple
 Pirate // Treasure
 Plargg, Dean of Chaos // Augusta, Dean of Order
+Polukranos Reborn // Polukranos, Engine of Ruin
 Poppet Stitcher // Poppet Factory
 Power of Persuasion // Ettin
 Primal Amulet // Primal Wellspring
 Profane Procession // Tomb of the Dusk Rose
 Prowl, Stoic Strategist // Prowl, Pursuit Vehicle
+Pyretic Prankster // Glistening Goremonger
 Radiant Grace // Radiant Restraints
 Ragged Recluse // Odious Witch
 Rahilda, Wanted Cutthroat // Rahilda, Feral Outlaw
@@ -590,6 +724,7 @@ Rimeshield Frost Giant // Frost Giant
 Riverglide Pathway // Lavaglide Pathway
 Roil Royale // Roil Royale (cont'd)
 Roll for Initiative // Roll for Initiative (cont'd)
+Rona, Herald of Invasion // Rona, Tolarian Obliterator
 Rowan, Scholar of Sparks // Will, Scholar of Frost
 Runo Stromkirk // Krothuss, Lord of the Deep
 Sage of Ancient Lore // Werewolf of Ancient Hunger
@@ -600,13 +735,16 @@ Sea Gate Restoration // Sea Gate, Reborn
 Search for Azcanta // Azcanta, the Sunken Ruin
 Sejiri Shelter // Sejiri Glacier
 Selfless Glyphweaver // Deadly Vanity
+Seraph of New Capenna // Seraph of New Phyrexia
 Servo // Thopter
 Shady Traveler // Stalking Predator
 Shaile, Dean of Radiance // Embrose, Dean of Shadow
 Shatterskull Smashing // Shatterskull, the Hammer Pass
+Sheoldred // The True Scriptures
 Shrill Howler // Howling Chorus
 Silundi Vision // Silundi Isle
 Skin Invasion // Skin Shedder
+Skyclave Aerialist // Skyclave Invader
 Skyclave Cleric // Skyclave Basilica
 Slicer, Hired Muscle // Slicer, High-Speed Antagonist
 Smoldering Egg // Ashmouth Dragon
@@ -624,13 +762,16 @@ Starscream, Power Hungry // Starscream, Seeker Leader
 Startled Awake // Persistent Nightmare
 Storm the Vault // Vault of Catlacan
 Strictly Better // Strictly Better (cont'd)
+Sun-Blessed Guardian // Furnace-Blessed Conqueror
 Suspicious Stowaway // Seafaring Werewolf
 Swarming Goblins // Goblin
 Tales of Master Seshiro // Seshiro's Living Legacy
 Tangleclaw Werewolf // Fibrous Entangler
 Tangled Florahedron // Tangled Vale
+Tarkir Duneshaper // Burnished Dunestomper
 Tavern Ruffian // Tavern Smasher
 Teachings of the Kirin // Kirin-Touched Orochi
+Telepathic Transmission // Telepathic Transmission (cont'd)
 Tergrid, God of Fright // Tergrid's Lantern
 Thaumatic Compass // Spires of Orazca
 The Dragon-Kami Reborn // Dragon-Kami's Egg
@@ -665,6 +806,7 @@ Ulvenwald Oddity // Ulvenwald Behemoth
 Umara Wizard // Umara Skyfalls
 Underdark Basilisk // Basilisk
 Uninvited Geist // Unimpeded Trespasser
+Urabrask // The Great Work
 Urza's Blueprints (minigame) // Urza's Blueprints (cont'd)
 Uvilda, Dean of Perfection // Nassari, Dean of Expression
 Valakut Awakening // Valakut Stoneforge
@@ -685,6 +827,7 @@ Volatile Arsonist // Dire-Strain Anarchist
 Voldaren Bloodcaster // Bloodbat Summoner
 Voldaren Pariah // Abolisher of Bloodlines
 Voltaic Visionary // Volt-Charged Berserker
+Vorinclex // The Grand Evolution
 Wandering Archaic // Explore the Vastlands
 Weary Prisoner // Wrathful Jailbreaker
 Weaver of Blossoms // Blossom-Clad Werewolf
