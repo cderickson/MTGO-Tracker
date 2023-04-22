@@ -575,6 +575,8 @@ def game_actions(init,time):
         # Player joined game header.
         if count == 0:
             count += 1
+        elif i.find("This is a @iMultiplayer Commander@i game.") != -1:
+            return 'Multiplayer Game Found.'
         elif i.find(" has lost connection to the game") != -1:
             lost_conn = True
         elif i.find(" joined the game.") != -1:
@@ -1118,6 +1120,8 @@ def get_all_data(init,mtime):
     # Output: List[Matches,Games,Plays]
     
     gameactions = game_actions(init,mtime)
+    if isinstance(gameactions, str):
+        return gameactions
     gamedata = game_data(gameactions)
     if isinstance(gamedata, str):
         return gamedata
