@@ -929,12 +929,17 @@ def play_data(ga):
     def get_cards(play):
         cards = []
         count = play.count("@[")
+        if play.count("@]") < count:
+            count = play.count("@]")
         while count > 0:
-            play = play.split("@[",1)
-            play = play[1].split("@]",1)
-            cards.append(play[0])
-            play = play[1]
-            count -= 1  
+            try:
+                play = play.split("@[",1)
+                play = play[1].split("@]",1)
+                cards.append(play[0])
+                play = play[1]
+            except IndexError:
+                pass
+            count -= 1
         return cards
 
     PLAY_DATA = []
