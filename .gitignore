@@ -4,6 +4,9 @@ __pycache__/
 mtg-goldfish-lists.py
 exe_command.txt
 build_mtgo_tracker.bat
+_ALL_DECKS
+_INPUT_OPTIONS.txt
+_MULTIFACED_CARDS.txt
 
 # AUXILIARY FILES
 lists/
