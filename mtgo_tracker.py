@@ -15,6 +15,7 @@ import datetime
 import itertools
 import pickle
 import shutil
+import requests
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 pd.options.mode.chained_assignment = None
 
@@ -38,6 +39,7 @@ FILEPATH_LOGS_COPY =     ""
 FILEPATH_DRAFTS =        ""
 FILEPATH_DRAFTS_COPY =   ""
 HERO =                   ""
+LAST_UPDATED =           "Never"
 INPUT_OPTIONS =          {}
 MULTIFACED_CARDS =       {}
 MAIN_WINDOW_SIZE =  ("small",1000,490)
@@ -57,7 +59,7 @@ selected =          ()
 display_index =     0
 ln_per_page =       20
 curr_data =         pd.DataFrame()
-debug_str =         'Version 12\n\n'
+debug_str =         'Version 13\n\n'
 
 def save(exit):
     global ask_to_save
@@ -430,6 +432,7 @@ def startup():
     global FILEPATH_DRAFTS
     global FILEPATH_DRAFTS_COPY
     global HERO
+    global LAST_UPDATED
     global ALL_DATA
     global ALL_DATA_INVERTED
     global ALL_DECKS
@@ -511,10 +514,12 @@ def startup():
     
     for file in os.listdir(os.getcwd()):
         if file.startswith('ALL_DECKS'):
-            ALL_DECKS = pickle.load(open(file,"rb"))
-            all_decks_loaded = True
-            debug_str += 'Loaded ALL_DECKS file from root folder.\n'
-
+            try:
+                ALL_DECKS = pickle.load(open(file,"rb"))
+                all_decks_loaded = True
+                debug_str += 'Loaded ALL_DECKS file from root folder.\n'
+            except pickle.UnpicklingError:
+                debug_str += 'UnpicklingError when reading from ALL_DECKS file.\n'
     os.chdir(FILEPATH_ROOT + "\\" + "save")
 
     if all_decks_loaded == False:
@@ -532,6 +537,7 @@ def startup():
         FILEPATH_DRAFTS =      SETTINGS[4]
         #FILEPATH_DRAFTS_COPY = SETTINGS[5]
         HERO =                 SETTINGS[6]
+        LAST_UPDATED =         SETTINGS[7]
         debug_str += 'Loaded SETTINGS file from save folder.\n'
 
     if (os.path.isfile("ALL_DATA") == False) & (os.path.isfile("DRAFTS_TABLE") == False):
@@ -572,7 +578,7 @@ def startup():
     os.chdir(FILEPATH_ROOT)
 def save_settings():
     os.chdir(FILEPATH_ROOT + "\\" + "save")
-    SETTINGS = [FILEPATH_ROOT,FILEPATH_EXPORT,FILEPATH_LOGS,FILEPATH_LOGS_COPY,FILEPATH_DRAFTS,FILEPATH_DRAFTS_COPY,HERO]
+    SETTINGS = [FILEPATH_ROOT,FILEPATH_EXPORT,FILEPATH_LOGS,FILEPATH_LOGS_COPY,FILEPATH_DRAFTS,FILEPATH_DRAFTS_COPY,HERO,LAST_UPDATED]
     pickle.dump(SETTINGS,open("SETTINGS","wb"))
     pickle.dump(MAIN_WINDOW_SIZE,open("MAIN_WINDOW_SIZE","wb"))
     os.chdir(FILEPATH_ROOT)
@@ -5396,6 +5402,90 @@ def associated_draftid_window(list_to_process,index,total):
 
     subwindow.protocol("WM_DELETE_WINDOW", lambda : close_format_window("Exit"))
     subwindow.wait_window()
+def update_auxiliary():
+    height = 100
+    width =  350
+    update_window = tk.Toplevel(window)
+    update_window.title("Set Default Hero")
+    update_window.iconbitmap(update_window,"icon.ico")
+    update_window.minsize(width,height)
+    update_window.resizable(False,False)
+    update_window.grab_set()
+    update_window.focus()
+    update_window.geometry("+%d+%d" % 
+        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
+        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
+
+    url_mfc = 'https://raw.githubusercontent.com/cderickson/MTGO-Tracker/main/MULTIFACED_CARDS.txt'
+    url_decks = 'https://github.com/cderickson/MTGO-Tracker/blob/main/ALL_DECKS_2023-03?raw=true'
+    url_input = 'https://raw.githubusercontent.com/cderickson/MTGO-Tracker/main/INPUT_OPTIONS.txt'
+
+    def download_update():
+        global LAST_UPDATED
+        global debug_str
+        error = False
+
+        try:
+            with requests.get(url_mfc) as r:
+                with open('new_MULTIFACED_CARDS.txt', 'wb') as f:
+                    f.write(r.content)
+
+            with requests.get(url_decks) as r:
+                with open('new_ALL_DECKS', 'wb') as f:
+                    f.write(r.content)
+
+            with requests.get(url_input) as r:
+                with open('new_INPUT_OPTIONS.txt', 'wb') as f:
+                    f.write(r.content)
+            
+            LAST_UPDATED = str(datetime.datetime.now().strftime("%Y-%m-%d"))
+            label2['text'] = f'Last Updated: {LAST_UPDATED}'
+            button1['state'] = tk.DISABLED
+            save_settings()
+        except requests.ConnectionError:
+            label2['text'] = f'Connection Failed.'
+            error = True
+        if error == False:
+            for file in os.listdir(os.getcwd()):
+                if (file.startswith('_ALL_DECKS')) or (file.startswith('_MULTIFACED_CARDS')) or (file.startswith('_INPUT_OPTIONS')):
+                    os.remove(file)
+                    debug_str += 'Deleted a file while updating auxiliary files.\n'
+            for file in os.listdir(os.getcwd()):
+                if (file.startswith('ALL_DECKS')) or (file.startswith('MULTIFACED_CARDS')) or (file.startswith('INPUT_OPTIONS')):
+                    os.rename(file, f'_{file}')
+                    debug_str += 'Renamed a file while updating auxiliary files.\n'
+            for file in os.listdir(os.getcwd()):
+                if (file.startswith('new_ALL_DECKS')) or (file.startswith('new_MULTIFACED_CARDS')) or (file.startswith('new_INPUT_OPTIONS')):
+                    os.rename(file, file[4:])
+
+    def close_update_window():
+        update_window.grab_release()
+        update_window.destroy()
+
+    mid_frame = tk.LabelFrame(update_window,text="")
+    bot_frame = tk.Frame(update_window)
+
+    mid_frame.grid(row=1,column=0,sticky="nsew")
+    bot_frame.grid(row=2,column=0,sticky="")
+
+    update_window.grid_columnconfigure(0,weight=1)
+    update_window.rowconfigure(1,minsize=0,weight=1)  
+    mid_frame.grid_columnconfigure(0,weight=1)
+    mid_frame.grid_rowconfigure(0,weight=1)
+    mid_frame.grid_rowconfigure(1,weight=1)
+
+    label1 = tk.Label(mid_frame,text='This will download updated versions of:\n\nMULTIFACED_CARDS.txt\nALL_DECKS\nINPUT_OPTIONS.txt\n\nThese files are required for some functions to work correctly.\n',wraplength=width,justify="left")
+    label2 = tk.Label(mid_frame,text=f'Last Updated: {LAST_UPDATED}',wraplength=width,justify="center")
+    button1 = tk.Button(bot_frame,text="Update",width=10,command=lambda : download_update())
+    button2 = tk.Button(bot_frame,text="Close",width=10,command=lambda : close_update_window())
+
+    label1.grid(row=0,column=0,padx=15,pady=(15,0))       
+    label2.grid(row=1,column=0,padx=15,pady=(0,15))
+    button1.grid(row=2,column=0,padx=5,pady=5)
+    button2.grid(row=2,column=1,padx=5,pady=5)
+
+    update_window.protocol("WM_DELETE_WINDOW", lambda : close_update_window())
+
 def debug():
     os.chdir(FILEPATH_ROOT)
     with open("DEBUG.txt","w",encoding="utf-8") as txt:
@@ -5408,6 +5498,7 @@ def debug():
         txt.write(f"FILEPATH_DRAFTS: {FILEPATH_DRAFTS}\n")
         txt.write(f"FILEPATH_DRAFTS_COPY: {FILEPATH_DRAFTS_COPY}\n")
         txt.write(f"HERO: {HERO}\n")
+        txt.write(f"LAST_UPDATED: {LAST_UPDATED}\n")
         txt.write(f"MAIN_WINDOW_SIZE: {MAIN_WINDOW_SIZE}\n")
         txt.write("\n")
 
@@ -5451,10 +5542,7 @@ def debug():
         txt.write(f"Raw (Inverse): {str(len(ALL_DATA_INVERTED[3]))}\n")
         txt.write("\n")
 
-        txt.write("ALL_DECKS:\n")
-        txt.write(f"{list(ALL_DECKS.keys())[0]} to {list(ALL_DECKS.keys())[-1]}\n")
-        for i in ALL_DECKS:
-            txt.write(f"{i}: {str(len(ALL_DECKS[i]))}\n")
+        txt.write(f"ALL_DECKS: {len(ALL_DECKS)}\n")
         txt.write("\n")
 
         txt.write("Other Variables:\n")
@@ -5588,6 +5676,8 @@ data_menu.add_command(label="Apply Associated Draft_IDs to Limited Matches",comm
 data_menu.add_separator()
 data_menu.add_command(label="Set Default Hero",command=lambda : set_default_hero(),state=tk.DISABLED)
 data_menu.add_command(label="Set Default Import Folders",command=lambda : set_default_import())
+data_menu.add_separator()
+data_menu.add_command(label="Update Auxiliary Files",command=lambda : update_auxiliary())
 data_menu.add_separator()
 data_menu.add_command(label="Clear Loaded Data",command=lambda : clear_window(),state=tk.DISABLED)
 data_menu.add_command(label="Delete Saved Session",command=lambda : delete_session())
