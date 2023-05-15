@@ -5417,10 +5417,11 @@ def update_auxiliary():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     url_mfc = 'https://raw.githubusercontent.com/cderickson/MTGO-Tracker/main/MULTIFACED_CARDS.txt'
-    url_decks = 'https://github.com/cderickson/MTGO-Tracker/blob/main/ALL_DECKS_2023-03?raw=true'
+    url_decks = 'https://github.com/cderickson/MTGO-Tracker/blob/main/ALL_DECKS?raw=true'
     url_input = 'https://raw.githubusercontent.com/cderickson/MTGO-Tracker/main/INPUT_OPTIONS.txt'
 
     def download_update():
+        global ALL_DECKS
         global LAST_UPDATED
         global debug_str
         error = False
@@ -5457,6 +5458,59 @@ def update_auxiliary():
             for file in os.listdir(os.getcwd()):
                 if (file.startswith('new_ALL_DECKS')) or (file.startswith('new_MULTIFACED_CARDS')) or (file.startswith('new_INPUT_OPTIONS')):
                     os.rename(file, file[4:])
+            
+            if os.path.isfile("MULTIFACED_CARDS.txt"):
+                with io.open("MULTIFACED_CARDS.txt","r",encoding="ansi") as file:
+                    initial = file.read().split("\n")
+                    for i in initial:
+                        if i.isupper():
+                            MULTIFACED_CARDS[i] = {}
+                            last = i
+                        if ' // ' in i:
+                            MULTIFACED_CARDS[last][i.split(' // ')[0]] = i.split(' // ')[1]
+                debug_str += 'Loaded MULTIFACED_CARDS from file.\n'
+
+            if os.path.isfile("INPUT_OPTIONS.txt"):
+                in_header = False
+                in_instr = True
+                x = ""
+                y = []
+                with io.open("INPUT_OPTIONS.txt","r",encoding="ansi") as file:
+                    initial = file.read().split("\n")
+                    for i in initial:
+                        if i == "-----------------------------":
+                            if in_instr:
+                                in_instr = False
+                            in_header = not in_header
+                            if in_header == False:
+                                x = last.split(":")[0].split("# ")[1]
+                            elif x != "":
+                                INPUT_OPTIONS[x] = y
+                                y = []                        
+                        elif (in_header == False) and (i != "") and (in_instr == False):
+                            y.append(i)
+                        last = i
+                debug_str += 'Loaded INPUT_OPTIONS from file.\n'
+            else:
+                INPUT_OPTIONS["Constructed Match Types"] = modo.match_types(con=True)
+                INPUT_OPTIONS["Booster Draft Match Types"] = modo.match_types(booster=True)
+                INPUT_OPTIONS["Sealed Match Types"] = modo.match_types(sealed=True)
+                INPUT_OPTIONS["Archetypes"] = modo.archetypes()
+                INPUT_OPTIONS["Constructed Formats"] = modo.formats(con=True)
+                INPUT_OPTIONS["Limited Formats"] = modo.formats(lim=True)
+                INPUT_OPTIONS["Cube Formats"] = modo.formats(cube=True)
+                INPUT_OPTIONS["Booster Draft Formats"] = modo.formats(booster=True)
+                INPUT_OPTIONS["Sealed Formats"] = modo.formats(sealed=True)
+                debug_str += 'Loaded INPUT_OPTIONS from modo.py.\n'
+            
+            for file in os.listdir(os.getcwd()):
+                if file.startswith('ALL_DECKS'):
+                    try:
+                        ALL_DECKS = pickle.load(open(file,"rb"))
+                        all_decks_loaded = True
+                        debug_str += 'Loaded ALL_DECKS file from root folder.\n'
+                    except pickle.UnpicklingError:
+                        debug_str += 'UnpicklingError when reading from ALL_DECKS file.\n'
 
     def close_update_window():
         update_window.grab_release()
