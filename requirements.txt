@@ -1,5 +1,5 @@
-matplotlib==3.5.1
-numpy==1.23.5
-pandas==1.4.0
-Requests==2.30.0
+matplotlib==3.7.1
+numpy==1.24.3
+pandas==2.0.1
+Requests==2.31.0
 tkcalendar==1.6.1
