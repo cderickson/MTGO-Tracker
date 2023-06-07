@@ -59,7 +59,7 @@ selected =          ()
 display_index =     0
 ln_per_page =       20
 curr_data =         pd.DataFrame()
-debug_str =         'Version 13\n\n'
+debug_str =         'Version 14\n\n'
 
 def save(exit):
     global ask_to_save
@@ -682,7 +682,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
                         parsed_data = modo.get_all_data(initial,mtime)
                         debug_str += f'Parsed GameLog: {i}\n'
                     except Exception as error:
-                        debug_str += f'Error while parsing GameLog: {i}: {error.message}\n'
+                        debug_str += f'Error while parsing GameLog: {i}: {str(error)}\n'
                         error_count += 1
                         continue
                     if parsed_data[0][0] in SKIP_FILES:
@@ -3722,9 +3722,9 @@ def get_stats():
                 opp_mull_rate = 0.0
                 turn_rate =     0.0
             else:
-                hero_mull_rate =round((i.P1_Mulls.sum()/total_n),2)
-                opp_mull_rate = round((i.P2_Mulls.sum()/total_n),2)
-                turn_rate =     round((i.Turns.sum()/total_n),2)     
+                hero_mull_rate =round((pd.to_numeric(i.P1_Mulls, errors='coerce').sum()/total_n),2)
+                opp_mull_rate = round((pd.to_numeric(i.P2_Mulls, errors='coerce').sum()/total_n),2)
+                turn_rate =     round((pd.to_numeric(i.Turns, errors='coerce').sum()/total_n),2)     
             tree1data.append([wins,
                               losses,
                               win_rate,
@@ -3751,9 +3751,9 @@ def get_stats():
                     opp_mull_rate = 0.0
                     turn_rate =     0.0
                 else:
-                    hero_mull_rate =round((i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck)].P1_Mulls.sum()/total_n),2)
-                    opp_mull_rate = round((i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck)].P2_Mulls.sum()/total_n),2)
-                    turn_rate =     round((i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck)].Turns.sum()/total_n),2)     
+                    hero_mull_rate =round((pd.to_numeric(i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck)].P1_Mulls, errors='coerce').sum()/total_n),2)
+                    opp_mull_rate = round((pd.to_numeric(i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck)].P2_Mulls, errors='coerce').sum()/total_n),2)
+                    turn_rate =     round((pd.to_numeric(i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck)].Turns, errors='coerce').sum()/total_n),2)     
                 tree2data.append([wins,
                                   losses,
                                   win_rate,
@@ -3780,9 +3780,9 @@ def get_stats():
                     opp_mull_rate = 0.0
                     turn_rate =     0.0
                 else:
-                    hero_mull_rate =round((i[(i.P1_Subarch == deck)].P1_Mulls.sum()/total_n),2)
-                    opp_mull_rate = round((i[(i.P1_Subarch == deck)].P2_Mulls.sum()/total_n),2)
-                    turn_rate =     round((i[(i.P1_Subarch == deck)].Turns.sum()/total_n),2)     
+                    hero_mull_rate =round((pd.to_numeric(i[(i.P1_Subarch == deck)].P1_Mulls, errors='coerce').sum()/total_n),2)
+                    opp_mull_rate = round((pd.to_numeric(i[(i.P1_Subarch == deck)].P2_Mulls, errors='coerce').sum()/total_n),2)
+                    turn_rate =     round((pd.to_numeric(i[(i.P1_Subarch == deck)].Turns, errors='coerce').sum()/total_n),2)     
                 tree3data.append([wins,
                                   losses,
                                   win_rate,
@@ -3809,9 +3809,9 @@ def get_stats():
                     opp_mull_rate = 0.0
                     turn_rate =     0.0
                 else:
-                    hero_mull_rate =round((i[(i.P2_Subarch == opp_deck)].P1_Mulls.sum()/total_n),2)
-                    opp_mull_rate = round((i[(i.P2_Subarch == opp_deck)].P2_Mulls.sum()/total_n),2)
-                    turn_rate =     round((i[(i.P2_Subarch == opp_deck)].Turns.sum()/total_n),2)     
+                    hero_mull_rate =round((pd.to_numeric(i[(i.P2_Subarch == opp_deck)].P1_Mulls, errors='coerce').sum()/total_n),2)
+                    opp_mull_rate = round((pd.to_numeric(i[(i.P2_Subarch == opp_deck)].P2_Mulls, errors='coerce').sum()/total_n),2)
+                    turn_rate =     round((pd.to_numeric(i[(i.P2_Subarch == opp_deck)].Turns, errors='coerce').sum()/total_n),2)     
                 tree4data.append([wins,
                                   losses,
                                   win_rate,
@@ -5556,13 +5556,13 @@ def debug():
         txt.write(f"MAIN_WINDOW_SIZE: {MAIN_WINDOW_SIZE}\n")
         txt.write("\n")
 
-        txt.write("INPUT_OPTIONS:\n")
-        for i in INPUT_OPTIONS:
-            txt.write(f'{i}:\n')
-            for j in INPUT_OPTIONS[i]:
-                txt.write(f'{j}\n')
-            txt.write('\n')
-        txt.write("\n")
+        # txt.write("INPUT_OPTIONS:\n")
+        # for i in INPUT_OPTIONS:
+        #     txt.write(f'{i}:\n')
+        #     for j in INPUT_OPTIONS[i]:
+        #         txt.write(f'{j}\n')
+        #     txt.write('\n')
+        # txt.write("\n")
 
         txt.write(f"PARSED_FILE_DICT ({str(len(PARSED_FILE_DICT))} files):\n")
         for i in PARSED_FILE_DICT:
