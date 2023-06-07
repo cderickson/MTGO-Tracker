@@ -1,5 +1,6 @@
 # MODO GameLog Cleaning Module
 import copy
+import numpy as np
 
 # To add a column to a database:
 # Add the column to modo.header() function.
@@ -717,7 +718,10 @@ def game_data(ga):
 
     def mulls(cards):
         mull_dict = {"seven":0,"six":1,"five":2,"four":3,"three":4,"two":5,"one":6,"zero":7}
-        return mull_dict[cards]
+        try:
+            return mull_dict[cards]
+        except KeyError:
+            return "NA"
     
     def get_winner(curr_game_list,p1,p2):
         # Look for a concession string.
