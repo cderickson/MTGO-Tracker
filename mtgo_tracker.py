@@ -4536,7 +4536,7 @@ def get_stats():
             canvas2.draw()
             canvas2.get_tk_widget().grid(row=0,column=0,sticky="")
 
-    def card_stats(hero,opp,mformat,lformat,deck,opp_deck,date_range,s_type):
+    def card_stats(hero,opp,mformat,lformat,deck,opp_deck,date_range,s_type,opponents,lands):
         stats_window.title("Statistics - Card Data: " + hero)
         clear_frames()
         def tree_setup(*argv):
@@ -4641,11 +4641,23 @@ def get_stats():
         else:
             wr_post = round((wins_post/n_post)*100,1).item()
 
-        df_merge_pre = df_merge_pre[(df_merge_pre.Casting_Player == hero) & (df_merge_pre.Action.isin(["Plays","Casts"]))]
+        if opponents == True:
+            df_merge_pre = df_merge_pre[(df_merge_pre.Casting_Player != hero)]
+            df_merge_post = df_merge_post[(df_merge_post.Casting_Player != hero)]
+        elif opponents == False:
+            df_merge_pre = df_merge_pre[(df_merge_pre.Casting_Player == hero)]
+            df_merge_post = df_merge_post[(df_merge_post.Casting_Player == hero)]
+
+        if lands == True:
+            df_merge_pre = df_merge_pre[(df_merge_pre.Action.isin(["Land Drop"]))]
+            df_merge_post = df_merge_post[(df_merge_post.Action.isin(["Land Drop"]))]
+        elif lands == False:
+            df_merge_pre = df_merge_pre[(df_merge_pre.Action.isin(["Plays","Casts"]))]
+            df_merge_post = df_merge_post[(df_merge_post.Action.isin(["Plays","Casts"]))]
+
         df_merge_pre.drop(df_merge_pre.columns.difference(["Game_ID","Game_Num","P1_Subarch","P2_Subarch","Primary_Card","Won_Game"]),axis=1,inplace=True)
         df_merge_pre.drop_duplicates(inplace=True)
 
-        df_merge_post = df_merge_post[(df_merge_post.Casting_Player == hero) & (df_merge_post.Action.isin(["Plays","Casts"]))]
         df_merge_post.drop(df_merge_post.columns.difference(["Game_ID","Game_Num","P1_Subarch","P2_Subarch","Primary_Card","Won_Game"]),axis=1,inplace=True)
         df_merge_post.drop_duplicates(inplace=True)
 
@@ -4886,12 +4898,17 @@ def get_stats():
             opp_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())
         elif s_type.get() == "Time Data":
             time_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())
-        elif s_type.get() == "Card Data":
-            card_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())      
+        elif s_type.get() == "Spells - Win Rate":
+            card_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get(),opponents=False,lands=False)
+        elif s_type.get() == "Spells - Win Rate Against":
+            card_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get(),opponents=True,lands=False)
+        elif s_type.get() == "Lands - Win Rate":
+            card_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get(),opponents=False,lands=True)
         
         status_text = "Loaded Data:"+player.get()+","+opponent.get()+","+mformat.get()+","+lim_format.get()+","+deck.get()+","+opp_deck.get()+","+dr[0]+","+dr[1]+","+s_type.get()
         print(status_text)
         debug_str += status_text + '\n'
+
     def close_stats_window():
         window.deiconify()
         stats_window.destroy()
@@ -4906,8 +4923,7 @@ def get_stats():
     limited_options = [""]
     decks_played = [""]
     opp_decks_played = [""]
-    # stat_types = ["Match History","Match Stats","Game Stats","Play Stats","Opponent Stats","Time Data","Card Data"]
-    stat_types = ["Match History","Match Stats","Game Stats","Play Stats","Opponent Stats","Card Data"]
+    stat_types = ["Match History","Match Stats","Game Stats","Play Stats","Opponent Stats","Spells - Win Rate","Spells - Win Rate Against","Lands - Win Rate"]
     
     player = tk.StringVar()
     player.set(HERO)
@@ -4962,7 +4978,7 @@ def get_stats():
     date_entry_1.grid(row=0,column=5,padx=5,pady=10)
     date_entry_2.grid(row=0,column=6,padx=5,pady=10,sticky="w")
     menu_6.grid(row=0,column=7,padx=(5,10),pady=10)
-    menu_6.config(width=15)
+    menu_6.config(width=25)
     
     menu_6.config(bg="black",fg="white",activebackground="black",activeforeground="white")
     menu_6["menu"].config(bg="black",fg="white",borderwidth=0)
