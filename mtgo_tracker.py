@@ -59,7 +59,7 @@ selected =          ()
 display_index =     0
 ln_per_page =       20
 curr_data =         pd.DataFrame()
-debug_str =         'Version 14\n\n'
+debug_str =         'Version 15\n\n'
 
 def save(exit):
     global ask_to_save
@@ -199,13 +199,15 @@ def set_default_window_size():
     button_close.grid(row=0,column=1,padx=5,pady=5)
     
     popup.protocol("WM_DELETE_WINDOW", lambda : close_window())
-def clear_loaded():
+def clear_loaded(importingCopies):
     global ALL_DATA
     global ALL_DATA_INVERTED
     global DRAFTS_TABLE
     global PICKS_TABLE
     global PARSED_FILE_DICT
     global PARSED_DRAFT_DICT
+    global SKIP_FILES
+    global SKIP_DRAFTS
     global HERO
     global filter_dict
     global display
@@ -231,6 +233,10 @@ def clear_loaded():
     filter_changed =    False
     new_import =        False
     ask_to_save =       False
+
+    if importingCopies == False:
+        SKIP_FILES =        []
+        SKIP_DRAFTS =       []
 
     match_button["state"] = tk.DISABLED
     game_button["state"] = tk.DISABLED
@@ -273,7 +279,7 @@ def clear_window():
         window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     def clear():
-        clear_loaded()
+        clear_loaded(importingCopies=False)
         update_status_bar(status="Previously loaded data has been cleared.")
         close_clear_window()
 
@@ -376,18 +382,6 @@ def delete_session():
             if os.path.exists(i):
                 session_exists = True
                 os.remove(i)
-
-        # os.chdir(FILEPATH_LOGS_COPY)
-        # for (root,dirs,files) in os.walk(os.getcwd()):
-        #     for i in files:
-        #         os.remove(i)
-        
-        # os.chdir(FILEPATH_DRAFTS_COPY)
-        # for (root,dirs,files) in os.walk(os.getcwd()):
-        #     for i in files:
-        #         os.remove(i) 
-
-        # clear_loaded()
 
         if session_exists == True:
             update_status_bar(status="Saved session data has been deleted.")
@@ -756,8 +750,12 @@ def get_all_data(fp_logs,fp_drafts,copy):
         status_text = f"Imported {str(match_count)} new Matches and {str(draft_count)} new Draft."
     else:
         status_text = f"Imported {str(match_count)} new Matches and {str(draft_count)} new Drafts."
-    if error_count > 0:
-        status_text += f' Skipped {error_count} files due to error. See DEBUG.txt for details.'
+    status_text += f' Skipped {error_count} files (error). Skipped {len(skip_dict)} files (possible error).'
+
+    if len(skip_dict) > 0:
+        debug_str += "\nFiles skipped due to possible errors:\n"
+        for i in skip_dict:
+            debug_str += f"{i}: {skip_dict[i]}\n"
     update_status_bar(status=status_text)
 
     if (match_count > 0) or (draft_count > 0):
@@ -2898,7 +2896,7 @@ def import_window():
             h = HERO
             match_dict = user_inputs(type="Matches")
             game_dict = user_inputs(type="Games")
-            clear_loaded()
+            clear_loaded(importingCopies=True)
             get_all_data(fp_logs=FILEPATH_LOGS_COPY,fp_drafts=FILEPATH_DRAFTS_COPY,copy=False)
             for i in ALL_DATA[0]:
                 try:
@@ -4613,7 +4611,7 @@ def get_stats():
                             how="inner",
                             left_on=["Match_ID","P1","P2"],
                             right_on=["Match_ID","P1","P2"])
-        df_merge = df_merge[(df_merge.Game_Winner != "NA") & (df_merge.Date > date_range[0]) & (df_merge.Date < date_range[1])]
+        df_merge = df_merge[(df_merge.Game_Winner != "NA") & (df_merge.Date > date_range[0]) & (df_merge.Date < date_range[1]) & (df_merge.Primary_Card != "NA")]
         if mformat != "All Formats":
             df_merge = df_merge[(df_merge.Format == mformat)]
         if lformat != "All Limited Formats":
@@ -5539,6 +5537,19 @@ def update_auxiliary():
     button2.grid(row=2,column=1,padx=5,pady=5)
 
     update_window.protocol("WM_DELETE_WINDOW", lambda : close_update_window())
+def clear_skipped_files():
+    global SKIP_FILES
+    global SKIP_DRAFTS
+    global ask_to_save
+
+    file_count = len(SKIP_FILES)
+    draft_count = len(SKIP_DRAFTS)
+
+    SKIP_FILES = []
+    SKIP_DRAFTS = []
+    ask_to_save = True
+
+    update_status_bar(status=f"Made all ignored files scannable ({file_count} GameLogs and {draft_count} DraftLogs).")
 
 def debug():
     os.chdir(FILEPATH_ROOT)
@@ -5733,6 +5744,7 @@ data_menu.add_command(label="Set Default Import Folders",command=lambda : set_de
 data_menu.add_separator()
 data_menu.add_command(label="Update Auxiliary Files",command=lambda : update_auxiliary())
 data_menu.add_separator()
+data_menu.add_command(label="Make Ignored Records Scannable",command=lambda : clear_skipped_files())
 data_menu.add_command(label="Clear Loaded Data",command=lambda : clear_window(),state=tk.DISABLED)
 data_menu.add_command(label="Delete Saved Session",command=lambda : delete_session())
 
