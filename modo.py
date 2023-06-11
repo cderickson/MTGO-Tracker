@@ -665,9 +665,6 @@ def match_data(ga,gd,pd):
     MATCH_ID =      f"{ga[0]}_{P1}_{P2}"
     DRAFT_ID =      "NA"
 
-    player_count =  len(players(ga))
-    prev_string =   ""
-
     if P1_ROLL > P2_ROLL:
         ROLL_WINNER = "P1"
     else:
@@ -711,6 +708,8 @@ def match_data(ga,gd,pd):
                        LIM_FORMAT,
                        MATCH_TYPE,
                        DATE))
+    if len(MATCH_DATA) != len(header("Matches")):
+        return "Match Header is Wrong Size."
     return MATCH_DATA
 def game_data(ga):
     # Input:  List[GameActions]
@@ -725,18 +724,32 @@ def game_data(ga):
     
     def get_winner(curr_game_list,p1,p2):
         # Look for a concession string.
+        # Add more lose conditions here.
         for index,i in enumerate(curr_game_list):
             if i.find("has conceded") != -1:
                 if i.split()[0] == p1:
                     return "P2"
                 elif i.split()[0] == p2:
                     return "P1"
+            elif i.find("has lost the game") != -1:
+                if i.split()[0] == p1:
+                    return "P2"
+                elif i.split()[0] == p2:
+                    return "P1"
+            elif i.find("loses because of drawing a card") != -1:
+                if i.split()[0] == p1:
+                    return "P2"
+                elif i.split()[0] == p2:
+                    return "P1"
+            elif i.find("wins the game") != -1:
+                if i.split()[0] == p1:
+                    return "P1"
+                elif i.split()[0] == p2:
+                    return "P2"
 
         lastline = curr_game_list[-1]
         # Check last GameAction. Add more lose conditions here.
-        if lastline.find("is being attacked") != -1 or \
-           lastline.find("has lost the game") != -1 or \
-           lastline.find("loses because of drawing a card") != -1:
+        if lastline.find("is being attacked") != -1:
             if lastline.split()[0] == p1:
                 return "P2"
             elif lastline.split()[0] == p2:
@@ -772,17 +785,15 @@ def game_data(ga):
     except IndexError:
         return "Players not Found."
     curr_game_list =[]
-    player_count =  len(players(ga))
-    prev_string =   ""
     curr_list =     []
     MATCH_ID = f"{ga[0]}_{P1}_{P2}"
 
     for i in ga:
         curr_list = i.split()
         if i.find("joined the game") != -1:
-            if player_count == 0:
-                # New Game
-                player_count = len(players(ga)) - 1
+            continue
+        elif (i.find("chooses to play first") != -1) or (i.find("chooses to not play first") != -1):
+            if GAME_NUM != 0:
                 GAME_WINNER = get_winner(curr_game_list,P1,P2)
                 if GAME_WINNER == "NA":
                     ALL_GAMES_GA[f"{MATCH_ID}-{GAME_NUM}"] = curr_game_list
@@ -815,9 +826,6 @@ def game_data(ga):
                                GAME_WINNER))
                     GAME_DATA.append(G2)
                 curr_game_list = []
-            else:
-                player_count -= 1
-        elif (i.find("chooses to play first") != -1) or (i.find("chooses to not play first") != -1):
             GAME_NUM += 1
             if curr_list[0] == P1:
                 PD_SELECTOR = "P1"
@@ -894,6 +902,14 @@ def game_data(ga):
                    TURNS,
                    GAME_WINNER))
         GAME_DATA.append(G3)
+    if len(G1) != len(header("Games")) and (len(G1) != 0):
+        return "Game 1 Header is Wrong Size."
+    elif len(G2) != len(header("Games")) and (len(G2) != 0):
+        return "Game 2 Header is Wrong Size."
+    elif (len(G3) != len(header("Games"))) and (len(G3) != 0):
+        return "Game 3 Header is Wrong Size."
+    if len(GAME_DATA) == 0:
+        return "Match has no Games"
     return (GAME_DATA,ALL_GAMES_GA)
 def play_data(ga):
     # Input:  List[GameActions]
@@ -1117,7 +1133,11 @@ def play_data(ga):
                               ATTACKERS,
                               alter(ACTIVE_PLAYER,original=True),
                               alter(NON_ACTIVE_PLAYER,original=True)))
+            if len(PLAY_DATA) != len(header("Plays")):
+                return "Play Header is Wrong Size."
             ALL_PLAYS.append(PLAY_DATA)
+    if len(ALL_PLAYS) == 0:
+        return "Match has no Plays."
     return ALL_PLAYS
 def get_all_data(init,mtime):
     # Input:  String,String
@@ -1130,6 +1150,8 @@ def get_all_data(init,mtime):
     if isinstance(gamedata, str):
         return gamedata
     playdata = play_data(gameactions)
+    if isinstance(playdata, str):
+        return playdata
     matchdata = match_data(gameactions,gamedata[0],playdata)
     if isinstance(matchdata, str):
         return matchdata
