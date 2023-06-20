@@ -32,7 +32,7 @@ This will make an individualized dataset more readable. The statistics window wi
 <br><br>
 
 ## Complete your dataset
-Use the **Data Cleaning** methods described in the Wiki to fill in information for attributes such as Deck Archetype, Deck Name, Match Format, and more. Records can also be revised manually.
+Use the **Data Cleaning** methods described in the <b><a href=https://github.com/cderickson/MTGO-Tracker/wiki>Wiki</a></b> to fill in information for attributes such as Deck Archetype, Deck Name, Match Format, and more. Records can also be revised manually.
 <br><br>
 
 ## Continue importing data as you play more matches on MTGO!
