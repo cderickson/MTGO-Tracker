@@ -770,7 +770,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
 def print_data(data,headers,update_status,start_index,apply_filter):
     global new_import
     global curr_data
-
+    print(len(ALL_DATA[3]))
     small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num","Pack_Num","Pick_Num","Pick_Ovr"]
     med_headers = ["Avail_1","Avail_2","Avail_3","Avail_4","Avail_5","Avail_6","Avail_7","Avail_8","Avail_9","Avail_10","Avail_11","Avail_12","Avail_13","Avail_14"]
     large_headers = ["Card"]
@@ -818,7 +818,6 @@ def print_data(data,headers,update_status,start_index,apply_filter):
         # Apply existing filters.
         filtered_list = []
         for key in filter_dict:
-            print(key)
             if key not in headers:
                 continue
             for i in filter_dict[key]:
@@ -2915,14 +2914,15 @@ def import_window():
                 key = i[0] + "-" + str(i[modo.header("Games").index("Game_Num")])
                 try:
                     if (i[modo.header("Games").index("P1")] == game_dict[key][0]):
-                        i[modo.header("Games").index("Game_Winner")] = game_dict[key][2]
+                        if (game_dict[key][2]) != "NA":
+                            i[modo.header("Games").index("Game_Winner")] = game_dict[key][2]
                 # Found new Game for which we don't have user inputs.
                 except KeyError:
                     pass
                 # Delete RawData for Games that have a manually entered Game_Winner.
-                if key in ALL_DATA[3]:
-                    if i[modo.header("Games").index("Game_Winner")] != "NA":
-                        ALL_DATA[3].pop(key)
+                # if key in ALL_DATA[3]:
+                #     if i[modo.header("Games").index("Game_Winner")] != "NA":
+                #         ALL_DATA[3].pop(key)
             HERO = h
             if HERO != "":
                 stats_button["state"] = tk.NORMAL
