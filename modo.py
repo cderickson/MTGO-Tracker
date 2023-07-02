@@ -795,8 +795,7 @@ def game_data(ga):
         elif (i.find("chooses to play first") != -1) or (i.find("chooses to not play first") != -1):
             if GAME_NUM != 0:
                 GAME_WINNER = get_winner(curr_game_list,P1,P2)
-                if GAME_WINNER == "NA":
-                    ALL_GAMES_GA[f"{MATCH_ID}-{GAME_NUM}"] = curr_game_list
+                ALL_GAMES_GA[f"{MATCH_ID}-{GAME_NUM}"] = curr_game_list
                 if GAME_NUM == 1:
                     G1.extend((MATCH_ID,
                                alter(P1,original=True),
@@ -858,8 +857,7 @@ def game_data(ga):
             TURNS = int(curr_list[1].split(":")[0])
         curr_game_list.append(i)
     GAME_WINNER = get_winner(curr_game_list,P1,P2)
-    if GAME_WINNER == "NA":
-        ALL_GAMES_GA[f"{MATCH_ID}-{GAME_NUM}"] = curr_game_list
+    ALL_GAMES_GA[f"{MATCH_ID}-{GAME_NUM}"] = curr_game_list
     if (GAME_NUM == 1) and (len(G1) == 0):
         G1.extend((MATCH_ID,
                    alter(P1,original=True),
