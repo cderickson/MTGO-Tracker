@@ -712,6 +712,9 @@ def get_all_data(fp_logs,fp_drafts,copy):
         for i in files:
             if (i.count(".") != 3) or (i.count("-") != 4) or (".txt" not in i):
                 pass
+            if (len(i.split('-')[1]) != 4) or (len(i.split('-')[2]) != 4):
+                pass
+
             elif (i in PARSED_DRAFT_DICT):
                 os.chdir(root)
             else:
