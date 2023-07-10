@@ -32,7 +32,7 @@ This will make an individualized dataset more readable. The statistics window wi
 <br><br>
 
 ## Complete your dataset
-Use the **<a href=https://github.com/cderickson/MTGO-Tracker/wiki/Data-Cleaning-Methods>Data Cleaning</a>** methods described in the <b><a href=https://github.com/cderickson/MTGO-Tracker/wiki>Wiki</a></b> to fill in information for attributes that did not import automatically. Records can also be revised manually.
+Use the **<a href=https://github.com/cderickson/MTGO-Tracker/wiki/Data-Cleaning-Methods>Data Cleaning</a>** methods described in the <b><a href=https://github.com/cderickson/MTGO-Tracker/wiki>Wiki</a></b> to fill in information for attributes that do not import automatically. Records can also be revised manually.
 <br><br>
 
 ## Continue importing data as you play more matches on MTGO!
