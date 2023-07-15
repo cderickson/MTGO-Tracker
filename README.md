@@ -8,7 +8,7 @@ Five (5) tables are created:
 * Drafts
 * Draft Picks
 
-These tables will help you not only track and analyze your results, but your play patterns as well.
+These tables will help you track your results, evaluate your performance, and analyze your play patterns.
 
 <p align="center">
 <img src="https://github.com/cderickson/MTGO-Tracker/blob/main/readme_img.PNG?raw=true">
