@@ -569,7 +569,11 @@ def game_actions(init,time):
         initial = initial.replace(i,alter(i,original=False))
     initial = initial.split("@P")
 
-    gameactions.append(format_time(time))
+    try:
+        gameactions.append(format_time(time))
+    except:
+        # Time formatted by MTGO-DB Flask App.
+        gameactions.append(time)
     for i in initial:
         fullstring = i.replace(" (Alt.)", "")
         fullstring = fullstring.split(".")[0]
