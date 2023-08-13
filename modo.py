@@ -533,7 +533,7 @@ def parse_draft_log(file,initial):
                 PICK_NUM += 1
                 PICK_OVR += 1
             else:
-                AVAIL_LIST.append(i.split("    ")[1])
+                AVAIL_LIST.append(i.strip())
     while len(PLAYER_LIST) < 7:
         PLAYER_LIST.append("NA")
     DRAFTS_TABLE.append([DRAFT_ID,HERO] + PLAYER_LIST + [0,0,FORMAT,DATE])
