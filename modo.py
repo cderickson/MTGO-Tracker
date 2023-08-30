@@ -526,7 +526,7 @@ def parse_draft_log(file,initial):
                 HERO = i[4:]
                 DRAFT_ID = f"{year}{month}{day}{hour}{minute}_{HERO}_{FORMAT}_{EVENT_ID}"
             else:
-                PLAYER_LIST.append(i[4:])
+                PLAYER_LIST.append(i.strip())
         elif card_bool:
             if i.find("--> ") != -1:
                 CARD = i.split("--> ")[1]
