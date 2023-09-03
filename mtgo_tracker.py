@@ -3476,7 +3476,10 @@ def get_stats():
             formats_played.append(i)
             format_wins.append(mt_wins)
             format_losses.append(mt_losses)
-            format_wr.append(to_percent(mt_wins/(mt_wins+mt_losses),1) + "%")
+            try:
+                format_wr.append(to_percent(mt_wins/(mt_wins+mt_losses),1) + "%")
+            except:
+                format_wr.append("0.0%")
 
         roll_1_mean = round(df0["P1_Roll"].mean(),2)
         roll_2_mean = round(df0["P2_Roll"].mean(),2)
