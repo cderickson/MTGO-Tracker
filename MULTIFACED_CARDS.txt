@@ -98,6 +98,7 @@ A-Dorothea, Vengeful Victim // A-Dorothea's Retribution
 Aetherblade Agent // Gitaxian Mindstinger
 Afflicted Deserter // Werewolf Ransacker
 A-Gutter Skulker // A-Gutter Shortcut
+A-Kumano Faces Kakkazan // A-Etching of Kumano
 A-Lantern Bearer // A-Lanterns' Lift
 Alluring Suitor // Deadly Dancer
 Ambitious Farmhand // Seasoned Cathar
@@ -413,6 +414,7 @@ Afflicted Deserter // Werewolf Ransacker
 Agadeem's Awakening // Agadeem, the Undercrypt
 A-Gutter Skulker // A-Gutter Shortcut
 Akoum Warrior // Akoum Teeth
+A-Kumano Faces Kakkazan // A-Etching of Kumano
 A-Lantern Bearer // A-Lanterns' Lift
 Alluring Suitor // Deadly Dancer
 Alrund, God of the Cosmos // Hakka, Whispering Raven
@@ -920,60 +922,111 @@ Altar of Bhaal // Bone Offering
 Amethyst Dragon // Explosive Crystal
 A-Monster Manual // A-Zoological Study
 Animating Faerie // Bring to Life
+Aquatic Alchemist // Bubble Up
 Ardenvale Tactician // Dizzying Swoop
 A-Young Blue Dragon // A-Sand Augury
 A-Young Red Dragon // A-Bathe in Gold
 Beanstalk Giant // Fertile Footsteps
+Beanstalk Wurm // Plant Beans
+Bellowing Bruiser // Beat a Path
+Beluna Grandsquall // Seek Thrills
+Beluna's Gatekeeper // Entry Denied
+Besotted Knight // Betroth the Beast
 Blessed Hippogriff // Tyr's Blessing
 Bonecrusher Giant // Stomp
+Bramble Familiar // Fetch Quest
 Brazen Borrower // Petty Theft
+Callous Sell-Sword // Burn Together
+Cheeky House-Mouse // Squeak By
 Colossal Badger // Dig Deep
+Conceited Witch // Price of Beauty
+Cruel Somnophage // Can't Wake Up
 Crystal Dragon // Rob the Hoard
 Curious Pair // Treats to Share
+Decadent Dragon // Expensive Taste
+Devouring Sugarmaw // Have for Dinner
 Dread Linnorm // Scale Deflection
+Elusive Otter // Grove's Bounty
 Embereth Shieldbreaker // Battle Display
 Emerald Dragon // Dissonant Wave
 Ettercap // Web Shot
 Fae of Wishes // Granted
 Faerie Guidemother // Gift of the Fae
 Fang Dragon // Forktail Sweep
+Fell Horseman // Deathly Ride
+Ferocious Werefox // Guard Change
 Flaxen Intruder // Welcome Home
 Foulmire Knight // Profane Insight
+Frolicking Familiar // Blow Off Steam
+Galvanic Giant // Storm Reading
 Garenbrig Carver // Shield's Might
 Ghost Lantern // Bind Spirit
 Giant Killer // Chop Down
+Gingerbread Hunter // Puny Snack
+Grabby Giant // That's Mine
 Gray Slaad // Entropic Decay
 Guardian Naga // Banishing Coils
+Gumdrop Poisoner // Tempt with Treats
+Heartflame Duelist // Heartflame Slash
+Hearth Elemental // Stoke Genius
 Hezrou // Demonic Stench
+Hollow Scavenger // Bakery Raid
+Horned Loch-Whale // Lagoon Breach
 Horn of Valhalla // Ysgard's Call
 Hypnotic Sprite // Mesmeric Glare
 Illithid Harvester // Plant Tadpoles
+Imodane's Recruiter // Train Troops
+Intrepid Trufflesnout // Go Hog Wild
+Kellan, the Fae-Blooded // Birthright Boon
 Lonesome Unicorn // Rider in Need
 Lovestruck Beast // Heart's Desire
 Merchant of the Vale // Haggle
 Merfolk Secretkeeper // Venture Deeper
+Minecart Daredevil // Ride the Rails
 Monster Manual // Zoological Study
 Moonshae Pixie // Pixie Dust
+Mosswood Dreadknight // Dread Whispers
 Murderous Rider // Swift End
 Oakhame Ranger // Bring Back
+Obyra's Attendants // Desperate Parry
 Omniclown Colossus // Pie-roclasm
 Order of Midnight // Alter Fate
 Pegasus Guardian // Rescue the Foal
+Picklock Prankster // Free the Fae
+Picnic Ruiner // Stolen Goodies
+Pollen-Shield Hare // Hare Raising
 Queen of Ice // Rage of Winter
+Questing Druid // Seek the Beast
+Ratcatcher Trainee // Pest Problem
 Realm-Cloaked Giant // Cast Off
 Reaper of Night // Harvest Fear
 Rimrock Knight // Boulder Rush
 Rosethorn Acolyte // Seasonal Ritual
 Sapphire Dragon // Psionic Pulse
+Scalding Viper // Steam Clean
 Sea Hag // Aquatic Ingress
 Shepherd of the Flock // Usher to Safety
+Shrouded Shepherd // Cleave Shadows
 Silverflame Squire // On Alert
 Smitten Swordmaster // Curry Favor
+Spellscorn Coven // Take It Back
+Stormkeld Vanguard // Bear Down
 Sword Coast Serpent // Capsizing Wave
+Tempest Hart // Scan the Clouds
+Threadbind Clique // Rip the Seams
 Tlincalli Hunter // Retrieve Prey
 Topaz Dragon // Entropic Cloud
 Tuinvale Treefolk // Oaken Boon
+Twining Twins // Swift Spiral
 Two-Handed Axe // Sweeping Cleave
+Two-Headed Hunter // Twice the Rage
+Vantress Transmuter // Croaking Curse
+Virtue of Courage // Embereth Blaze
+Virtue of Knowledge // Vantress Visions
+Virtue of Loyalty // Ardenvale Fealty
+Virtue of Persistence // Locthwain Scorn
+Virtue of Strength // Garenbrig Growth
+Woodland Acolyte // Mend the Wilds
 Young Blue Dragon // Sand Augury
 Young Red Dragon // Bathe in Gold
 
