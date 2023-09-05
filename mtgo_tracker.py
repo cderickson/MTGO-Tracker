@@ -59,7 +59,7 @@ selected =          ()
 display_index =     0
 ln_per_page =       20
 curr_data =         pd.DataFrame()
-debug_str =         'Version 15\n\n'
+debug_str =         'Version 16\n\n'
 
 def save(exit):
     global ask_to_save
@@ -660,6 +660,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
                 else:
                     os.chdir(root)
                     with io.open(i,"r",encoding="ansi") as gamelog:
+                        fname = i.split('Match_GameLog_')[1].split('.dat')[0]
                         initial = gamelog.read()
                         mtime = time.ctime(os.path.getmtime(i))
                     if copy:
@@ -673,7 +674,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
                             debug_str += f'Same File Error While Copying GameLog: {i}\n'
                             pass
                     try:
-                        parsed_data = modo.get_all_data(initial,mtime)
+                        parsed_data = modo.get_all_data(initial,mtime,fname)
                         debug_str += f'Parsed GameLog: {i}\n'
                     except Exception as error:
                         debug_str += f'Error while parsing GameLog: {i}: {str(error)}\n'
@@ -853,13 +854,17 @@ def print_data(data,headers,update_status,start_index,apply_filter):
             filtered_list.clear()
         # Apply Default Sorting.
         if display == "Matches":
-            df = df.sort_values(by=["Match_ID"],ascending=False)
+            df = df.sort_values(by=["Date"],ascending=False)
         elif display == "Games":
+            df = pd.merge(df, pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))[['Match_ID', 'Date']], on="Match_ID", how="left").drop_duplicates(subset=["Match_ID","Game_Num"])
             df = df.sort_values(by=["Match_ID","Game_Num"],ascending=(False,True))
+            #df = df.drop('Date', axis=1)
         elif display == "Plays":
+            df = pd.merge(df, pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))[['Match_ID', 'Date']], on="Match_ID", how="left").drop_duplicates(subset=["Match_ID","Game_Num","Play_Num"])
             df = df.sort_values(by=["Match_ID","Game_Num","Play_Num"],ascending=(False,True,True))
+            #df = df.drop('Date', axis=1)
         elif display == "Drafts":
-            df = df.sort_values(by=["Draft_ID"],ascending=False)
+            df = df.sort_values(by=["Date"],ascending=False)
         elif display == "Picks":
             df = df.sort_values(by=["Draft_ID","Pick_Ovr"],ascending=(False,True))
         curr_data = df
@@ -2225,10 +2230,10 @@ def revise_record2():
     cards2 =  df[(df.Casting_Player == players[0]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
     cards3 =  df[(df.Casting_Player == players[1]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
     cards4 =  df[(df.Casting_Player == players[1]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
-    cards1 = sorted(cards1,key=str.casefold)
-    cards2 = sorted(cards2,key=str.casefold)
-    cards3 = sorted(cards3,key=str.casefold)
-    cards4 = sorted(cards4,key=str.casefold)
+    cards1 = sorted(modo.clean_card_set(set(cards1),MULTIFACED_CARDS),key=str.casefold)
+    cards2 = sorted(modo.clean_card_set(set(cards2),MULTIFACED_CARDS),key=str.casefold)
+    cards3 = sorted(modo.clean_card_set(set(cards3),MULTIFACED_CARDS),key=str.casefold)
+    cards4 = sorted(modo.clean_card_set(set(cards4),MULTIFACED_CARDS),key=str.casefold)
     revise_entry_window(players,cards1,cards2,cards3,cards4,0,values)
     if (missing_data == "Exit") or (missing_data == "Skip"):
         return
@@ -2899,25 +2904,35 @@ def import_window():
 
         if overwrite == True:
             h = HERO
+            date_index = modo.header("Matches").index("Date")
+            date_dict = {}
             match_dict = user_inputs(type="Matches")
             game_dict = user_inputs(type="Games")
             clear_loaded(importingCopies=True)
             get_all_data(fp_logs=FILEPATH_LOGS_COPY,fp_drafts=FILEPATH_DRAFTS_COPY,copy=False)
             for i in ALL_DATA[0]:
+                if i[date_index] not in date_dict:
+                    date_dict[i[date_index]] = [0,[]]
+                date_dict[i[date_index]][0] += 1
+                date_dict[i[date_index]][1].append(i[0])
                 try:
-                    i[modo.header("Matches").index("Draft_ID")] = match_dict[i[0]][1]
-                    i[modo.header("Matches").index("P1_Arch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P1")]][0]
-                    i[modo.header("Matches").index("P1_Subarch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P1")]][1]
-                    i[modo.header("Matches").index("P2_Arch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P2")]][0]
-                    i[modo.header("Matches").index("P2_Subarch")] = match_dict[i[0]][0][i[modo.header("Matches").index("P2")]][1]
-                    i[modo.header("Matches").index("Format")] = match_dict[i[0]][2]
-                    i[modo.header("Matches").index("Limited_Format")] = match_dict[i[0]][3]
-                    i[modo.header("Matches").index("Match_Type")] = match_dict[i[0]][4]
+                    if match_dict[i[date_index]][0] > 1:
+                        pass
+                    i[modo.header("Matches").index("Draft_ID")] = match_dict[i[date_index]][1][1]
+                    i[modo.header("Matches").index("P1_Arch")] = match_dict[i[date_index]][1][0][i[modo.header("Matches").index("P1")]][0]
+                    i[modo.header("Matches").index("P1_Subarch")] = match_dict[i[date_index]][1][0][i[modo.header("Matches").index("P1")]][1]
+                    i[modo.header("Matches").index("P2_Arch")] = match_dict[i[date_index]][1][0][i[modo.header("Matches").index("P2")]][0]
+                    i[modo.header("Matches").index("P2_Subarch")] = match_dict[i[date_index]][1][0][i[modo.header("Matches").index("P2")]][1]
+                    i[modo.header("Matches").index("Format")] = match_dict[i[date_index]][1][2]
+                    i[modo.header("Matches").index("Limited_Format")] = match_dict[i[date_index]][1][3]
+                    i[modo.header("Matches").index("Match_Type")] = match_dict[i[date_index]][1][4]
                 # Found new Match for which we don't have user inputs.
                 except KeyError:
                     pass
+            df_join = pd.merge(pd.DataFrame(ALL_DATA[1],columns=modo.header("Games")),pd.DataFrame(ALL_DATA[0],columns=modo.header("Matches")),on="Match_ID",how="left")
             for i in ALL_DATA[1]:
-                key = i[0] + "-" + str(i[modo.header("Games").index("Game_Num")])
+                date = df_join.loc[df_join["Match_ID"] == i[0], "Date"].values[0]
+                key = date + "-" + str(i[modo.header("Games").index("Game_Num")])
                 try:
                     if (i[modo.header("Games").index("P1")] == game_dict[key][0]):
                         if (game_dict[key][2]) != "NA":
@@ -3014,8 +3029,8 @@ def get_winners():
     exit = False
     raw_dict_new = {}
     for count,key in enumerate(ALL_DATA[3]):
-        match_id = key.split("-")[0]
-        game_num = key.split("-")[1]
+        match_id = key[:-2]
+        game_num = key[-1]
         if exit == False:
             for i in ALL_DATA[1]:
                 if (i[0] == match_id) & (str(i[gn_index]) == game_num) & (i[gw_index] == "NA"):
@@ -5187,14 +5202,27 @@ def user_inputs(type):
 
     if type == "Matches":
         for i in ALL_DATA[0]:
+            match_id = i[0]
+            if match_id[0:12].isdigit():
+                match_id = match_id[0:4] + '-' + match_id[4:6] + '-' + match_id[6:8] + '-' + match_id[8:10] + ':' + match_id[10:12]
+            if match_id not in match_dict:
+                match_dict[match_id] = [0]
+
             player_dict = {}
             player_dict[i[p1_index]] = [i[p1_arch_index],i[p1_sub_index]]
             player_dict[i[p2_index]] = [i[p2_arch_index],i[p2_sub_index]]
-            match_dict[i[0]] = [player_dict,i[draftid_index],i[format_index],i[lformat_index],i[match_type_index]]
+            match_dict[match_id].append([player_dict,i[draftid_index],i[format_index],i[lformat_index],i[match_type_index]])
+            match_dict[match_id][0] += 1
         return match_dict
     elif type == "Games":
         for i in ALL_DATA[1]:
-            key = f"{i[0]}-{i[gn_index]}"
+            match_id = i[0]
+            if match_id[0:12].isdigit():
+                match_id = match_id[0:4] + '-' + match_id[4:6] + '-' + match_id[6:8] + '-' + match_id[8:10] + ':' + match_id[10:12]
+            key = f"{match_id}-{i[gn_index]}"
+            if key not in game_dict:
+                match_dict[key] = [0]
+
             game_dict[key] = [i[modo.header("Games").index("P1")],i[modo.header("Games").index("P2")],i[gw_index]]
         return game_dict
 def get_associated_draftid(mode):
@@ -5233,8 +5261,8 @@ def get_associated_draftid(mode):
         p2 = df_matches[(df_matches.Match_ID == i)].P2.tolist()[0]
         match_date = df_matches[(df_matches.Match_ID == i)].Date.tolist()[0]
         df = df_plays[(df_plays.Match_ID == i)]
-        cards1 =  set(df[(df.Casting_Player == p1) & (df.Action == "Casts")].Primary_Card.unique())
-        cards2 =  set(df[(df.Casting_Player == p2) & (df.Action == "Casts")].Primary_Card.unique())
+        cards1 = set(df[(df.Casting_Player == p1) & (df.Action == "Casts")].Primary_Card.unique())
+        cards2 = set(df[(df.Casting_Player == p2) & (df.Action == "Casts")].Primary_Card.unique())
         cards1 = modo.clean_card_set(cards1, MULTIFACED_CARDS)
         cards2 = modo.clean_card_set(cards2, MULTIFACED_CARDS)
         cards_dict[p1] = cards1
@@ -5404,10 +5432,10 @@ def associated_draftid_window(list_to_process,index,total):
 
     draft_id = tk.StringVar()
     if (len(list_to_process[4]) == 1):
-        draft_id.set(list_to_process[4][0])
+        draft_id.set(sorted(list_to_process[4][0],reverse=True))
     else:
         draft_id.set("Select from Applicable Draft_IDs")
-    draftid_menu = tk.OptionMenu(bot_frame1,draft_id,*list_to_process[4])
+    draftid_menu = tk.OptionMenu(bot_frame1,draft_id,*sorted(list_to_process[4],reverse=True))
 
     button_skip = tk.Button(top_frame,text="Skip Match",width=10,command=lambda : [close_format_window("Skip")])
     button_exit = tk.Button(top_frame,text="Exit",width=10,command=lambda : [close_format_window("Exit")])
