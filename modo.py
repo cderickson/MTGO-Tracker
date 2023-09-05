@@ -626,7 +626,7 @@ def game_actions(init,time):
         elif i.find(".") != -1:
             gameactions.append(fullstring)
     return gameactions
-def match_data(ga,gd,pd):
+def match_data(ga,gd,pd,fname):
     # Input:  List[GameActions],List[GameData],List[PlayData]
     # Output: List[Match_Attributes]
 
@@ -666,7 +666,8 @@ def match_data(ga,gd,pd):
     LIM_FORMAT =    "NA"
     MATCH_TYPE =    "NA"
     DATE =          f"{ga[0][0:4]}-{ga[0][4:6]}-{ga[0][6:8]}-{ga[0][8:10]}:{ga[0][10:]}"
-    MATCH_ID =      f"{ga[0]}_{P1}_{P2}"
+    # MATCH_ID =      f"{ga[0]}_{P1}_{P2}"
+    MATCH_ID =      fname
     DRAFT_ID =      "NA"
 
     if P1_ROLL > P2_ROLL:
@@ -715,7 +716,7 @@ def match_data(ga,gd,pd):
     if len(MATCH_DATA) != len(header("Matches")):
         return "Match Header is Wrong Size."
     return MATCH_DATA
-def game_data(ga):
+def game_data(ga,fname):
     # Input:  List[GameActions]
     # Output: List[G1_List,G2_List,G3_List,NA_Games_Dict{}]
 
@@ -790,7 +791,8 @@ def game_data(ga):
         return "Players not Found."
     curr_game_list =[]
     curr_list =     []
-    MATCH_ID = f"{ga[0]}_{P1}_{P2}"
+    # MATCH_ID = f"{ga[0]}_{P1}_{P2}"
+    MATCH_ID = fname
 
     for i in ga:
         curr_list = i.split()
@@ -915,7 +917,7 @@ def game_data(ga):
     if len(GAME_DATA) == 0:
         return "Match has no Games"
     return (GAME_DATA,ALL_GAMES_GA)
-def play_data(ga):
+def play_data(ga,fname):
     # Input:  List[GameActions]
     # Output: List[Plays]
 
@@ -980,7 +982,8 @@ def play_data(ga):
     P1 = players(ga)[0]
     P2 = players(ga)[1]
     curr_list = []
-    MATCH_ID = f"{ga[0]}_{P1}_{P2}"
+    # MATCH_ID = f"{ga[0]}_{P1}_{P2}"
+    MATCH_ID = fname
 
     for i in ga:
         curr_list = i.split()
@@ -1143,20 +1146,20 @@ def play_data(ga):
     if len(ALL_PLAYS) == 0:
         return "Match has no Plays."
     return ALL_PLAYS
-def get_all_data(init,mtime):
-    # Input:  String,String
+def get_all_data(init,mtime,fname):
+    # Input:  String,String,String
     # Output: List[Matches,Games,Plays]
     
     gameactions = game_actions(init,mtime)
     if isinstance(gameactions, str):
         return gameactions
-    gamedata = game_data(gameactions)
+    gamedata = game_data(gameactions,fname)
     if isinstance(gamedata, str):
         return gamedata
-    playdata = play_data(gameactions)
+    playdata = play_data(gameactions,fname)
     if isinstance(playdata, str):
         return playdata
-    matchdata = match_data(gameactions,gamedata[0],playdata)
+    matchdata = match_data(gameactions,gamedata[0],playdata,fname)
     if isinstance(matchdata, str):
         return matchdata
     timeout = check_timeout(gameactions)
