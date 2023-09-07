@@ -5457,7 +5457,7 @@ def update_auxiliary():
     height = 100
     width =  350
     update_window = tk.Toplevel(window)
-    update_window.title("Set Default Hero")
+    update_window.title("Update Auxiliary Files")
     update_window.iconbitmap(update_window,"icon.ico")
     update_window.minsize(width,height)
     update_window.resizable(False,False)
