@@ -1,5 +1,4 @@
 SPLIT
-test // test
 Alive // Well
 Appeal // Authority
 Armed // Dangerous
