@@ -444,6 +444,7 @@ def startup():
     global debug_str
 
     all_decks_loaded = False
+    past_error_ids = []
 
     if os.path.isfile("MULTIFACED_CARDS.txt"):
         with io.open("MULTIFACED_CARDS.txt","r",encoding="ansi") as file:
@@ -551,6 +552,21 @@ def startup():
     except FileNotFoundError:
         debug_str += 'ALL_DATA found, but no other save files.\n'
         pass
+
+    for i in ALL_DATA[0]:
+        if len(i) != len(modo.header("Matches")):
+            past_error_ids.append(i[0])
+    for i in ALL_DATA[1]:
+        if len(i) != len(modo.header("Games")):
+            past_error_ids.append(i[0])
+    for i in ALL_DATA[2]:
+        if len(i) != len(modo.header("Plays")):
+            past_error_ids.append(i[0])
+    past_error_ids = list(set(past_error_ids))
+    if len(past_error_ids) > 0:
+        ALL_DATA[0] = [x for x in ALL_DATA[0] if x[0] not in past_error_ids]
+        ALL_DATA[1] = [x for x in ALL_DATA[1] if x[0] not in past_error_ids]
+        ALL_DATA[2] = [x for x in ALL_DATA[2] if x[0] not in past_error_ids]
 
     ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
 
