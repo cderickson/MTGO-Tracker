@@ -908,13 +908,13 @@ def game_data(ga,fname):
                    TURNS,
                    GAME_WINNER))
         GAME_DATA.append(G3)
-    if len(G1) != len(header("Games")) and (len(G1) != 0):
+    if (len(G1) != len(header("Games"))) and (len(G1) != 0):
         return "Game 1 Header is Wrong Size."
-    elif len(G2) != len(header("Games")) and (len(G2) != 0):
+    elif (len(G2) != len(header("Games"))) and (len(G2) != 0):
         return "Game 2 Header is Wrong Size."
     elif (len(G3) != len(header("Games"))) and (len(G3) != 0):
         return "Game 3 Header is Wrong Size."
-    if len(GAME_DATA) == 0:
+    if (len(GAME_DATA) == 0):
         return "Match has no Games"
     return (GAME_DATA,ALL_GAMES_GA)
 def play_data(ga,fname):
