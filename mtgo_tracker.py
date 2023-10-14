@@ -447,7 +447,7 @@ def startup():
     past_error_ids = []
 
     if os.path.isfile("MULTIFACED_CARDS.txt"):
-        with io.open("MULTIFACED_CARDS.txt","r",encoding="ansi") as file:
+        with io.open("MULTIFACED_CARDS.txt","r",encoding="latin1") as file:
             initial = file.read().split("\n")
             for i in initial:
                 if i.isupper():
@@ -462,7 +462,7 @@ def startup():
         in_instr = True
         x = ""
         y = []
-        with io.open("INPUT_OPTIONS.txt","r",encoding="ansi") as file:
+        with io.open("INPUT_OPTIONS.txt","r",encoding="latin1") as file:
             initial = file.read().split("\n")
             for i in initial:
                 if i == "-----------------------------":
@@ -552,7 +552,7 @@ def startup():
     except FileNotFoundError:
         debug_str += 'ALL_DATA found, but no other save files.\n'
         pass
-
+    print(PARSED_FILE_DICT)
     for i in ALL_DATA[0]:
         if len(i) != len(modo.header("Matches")):
             past_error_ids.append(i[0])
@@ -675,7 +675,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
                     os.chdir(root)
                 else:
                     os.chdir(root)
-                    with io.open(i,"r",encoding="ansi") as gamelog:
+                    with io.open(i,"r",encoding="latin1") as gamelog:
                         fname = i.split('Match_GameLog_')[1].split('.dat')[0]
                         initial = gamelog.read()
                         mtime = time.ctime(os.path.getmtime(i))
@@ -748,7 +748,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
                     except shutil.SameFileError:
                         debug_str += f'Same File Error While Copying DraftLog: {i}\n'
                         pass
-                with io.open(i,"r",encoding="ansi") as gamelog:
+                with io.open(i,"r",encoding="latin1") as gamelog:
                     initial = gamelog.read()
                 try:
                     parsed_data = modo.parse_draft_log(i,initial)
@@ -918,7 +918,7 @@ def get_lists():
         files = os.listdir()
         month_decks = []
         for j in files:
-            with io.open(j,"r",encoding="ansi") as decklist:
+            with io.open(j,"r",encoding="latin1") as decklist:
                 initial = decklist.read()
             deck = modo.parse_list(j,initial)
             if deck == None:
@@ -5212,30 +5212,28 @@ def user_inputs(type):
     format_index = modo.header("Matches").index("Format")
     lformat_index = modo.header("Matches").index("Limited_Format")
     match_type_index = modo.header("Matches").index("Match_Type")
+    date_index = modo.header("Matches").index("Date")
 
     gn_index = modo.header("Games").index("Game_Num")
+    gw_index = modo.header("Games").index("Game_Winner")
     gw_index = modo.header("Games").index("Game_Winner")
 
     if type == "Matches":
         for i in ALL_DATA[0]:
-            match_id = i[0]
-            if match_id[0:12].isdigit():
-                match_id = match_id[0:4] + '-' + match_id[4:6] + '-' + match_id[6:8] + '-' + match_id[8:10] + ':' + match_id[10:12]
-            if match_id not in match_dict:
-                match_dict[match_id] = [0]
+            if i[date_index] not in match_dict:
+                match_dict[i[date_index]] = [0]
 
             player_dict = {}
             player_dict[i[p1_index]] = [i[p1_arch_index],i[p1_sub_index]]
             player_dict[i[p2_index]] = [i[p2_arch_index],i[p2_sub_index]]
-            match_dict[match_id].append([player_dict,i[draftid_index],i[format_index],i[lformat_index],i[match_type_index]])
-            match_dict[match_id][0] += 1
+            match_dict[i[date_index]].append([player_dict,i[draftid_index],i[format_index],i[lformat_index],i[match_type_index]])
+            match_dict[i[date_index]][0] += 1
         return match_dict
     elif type == "Games":
+        df = pd.DataFrame(ALL_DATA[0],columns=modo.header("Matches"))
         for i in ALL_DATA[1]:
-            match_id = i[0]
-            if match_id[0:12].isdigit():
-                match_id = match_id[0:4] + '-' + match_id[4:6] + '-' + match_id[6:8] + '-' + match_id[8:10] + ':' + match_id[10:12]
-            key = f"{match_id}-{i[gn_index]}"
+            gdate = df[(df.Match_ID == i[0])]["Date"].tolist()[0]
+            key = f"{gdate}-{i[gn_index]}"
             if key not in game_dict:
                 match_dict[key] = [0]
 
@@ -5527,7 +5525,7 @@ def update_auxiliary():
                     os.rename(file, file[4:])
             
             if os.path.isfile("MULTIFACED_CARDS.txt"):
-                with io.open("MULTIFACED_CARDS.txt","r",encoding="ansi") as file:
+                with io.open("MULTIFACED_CARDS.txt","r",encoding="latin1") as file:
                     initial = file.read().split("\n")
                     for i in initial:
                         if i.isupper():
@@ -5542,7 +5540,7 @@ def update_auxiliary():
                 in_instr = True
                 x = ""
                 y = []
-                with io.open("INPUT_OPTIONS.txt","r",encoding="ansi") as file:
+                with io.open("INPUT_OPTIONS.txt","r",encoding="latin1") as file:
                     initial = file.read().split("\n")
                     for i in initial:
                         if i == "-----------------------------":
@@ -5619,7 +5617,6 @@ def clear_skipped_files():
     ask_to_save = True
 
     update_status_bar(status=f"Made all ignored files scannable ({file_count} GameLogs and {draft_count} DraftLogs).")
-
 def debug():
     os.chdir(FILEPATH_ROOT)
     with open("DEBUG.txt","w",encoding="utf-8") as txt:
