@@ -13,6 +13,6 @@ copy MULTIFACED_CARDS.txt dist\MULTIFACED_CARDS.txt
 copy ALL_DECKS dist\ALL_DECKS
 cd dist
 :: update version number.
-"C:\Program Files\WinRAR\rar" a -r "..\MTGO-Tracker-v.15.rar"
+"C:\Program Files\WinRAR\rar" a -r "..\MTGO-Tracker-v.16.rar"
 cd ..
 rmdir dist /s /q
