@@ -11,12 +11,14 @@ Bound // Determined
 Breaking // Entering
 Carnival // Carnage
 Catch // Release
+Cease // Desist
 Claim // Fame
 Collision // Colossus
 Commit // Memory
 Connive // Concoct
 Consecrate // Consume
 Consign // Oblivion
+Coward // Killer
 Crime // Punishment
 Cut // Ribbons
 Dead // Gone
@@ -34,12 +36,16 @@ Fast // Furious
 Find // Finality
 Fire // Ice
 Flesh // Blood
+Flotsam // Jetsam
 Flower // Flourish
+Fuss // Bother
+Gallifrey Falls // No More
 Give // Take
 Grind // Dust
 Heaven // Earth
 Hide // Seek
 Hit // Run
+Hustle // Bustle
 Illusion // Reality
 Incubation // Incongruity
 Indulge // Excess
@@ -59,6 +65,7 @@ Prepare // Fight
 Profit // Loss
 Protect // Serve
 Pure // Simple
+Push // Pull
 Rags // Riches
 Ready // Willing
 Reason // Believe
@@ -93,14 +100,16 @@ Aberrant Researcher // Perfected Form
 A-Binding Geist // A-Spectral Binding
 A-Brine Comber // A-Brinebound Gift
 Accursed Witch // Infectious Curse
+Aclazotz, Deepest Betrayal // Temple of the Dead
 A-Devoted Grafkeeper // A-Departed Soulkeeper
 A-Dorothea, Vengeful Victim // A-Dorothea's Retribution
 Aetherblade Agent // Gitaxian Mindstinger
 Afflicted Deserter // Werewolf Ransacker
 A-Gutter Skulker // A-Gutter Shortcut
-A-Kumano Faces Kakkazan // A-Etching of Kumano
+Ajani, Nacatl Pariah // Ajani, Nacatl Avenger
 A-Lantern Bearer // A-Lanterns' Lift
 Alluring Suitor // Deadly Dancer
+Altar of the Wretched // Wretched Bonemass
 Ambitious Farmhand // Seasoned Cathar
 A-Mischievous Catgeist // A-Catlike Curiosity
 Arcee, Sharpshooter // Arcee, Acrobatic Coupe
@@ -131,6 +140,8 @@ Bloodline Keeper // Lord of Lineage
 Bloodsworn Squire // Bloodsworn Knight
 Bonded Herdbeast // Plated Kilnbeast
 Boseiju Reaches Skyward // Branch of Boseiju
+Braided Net // Braided Quipu
+Brass's Tunnel-Grinder // Tecutlan, the Searing Rift
 Breakneck Rider // Neck Breaker
 Brine Comber // Brinebound Gift
 Brutal Cathar // Moonrage Brute
@@ -143,6 +154,7 @@ Chaplain of Alms // Chapel Shieldgeist
 Child of the Pack // Savage Packmate
 Chosen of Markov // Markov's Servant
 Civilized Scholar // Homicidal Brute
+Clay-Fired Bricks // Cosmium Kiln
 Cloistered Youth // Unholy Fiend
 Concealing Curtains // Revealing Eye
 Conduit of Storms // Conduit of Emrakul
@@ -161,12 +173,14 @@ Delver of Secrets // Insectile Aberration
 Dennick, Pious Apprentice // Dennick, Pious Apparition
 Desperate Farmer // Depraved Harvester
 Devoted Grafkeeper // Departed Soulkeeper
+Dire Flail // Dire Blunderbuss
 Distracting Geist // Clever Distraction
 Docent of Perfection // Final Iteration
 Doric, Nature's Warden // Doric, Owlbear Avenger
 Dormant Grove // Gnarled Grovestrider
 Dorothea, Vengeful Victim // Dorothea's Retribution
 Dowsing Dagger // Lost Vale
+Dowsing Device // Geode Grotto
 Drogskol Infantry // Drogskol Armaments
 Duskwatch Recruiter // Krallenhorde Howler
 Ecstatic Awakener // Awoken Demon
@@ -178,6 +192,7 @@ Enduring Angel // Angelic Enforcer
 Era of Enlightenment // Hand of Enlightenment
 Etali, Primal Conqueror // Etali, Primal Sickness
 Extricator of Sin // Extricator of Flesh
+Eye of Ojer Taq // Apex Observatory
 Fable of the Mirror-Breaker // Reflection of Kiki-Jiki
 Faithbound Judge // Sinner's Judgment
 Fangblade Brigand // Fangblade Eviscerator
@@ -193,7 +208,9 @@ Geier Reach Bandit // Vildin-Pack Alpha
 Gnottvold Hermit // Chrome Host Hulk
 Goldbug, Humanity's Ally // Goldbug, Scrappy Scout
 Golden Guardian // Gold-Forge Garrison
+Grasping Shadows // Shadows' Lair
 Graveyard Trespasser // Graveyard Glutton
+Grist, Voracious Larva // Grist, the Plague Swarm
 Grizzled Angler // Grisly Anglerfish
 Grizzled Outcasts // Krallenhorde Wantons
 Growing Rites of Itlimoc // Itlimoc, Cradle of the Sun
@@ -218,7 +235,9 @@ Hookhand Mariner // Riphook Raider
 Hostile Hostel // Creeping Inn
 Hound Tamer // Untamed Pup
 Howlpack Piper // Wildsong Howler
+Huatli, Poet of Unity // Roar of the Fifth People
 Huntmaster of the Fells // Ravager of the Fells
+Idol of the Deep King // Sovereign's Macuahuitl
 Ill-Tempered Loner // Howlpack Avenger
 Infestation Expert // Infested Werewolf
 Innocent Traveler // Malicious Invader
@@ -260,13 +279,16 @@ Invasion of Vryn // Overloaded Mage-Ring
 Invasion of Xerex // Vertex Paladin
 Invasion of Zendikar // Awakened Skyclave
 Inventive Iteration // Living Breakthrough
+Inverted Iceberg // Iceberg Titan
 Jace, Vryn's Prodigy // Jace, Telepath Unbound
 Jacob Hauken, Inspector // Hauken's Insight
+Jade Seedstones // Jadeheart Attendant
 Jerren, Corrupted Bishop // Ormendahl, the Corrupter
 Jetfire, Ingenious Scientist // Jetfire, Air Guardian
 Jin-Gitaxias // The Great Synthesis
 Journey to Eternity // Atzal, Cave of Eternity
 Jugan Defends the Temple // Remnant of the Rising Star
+Kaslem's Stonetree // Kaslem's Strider
 Katilda, Dawnhart Martyr // Katilda's Rising Dawn
 Kessig Forgemaster // Flameheart Werewolf
 Kessig Naturalist // Lord of the Ulvenwald
@@ -284,12 +306,15 @@ Lantern Bearer // Lanterns' Lift
 Legion's Landing // Adanto, the First Fort
 Life of Toshiro Umezawa // Memory of Toshiro
 Liliana, Heretical Healer // Liliana, Defiant Necromancer
+Lodestone Needle // Guidestone Compass
 Lone Rider // It That Rides as One
 Loyal Cathar // Unhallowed Cathar
 Ludevic, Necrogenius // Olag, Ludevic's Hubris
 Ludevic's Test Subject // Ludevic's Abomination
 Lunarch Veteran // Luminous Phantom
 Malevolent Hermit // Benevolent Geist
+Master's Guide-Mural // Master's Manufactory
+Matzalantli, the Great Door // The Core
 Mayor of Avabruck // Howlpack Alpha
 Megatron, Tyrant // Megatron, Destructive Force
 Michiko's Reign of Truth // Portrait of Michiko
@@ -304,11 +329,18 @@ Nezumi Freewheeler // Hideous Fleshwheeler
 Nicol Bolas, the Ravager // Nicol Bolas, the Arisen
 Nissa, Vastwood Seer // Nissa, Sage Animist
 Oakshade Stalker // Moonlit Ambusher
+Ojer Axonil, Deepest Might // Temple of Power
+Ojer Kaslem, Deepest Growth // Temple of Cultivation
+Ojer Pakpatiq, Deepest Epoch // Temple of Cyclical Time
+Ojer Taq, Deepest Foundation // Temple of Civilization
 Okiba Reckoner Raid // Nezumi Road Captain
 Optimus Prime, Hero // Optimus Prime, Autobot Leader
 Order of the Mirror // Order of the Alabaster Host
+Ore-Rich Stalactite // Cosmium Catalyst
+Oteclan Landmark // Oteclan Levitator
 Outland Liberator // Frenzied Trapbreaker
 Overwhelmed Archivist // Archive Haunt
+Paleontologist's Pick-Axe // Dinosaur Headdress
 Panicked Bystander // Cackling Culprit
 Path of Mettle // Metzali, Tower of Triumph
 Pious Evangel // Wayward Disciple
@@ -321,6 +353,7 @@ Pyretic Prankster // Glistening Goremonger
 Radiant Grace // Radiant Restraints
 Ragged Recluse // Odious Witch
 Rahilda, Wanted Cutthroat // Rahilda, Feral Outlaw
+Ral, Monsoon Mage // Ral, Leyline Prodigy
 Ratchet, Field Medic // Ratchet, Rescue Racer
 Ravenous Demon // Archdemon of Greed
 Reckless Stormseeker // Storm-Charged Slasher
@@ -329,6 +362,7 @@ Restless Bloodseeker // Bloodsoaked Reveler
 Rona, Herald of Invasion // Rona, Tolarian Obliterator
 Runo Stromkirk // Krothuss, Lord of the Deep
 Sage of Ancient Lore // Werewolf of Ancient Hunger
+Saheeli's Lattice // Mastercraft Raptor
 Scorned Villager // Moonscarred Werewolf
 Screeching Bat // Stalking Vampire
 Search for Azcanta // Azcanta, the Sunken Ruin
@@ -342,22 +376,30 @@ Slicer, Hired Muscle // Slicer, High-Speed Antagonist
 Smoldering Egg // Ashmouth Dragon
 Smoldering Werewolf // Erupting Dreadwolf
 Solitary Hunter // One of the Pack
+Sorin of House Markov // Sorin, Ravenous Neonate
 Soulcipher Board // Cipherbound Spirit
 Soul Seizer // Ghastly Haunting
 Soundwave, Sonic Spy // Soundwave, Superior Captain
 Spellrune Painter // Spellrune Howler
+Spring-Loaded Sawblades // Bladewheel Chariot
 Starscream, Power Hungry // Starscream, Seeker Leader
 Startled Awake // Persistent Nightmare
 Storm the Vault // Vault of Catlacan
+Sunbird Standard // Sunbird Effigy
 Sun-Blessed Guardian // Furnace-Blessed Conqueror
 Suspicious Stowaway // Seafaring Werewolf
 Tales of Master Seshiro // Seshiro's Living Legacy
+Tamiyo, Inquisitive Student // Tamiyo, Seasoned Scholar
 Tangleclaw Werewolf // Fibrous Entangler
 Tarkir Duneshaper // Burnished Dunestomper
+Tarrian's Journal // The Tomb of Aclazotz
 Tavern Ruffian // Tavern Smasher
 Teachings of the Kirin // Kirin-Touched Orochi
+Tetzin, Gnome Champion // The Golden-Gear Colossus
 Thaumatic Compass // Spires of Orazca
 The Dragon-Kami Reborn // Dragon-Kami's Egg
+The Enigma Jewel // Locus of Enlightenment
+The Everflowing Well // The Myriad Pools
 The Fall of Lord Konda // Fragment of Konda
 The Kami War // O-Kagachi Made Manifest
 The Long Reach of Night // Animus of Night's Reach
@@ -365,9 +407,12 @@ The Modern Age // Vector Glider
 The Restoration of Eiganjo // Architect of Restoration
 The Shattered States Era // Nameless Conqueror
 Thing in the Ice // Awoken Horror
+Thousand Moons Smithy // Barracks of the Thousand
 Thraben Gargoyle // Stonewing Antagonizer
 Thraben Sentry // Thraben Militia
+Throne of the Grim Captain // The Grim Captain
 Tireless Hauler // Dire-Strain Brawler
+Tithing Blade // Consuming Sepulcher
 Tormented Pariah // Rampaging Werewolf
 Tovolar, Dire Overlord // Tovolar, the Midnight Scourge
 Tovolar's Huntmaster // Tovolar's Packleader
@@ -375,12 +420,14 @@ Town Gossipmonger // Incited Rabble
 Treasure Map // Treasure Cove
 Tribute to Horobi // Echo of Death's Wail
 Twinblade Geist // Twinblade Invocation
+Twists and Turns // Mycoid Maze
 Ulrich of the Krallenhorde // Ulrich, Uncontested Alpha
 Ultra Magnus, Tactician // Ultra Magnus, Armored Carrier
 Ulvenwald Captive // Ulvenwald Abomination
 Ulvenwald Mystics // Ulvenwald Primordials
 Ulvenwald Oddity // Ulvenwald Behemoth
 Uninvited Geist // Unimpeded Trespasser
+Unstable Glyphbridge // Sandswirl Wanderglyph
 Urabrask // The Great Work
 Vance's Blasting Cannons // Spitfire Bastion
 Vengeful Strangler // Strangling Grasp
@@ -389,14 +436,17 @@ Village Ironsmith // Ironfang
 Village Messenger // Moonrise Intruder
 Villagers of Estwald // Howlpack of Estwald
 Village Watch // Village Reavers
+Visage of Dread // Dread Osseosaur
 Volatile Arsonist // Dire-Strain Anarchist
 Voldaren Bloodcaster // Bloodbat Summoner
 Voldaren Pariah // Abolisher of Bloodlines
 Voltaic Visionary // Volt-Charged Berserker
 Vorinclex // The Grand Evolution
+Waterlogged Hulk // Watertight Gondola
 Weary Prisoner // Wrathful Jailbreaker
 Weaver of Blossoms // Blossom-Clad Werewolf
 Wedding Announcement // Wedding Festivity
+Welcome to . . . // Jurassic Park
 Westvale Abbey // Ormendahl, Profane Prince
 Wolfbitten Captive // Krallenhorde Killer
 Wolfkin Outcast // Wedding Crasher
@@ -407,17 +457,19 @@ Aberrant Researcher // Perfected Form
 A-Binding Geist // A-Spectral Binding
 A-Brine Comber // A-Brinebound Gift
 Accursed Witch // Infectious Curse
+Aclazotz, Deepest Betrayal // Temple of the Dead
 A-Devoted Grafkeeper // A-Departed Soulkeeper
 A-Dorothea, Vengeful Victim // A-Dorothea's Retribution
 Aetherblade Agent // Gitaxian Mindstinger
 Afflicted Deserter // Werewolf Ransacker
 Agadeem's Awakening // Agadeem, the Undercrypt
 A-Gutter Skulker // A-Gutter Shortcut
+Ajani, Nacatl Pariah // Ajani, Nacatl Avenger
 Akoum Warrior // Akoum Teeth
-A-Kumano Faces Kakkazan // A-Etching of Kumano
 A-Lantern Bearer // A-Lanterns' Lift
 Alluring Suitor // Deadly Dancer
 Alrund, God of the Cosmos // Hakka, Whispering Raven
+Altar of the Wretched // Wretched Bonemass
 Ambitious Farmhand // Seasoned Cathar
 A-Mischievous Catgeist // A-Catlike Curiosity
 Angel // Demon
@@ -457,12 +509,29 @@ Blightreaper Thallid // Blightsower Thallid
 Blightstep Pathway // Searstep Pathway
 Blitzwing, Cruel Tormentor // Blitzwing, Adaptive Assailant
 Bloodline Keeper // Lord of Lineage
+Bloodsoaked Insight // Sanguine Morass
 Bloodsworn Squire // Bloodsworn Knight
+Boggart Trawler // Boggart Bog
 Bonded Herdbeast // Plated Kilnbeast
 Booster Sleuth // Booster Sleuth (cont'd)
 Boseiju Reaches Skyward // Branch of Boseiju
+Bounty: Eriana, Wrecking Ball // Wanted!
+Bounty: Frankie The Fang // Wanted!
+Bounty: Gorra Tash and Silas // Wanted!
+Bounty: Lord Fajjal // Wanted!
+Bounty: Lyssa, Sterling Collector // Wanted!
+Bounty: Miron Tillas Jr. // Wanted!
+Bounty: Paq, Fleeting Filcher // Wanted!
+Bounty: Rissa "Blades" Lee // Wanted!
+Bounty: Sleepy Sovka // Wanted!
+Bounty: Squeakers the Sly // Wanted!
+Bounty: The Outsider // Wanted!
+Bounty: Vara Beth Hannifer // Wanted!
+Braided Net // Braided Quipu
 Branchloft Pathway // Boulderloft Pathway
+Brass's Tunnel-Grinder // Tecutlan, the Searing Rift
 Breakneck Rider // Neck Breaker
+Bridgeworks Battle // Tanglespan Bridgeworks
 Brightclimb Pathway // Grimclimb Pathway
 Brine Comber // Brinebound Gift
 Brutal Cathar // Moonrage Brute
@@ -477,6 +546,7 @@ Child of the Pack // Savage Packmate
 Chosen of Markov // Markov's Servant
 City's Blessing // Elemental
 Civilized Scholar // Homicidal Brute
+Clay-Fired Bricks // Cosmium Kiln
 Clearwater Pathway // Murkwater Pathway
 Cloistered Youth // Unholy Fiend
 Concealing Curtains // Revealing Eye
@@ -505,6 +575,8 @@ Dennick, Pious Apprentice // Dennick, Pious Apparition
 Desperate Farmer // Depraved Harvester
 Devoted Grafkeeper // Departed Soulkeeper
 Dinosaur // Treasure
+Dire Flail // Dire Blunderbuss
+Disciple of Freyalise // Garden of Freyalise
 Distracting Geist // Clever Distraction
 Docent of Perfection // Final Iteration
 Dominarioes // Dominarioes (cont'd)
@@ -512,7 +584,9 @@ Doric, Nature's Warden // Doric, Owlbear Avenger
 Dormant Grove // Gnarled Grovestrider
 Dorothea, Vengeful Victim // Dorothea's Retribution
 Dowsing Dagger // Lost Vale
+Dowsing Device // Geode Grotto
 Drogskol Infantry // Drogskol Armaments
+Drowner of Truth // Drowned Jungle
 Duskwatch Recruiter // Krallenhorde Howler
 Ecstatic Awakener // Awoken Demon
 Edgar, Charmed Groom // Edgar Markov's Coffin
@@ -528,10 +602,12 @@ Esika, God of the Tree // The Prismatic Bridge
 Etali, Primal Conqueror // Etali, Primal Sickness
 Extricator of Sin // Extricator of Flesh
 Extus, Oriq Overlord // Awaken the Blood Avatar
+Eye of Ojer Taq // Apex Observatory
 Fable of the Mirror-Breaker // Reflection of Kiki-Jiki
 Faithbound Judge // Sinner's Judgment
 Fangblade Brigand // Fangblade Eviscerator
 Fearful Villager // Fearsome Werewolf
+Fell the Profane // Fell Mire
 Fish // Kraken
 Flame Channeler // Embodiment of Flame
 Flamescroll Celebrant // Revel in Silence
@@ -544,13 +620,16 @@ Gatstaf Arsonists // Gatstaf Ravagers
 Gatstaf Shepherd // Gatstaf Howler
 Geier Reach Bandit // Vildin-Pack Alpha
 Glasspool Mimic // Glasspool Shore
+Glasswing Grace // Age-Graced Chapel
 Gnottvold Hermit // Chrome Host Hulk
 Goblin // Soldier
 Goldbug, Humanity's Ally // Goldbug, Scrappy Scout
 Golden Guardian // Gold-Forge Garrison
+Grasping Shadows // Shadows' Lair
 Graveyard Trespasser // Graveyard Glutton
 Gremlin // Energy Reserve
 Grimlock, Dinobot Leader // Grimlock, Ferocious King
+Grist, Voracious Larva // Grist, the Plague Swarm
 Grizzled Angler // Grisly Anglerfish
 Grizzled Outcasts // Krallenhorde Wantons
 Growing Rites of Itlimoc // Itlimoc, Cradle of the Sun
@@ -579,8 +658,11 @@ Hookhand Mariner // Riphook Raider
 Hostile Hostel // Creeping Inn
 Hound Tamer // Untamed Pup
 Howlpack Piper // Wildsong Howler
+Huatli, Poet of Unity // Roar of the Fifth People
 Human // Wolf
 Huntmaster of the Fells // Ravager of the Fells
+Hydroelectric Specimen // Hydroelectric Laboratory
+Idol of the Deep King // Sovereign's Macuahuitl
 Ill-Tempered Loner // Howlpack Avenger
 Illusion // Saproling
 Incubator // Phyrexian
@@ -625,8 +707,10 @@ Invasion of Vryn // Overloaded Mage-Ring
 Invasion of Xerex // Vertex Paladin
 Invasion of Zendikar // Awakened Skyclave
 Inventive Iteration // Living Breakthrough
+Inverted Iceberg // Iceberg Titan
 Jace, Vryn's Prodigy // Jace, Telepath Unbound
 Jacob Hauken, Inspector // Hauken's Insight
+Jade Seedstones // Jadeheart Attendant
 Jadzi, Oracle of Arcavios // Journey to the Oracle
 Jerren, Corrupted Bishop // Ormendahl, the Corrupter
 Jetfire, Ingenious Scientist // Jetfire, Air Guardian
@@ -636,6 +720,7 @@ Journey to Eternity // Atzal, Cave of Eternity
 Jugan Defends the Temple // Remnant of the Rising Star
 Jwari Disruption // Jwari Ruins
 Kabira Takedown // Kabira Plateau
+Kaslem's Stonetree // Kaslem's Strider
 Katilda, Dawnhart Martyr // Katilda's Rising Dawn
 Kazandu Mammoth // Kazandu Valley
 Kazuul's Fury // Kazuul's Cliffs
@@ -655,10 +740,12 @@ Lambholt Elder // Silverpelt Werewolf
 Lambholt Pacifist // Lambholt Butcher
 Lambholt Raconteur // Lambholt Ravager
 Lantern Bearer // Lanterns' Lift
+Legion Leadership // Legion Stronghold
 Legion's Landing // Adanto, the First Fort
 Life of Toshiro Umezawa // Memory of Toshiro
 Liliana, Heretical Healer // Liliana, Defiant Necromancer
 Loathsome Troll // Troll
+Lodestone Needle // Guidestone Compass
 Lone Rider // It That Rides as One
 Look at Us, We're R&D // Look at Us, We're R&D (cont'd)
 Loyal Cathar // Unhallowed Cathar
@@ -670,6 +757,8 @@ Magic and Minions // Magic and Minions (cont'd)
 Makindi Stampede // Makindi Mesas
 Malakir Rebirth // Malakir Mire
 Malevolent Hermit // Benevolent Geist
+Master's Guide-Mural // Master's Manufactory
+Matzalantli, the Great Door // The Core
 Mayor of Avabruck // Howlpack Alpha
 Megatron, Tyrant // Megatron, Destructive Force
 Merfolk // Treasure
@@ -693,16 +782,24 @@ Nicol Bolas, the Ravager // Nicol Bolas, the Arisen
 Nightmare Moon // Princess Luna
 Nissa, Vastwood Seer // Nissa, Sage Animist
 Oakshade Stalker // Moonlit Ambusher
+Ojer Axonil, Deepest Might // Temple of Power
+Ojer Kaslem, Deepest Growth // Temple of Cultivation
+Ojer Pakpatiq, Deepest Epoch // Temple of Cyclical Time
+Ojer Taq, Deepest Foundation // Temple of Civilization
 Okiba Reckoner Raid // Nezumi Road Captain
 Ondu Inversion // Ondu Skyruins
 Optimus Prime, Hero // Optimus Prime, Autobot Leader
 Order of the Mirror // Order of the Alabaster Host
+Ore-Rich Stalactite // Cosmium Catalyst
+Oteclan Landmark // Oteclan Levitator
 Outland Liberator // Frenzied Trapbreaker
 Overwhelmed Archivist // Archive Haunt
+Paleontologist's Pick-Axe // Dinosaur Headdress
 Panicked Bystander // Cackling Culprit
 Path of Mettle // Metzali, Tower of Triumph
 Pelakka Predation // Pelakka Caverns
 Pestilent Cauldron // Restorative Burst
+Pinnacle Monk // Mystic Peak
 Pious Evangel // Wayward Disciple
 Pirate // Treasure
 Plargg, Dean of Chaos // Augusta, Dean of Order
@@ -716,12 +813,15 @@ Pyretic Prankster // Glistening Goremonger
 Radiant Grace // Radiant Restraints
 Ragged Recluse // Odious Witch
 Rahilda, Wanted Cutthroat // Rahilda, Feral Outlaw
+Ral, Monsoon Mage // Ral, Leyline Prodigy
 Ratchet, Field Medic // Ratchet, Rescue Racer
 Ravenous Demon // Archdemon of Greed
+Razorgrass Ambush // Razorgrass Field
 Reckless Stormseeker // Storm-Charged Slasher
 Reckless Waif // Merciless Predator
 Reidane, God of the Worthy // Valkmira, Protector's Shield
 Restless Bloodseeker // Bloodsoaked Reveler
+Revitalizing Repast // Old-Growth Grove
 Rimeshield Frost Giant // Frost Giant
 Riverglide Pathway // Lavaglide Pathway
 Roil Royale // Roil Royale (cont'd)
@@ -729,7 +829,9 @@ Roll for Initiative // Roll for Initiative (cont'd)
 Rona, Herald of Invasion // Rona, Tolarian Obliterator
 Rowan, Scholar of Sparks // Will, Scholar of Frost
 Runo Stromkirk // Krothuss, Lord of the Deep
+Rush of Inspiration // Crackling Falls
 Sage of Ancient Lore // Werewolf of Ancient Hunger
+Saheeli's Lattice // Mastercraft Raptor
 Saproling // Insect
 Scorned Villager // Moonscarred Werewolf
 Screeching Bat // Stalking Vampire
@@ -745,6 +847,7 @@ Shatterskull Smashing // Shatterskull, the Hammer Pass
 Sheoldred // The True Scriptures
 Shrill Howler // Howling Chorus
 Silundi Vision // Silundi Isle
+Sink into Stupor // Soporific Springs
 Skin Invasion // Skin Shedder
 Skyclave Aerialist // Skyclave Invader
 Skyclave Cleric // Skyclave Basilica
@@ -755,30 +858,41 @@ Snake // Zombie
 Soldier // Goblin
 Solitary Hunter // One of the Pack
 Song-Mad Treachery // Song-Mad Ruins
+Sorin of House Markov // Sorin, Ravenous Neonate
 Soulcipher Board // Cipherbound Spirit
 Soul Seizer // Ghastly Haunting
 Soundwave, Sonic Spy // Soundwave, Superior Captain
 Spellrune Painter // Spellrune Howler
 Spikefield Hazard // Spikefield Cave
+Spring-Loaded Sawblades // Bladewheel Chariot
 Starscream, Power Hungry // Starscream, Seeker Leader
 Startled Awake // Persistent Nightmare
 Storm the Vault // Vault of Catlacan
+Strength of the Harvest // Haven of the Harvest
 Strictly Better // Strictly Better (cont'd)
+Stump Stomp // Burnwillow Clearing
+Sunbird Standard // Sunbird Effigy
 Sun-Blessed Guardian // Furnace-Blessed Conqueror
+Sundering Eruption // Volcanic Fissure
+Suppression Ray // Orderly Plaza
 Suspicious Stowaway // Seafaring Werewolf
 Swarming Goblins // Goblin
 Tales of Master Seshiro // Seshiro's Living Legacy
+Tamiyo, Inquisitive Student // Tamiyo, Seasoned Scholar
 Tangleclaw Werewolf // Fibrous Entangler
 Tangled Florahedron // Tangled Vale
 Tarkir Duneshaper // Burnished Dunestomper
+Tarrian's Journal // The Tomb of Aclazotz
 Tavern Ruffian // Tavern Smasher
 Teachings of the Kirin // Kirin-Touched Orochi
 Telepathic Transmission // Telepathic Transmission (cont'd)
 Tergrid, God of Fright // Tergrid's Lantern
+Tetzin, Gnome Champion // The Golden-Gear Colossus
 Thaumatic Compass // Spires of Orazca
 The Dragon-Kami Reborn // Dragon-Kami's Egg
+The Enigma Jewel // Locus of Enlightenment
+The Everflowing Well // The Myriad Pools
 The Fall of Lord Konda // Fragment of Konda
-The Initiative // Undercity
 The Kami War // O-Kagachi Made Manifest
 The Long Reach of Night // Animus of Night's Reach
 The Modern Age // Vector Glider
@@ -787,9 +901,12 @@ The Ring // The Ring Tempts You
 The Shattered States Era // Nameless Conqueror
 The Tarrasque // Tarrasque
 Thing in the Ice // Awoken Horror
+Thousand Moons Smithy // Barracks of the Thousand
 Thraben Gargoyle // Stonewing Antagonizer
 Thraben Sentry // Thraben Militia
+Throne of the Grim Captain // The Grim Captain
 Tireless Hauler // Dire-Strain Brawler
+Tithing Blade // Consuming Sepulcher
 Toralf, God of Fury // Toralf's Hammer
 Tormented Pariah // Rampaging Werewolf
 Torrent Sculptor // Flamethrower Sonata
@@ -801,14 +918,17 @@ Treasure Map // Treasure Cove
 Tribute to Horobi // Echo of Death's Wail
 Turntimber Symbiosis // Turntimber, Serpentine Wood
 Twinblade Geist // Twinblade Invocation
+Twists and Turns // Mycoid Maze
 Ulrich of the Krallenhorde // Ulrich, Uncontested Alpha
 Ultra Magnus, Tactician // Ultra Magnus, Armored Carrier
 Ulvenwald Captive // Ulvenwald Abomination
 Ulvenwald Mystics // Ulvenwald Primordials
 Ulvenwald Oddity // Ulvenwald Behemoth
 Umara Wizard // Umara Skyfalls
+Undercity // The Initiative
 Underdark Basilisk // Basilisk
 Uninvited Geist // Unimpeded Trespasser
+Unstable Glyphbridge // Sandswirl Wanderglyph
 Urabrask // The Great Work
 Urza's Blueprints (minigame) // Urza's Blueprints (cont'd)
 Uvilda, Dean of Perfection // Nassari, Dean of Expression
@@ -825,6 +945,7 @@ Village Ironsmith // Ironfang
 Village Messenger // Moonrise Intruder
 Villagers of Estwald // Howlpack of Estwald
 Village Watch // Village Reavers
+Visage of Dread // Dread Osseosaur
 Voja // Saproling
 Volatile Arsonist // Dire-Strain Anarchist
 Voldaren Bloodcaster // Bloodbat Summoner
@@ -832,12 +953,16 @@ Voldaren Pariah // Abolisher of Bloodlines
 Voltaic Visionary // Volt-Charged Berserker
 Vorinclex // The Grand Evolution
 Wandering Archaic // Explore the Vastlands
+Waterlogged Hulk // Watertight Gondola
+Waterlogged Teachings // Inundated Archive
 Weary Prisoner // Wrathful Jailbreaker
 Weaver of Blossoms // Blossom-Clad Werewolf
 Wedding Announcement // Wedding Festivity
 Weird // Goblin
+Welcome to . . . // Jurassic Park
 Westvale Abbey // Ormendahl, Profane Prince
 Winchester Draft // Winchester Draft (cont'd)
+Witch Enchanter // Witch-Blessed Meadow
 Wolfbitten Captive // Krallenhorde Killer
 Wolfkin Outcast // Wedding Crasher
 Wurm // Saproling
@@ -857,21 +982,29 @@ Birgi, God of Storytelling // Harnfel, Horn of Bounty
 Blackbloom Rogue // Blackbloom Bog
 Blex, Vexing Pest // Search for Blex
 Blightstep Pathway // Searstep Pathway
+Bloodsoaked Insight // Sanguine Morass
+Boggart Trawler // Boggart Bog
 Branchloft Pathway // Boulderloft Pathway
+Bridgeworks Battle // Tanglespan Bridgeworks
 Brightclimb Pathway // Grimclimb Pathway
 Clearwater Pathway // Murkwater Pathway
 Cosima, God of the Voyage // The Omenkeel
 Cragcrown Pathway // Timbercrown Pathway
 Darkbore Pathway // Slitherbore Pathway
+Disciple of Freyalise // Garden of Freyalise
+Drowner of Truth // Drowned Jungle
 Egon, God of Death // Throne of Death
 Emeria's Call // Emeria, Shattered Skyclave
 Esika, God of the Tree // The Prismatic Bridge
 Extus, Oriq Overlord // Awaken the Blood Avatar
+Fell the Profane // Fell Mire
 Flamescroll Celebrant // Revel in Silence
 Glasspool Mimic // Glasspool Shore
+Glasswing Grace // Age-Graced Chapel
 Hagra Mauling // Hagra Broodpit
 Halvar, God of Battle // Sword of the Realms
 Hengegate Pathway // Mistgate Pathway
+Hydroelectric Specimen // Hydroelectric Laboratory
 Jadzi, Oracle of Arcavios // Journey to the Oracle
 Jorn, God of Winter // Kaldring, the Rimestaff
 Jwari Disruption // Jwari Ruins
@@ -881,6 +1014,7 @@ Kazuul's Fury // Kazuul's Cliffs
 Khalni Ambush // Khalni Territory
 Kianne, Dean of Substance // Imbraham, Dean of Theory
 Kolvori, God of Kinship // The Ringhart Crest
+Legion Leadership // Legion Stronghold
 Makindi Stampede // Makindi Mesas
 Malakir Rebirth // Malakir Mire
 Mila, Crafty Companion // Lukka, Wayward Bonder
@@ -888,19 +1022,28 @@ Needleverge Pathway // Pillarverge Pathway
 Ondu Inversion // Ondu Skyruins
 Pelakka Predation // Pelakka Caverns
 Pestilent Cauldron // Restorative Burst
+Pinnacle Monk // Mystic Peak
 Plargg, Dean of Chaos // Augusta, Dean of Order
+Razorgrass Ambush // Razorgrass Field
 Reidane, God of the Worthy // Valkmira, Protector's Shield
+Revitalizing Repast // Old-Growth Grove
 Riverglide Pathway // Lavaglide Pathway
 Rowan, Scholar of Sparks // Will, Scholar of Frost
+Rush of Inspiration // Crackling Falls
 Sea Gate Restoration // Sea Gate, Reborn
 Sejiri Shelter // Sejiri Glacier
 Selfless Glyphweaver // Deadly Vanity
 Shaile, Dean of Radiance // Embrose, Dean of Shadow
 Shatterskull Smashing // Shatterskull, the Hammer Pass
 Silundi Vision // Silundi Isle
+Sink into Stupor // Soporific Springs
 Skyclave Cleric // Skyclave Basilica
 Song-Mad Treachery // Song-Mad Ruins
 Spikefield Hazard // Spikefield Cave
+Strength of the Harvest // Haven of the Harvest
+Stump Stomp // Burnwillow Clearing
+Sundering Eruption // Volcanic Fissure
+Suppression Ray // Orderly Plaza
 Tangled Florahedron // Tangled Vale
 Tergrid, God of Fright // Tergrid's Lantern
 Toralf, God of Fury // Toralf's Hammer
@@ -913,14 +1056,17 @@ Valentin, Dean of the Vein // Lisette, Dean of the Root
 Valki, God of Lies // Tibalt, Cosmic Impostor
 Vastwood Fortification // Vastwood Thicket
 Wandering Archaic // Explore the Vastlands
+Waterlogged Teachings // Inundated Archive
+Witch Enchanter // Witch-Blessed Meadow
 Zof Consumption // Zof Bloodbog
 
 ADVENTURE
 A-Blessed Hippogriff // A-Tyr's Blessing
+Accident-Prone Apprentice // Amphibian Accident
 A-Emerald Dragon // A-Dissonant Wave
+Albiorix, Goose Tyrant // Wild Goose Chase
 Altar of Bhaal // Bone Offering
 Amethyst Dragon // Explosive Crystal
-A-Monster Manual // A-Zoological Study
 Animating Faerie // Bring to Life
 Aquatic Alchemist // Bubble Up
 Ardenvale Tactician // Dizzying Swoop
@@ -977,6 +1123,10 @@ Hypnotic Sprite // Mesmeric Glare
 Illithid Harvester // Plant Tadpoles
 Imodane's Recruiter // Train Troops
 Intrepid Trufflesnout // Go Hog Wild
+James, Wandering Dad // Follow Him
+Karvanista, Loyal Lupari // Lupari Shield
+Kellan, Daring Traveler // Journey On
+Kellan, Inquisitive Prodigy // Tail the Suspect
 Kellan, the Fae-Blooded // Birthright Boon
 Lonesome Unicorn // Rider in Need
 Lovestruck Beast // Heart's Desire
@@ -990,11 +1140,14 @@ Murderous Rider // Swift End
 Oakhame Ranger // Bring Back
 Obyra's Attendants // Desperate Parry
 Omniclown Colossus // Pie-roclasm
+Ondu Knotmaster // Throw a Line
 Order of Midnight // Alter Fate
 Pegasus Guardian // Rescue the Foal
 Picklock Prankster // Free the Fae
 Picnic Ruiner // Stolen Goodies
 Pollen-Shield Hare // Hare Raising
+Porcine Portent // Lend a Ham
+Promise of Aclazotz // Foul Rebirth
 Queen of Ice // Rage of Winter
 Questing Druid // Seek the Beast
 Ratcatcher Trainee // Pest Problem
@@ -1010,6 +1163,8 @@ Shrouded Shepherd // Cleave Shadows
 Silverflame Squire // On Alert
 Smitten Swordmaster // Curry Favor
 Spellscorn Coven // Take It Back
+Steady Tortoise // Harried Dash
+Stormkeld Curator // Giant Secrets
 Stormkeld Vanguard // Bear Down
 Sword Coast Serpent // Capsizing Wave
 Tempest Hart // Scan the Clouds
@@ -1017,6 +1172,7 @@ Threadbind Clique // Rip the Seams
 Tlincalli Hunter // Retrieve Prey
 Topaz Dragon // Entropic Cloud
 Tuinvale Treefolk // Oaken Boon
+Twice Upon a Time // Unlikely Meeting
 Twining Twins // Swift Spiral
 Two-Handed Axe // Sweeping Cleave
 Two-Headed Hunter // Twice the Rage
