@@ -16,6 +16,7 @@ import itertools
 import pickle
 import shutil
 import requests
+import sqlite3
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 pd.options.mode.chained_assignment = None
 
@@ -43,6 +44,7 @@ LAST_UPDATED =           "Never"
 INPUT_OPTIONS =          {}
 MULTIFACED_CARDS =       {}
 MAIN_WINDOW_SIZE =  ("small",1000,490)
+CONN =              None
 
 test_mode =         False
 resize =            False
@@ -5689,6 +5691,18 @@ def debug():
 def test():
     # Test function
     pass
+def init_db():
+    global CONN
+    global debug_str
+    CONN = sqlite3.connect('all_data.db')
+    debug_str += 'Database connection initialized.\n'
+def close_db():
+    global CONN
+    global debug_str
+    if CONN:
+        CONN.close()
+        debug_str += 'Database connection closed.\n'
+
 
 window = tk.Tk() 
 window.title("MTGO-Tracker")
