@@ -551,26 +551,30 @@ def startup():
         SKIP_FILES = pickle.load(open("SKIP_FILES","rb"))
         SKIP_DRAFTS = pickle.load(open("SKIP_DRAFTS","rb"))
         debug_str += 'Save files loaded.\n'
+        print(PARSED_FILE_DICT)
+        for i in ALL_DATA[0]:
+            if len(i) != len(modo.header("Matches")):
+                past_error_ids.append(i[0])
+        for i in ALL_DATA[1]:
+            if len(i) != len(modo.header("Games")):
+                past_error_ids.append(i[0])
+        for i in ALL_DATA[2]:
+            if len(i) != len(modo.header("Plays")):
+                past_error_ids.append(i[0])
+        past_error_ids = list(set(past_error_ids))
+        if len(past_error_ids) > 0:
+            ALL_DATA[0] = [x for x in ALL_DATA[0] if x[0] not in past_error_ids]
+            ALL_DATA[1] = [x for x in ALL_DATA[1] if x[0] not in past_error_ids]
+            ALL_DATA[2] = [x for x in ALL_DATA[2] if x[0] not in past_error_ids]
+
+        ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
+        
+        create_tables()
+
     except FileNotFoundError:
         debug_str += 'ALL_DATA found, but no other save files.\n'
         pass
-    print(PARSED_FILE_DICT)
-    for i in ALL_DATA[0]:
-        if len(i) != len(modo.header("Matches")):
-            past_error_ids.append(i[0])
-    for i in ALL_DATA[1]:
-        if len(i) != len(modo.header("Games")):
-            past_error_ids.append(i[0])
-    for i in ALL_DATA[2]:
-        if len(i) != len(modo.header("Plays")):
-            past_error_ids.append(i[0])
-    past_error_ids = list(set(past_error_ids))
-    if len(past_error_ids) > 0:
-        ALL_DATA[0] = [x for x in ALL_DATA[0] if x[0] not in past_error_ids]
-        ALL_DATA[1] = [x for x in ALL_DATA[1] if x[0] not in past_error_ids]
-        ALL_DATA[2] = [x for x in ALL_DATA[2] if x[0] not in past_error_ids]
 
-    ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
 
     filter_button["state"] = tk.NORMAL
     clear_button["state"] = tk.NORMAL
@@ -704,6 +708,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
                     if isinstance(parsed_data, str):
                         skip_dict[i] = parsed_data
                         continue
+                    # !FIXTHIS! INSERT INTO PARSED FILE TABLE
                     PARSED_FILE_DICT[i] = (parsed_data[0][0],datetime.datetime.strptime(mtime,"%a %b %d %H:%M:%S %Y"))
                     new_data[0].append(parsed_data[0])
                     for i in parsed_data[1]:
@@ -713,6 +718,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
                     for i in parsed_data[3]:
                         new_data[3] = new_data[3] | parsed_data[3]
                     if parsed_data[4][0] == True:
+                        # !FIXTHIS! INSERT INTO TIMEOUT TABLE
                         TIMEOUT[parsed_data[0][0]] = parsed_data[4][1]
                     match_count += 1
         new_data_inverted = modo.invert_join(new_data)
@@ -764,6 +770,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
                     continue
                 DRAFTS_TABLE.extend(parsed_data[0])
                 PICKS_TABLE.extend(parsed_data[1])
+                # !FIXTHIS! INSERT INTO PARSED FILE TABLE, ADD PROC_DT.
                 PARSED_DRAFT_DICT[i] = parsed_data[2]
                 draft_count += 1
 
@@ -5095,6 +5102,7 @@ def remove_record(ignore):
 
     # Remove records from our table data and get table size differences.
     if display == "Matches":
+        # !FIXTHIS! INSERT RECORD INTO SKIP FILES TABLE. DELETE RECORDS FROM MATCH, GAME, PLAY TABLE.
         SKIP_FILES += sel_matchid
         precounts = [len(ALL_DATA[0]),len(ALL_DATA[1]),len(ALL_DATA[2])]
         ALL_DATA[0] = [i for i in ALL_DATA[0] if i[0] not in sel_matchid]
@@ -5105,6 +5113,7 @@ def remove_record(ignore):
         ALL_DATA_INVERTED[2] = [i for i in ALL_DATA_INVERTED[2] if i[0] not in sel_matchid]
         counts = [precounts[0]-len(ALL_DATA[0]),precounts[1]-len(ALL_DATA[1]),precounts[2]-len(ALL_DATA[2])]
     elif display == "Drafts":
+        # !FIXTHIS! INSERT RECORD INTO SKIP FILES TABLE. DELETE RECORDS FROM DRAFT, PICK TABLE. SET DRAFT_ID TO NA IN MATCH TABLE.
         SKIP_DRAFTS += sel_matchid
         for i in ALL_DATA[0]:
             if i[1] in SKIP_DRAFTS:
@@ -5121,6 +5130,7 @@ def remove_record(ignore):
     if ignore == False:
         if display == "Matches":
             for i in sel_matchid:
+                # !FIXTHIS! REMOVE RECORDS FROM SKIP FILES TABLE AND PARSED FILE TABLE.
                 SKIP_FILES.remove(i)
                 for j in PARSED_FILE_DICT:
                     if PARSED_FILE_DICT[j][0] in sel_matchid:
@@ -5128,6 +5138,7 @@ def remove_record(ignore):
                         break
         elif display == "Drafts":
             for i in sel_matchid:
+                # !FIXTHIS! REMOVE RECORDS FROM SKIP FILES TABLE AND PARSED FILE TABLE.
                 SKIP_DRAFTS.remove(i)
                 for j in PARSED_DRAFT_DICT:
                     if PARSED_DRAFT_DICT[j] in sel_matchid:
@@ -5614,6 +5625,7 @@ def clear_skipped_files():
     file_count = len(SKIP_FILES)
     draft_count = len(SKIP_DRAFTS)
 
+    # !FIXTHIS! REMOVE RECORDS FROM SKIP FILES TABLE.
     SKIP_FILES = []
     SKIP_DRAFTS = []
     ask_to_save = True
@@ -5690,19 +5702,183 @@ def debug():
         txt.write(f"    selected: {selected}\n")
 def test():
     # Test function
-    pass
-def init_db():
-    global CONN
-    global debug_str
-    CONN = sqlite3.connect('all_data.db')
-    debug_str += 'Database connection initialized.\n'
-def close_db():
-    global CONN
-    global debug_str
-    if CONN:
-        CONN.close()
-        debug_str += 'Database connection closed.\n'
+    tables = ['Draft','Pick','Match','Game','Play','GameActions','Timeout','Parsed_File','Skipped_File']
+    conn = sqlite3.connect('all_data.db')
+    for i in tables:
+        df = pd.read_sql_query(f'SELECT * FROM {i}', conn)
+        df.to_excel(f'{i}.xlsx', index=False)
+    conn.close()
 
+def create_tables():
+    global debug_str
+
+    draft_query = '''
+    CREATE TABLE IF NOT EXISTS Draft (
+    Draft_ID TEXT PRIMARY KEY,
+    Hero TEXT,
+    Player_2 TEXT,
+    Player_3 TEXT,
+    Player_4 TEXT,
+    Player_5 TEXT,
+    Player_6 TEXT,
+    Player_7 TEXT,
+    Player_8 TEXT,
+    Match_Wins INTEGER,
+    Match_Losses INTEGER,
+    Format TEXT,
+    Date TEXT
+    )
+    '''
+    pick_query = '''
+    CREATE TABLE IF NOT EXISTS Pick (
+    Draft_ID TEXT,
+    Pick TEXT,
+    Pack_Num INTEGER,
+    Pick_Num INTEGER,
+    Pick_Ovr INTEGER,
+    AVAIL_1 TEXT,
+    AVAIL_2 TEXT,
+    AVAIL_3 TEXT,
+    AVAIL_4 TEXT,
+    AVAIL_5 TEXT,
+    AVAIL_6 TEXT,
+    AVAIL_7 TEXT,
+    AVAIL_8 TEXT,
+    AVAIL_9 TEXT,
+    AVAIL_10 TEXT,
+    AVAIL_11 TEXT,
+    AVAIL_12 TEXT,
+    AVAIL_13 TEXT,
+    AVAIL_14 TEXT,
+    FOREIGN KEY (Draft_ID) REFERENCES Draft(Draft_ID)
+    )
+    '''
+    match_query = '''
+    CREATE TABLE IF NOT EXISTS Match (
+    Match_ID TEXT PRIMARY KEY,
+    Draft_ID TEXT,
+    P1 TEXT,
+    P1_Arch TEXT,
+    P1_Subarch TEXT,
+    P2 TEXT,
+    P2_Arch TEXT,
+    P2_Subarch TEXT,
+    P1_Roll INTEGER,
+    P2_Roll INTEGER,
+    Roll_Winner TEXT,
+    P1_Wins INTEGER,
+    P2_Wins INTEGER,
+    Match_Winner TEXT,
+    Format TEXT,
+    Limited_Format TEXT,
+    Match_Type TEXT,
+    Date TEXT
+    )
+    '''
+    game_query = '''
+    CREATE TABLE IF NOT EXISTS Game (
+    Match_ID TEXT,
+    P1 TEXT,
+    P2 TEXT,
+    Game_Num INTEGER,
+    PD_Selector TEXT,
+    PD_Choice TEXT,
+    On_Play TEXT,
+    On_Draw TEXT,
+    P1_Mulls INTEGER,
+    P2_Mulls INTEGER,
+    Turns INTEGER,
+    Game_Winner INTEGER,
+    FOREIGN KEY (Match_ID) REFERENCES Match(Match_ID)
+    )
+    '''
+    play_query = '''
+    CREATE TABLE IF NOT EXISTS Play (
+    Match_ID TEXT,
+    Game_Num INTEGER,
+    Play_Num INTEGER,
+    Turn_Num INTEGER,
+    Casting_Player TEXT,
+    Action TEXT,
+    Primary_Card TEXT,
+    Target1 TEXT,
+    Target2 TEXT,
+    Target3 TEXT,
+    Opp_Target INTEGER,
+    Self_Target INTEGER,
+    Cards_Drawn INTEGER,
+    Attackers INTEGER,
+    Active_Player TEXT,
+    Nonactive_Player TEXT,
+    FOREIGN KEY (Match_ID) REFERENCES Match(Match_ID) !FIXTHIS!
+    '''
+    gameactions_query = '''
+    CREATE TABLE IF NOT EXISTS GameActions (
+    Match_ID TEXT,
+    Game_Num INTEGER,
+    Game_Actions TEXT,
+    FOREIGN KEY (Match_ID) REFERENCES Match(Match_ID) !FIXTHIS!
+    '''
+    timeout_query = '''
+    CREATE TABLE IF NOT EXISTS Timeout (
+    Match_ID TEXT,
+    Timed_Out_User TEXT
+    '''
+    parsed_file_query = '''
+    CREATE TABLE IF NOT EXISTS Parsed_File (
+    Filename TEXT,
+    Record_ID TEXT,
+    Proc_DT TEXT
+    '''
+    skip_files_query = '''
+    CREATE TABLE IF NOT EXISTS Skipped_File (
+    Filename TEXT,
+    Record_ID TEXT,
+    Proc_DT TEXT
+    '''
+    
+    all_queries = [draft_query,pick_query,match_query,game_query,play_query,
+                   gameactions_query,timeout_query,parsed_file_query,skip_files_query]
+    conn = sqlite3.connect('all_data.db')
+    debug_str += 'Database connection initialized.\n'
+    cursor = conn.cursor()
+    for i in all_queries:
+        cursor.execute(i)
+    conn.commit()
+    debug_str += 'Table creation queries committed.\n'
+    conn.close()
+    debug_str += 'Database connection closed.\n'
+    test()
+def table_insert(table,data):
+    global debug_str
+    if table == 'Draft':
+        query = '''
+        '''
+    elif table == 'Pick':
+        pass
+    elif table == 'Match':
+        pass
+    elif table == 'Game':
+        pass
+    elif table == 'Play':
+        pass
+    elif table == 'GameActions':
+        pass
+    elif table == 'Timeout':
+        pass
+    elif table == 'Parsed_File':
+        pass
+    elif table == 'Skipped_File':
+        pass
+    conn = sqlite3.connect('all_data.db')
+    debug_str += 'Database connection initialized.\n'
+    cursor = conn.cursor()
+    cursor.execute(query)
+    conn.commit()
+    debug_str += 'Table creation queries committed.\n'
+    conn.close()
+    debug_str += 'Database connection closed.\n'
+    test()
 
 window = tk.Tk() 
 window.title("MTGO-Tracker")
