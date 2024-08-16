@@ -5737,7 +5737,6 @@ def test():
         df = pd.read_sql_query(f'SELECT * FROM {i}', conn)
         df.to_excel(f'{i}.xlsx', index=False)
     conn.close()
-
 def create_tables():
     global debug_str
     # !FIXTHIS! add foreign key relationships
@@ -5755,7 +5754,8 @@ def create_tables():
     Match_Wins INTEGER,
     Match_Losses INTEGER,
     Format TEXT,
-    Date TEXT
+    Date TEXT,
+    PRIMARY KEY (Draft_ID, Hero)
     )
     '''
     picks_query = '''
@@ -5779,7 +5779,8 @@ def create_tables():
     AVAIL_12 TEXT,
     AVAIL_13 TEXT,
     AVAIL_14 TEXT,
-    FOREIGN KEY (Draft_ID) REFERENCES Draft(Draft_ID)
+    PRIMARY KEY (Draft_ID, Pick_Ovr),
+    FOREIGN KEY (Draft_ID) REFERENCES Drafts(Draft_ID)
     )
     '''
     matches_query = '''
@@ -5801,7 +5802,8 @@ def create_tables():
     Format TEXT,
     Limited_Format TEXT,
     Match_Type TEXT,
-    Date TEXT
+    Date TEXT,
+    PRIMARY KEY (Match_ID, P1)
     )
     '''
     games_query = '''
@@ -5817,7 +5819,9 @@ def create_tables():
     P1_Mulls INTEGER,
     P2_Mulls INTEGER,
     Turns INTEGER,
-    Game_Winner INTEGER
+    Game_Winner INTEGER,
+    PRIMARY KEY (Match_ID, Game_Num, P1),
+    FOREIGN KEY (Match_ID, P1) REFERENCES Matches(Match_ID, P1)
     )
     '''
     plays_query = '''
@@ -5837,32 +5841,34 @@ def create_tables():
     Cards_Drawn INTEGER,
     Attackers INTEGER,
     Active_Player TEXT,
-    Nonactive_Player TEXT
+    Nonactive_Player TEXT,
+    PRIMARY KEY (Match_ID, Game_Num, Play_Num)
     )
     '''
     gameactions_query = '''
     CREATE TABLE IF NOT EXISTS GameActions (
     Match_ID TEXT,
     Game_Num INTEGER,
-    Game_Actions TEXT
+    Game_Actions TEXT,
+    PRIMARY KEY (Match_ID, Game_Num)
     )
     '''
     timeout_query = '''
     CREATE TABLE IF NOT EXISTS Timeout (
-    Match_ID TEXT,
+    Match_ID TEXT PRIMARY KEY,
     Timed_Out_User TEXT
     )
     '''
     parsed_files_query = '''
     CREATE TABLE IF NOT EXISTS Parsed_Files (
-    Filename TEXT,
+    Filename TEXT PRIMARY KEY,
     Record_ID TEXT,
     Proc_DT TEXT
     )
     '''
     skip_files_query = '''
     CREATE TABLE IF NOT EXISTS Skipped_Files (
-    Filename TEXT,
+    Filename TEXT PRIMARY KEY,
     Record_ID TEXT,
     Proc_DT TEXT
     )
