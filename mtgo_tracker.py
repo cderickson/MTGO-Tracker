@@ -551,7 +551,7 @@ def startup():
         SKIP_FILES = pickle.load(open("SKIP_FILES","rb"))
         SKIP_DRAFTS = pickle.load(open("SKIP_DRAFTS","rb"))
         debug_str += 'Save files loaded.\n'
-        print(PARSED_FILE_DICT)
+        
         for i in ALL_DATA[0]:
             if len(i) != len(modo.header("Matches")):
                 past_error_ids.append(i[0])
@@ -598,6 +598,17 @@ def startup():
             table_insert('Skipped_Files',[[match_id,None,None]])
         for draft_id in SKIP_DRAFTS:
             table_insert('Skipped_Files',[[draft_id,None,None]])
+        
+        os.makedirs('old_saves',exist_ok=True)
+        curr_date = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+        shutil.move('ALL_DATA',f'old_saves/ALL_DATA_{curr_date}')
+        shutil.move('TIMEOUT',f'old_saves/TIMEOUT_{curr_date}')
+        shutil.move('DRAFTS_TABLE',f'old_saves/DRAFTS_TABLE_{curr_date}')
+        shutil.move('PICKS_TABLE',f'old_saves/PICKS_TABLE_{curr_date}')
+        shutil.move('PARSED_FILE_DICT',f'old_saves/PARSED_FILE_DICT_{curr_date}')
+        shutil.move('PARSED_DRAFT_DICT',f'old_saves/PARSED_DRAFT_DICT_{curr_date}')
+        shutil.move('SKIP_FILES',f'old_saves/SKIP_FILES_{curr_date}')
+        shutil.move('SKIP_DRAFTS',f'old_saves/SKIP_DRAFTS_{curr_date}')
         test()
         
     except FileNotFoundError:
@@ -5888,7 +5899,7 @@ def create_tables():
     debug_str += 'Database connection closed.\n'
 def table_insert(table,data):
     global debug_str
-    
+
     if table == 'Drafts':
         query = '''
         INSERT OR IGNORE INTO Drafts (Draft_ID, Hero, Player_2, Player_3, Player_4, Player_5, Player_6, Player_7, Player_8, Match_Wins, Match_Losses, Format, Date) 
