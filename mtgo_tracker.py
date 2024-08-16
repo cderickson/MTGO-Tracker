@@ -5739,7 +5739,7 @@ def test():
     conn.close()
 def create_tables():
     global debug_str
-    # !FIXTHIS! add foreign key relationships
+
     drafts_query = '''
     CREATE TABLE IF NOT EXISTS Drafts (
     Draft_ID TEXT PRIMARY KEY,
@@ -5888,50 +5888,50 @@ def create_tables():
     debug_str += 'Database connection closed.\n'
 def table_insert(table,data):
     global debug_str
-    # !FIXTHIS! do we use INSERT OR REPLACE or INSERT OR IGNORE.
+    
     if table == 'Drafts':
         query = '''
-        INSERT INTO Drafts (Draft_ID, Hero, Player_2, Player_3, Player_4, Player_5, Player_6, Player_7, Player_8, Match_Wins, Match_Losses, Format, Date) 
+        INSERT OR IGNORE INTO Drafts (Draft_ID, Hero, Player_2, Player_3, Player_4, Player_5, Player_6, Player_7, Player_8, Match_Wins, Match_Losses, Format, Date) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         '''
     elif table == 'Picks':
         query = '''
-        INSERT INTO Picks (Pick, Pack_Num, Pick_Num, Pick_Ovr, AVAIL_1, AVAIL_2, AVAIL_3, AVAIL_4, AVAIL_5, AVAIL_6, AVAIL_7, AVAIL_8, AVAIL_9, AVAIL_10, AVAIL_11, AVAIL_12, AVAIL_13, AVAIL_14) 
+        INSERT OR IGNORE INTO Picks (Pick, Pack_Num, Pick_Num, Pick_Ovr, AVAIL_1, AVAIL_2, AVAIL_3, AVAIL_4, AVAIL_5, AVAIL_6, AVAIL_7, AVAIL_8, AVAIL_9, AVAIL_10, AVAIL_11, AVAIL_12, AVAIL_13, AVAIL_14) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         '''
     elif table == 'Matches':
         query = '''
-        INSERT INTO Matches (Match_ID, Draft_ID, P1, P1_Arch, P1_Subarch, P2, P2_Arch, P2_Subarch, P1_Roll, P2_Roll, Roll_Winner, P1_Wins, P2_Wins, Match_Winner, Format, Limited_Format, Match_Type, Date) 
+        INSERT OR IGNORE INTO Matches (Match_ID, Draft_ID, P1, P1_Arch, P1_Subarch, P2, P2_Arch, P2_Subarch, P1_Roll, P2_Roll, Roll_Winner, P1_Wins, P2_Wins, Match_Winner, Format, Limited_Format, Match_Type, Date) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         '''
     elif table == 'Games':
         query = '''
-        INSERT INTO Games (Match_ID, P1, P2, Game_Num, PD_Selector, PD_Choice, On_Play, On_Draw, P1_Mulls, P2_Mulls, Turns, Game_Winner) 
+        INSERT OR IGNORE INTO Games (Match_ID, P1, P2, Game_Num, PD_Selector, PD_Choice, On_Play, On_Draw, P1_Mulls, P2_Mulls, Turns, Game_Winner) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         '''
     elif table == 'Plays':
         query = '''
-        INSERT INTO Plays (Match_ID, Game_Num, Play_Num, Turn_Num, Casting_Player, Action, Primary_Card, Target1, Target2, Target3, Opp_Target, Self_Target, Cards_Drawn, Attackers, Active_Player, Nonactive_Player) 
+        INSERT OR IGNORE INTO Plays (Match_ID, Game_Num, Play_Num, Turn_Num, Casting_Player, Action, Primary_Card, Target1, Target2, Target3, Opp_Target, Self_Target, Cards_Drawn, Attackers, Active_Player, Nonactive_Player) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         '''
     elif table == 'GameActions':
         query = '''
-        INSERT INTO GameActions (Match_ID, Game_Num, Game_Actions) 
+        INSERT OR IGNORE INTO GameActions (Match_ID, Game_Num, Game_Actions) 
         VALUES (?, ?, ?)
         '''
     elif table == 'Timeout':
         query = '''
-        INSERT INTO Timeout (Match_ID, Timed_Out_User) 
+        INSERT OR IGNORE INTO Timeout (Match_ID, Timed_Out_User) 
         VALUES (?, ?)
         '''
     elif table == 'Parsed_Files':
         query = '''
-        INSERT INTO Parsed_Files (Filename, Record_ID, Proc_DT) 
+        INSERT OR IGNORE INTO Parsed_Files (Filename, Record_ID, Proc_DT) 
         VALUES (?, ?, ?)
         '''
     elif table == 'Skipped_Files':
         query = '''
-        INSERT INTO Skipped_Files (Record_ID, Reason, Proc_DT) 
+        INSERT OR IGNORE INTO Skipped_Files (Record_ID, Reason, Proc_DT) 
         VALUES (?, ?, ?)
         '''
 
