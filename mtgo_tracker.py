@@ -570,7 +570,6 @@ def startup():
         ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
         print('Creating tables.')
         create_tables()
-        test()
 
         print('Inserting Drafts.')
         table_insert('Plays',DRAFTS_TABLE)
@@ -590,7 +589,7 @@ def startup():
             table_insert('Timeout',[[match_id,timed_out_user]])
         print('Inserting Parsed Files.')
         for filename, (match_id, proc_dt) in PARSED_FILE_DICT.items():
-            table_insert('Parsed_Files',[[filename, match_id, proc_dt]])
+            table_insert('Parsed_Files',[[filename, match_id, proc_dt.strftime("%Y-%m-%d %H:%M:%S")]])
         for filename, draft_id in PARSED_DRAFT_DICT.items():
             table_insert('Parsed_Files',[[filename, draft_id, None]])
         print('Inserting Skipped Files.')
@@ -600,7 +599,7 @@ def startup():
             table_insert('Skipped_Files',[[draft_id,None,None]])
         
         os.makedirs('old_saves',exist_ok=True)
-        curr_date = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+        curr_date = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         shutil.move('ALL_DATA',f'old_saves/ALL_DATA_{curr_date}')
         shutil.move('TIMEOUT',f'old_saves/TIMEOUT_{curr_date}')
         shutil.move('DRAFTS_TABLE',f'old_saves/DRAFTS_TABLE_{curr_date}')
@@ -609,12 +608,10 @@ def startup():
         shutil.move('PARSED_DRAFT_DICT',f'old_saves/PARSED_DRAFT_DICT_{curr_date}')
         shutil.move('SKIP_FILES',f'old_saves/SKIP_FILES_{curr_date}')
         shutil.move('SKIP_DRAFTS',f'old_saves/SKIP_DRAFTS_{curr_date}')
-        test()
         
     except FileNotFoundError:
         debug_str += 'ALL_DATA found, but no other save files.\n'
         pass
-
 
     filter_button["state"] = tk.NORMAL
     clear_button["state"] = tk.NORMAL
@@ -5749,11 +5746,12 @@ def test():
         df.to_excel(f'{i}.xlsx', index=False)
     conn.close()
 def create_tables():
+    global CONN
     global debug_str
 
     drafts_query = '''
     CREATE TABLE IF NOT EXISTS Drafts (
-    Draft_ID TEXT PRIMARY KEY,
+    Draft_ID TEXT,
     Hero TEXT,
     Player_2 TEXT,
     Player_3 TEXT,
@@ -5887,17 +5885,14 @@ def create_tables():
     
     all_queries = [drafts_query,picks_query,matches_query,games_query,plays_query,
                    gameactions_query,timeout_query,parsed_files_query,skip_files_query]
-    conn = sqlite3.connect('all_data.db')
-    debug_str += 'Database connection initialized.\n'
-    cursor = conn.cursor()
+    init_db()
+    cursor = CONN.cursor()
     for i in all_queries:
-        print(i)
         cursor.execute(i)
-    conn.commit()
-    debug_str += 'Table creation queries committed.\n'
-    conn.close()
-    debug_str += 'Database connection closed.\n'
+    commit_db()
+    close_db()
 def table_insert(table,data):
+    global CONN
     global debug_str
 
     if table == 'Drafts':
@@ -5945,15 +5940,26 @@ def table_insert(table,data):
         INSERT OR IGNORE INTO Skipped_Files (Record_ID, Reason, Proc_DT) 
         VALUES (?, ?, ?)
         '''
-
-    conn = sqlite3.connect('all_data.db')
-    debug_str += 'Database connection initialized.\n'
-    cursor = conn.cursor()
+    init_db()
+    cursor = CONN.cursor()
     cursor.executemany(query,data)
-    conn.commit()
-    debug_str += 'Table creation queries committed.\n'
-    conn.close()
+    commit_db()
+    close_db()
+def init_db():
+    global CONN
+    global debug_str
+    CONN = sqlite3.connect('all_data.db')
+    debug_str += 'Database connection initialized.\n'
+def close_db():
+    global CONN
+    global debug_str
+    CONN.close()
     debug_str += 'Database connection closed.\n'
+def commit_db():
+    global CONN
+    global debug_str
+    CONN.commit()
+    debug_str += 'Table creation queries committed.\n'
 
 window = tk.Tk() 
 window.title("MTGO-Tracker")
@@ -6122,6 +6128,7 @@ s.map("Treeview",
       background=[("selected","#4a6984")],
       foreground=[("selected","#ffffff")])
 
+window.update()
 startup()
 window.protocol("WM_DELETE_WINDOW", lambda : exit_select())
 
