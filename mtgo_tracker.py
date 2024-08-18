@@ -68,21 +68,25 @@ def save(exit):
     ask_to_save = False
 
     save_settings()
-    os.chdir(FILEPATH_ROOT + "\\" + "save")
+    #os.chdir(FILEPATH_ROOT + "\\" + "save")
 
-    pickle.dump(ALL_DATA,open("ALL_DATA","wb"))
-    pickle.dump(TIMEOUT,open("TIMEOUT","wb"))
-    pickle.dump(DRAFTS_TABLE,open("DRAFTS_TABLE","wb"))
-    pickle.dump(PICKS_TABLE,open("PICKS_TABLE","wb"))
-    pickle.dump(PARSED_FILE_DICT,open("PARSED_FILE_DICT","wb"))
-    pickle.dump(PARSED_DRAFT_DICT,open("PARSED_DRAFT_DICT","wb"))
-    pickle.dump(SKIP_FILES,open("SKIP_FILES","wb"))
-    pickle.dump(SKIP_DRAFTS,open("SKIP_DRAFTS","wb"))
+    # pickle.dump(ALL_DATA,open("ALL_DATA","wb"))
+    # pickle.dump(TIMEOUT,open("TIMEOUT","wb"))
+    # pickle.dump(DRAFTS_TABLE,open("DRAFTS_TABLE","wb"))
+    # pickle.dump(PICKS_TABLE,open("PICKS_TABLE","wb"))
+    # pickle.dump(PARSED_FILE_DICT,open("PARSED_FILE_DICT","wb"))
+    # pickle.dump(PARSED_DRAFT_DICT,open("PARSED_DRAFT_DICT","wb"))
+    # pickle.dump(SKIP_FILES,open("SKIP_FILES","wb"))
+    # pickle.dump(SKIP_DRAFTS,open("SKIP_DRAFTS","wb"))
+    close_db(save=True)
+    
     update_status_bar(status="Save complete. Data will be loaded automatically on next startup.")
     os.chdir(FILEPATH_ROOT)
 
     if exit:
         close()
+    else:
+        init_db()
 def save_window(exit):
     height = 100
     width =  300
@@ -240,6 +244,8 @@ def clear_loaded(importingCopies):
         SKIP_FILES =        []
         SKIP_DRAFTS =       []
 
+    close_db(save=False)
+
     match_button["state"] = tk.DISABLED
     game_button["state"] = tk.DISABLED
     play_button["state"] = tk.DISABLED
@@ -384,6 +390,11 @@ def delete_session():
             if os.path.exists(i):
                 session_exists = True
                 os.remove(i)
+        
+        close_db(save=False)
+        if os.path.exists('all_data.db'):
+            session_exists = True
+            os.remove(i)
 
         if session_exists == True:
             update_status_bar(status="Saved session data has been deleted.")
@@ -541,6 +552,11 @@ def startup():
         update_status_bar(status="No session data to load. Import your MTGO GameLog files to get started.")
         os.chdir(FILEPATH_ROOT)
         return
+    
+    print('Creating tables.')
+    init_db()
+    create_tables()
+
     try:
         ALL_DATA = pickle.load(open("ALL_DATA","rb"))
         TIMEOUT = pickle.load(open("TIMEOUT","rb"))
@@ -568,8 +584,6 @@ def startup():
             ALL_DATA[2] = [x for x in ALL_DATA[2] if x[0] not in past_error_ids]
 
         ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
-        print('Creating tables.')
-        create_tables()
 
         print('Inserting Drafts.')
         table_insert('Plays',DRAFTS_TABLE)
@@ -671,21 +685,21 @@ def set_display(d,update_status,start_index,reset):
         if resize:
             if MAIN_WINDOW_SIZE[0] == "large":
                 window.geometry("1740x" + str(MAIN_WINDOW_SIZE[2]))
-        print_data(ALL_DATA[0],modo.header(display),update_status,start_index,apply_filter=True)
+        print_data(headers=modo.header(display),update_status=update_status,start_index=start_index,apply_filter=True)
     elif d == "Games":
         if resize:
             if MAIN_WINDOW_SIZE[0] == "large":
                 window.geometry("1315x" + str(MAIN_WINDOW_SIZE[2]))
-        print_data(ALL_DATA[1],modo.header(display),update_status,start_index,apply_filter=True)
+        print_data(headers=modo.header(display),update_status=update_status,start_index=start_index,apply_filter=True)
     elif d == "Plays":
         if resize:
             if MAIN_WINDOW_SIZE[0] == "large":
                 window.geometry("1665x" + str(MAIN_WINDOW_SIZE[2]))
-        print_data(ALL_DATA[2],modo.header(display),update_status,start_index,apply_filter=True)
+        print_data(headers=modo.header(display),update_status=update_status,start_index=start_index,apply_filter=True)
     elif d == "Drafts":
-        print_data(DRAFTS_TABLE,modo.header(display),update_status,start_index,apply_filter=True)
+        print_data(headers=modo.header(display),update_status=update_status,start_index=start_index,apply_filter=True)
     elif d == "Picks":
-        print_data(PICKS_TABLE,modo.header(display),update_status,start_index,apply_filter=True)
+        print_data(headers=modo.header(display),update_status=update_status,start_index=start_index,apply_filter=True)
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def get_all_data(fp_logs,fp_drafts,copy):
@@ -836,10 +850,13 @@ def get_all_data(fp_logs,fp_drafts,copy):
         clear_button["state"] = tk.NORMAL
         data_loaded = True
     os.chdir(FILEPATH_ROOT)
-def print_data(data,headers,update_status,start_index,apply_filter):
+def print_data(headers,update_status,start_index,apply_filter,data=None):
+    global CONN
     global new_import
     global curr_data
     
+    cursor = CONN.cursor()
+
     small_headers = ["P1_Roll","P2_Roll","P1_Wins","P2_Wins","Game_Num","Play_Num","Turn_Num","Pack_Num","Pick_Num","Pick_Ovr"]
     med_headers = ["Avail_1","Avail_2","Avail_3","Avail_4","Avail_5","Avail_6","Avail_7","Avail_8","Avail_9","Avail_10","Avail_11","Avail_12","Avail_13","Avail_14"]
     large_headers = ["Card"]
@@ -866,26 +883,26 @@ def print_data(data,headers,update_status,start_index,apply_filter):
     # Build dataframe being printed.
     if isinstance(data, pd.DataFrame):
         df = data
-    elif data == None:
-        df = df = pd.DataFrame([],columns=headers)
-    elif (HERO != "") & (display == "Matches"):
-        df = pd.DataFrame(ALL_DATA_INVERTED[0],columns=headers)
-        df = df[(df.P1 == HERO)]
-    elif (HERO != "") & (display == "Games"):
-        df = pd.DataFrame(ALL_DATA_INVERTED[1],columns=headers)
-        df = df[(df.P1 == HERO)]
-    elif (display == "Drafts"):
-        df = pd.DataFrame(DRAFTS_TABLE,columns=headers)
-    elif (display == "Picks"):
-        df = pd.DataFrame(PICKS_TABLE,columns=headers)
-    else:
-        df = pd.DataFrame(data,columns=headers)
-    total = df.shape[0]
-    curr_data = df
+    elif data == 'Empty':
+        df = pd.DataFrame([],columns=headers)
+    # elif (HERO != "") & (display == "Matches"):
+    #     df = pd.DataFrame(ALL_DATA_INVERTED[0],columns=headers)
+    #     df = df[(df.P1 == HERO)]
+    # elif (HERO != "") & (display == "Games"):
+    #     df = pd.DataFrame(ALL_DATA_INVERTED[1],columns=headers)
+    #     df = df[(df.P1 == HERO)]
+    # elif (display == "Drafts"):
+    #     df = pd.DataFrame(DRAFTS_TABLE,columns=headers)
+    # elif (display == "Picks"):
+    #     df = pd.DataFrame(PICKS_TABLE,columns=headers)
+    # else:
+    #     df = pd.DataFrame(data,columns=headers)
+    # curr_data = df
 
+    filter_list = []
     if apply_filter:
         # Apply existing filters.
-        filtered_list = []
+        # filtered_list = []
         for key in filter_dict:
             if key not in headers:
                 continue
@@ -896,44 +913,92 @@ def print_data(data,headers,update_status,start_index,apply_filter):
                     value = i[2:]
                 if i[0] == "=":
                     if key == "Date":
-                        filtered_list.append(df[(df[key].str.contains(value[0:10]))])
+                        # filtered_list.append(df[(df[key].str.contains(value[0:10]))])
+                        filter_query += f"{key} LIKE %{value}%"
                     else:
-                        filtered_list.append(df[(df[key] == value)])
+                        if isinstance(value, int):
+                            filter_list.append(f"{key} = {value}")
+                        else:
+                            filter_list.append(f"{key} = '{value}'")
+                        # filtered_list.append(df[(df[key] == value)])
                 elif i[0] == ">":
-                    filtered_list.append(df[(df[key] > value)])
+                    # filtered_list.append(df[(df[key] > value)])
+                    if isinstance(value, int):
+                        filter_list.append(f"{key} > {value}")
+                    else:
+                        filter_list.append(f"{key} > '{value}'")
                 elif i[0] == "<":
-                    filtered_list.append(df[(df[key] < value)])
-            if len(filtered_list) == 0:
-                pass
-            elif len(filtered_list) == 1:
-                df = filtered_list[0]
-            else:
-                index = 1
-                df = filtered_list[0]
-                while index < (len(filtered_list)):
-                    df = pd.merge(df,filtered_list[index],how="outer")
-                    index += 1
-            filtered_list.clear()
+                    # filtered_list.append(df[(df[key] < value)])
+                    if isinstance(value, int):
+                        filter_list.append(f"{key} < {value}")
+                    else:
+                        filter_list.append(f"{key} < '{value}'")
+            # if len(filtered_list) == 0:
+            #     pass
+            # elif len(filtered_list) == 1:
+            #     df = filtered_list[0]
+            # else:
+            #     index = 1
+            #     df = filtered_list[0]
+            #     while index < (len(filtered_list)):
+            #         df = pd.merge(df,filtered_list[index],how="outer")
+            #         index += 1
+            # filtered_list.clear()
+        
         # Apply Default Sorting.
-        if display == "Matches":
-            df = df.sort_values(by=["Date"],ascending=False)
-        elif display == "Games":
-            df = pd.merge(df, pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))[['Match_ID', 'Date']], on="Match_ID", how="left").drop_duplicates(subset=["Match_ID","Game_Num"])
-            df = df.sort_values(by=["Match_ID","Game_Num"],ascending=(False,True))
-            #df = df.drop('Date', axis=1)
-        elif display == "Plays":
-            df = pd.merge(df, pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))[['Match_ID', 'Date']], on="Match_ID", how="left").drop_duplicates(subset=["Match_ID","Game_Num","Play_Num"])
-            df = df.sort_values(by=["Match_ID","Game_Num","Play_Num"],ascending=(False,True,True))
-            #df = df.drop('Date', axis=1)
-        elif display == "Drafts":
-            df = df.sort_values(by=["Date"],ascending=False)
-        elif display == "Picks":
-            df = df.sort_values(by=["Draft_ID","Pick_Ovr"],ascending=(False,True))
-        curr_data = df
-
-    df_rows = df.to_numpy().tolist()
+    if display == "Matches":
+        # df = df.sort_values(by=["Date"],ascending=False)
+        filter_query = f'SELECT * FROM Matches'
+        if HERO != '':
+            filter_list.append(f"P1 = '{HERO}'")
+        if len(filter_query) > 0:
+            filter_query += ' WHERE '
+            filter_query += ' AND '.join(filter_list)
+        filter_query += ' ORDER BY Date ASC'
+    elif display == "Games":
+        # df = pd.merge(df, pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))[['Match_ID', 'Date']], on="Match_ID", how="left").drop_duplicates(subset=["Match_ID","Game_Num"])
+        # df = df.sort_values(by=["Match_ID","Game_Num"],ascending=(False,True))
+        filter_query = f'SELECT Games.*, Matches.Date FROM Games LEFT JOIN Matches ON Games.Match_ID = Matches.Match_ID'
+        if HERO != '':
+            filter_list.append(f"P1 = '{HERO}'")
+        if len(filter_query) > 0:
+            filter_query += ' WHERE '
+            filter_query += ' AND '.join(filter_list)
+        filter_query += ' ORDER BY Date DESC, Game_Num ASC'
+        # df = df.drop('Date', axis=1)
+    elif display == "Plays":
+        # df = pd.merge(df, pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))[['Match_ID', 'Date']], on="Match_ID", how="left").drop_duplicates(subset=["Match_ID","Game_Num","Play_Num"])
+        # df = df.sort_values(by=["Match_ID","Game_Num","Play_Num"],ascending=(False,True,True))
+        filter_query = f'SELECT Plays.*, Matches.Date FROM Plays LEFT JOIN Matches ON Plays.Match_ID = Matches.Match_ID'
+        if len(filter_query) > 0:
+            filter_query += ' WHERE '
+            filter_query += ' AND '.join(filter_list)
+        filter_query += ' ORDER BY Date DESC, Game_Num ASC, Play_Num ASC'
+        # df = df.drop('Date', axis=1)
+    elif display == "Drafts":
+        # df = df.sort_values(by=["Date"],ascending=False)
+        filter_query = f'SELECT * FROM Drafts'
+        if HERO != '':
+            filter_list.append(f"Hero = '{HERO}'")
+        if len(filter_query) > 0:
+            filter_query += ' WHERE '
+            filter_query += ' AND '.join(filter_list)
+        filter_query += ' ORDER BY Date DESC'
+    elif display == "Picks":
+        # df = df.sort_values(by=["Draft_ID","Pick_Ovr"],ascending=(False,True))
+        filter_query = f'SELECT * FROM Picks'
+        if len(filter_query) > 0:
+            filter_query += ' WHERE '
+            filter_query += ' AND '.join(filter_list)
+        filter_query += ' ORDER BY Draft_ID DESC, Pick_Ovr ASC'
+    # curr_data = df
 
     end_index = start_index + ln_per_page
+    filter_query += f' LIMIT {ln_per_page} OFFSET {start_index};'
+
+    df = pd.read_sql_query(filter_query, CONN)
+    df_rows = df.to_numpy().tolist()
+
     if len(df_rows) <= end_index:
         end_index = len(df_rows)
         next_button["state"] = tk.DISABLED
@@ -945,8 +1010,8 @@ def print_data(data,headers,update_status,start_index,apply_filter):
     else:
         back_button["state"] = tk.NORMAL
 
-    for i in range(start_index,end_index):
-        tree1.insert("","end",values=df_rows[i])
+    for i in df_rows:
+        tree1.insert("","end",values=i)
 
     if new_import == True:
         new_import = False
@@ -1600,34 +1665,23 @@ def tree_double(event):
     elif (display == "Drafts"):
         add_filter_setting("Draft_ID",tree1.item(tree1.focus(),"values")[0],"=")
         set_display("Picks",update_status=True,start_index=0,reset=True)
-def back2():
-    global filter_dict
-    if "Match_ID" in filter_dict:
-        match_id = filter_dict["Match_ID"][0][2:]
-        clear_filter(update_status=False,reload_display=True)
-        add_filter_setting("Match_ID",match_id,"=")
-    else:
-        clear_filter(update_status=False,reload_display=True)
-    if display == "Games":
-        set_display("Matches",update_status=True,start_index=0,reset=True)
-    elif display == "Plays":
-        set_display("Games",update_status=True,start_index=0,reset=True)
 def back():
     global display_index
     display_index -= ln_per_page
     if (display == "Drafts") or (display == "Picks"):
-        print_data(curr_data,headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
+        print_data(headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
     else:
-        print_data(curr_data,headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
+        print_data(headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def next_page():
     global display_index
+    global curr_data
     display_index += ln_per_page
     if (display == "Drafts") or (display == "Picks"):
-        print_data(curr_data,headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
+        print_data(headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
     else:
-        print_data(curr_data,headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
+        print_data(headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def export2(current=False,matches=False,games=False,plays=False,drafts=False,picks=False,_csv=False,_excel=False,inverted=False,filtered=False):
@@ -1791,9 +1845,14 @@ def set_default_hero():
         hero_window.grab_release()
         hero_window.destroy()
     
-    df0_i = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
-    hero_options = df0_i.P1.tolist()
-    hero_options = sorted(list(set(hero_options)),key=str.casefold)
+    global CONN
+    cursor = CONN.cursor()
+
+    # df0_i = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
+    # hero_options = df0_i.P1.tolist()
+    # hero_options = sorted(list(set(hero_options)),key=str.casefold)
+    cursor.execute('SELECT DISTINCT P1 FROM Matches')
+    hero_options = [row[0] for row in cursor.fetchall()]
 
     mid_frame = tk.LabelFrame(hero_window,text="")
     bot_frame = tk.Frame(hero_window)
@@ -5090,6 +5149,7 @@ def get_stats():
 def close():
     # Close window and exit program.
     debug()
+    close_db(save=False)
     window.destroy()
 def exit_select():
     if ask_to_save:
@@ -5885,12 +5945,9 @@ def create_tables():
     
     all_queries = [drafts_query,picks_query,matches_query,games_query,plays_query,
                    gameactions_query,timeout_query,parsed_files_query,skip_files_query]
-    init_db()
     cursor = CONN.cursor()
     for i in all_queries:
         cursor.execute(i)
-    commit_db()
-    close_db()
 def table_insert(table,data):
     global CONN
     global debug_str
@@ -5940,26 +5997,34 @@ def table_insert(table,data):
         INSERT OR IGNORE INTO Skipped_Files (Record_ID, Reason, Proc_DT) 
         VALUES (?, ?, ?)
         '''
-    init_db()
     cursor = CONN.cursor()
     cursor.executemany(query,data)
-    commit_db()
-    close_db()
 def init_db():
     global CONN
     global debug_str
+
     CONN = sqlite3.connect('all_data.db')
+    cursor = CONN.cursor()
+    cursor.execute('''
+        BEGIN TRANSACTION;
+        ''')
     debug_str += 'Database connection initialized.\n'
-def close_db():
+def close_db(save):
     global CONN
     global debug_str
+
+    if save == True:
+        CONN.commit()
+        debug_str += 'Table creation queries committed.\n'
+    elif save == False:
+        cursor = CONN.cursor()
+        cursor.execute('''
+        ROLLBACK;
+        ''')
+        debug_str += 'Database changes rolled back.\n'
     CONN.close()
+    CONN = None
     debug_str += 'Database connection closed.\n'
-def commit_db():
-    global CONN
-    global debug_str
-    CONN.commit()
-    debug_str += 'Table creation queries committed.\n'
 
 window = tk.Tk() 
 window.title("MTGO-Tracker")
