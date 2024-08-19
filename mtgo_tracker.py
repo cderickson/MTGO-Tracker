@@ -708,10 +708,10 @@ def get_all_data(fp_logs,fp_drafts,copy):
     global TIMEOUT
     global DRAFTS_TABLE
     global PICKS_TABLE
-    global PARSED_FILE_DICT
     global PARSED_DRAFT_DICT
     global SKIP_FILES
     global SKIP_DRAFTS
+    global CONN
     global data_loaded
     global new_import
     global ask_to_save
@@ -721,6 +721,14 @@ def get_all_data(fp_logs,fp_drafts,copy):
     match_count = 0
     draft_count = 0
     skip_dict = {}
+
+    # init_db()
+    cursor = CONN.cursor()
+    cursor.execute('SELECT Filename FROM Parsed_Files')
+    parsed_files = {row[0] for row in cursor.fetchall()}
+    cursor.execute('SELECT Record_ID FROM Skipped_Files')
+    skipped_files = {row[0] for row in cursor.fetchall()}
+
     if (fp_logs != "No Default GameLogs Folder"):
         new_data = [[],[],[],{}]
         os.chdir(fp_logs)
@@ -728,7 +736,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
             for i in files:
                 if ("Match_GameLog_" not in i) or (len(i) < 30):
                     pass
-                elif (i in PARSED_FILE_DICT):
+                elif (i in parsed_files):
                     os.chdir(root)
                 else:
                     os.chdir(root)
@@ -753,14 +761,14 @@ def get_all_data(fp_logs,fp_drafts,copy):
                         debug_str += f'Error while parsing GameLog: {i}: {str(error)}\n'
                         error_count += 1
                         continue
-                    if parsed_data[0][0] in SKIP_FILES:
-                        debug_str += f'Skipped GameLog (in SKIP_FILES): {i}\n'
+                    if parsed_data[0][0] in skipped_files:
+                        debug_str += f'Skipped GameLog (in skipped_files): {i}\n'
                         continue
                     if isinstance(parsed_data, str):
                         skip_dict[i] = parsed_data
                         continue
-                    # !FIXTHIS! INSERT INTO PARSED FILE TABLE
-                    PARSED_FILE_DICT[i] = (parsed_data[0][0],datetime.datetime.strptime(mtime,"%a %b %d %H:%M:%S %Y"))
+                    table_insert(table='Parsed_Files',data=[i,parsed_data[0][0],datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
+
                     new_data[0].append(parsed_data[0])
                     for i in parsed_data[1]:
                         new_data[1].append(i)
@@ -769,17 +777,14 @@ def get_all_data(fp_logs,fp_drafts,copy):
                     for i in parsed_data[3]:
                         new_data[3] = new_data[3] | parsed_data[3]
                     if parsed_data[4][0] == True:
-                        # !FIXTHIS! INSERT INTO TIMEOUT TABLE
-                        TIMEOUT[parsed_data[0][0]] = parsed_data[4][1]
+                        table_insert(table='Timeout',data=[[parsed_data[0][0],parsed_data[4][1]]])
                     match_count += 1
         new_data_inverted = modo.invert_join(new_data)
-        for index in range(3):
-            for j in new_data[index]:
-                ALL_DATA[index].append(j)
-            for j in new_data_inverted[index]:
-                ALL_DATA_INVERTED[index].append(j)
-        ALL_DATA[3] = ALL_DATA[3] | new_data[3]
-        ALL_DATA_INVERTED[3] = ALL_DATA_INVERTED[3] | new_data_inverted[3]
+        table_insert(table='Matches',data=new_data_inverted[0])
+        table_insert(table='Games',data=new_data_inverted[1])
+        table_insert(table='Plays',data=new_data_inverted[2])
+        for key,value in new_data_inverted[3].items():
+            table_insert(table='GameActions',data=[[key[:-2],int(key[-1]),'\n'.join(value)]])
 
     if (fp_drafts != "No Default DraftLogs Folder"):
         os.chdir(fp_drafts)
@@ -793,8 +798,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
                     continue
             except:
                 continue
-
-            if (i in PARSED_DRAFT_DICT):
+            if (i in parsed_files):
                 os.chdir(root)
             else:
                 os.chdir(root)
@@ -816,13 +820,12 @@ def get_all_data(fp_logs,fp_drafts,copy):
                     debug_str += f'Error while parsing DraftLog: {i}: {error.message}\n'
                     error_count += 1
                     continue
-                if parsed_data[0][0][0] in SKIP_DRAFTS:
+                if parsed_data[0][0][0] in skipped_files:
                     debug_str += f'Skipped DraftLog (in SKIP_DRAFTS): {i}\n'
                     continue
-                DRAFTS_TABLE.extend(parsed_data[0])
-                PICKS_TABLE.extend(parsed_data[1])
-                # !FIXTHIS! INSERT INTO PARSED FILE TABLE, ADD PROC_DT. ,datetime.datetime.strptime(mtime,"%a %b %d %H:%M:%S %Y")
-                PARSED_DRAFT_DICT[i] = parsed_data[2]
+                table_insert(table='Drafts',data=parsed_data[0])
+                table_insert(table='Picks',data=parsed_data[1])
+                table_insert(table='Parsed_Files',data=[[i,parsed_data[2],datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]])
                 draft_count += 1
 
     if (match_count == 1) & (draft_count == 1):
@@ -845,7 +848,11 @@ def get_all_data(fp_logs,fp_drafts,copy):
         ask_to_save = True
     new_import = True
 
-    if (len(ALL_DATA[0]) != 0) or (len(DRAFTS_TABLE) != 0):
+    cursor.execute('SELECT COUNT(*) FROM Matches')
+    match_records = cursor.fetchone()[0]
+    cursor.execute('SELECT COUNT(*) FROM Drafts')
+    draft_records = cursor.fetchone()[0]
+    if (match_records != 0) or (draft_records != 0):
         filter_button["state"] = tk.NORMAL
         clear_button["state"] = tk.NORMAL
         data_loaded = True
@@ -5176,16 +5183,11 @@ def update_status_bar(status):
     debug_str += f'{status}\n'
     print(status)
 def remove_record(ignore):
-    global ALL_DATA
-    global ALL_DATA_INVERTED
-    global DRAFTS_TABLE
-    global PICKS_TABLE
-    global PARSED_FILE_DICT
-    global PARSED_DRAFT_DICT
-    global SKIP_FILES
-    global SKIP_DRAFTS
+    global CONN
     global ask_to_save
     global selected
+
+    cursor = CONN.cursor()
 
     # Return if nothing is selected.
     selected = tree1.selection()
@@ -5196,64 +5198,64 @@ def remove_record(ignore):
     sel_matchid = []
     for i in selected:
         sel_matchid.append(list(tree1.item(i,"values"))[0])
+    sel_matchid_tuple = tuple(sel_matchid)
 
     # Remove records from our table data and get table size differences.
     if display == "Matches":
-        # !FIXTHIS! INSERT RECORD INTO SKIP FILES TABLE. DELETE RECORDS FROM MATCH, GAME, PLAY TABLE.
-        SKIP_FILES += sel_matchid
-        precounts = [len(ALL_DATA[0]),len(ALL_DATA[1]),len(ALL_DATA[2])]
-        ALL_DATA[0] = [i for i in ALL_DATA[0] if i[0] not in sel_matchid]
-        ALL_DATA[1] = [i for i in ALL_DATA[1] if i[0] not in sel_matchid]
-        ALL_DATA[2] = [i for i in ALL_DATA[2] if i[0] not in sel_matchid]
-        ALL_DATA_INVERTED[0] = [i for i in ALL_DATA_INVERTED[0] if i[0] not in sel_matchid]
-        ALL_DATA_INVERTED[1] = [i for i in ALL_DATA_INVERTED[1] if i[0] not in sel_matchid]
-        ALL_DATA_INVERTED[2] = [i for i in ALL_DATA_INVERTED[2] if i[0] not in sel_matchid]
-        counts = [precounts[0]-len(ALL_DATA[0]),precounts[1]-len(ALL_DATA[1]),precounts[2]-len(ALL_DATA[2])]
+        for i in sel_matchid:
+            table_insert(table='Skipped_Files',data=[[i,'Ignored.',datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]])
+        precounts = []
+        cursor.execute('SELECT COUNT(DISTINCT Match_ID) FROM Matches')
+        precounts.append(cursor.fetchone()[0])
+        cursor.execute('SELECT COUNT(DISTINCT Match_ID, Game_Num) FROM Games')
+        precounts.append(cursor.fetchone()[0])
+        cursor.execute('SELECT COUNT(*) FROM Plays')
+        precounts.append(cursor.fetchone()[0])
+        cursor.execute(f'DELETE FROM Matches WHERE Match_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)
+        cursor.execute(f'DELETE FROM Games WHERE Match_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)
+        cursor.execute(f'DELETE FROM Matches WHERE Match_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)
+        counts = []
+        cursor.execute('SELECT COUNT(DISTINCT Match_ID) FROM Matches')
+        counts.append(cursor.fetchone()[0])
+        cursor.execute('SELECT COUNT(DISTINCT Match_ID, Game_Num) FROM Games')
+        counts.append(cursor.fetchone()[0])
+        cursor.execute('SELECT COUNT(*) FROM Plays')
+        counts.append(cursor.fetchone()[0])
     elif display == "Drafts":
-        # !FIXTHIS! INSERT RECORD INTO SKIP FILES TABLE. DELETE RECORDS FROM DRAFT, PICK TABLE. SET DRAFT_ID TO NA IN MATCH TABLE.
-        SKIP_DRAFTS += sel_matchid
-        for i in ALL_DATA[0]:
-            if i[1] in SKIP_DRAFTS:
-                i[1] = 'NA'
-        for i in ALL_DATA_INVERTED[0]:
-            if i[1] in SKIP_DRAFTS:
-                i[1] = 'NA'
-        precounts = [len(DRAFTS_TABLE),len(PICKS_TABLE)]
-        DRAFTS_TABLE = [i for i in DRAFTS_TABLE if i[0] not in sel_matchid]
-        PICKS_TABLE = [i for i in PICKS_TABLE if i[0] not in sel_matchid]
-        counts = [precounts[0]-len(DRAFTS_TABLE),precounts[1]-len(PICKS_TABLE)]
+        for i in sel_matchid:
+            table_insert(table='Skipped_Files',data=[[i,'Ignored.',datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]])
+        # Updating Matches.Draft_ID to NA for skipped Draft.
+        cursor.execute(f'UPDATE Matches SET Draft_ID = "NA" WHERE Draft_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)
+        precounts = []
+        cursor.execute('SELECT COUNT(*) FROM Drafts')
+        precounts.append(cursor.fetchone()[0])
+        cursor.execute('SELECT COUNT(*) FROM Picks')
+        precounts.append(cursor.fetchone()[0])
+        cursor.execute(f'DELETE FROM Drafts WHERE Draft_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)
+        cursor.execute(f'DELETE FROM Picks WHERE Draft_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)
+        counts = []
+        cursor.execute('SELECT COUNT(*) FROM Drafts')
+        counts.append(cursor.fetchone()[0])
+        cursor.execute('SELECT COUNT(*) FROM Picks')
+        counts.append(cursor.fetchone()[0])
 
     # Remove GameLog filename from our list of previously parsed files.
     if ignore == False:
-        if display == "Matches":
-            for i in sel_matchid:
-                # !FIXTHIS! REMOVE RECORDS FROM SKIP FILES TABLE AND PARSED FILE TABLE.
-                SKIP_FILES.remove(i)
-                for j in PARSED_FILE_DICT:
-                    if PARSED_FILE_DICT[j][0] in sel_matchid:
-                        PARSED_FILE_DICT.pop(j)
-                        break
-        elif display == "Drafts":
-            for i in sel_matchid:
-                # !FIXTHIS! REMOVE RECORDS FROM SKIP FILES TABLE AND PARSED FILE TABLE.
-                SKIP_DRAFTS.remove(i)
-                for j in PARSED_DRAFT_DICT:
-                    if PARSED_DRAFT_DICT[j] in sel_matchid:
-                        PARSED_DRAFT_DICT.pop(j)
-                        break          
+        cursor.execute(f'DELETE FROM Skipped_Files WHERE Record_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)
+        cursor.execute(f'DELETE FROM Parsed_Files WHERE Record_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)     
 
     ask_to_save = True
     set_display(display,update_status=False,start_index=0,reset=True)
     if display == "Matches":
         if len(selected) == 1:
-            update_status_bar(f"Removed {counts[0]} Match, {counts[1]} Games, and {counts[2]} Plays from Database.")
+            update_status_bar(f"Removed {precounts[0]-counts[0]} Match, {precounts[1]-counts[1]} Games, and {precounts[2]-counts[2]} Plays from Database.")
         else:
-            update_status_bar(f"Removed {counts[0]} Matches, {counts[1]} Games, and {counts[2]} Plays from Database.")
+            update_status_bar(f"Removed {precounts[0]-counts[0]} Matches, {precounts[1]-counts[1]} Games, and {precounts[2]-counts[2]} Plays from Database.")
     elif display == "Drafts":
         if len(selected) == 1:
-            update_status_bar(f"Removed {counts[0]} Draft and {counts[1]} Draft Picks from Database.")
+            update_status_bar(f"Removed {precounts[0]-counts[0]} Draft and {precounts[1]-counts[1]} Draft Picks from Database.")
         else:
-            update_status_bar(f"Removed {counts[0]} Drafts and {counts[1]} Draft Picks from Database.")
+            update_status_bar(f"Removed {precounts[0]-counts[0]} Drafts and {precounts[1]-counts[1]} Draft Picks from Database.")
 def remove_select():
     height = 150
     width =  350
@@ -5715,19 +5717,17 @@ def update_auxiliary():
 
     update_window.protocol("WM_DELETE_WINDOW", lambda : close_update_window())
 def clear_skipped_files():
-    global SKIP_FILES
-    global SKIP_DRAFTS
     global ask_to_save
+    global CONN
 
-    file_count = len(SKIP_FILES)
-    draft_count = len(SKIP_DRAFTS)
+    cursor = CONN.cursor()
+    cursor.execute('SELECT COUNT(*) FROM Skipped_Files')
+    file_count = cursor.fetchone()[0]
 
-    # !FIXTHIS! REMOVE RECORDS FROM SKIP FILES TABLE.
-    SKIP_FILES = []
-    SKIP_DRAFTS = []
+    cursor.execute('DELETE FROM Skipped_Files')
     ask_to_save = True
 
-    update_status_bar(status=f"Made all ignored files scannable ({file_count} GameLogs and {draft_count} DraftLogs).")
+    update_status_bar(status=f"Made all ignored files scannable ({file_count} GameLogs and/or DraftLogs).")
 def debug():
     os.chdir(FILEPATH_ROOT)
     with open("DEBUG.txt","w",encoding="utf-8") as txt:
@@ -5937,8 +5937,8 @@ def create_tables():
     '''
     skip_files_query = '''
     CREATE TABLE IF NOT EXISTS Skipped_Files (
-    Filename TEXT PRIMARY KEY,
     Record_ID TEXT,
+    Reason TEXT,
     Proc_DT TEXT
     )
     '''
