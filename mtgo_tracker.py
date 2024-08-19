@@ -923,7 +923,7 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
                 if i[0] == "=":
                     if key == "Date":
                         # filtered_list.append(df[(df[key].str.contains(value[0:10]))])
-                        filter_query += f"{key} LIKE %{value}%"
+                        filter_list += f"{key} LIKE %{value}%"
                     else:
                         if isinstance(value, int):
                             filter_list.append(f"{key} = {value}")
@@ -1695,6 +1695,7 @@ def next_page():
     remove_button["state"] = tk.DISABLED
 def export2(current=False,matches=False,games=False,plays=False,drafts=False,picks=False,_csv=False,_excel=False,inverted=False,filtered=False):
     global FILEPATH_EXPORT
+    global CONN
     fp = FILEPATH_EXPORT
     if (FILEPATH_EXPORT is None) or (FILEPATH_EXPORT == ""):
         FILEPATH_EXPORT = filedialog.askdirectory()
@@ -1705,6 +1706,7 @@ def export2(current=False,matches=False,games=False,plays=False,drafts=False,pic
     file_names = []
     header_list = []
     data_to_write = []
+    cursor = CONN.cursor()
 
     if current:
         file_names.append("Current")
@@ -1714,55 +1716,49 @@ def export2(current=False,matches=False,games=False,plays=False,drafts=False,pic
             header_list.append(modo.header(display))
         if display == "Matches":
             if ((HERO != "") & (filtered)):
-                df = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header(display))
-                df = df[(df.P1 == HERO)]
+                df = pd.read_sql_query(f'SELECT * FROM Matches WHERE P1 = "{HERO}";',CONN)
             else:
-                df = pd.DataFrame(ALL_DATA[0],columns=modo.header(display))
+                df = pd.read_sql_query(f'SELECT * FROM Matches;',CONN)
         elif display == "Games":
             if ((HERO != "") & (filtered)):
-                df = pd.DataFrame(ALL_DATA_INVERTED[1],columns=modo.header(display))
-                df = df[(df.P1 == HERO)]
+                df = pd.read_sql_query(f'SELECT * FROM Games WHERE P1 = "{HERO}";',CONN)
             else:
-                df = pd.DataFrame(ALL_DATA[1],columns=modo.header(display))            
+                df = pd.read_sql_query(f'SELECT * FROM Games;',CONN)
         elif display == "Plays":
-            df = pd.DataFrame(ALL_DATA[2],columns=modo.header(display))
+            df = pd.read_sql_query(f'SELECT * FROM Plays;',CONN)
         elif display == "Drafts":
-            df = pd.DataFrame(DRAFTS_TABLE,columns=modo.header(display))
+            df = pd.read_sql_query(f'SELECT * FROM Drafts;',CONN)
         elif display == "Picks":
-            df = pd.DataFrame(PICKS_TABLE,columns=modo.header(display))
+            df = pd.read_sql_query(f'SELECT * FROM Picks;',CONN)
         data_to_write.append(df)
     if matches:
         file_names.append("Matches")
         header_list.append(modo.header("Matches"))
         if (inverted) or ((HERO != "") & (filtered)):
-            df = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
-        else:
-            df = pd.DataFrame(ALL_DATA[0],columns=modo.header("Matches"))
+            df = pd.read_sql_query(f'SELECT * FROM Matches;',CONN)
         if ((HERO != "") & (filtered)):
-            df = df[(df.P1 == HERO)]
+            df = pd.read_sql_query(f'SELECT * FROM Matches WHERE P1 = "{HERO}";',CONN)
         data_to_write.append(df)
     if games:
         file_names.append("Games")
         header_list.append(modo.header("Games"))
         if (inverted) or ((HERO != "") & (filtered)):
-            df = pd.DataFrame(ALL_DATA_INVERTED[1],columns=modo.header("Games"))
-        else:
-            df = pd.DataFrame(ALL_DATA[1],columns=modo.header("Games"))
+            df = pd.read_sql_query(f'SELECT * FROM Games;',CONN)
         if ((HERO != "") & (filtered)):
-            df = df[(df.P1 == HERO)]
+            df = pd.read_sql_query(f'SELECT * FROM Games WHERE P1 = "{HERO}";',CONN)
         data_to_write.append(df)
     if plays:
         file_names.append("Plays")
         header_list.append(modo.header("Plays"))
-        data_to_write.append(pd.DataFrame(ALL_DATA[2],columns=modo.header("Plays")))
+        data_to_write.append(pd.read_sql_query(f'SELECT * FROM Plays;',CONN))
     if drafts:
         file_names.append("Drafts")
         header_list.append(modo.header("Drafts"))
-        data_to_write.append(pd.DataFrame(DRAFTS_TABLE,columns=modo.header("Drafts")))
+        data_to_write.append(pd.read_sql_query(f'SELECT * FROM Drafts;',CONN))
     if picks:
         file_names.append("Picks")
         header_list.append(modo.header("Picks"))
-        data_to_write.append(pd.DataFrame(PICKS_TABLE,columns=modo.header("Picks")))
+        data_to_write.append(pd.read_sql_query(f'SELECT * FROM Picks;',CONN))
     if filtered:
         for index,table in enumerate(data_to_write):
             for key in filter_dict:
@@ -2249,36 +2245,18 @@ def set_filter():
         filter_window.grab_release()
         filter_window.destroy()
 
+    global CONN
     global filter_changed
     filter_changed = False
     filter_init = filter_dict.copy()
 
     # Building dataframe (unfiltered) to give us our dropdown options.
-    if HERO == "":
-        if display == "Matches":
-            df = pd.DataFrame(ALL_DATA[0],columns=modo.header(display))
-        elif display == "Games":
-            df = pd.DataFrame(ALL_DATA[1],columns=modo.header(display))
-        elif display == "Plays":
-            df = pd.DataFrame(ALL_DATA[2],columns=modo.header(display))
+    if (HERO != '') and (display in ['Matches','Games']):
+        df = pd.read_sql_query(f'SELECT * FROM {display} WHERE P1 = "{HERO}"', CONN)
     else:
-        if display == "Matches":
-            df = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header(display))
-            df = df[(df.P1 == HERO)]
-        elif display == "Games":
-            df = pd.DataFrame(ALL_DATA_INVERTED[1],columns=modo.header(display))
-            df = df[(df.P1 == HERO)]
-        elif display == "Plays":
-            df = pd.DataFrame(ALL_DATA_INVERTED[2],columns=modo.header(display))
-    if display == "Drafts":
-        df = pd.DataFrame(DRAFTS_TABLE,columns=modo.header(display))
-    elif display == "Picks":
-        df = pd.DataFrame(PICKS_TABLE,columns=modo.header(display))
+        df = pd.read_sql_query(f'SELECT * FROM {display}', CONN)
 
-    if (display == "Drafts") or (display == "Picks"):
-        col_options = modo.header(display).copy()
-    else:
-        col_options = modo.header(display).copy()
+    col_options = modo.header(display).copy()
     col_options.pop(0)
     
     col = tk.StringVar()
@@ -2334,6 +2312,7 @@ def set_filter():
 def revise_record2():
     global ALL_DATA
     global ALL_DATA_INVERTED
+    global CONN
     global selected
 
     if tree1.focus() == "":
@@ -2343,23 +2322,21 @@ def revise_record2():
     values = list(tree1.item(selected,"values"))
     sel_matchid = values[0]
 
-    p1_index      = modo.header("Matches").index("P1")
-    p2_index      = modo.header("Matches").index("P2")
-    mformat_index = modo.header("Matches").index("Format")
-    lformat_index = modo.header("Matches").index("Limited_Format")
-    mtype_index =   modo.header("Matches").index("Match_Type")
-    p1_arch_index = modo.header("Matches").index("P1_Arch")
-    p1_sub_index =  modo.header("Matches").index("P1_Subarch")
-    p2_arch_index = modo.header("Matches").index("P2_Arch")
-    p2_sub_index =  modo.header("Matches").index("P2_Subarch")
+    cursor = CONN.cursor()
 
-    df = pd.DataFrame(ALL_DATA[2],columns=modo.header("Plays"))
-    df = df[(df.Match_ID == values[0]) & (df.Primary_Card != 'NA')]
+    p1_index = modo.header("Matches").index("P1")
+    p2_index = modo.header("Matches").index("P2")
     players = [values[p1_index],values[p2_index]]
-    cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
-    cards2 =  df[(df.Casting_Player == players[0]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
-    cards3 =  df[(df.Casting_Player == players[1]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
-    cards4 =  df[(df.Casting_Player == players[1]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
+        
+    cursor.execute(f'SELECT DISTINCT Primary_Card FROM Plays WHERE Match_ID = {values[0]} AND Primary_Card != "NA" AND Casting_Player = "{players[0]}" AND Action = "Land Drop"')
+    cards1 = [row[0] for row in cursor.fetchall()]
+    cursor.execute(f'SELECT DISTINCT Primary_Card FROM Plays WHERE Match_ID = {values[0]} AND Primary_Card != "NA" AND Casting_Player = "{players[0]}" AND Action = "Casts"')
+    cards2 = [row[0] for row in cursor.fetchall()]
+    cursor.execute(f'SELECT DISTINCT Primary_Card FROM Plays WHERE Match_ID = {values[0]} AND Primary_Card != "NA" AND Casting_Player = "{players[1]}" AND Action = "Land Drop"')
+    cards3 = [row[0] for row in cursor.fetchall()]
+    cursor.execute(f'SELECT DISTINCT Primary_Card FROM Plays WHERE Match_ID = {values[0]} AND Primary_Card != "NA" AND Casting_Player = "{players[1]}" AND Action = "Casts"')
+    cards4 = [row[0] for row in cursor.fetchall()]
+
     cards1 = sorted(modo.clean_card_set(set(cards1),MULTIFACED_CARDS),key=str.casefold)
     cards2 = sorted(modo.clean_card_set(set(cards2),MULTIFACED_CARDS),key=str.casefold)
     cards3 = sorted(modo.clean_card_set(set(cards3),MULTIFACED_CARDS),key=str.casefold)
@@ -2368,24 +2345,31 @@ def revise_record2():
     if (missing_data == "Exit") or (missing_data == "Skip"):
         return
 
-    for i in ALL_DATA[0]:
-        if i[0] == values[0]:
-            if i[p1_index] == values[p1_index]:
-                i[p1_arch_index] = missing_data[0]
-                i[p1_sub_index] =  missing_data[1]
-                i[p2_arch_index] = missing_data[2]
-                i[p2_sub_index] =  missing_data[3]
-            else:
-                i[p1_arch_index] = missing_data[2]
-                i[p1_sub_index] =  missing_data[3]
-                i[p2_arch_index] = missing_data[0]
-                i[p2_sub_index] =  missing_data[1]
-            i[mformat_index] = missing_data[4]
-            i[lformat_index] = missing_data[5]
-            i[mtype_index] =   missing_data[6]  
-            break
+    cursor.execute(f'''
+    UPDATE Matches 
+    SET P1_Arch = "{missing_data[0]}", 
+        P1_Subarch = "{missing_data[1]}", 
+        P2_Arch = "{missing_data[2]}",
+        P2_Subarch = "{missing_data[3]}",
+        Format = "{missing_data[4]}",
+        Limited_Format = "{missing_data[5]}",
+        Match_Type = "{missing_data[6]}"
+    WHERE Match_ID = "{sel_matchid}" AND P1 = "{values[p1_index]}"
+    '''
+    )
+    cursor.execute(f'''
+    UPDATE Matches 
+    SET P1_Arch = "{missing_data[2]}", 
+        P1_Subarch = "{missing_data[3]}", 
+        P2_Arch = "{missing_data[0]}",
+        P2_Subarch = "{missing_data[1]}",
+        Format = "{missing_data[4]}",
+        Limited_Format = "{missing_data[5]}",
+        Match_Type = "{missing_data[6]}"
+    WHERE Match_ID = "{sel_matchid}" AND P1 != "{values[p1_index]}"
+    '''
+    )
 
-    ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
     set_display("Matches",update_status=True,start_index=display_index,reset=False)
     revise_button["state"] = tk.NORMAL
     remove_button["state"] = tk.NORMAL
@@ -2396,298 +2380,6 @@ def revise_record2():
             tree1.focus(i)
             selected = i
             break
-def revise_record3():
-    global ALL_DATA
-    global ALL_DATA_INVERTED
-    global selected
-    if tree1.focus() == "":
-        return
-
-    if isinstance(tree1.focus(),str):
-        selected = tree1.focus()
-    else:
-        selected = tree1.focus()[0]
-    values = list(tree1.item(selected,"values"))
-    sel_matchid = values[0]
-
-    match_wins_index = modo.header(display).index("Match_Wins")
-    match_losses_index = modo.header(display).index("Match_Losses")
-
-    df = pd.DataFrame(PICKS_TABLE,columns=modo.header("Picks"))
-    df = df[(df.Draft_ID == values[0])]
-    pack_nums = df.Pack_Num.unique().tolist()
-    pick_list = []
-    for i in pack_nums:
-        pick_list.append(df[(df.Pack_Num == i)].sort_values("Pick_Ovr",ascending=True).Card.tolist())
-        
-    revise_draft_window(pick_list,0,values)
-    if (missing_data == "Exit") or (missing_data == "Skip"):
-        return
-
-    for i in DRAFTS_TABLE:
-        if i[0] == values[0]:
-            i[match_wins_index] = missing_data[0]
-            i[match_losses_index] = missing_data[1]
-            break
-
-    set_display(display,update_status=True,start_index=display_index,reset=False)
-    revise_button["state"] = tk.NORMAL
-    remove_button["state"] = tk.NORMAL
-
-    for i in tree1.get_children():
-        if list(tree1.item(i,"values"))[0] == sel_matchid:
-            tree1.selection_set(i)
-            tree1.focus(i)
-            selected = i
-            break
-def revise_record():
-    if tree1.focus() == "":
-        return
-    height = 300
-    width =  700
-    revise_window = tk.Toplevel(window)
-    revise_window.title("Revise Record")
-    revise_window.iconbitmap(revise_window,"icon.ico")
-    revise_window.minsize(width,height)
-    revise_window.resizable(False,False)
-    revise_window.attributes("-topmost",True)
-    revise_window.grab_set()
-    revise_window.focus()
-
-    revise_window.geometry("+%d+%d" %
-        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
-        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
-    
-    mid_frame = tk.LabelFrame(revise_window,text="Match_ID")
-    bot_frame = tk.Frame(revise_window)
-    mid_frame.grid(row=0,column=0,sticky="nsew")
-    bot_frame.grid(row=1,column=0,sticky="")
-    
-    revise_window.grid_columnconfigure(0,weight=1)
-    revise_window.rowconfigure(0,minsize=0,weight=1)  
-    mid_frame.grid_columnconfigure(0,weight=1)
-    mid_frame.grid_columnconfigure(1,weight=1)
-    mid_frame.grid_columnconfigure(2,weight=1)
-    mid_frame.grid_columnconfigure(3,weight=1)
-    mid_frame.grid_columnconfigure(4,weight=1)
-    mid_frame.grid_columnconfigure(5,weight=1)
-
-    def update_arch(*argv):
-        menu = match_type_entry["menu"]
-        menu.delete(0,"end")
-        if match_format.get() == "NA":
-            for i in ["NA"] + INPUT_OPTIONS["Constructed Match Types"] + INPUT_OPTIONS["Booster Draft Match Types"] + INPUT_OPTIONS["Sealed Match Types"]:
-                menu.add_command(label=i,command=lambda x=i: match_type.set(x))
-        elif match_format.get() in INPUT_OPTIONS["Constructed Formats"]:
-            for i in ["NA"] + INPUT_OPTIONS["Constructed Match Types"]:
-                menu.add_command(label=i,command=lambda x=i: match_type.set(x))
-        elif (match_format.get() == "Cube") or (match_format.get() == "Booster Draft"):
-            for i in ["NA"] + INPUT_OPTIONS["Booster Draft Match Types"]:
-                menu.add_command(label=i,command=lambda x=i: match_type.set(x))
-        elif match_format.get() == "Sealed Deck":
-            for i in ["NA"] + INPUT_OPTIONS["Sealed Match Types"]:
-                menu.add_command(label=i,command=lambda x=i: match_type.set(x))
-
-        if match_format.get() in INPUT_OPTIONS["Limited Formats"]:
-            arch_options = ["Limited"]
-            draft_type_entry["state"] = tk.NORMAL
-
-            menu = p1_arch_entry["menu"]
-            menu.delete(0,"end")
-            for i in arch_options:
-                menu.add_command(label=i,command=lambda x=i: p1_arch_type.set(x))
-
-            menu = p2_arch_entry["menu"]
-            menu.delete(0,"end")
-            for i in arch_options:
-                menu.add_command(label=i,command=lambda x=i: p2_arch_type.set(x))
-
-            menu = draft_type_entry["menu"]
-            menu.delete(0,"end")
-            if match_format.get() == "Cube":
-                for i in ["NA"] + INPUT_OPTIONS["Cube Formats"]:
-                    menu.add_command(label=i,command=lambda x=i: limited_format.set(x))
-            elif match_format.get() == "Booster Draft":
-                for i in ["NA"] + INPUT_OPTIONS["Booster Draft Formats"]:
-                    menu.add_command(label=i,command=lambda x=i: limited_format.set(x))
-            elif match_format.get() == "Sealed Deck":
-                for i in ["NA"] + INPUT_OPTIONS["Sealed Formats"]:
-                    menu.add_command(label=i,command=lambda x=i: limited_format.set(x))
-
-            p1_arch_type.set(arch_options[0])
-            p2_arch_type.set(arch_options[0])
-        elif (p1_arch_type.get() == "Limited"):
-            arch_options = ["NA"] + INPUT_OPTIONS["Archetypes"]
-            limited_format.set("NA")
-            draft_type_entry["state"] = tk.DISABLED
-
-            menu = p1_arch_entry["menu"]
-            menu.delete(0,"end")
-            for i in arch_options:
-                menu.add_command(label=i,command=lambda x=i: p1_arch_type.set(x))
-
-            menu = p2_arch_entry["menu"]
-            menu.delete(0,"end")
-            for i in arch_options:
-                menu.add_command(label=i,command=lambda x=i: p2_arch_type.set(x))
-
-            if values[modo.header("Matches").index("P1_Arch")] == "Limited":
-                p1_arch_type.set(arch_options[0])
-                p2_arch_type.set(arch_options[0])
-            else:
-                p1_arch_type.set(values[modo.header("Matches").index("P1_Arch")])
-                p2_arch_type.set(values[modo.header("Matches").index("P2_Arch")])
-
-    def close_revise_window():
-        global ALL_DATA_INVERTED
-        for count,i in enumerate(ALL_DATA[0]):
-            if i[0] == values[0]:
-                if i[modo.header("Matches").index("P1")] == values[modo.header("Matches").index("P1")]:
-                    i[modo.header("Matches").index("P1_Arch")] = p1_arch_type.get()
-                    i[modo.header("Matches").index("P1_Subarch")] = p1_subarch_entry.get()
-                    i[modo.header("Matches").index("P2_Arch")] = p2_arch_type.get()
-                    i[modo.header("Matches").index("P2_Subarch")] = p2_subarch_entry.get()
-                else:
-                    i[modo.header("Matches").index("P1_Arch")] = p2_arch_type.get()
-                    i[modo.header("Matches").index("P1_Subarch")] = p2_subarch_entry.get()
-                    i[modo.header("Matches").index("P2_Arch")] = p1_arch_type.get()
-                    i[modo.header("Matches").index("P2_Subarch")] = p1_subarch_entry.get()
-                i[modo.header("Matches").index("Format")] = match_format.get()
-                i[modo.header("Matches").index("Limited_Format")] = limited_format.get()
-                i[modo.header("Matches").index("Match_Type")] = match_type.get()                   
-                ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
-                set_display("Matches",update_status=True,start_index=0,reset=True)
-                break
-        revise_window.grab_release()
-        revise_window.destroy()
-
-    def close_without_saving():
-        revise_window.grab_release()
-        revise_window.destroy()       
-
-    selected = tree1.focus()
-    values = list(tree1.item(selected,"values"))
-
-    format_options = ["NA"] + INPUT_OPTIONS["Constructed Formats"] + INPUT_OPTIONS["Limited Formats"]
-    match_format = tk.StringVar()
-    match_format.set(values[modo.header("Matches").index("Format")])
-
-    if match_format.get() == "Cube":
-        limited_options = INPUT_OPTIONS["Cube Formats"]
-        match_options = ["NA"] + INPUT_OPTIONS["Booster Draft Match Types"]
-    elif match_format.get() == "Booster Draft":
-        limited_options = INPUT_OPTIONS["Booster Draft Formats"]
-        match_options = ["NA"] + INPUT_OPTIONS["Booster Draft Match Types"]
-    elif match_format.get() == "Sealed Deck":
-        limited_options = INPUT_OPTIONS["Sealed Formats"]
-        match_options = ["NA"] + INPUT_OPTIONS["Sealed Match Types"]
-    elif match_format.get() in INPUT_OPTIONS["Constructed Formats"]:
-        limited_options = ["NA"]
-        match_options = ["NA"] + INPUT_OPTIONS["Constructed Match Types"]
-    elif match_format.get() == "NA":
-        limited_options = ["NA"]
-        match_options = ["NA"] + INPUT_OPTIONS["Constructed Match Types"] + INPUT_OPTIONS["Booster Draft Match Types"] + INPUT_OPTIONS["Sealed Match Types"]
-
-    limited_format = tk.StringVar()
-    limited_format.set(values[modo.header("Matches").index("Limited_Format")])
-
-    match_type = tk.StringVar()
-    match_type.set(values[modo.header("Matches").index("Match_Type")])
-
-    if values[modo.header("Matches").index("Format")] in INPUT_OPTIONS["Limited Formats"]:
-        arch_options = ["Limited"]
-    else:
-        arch_options = INPUT_OPTIONS["Archetypes"]
-    p1_arch_type = tk.StringVar()
-    p1_arch_type.set(values[modo.header("Matches").index("P1_Arch")])
-
-    p2_arch_type = tk.StringVar()
-    p2_arch_type.set(values[modo.header("Matches").index("P2_Arch")])
-
-    p1_label =           tk.Label(mid_frame,text="P1:")
-    p1_entry =           tk.Label(mid_frame,text=values[modo.header("Matches").index("P1")])
-    p1_arch_label =      tk.Label(mid_frame,text="P1_Arch:")
-    p1_arch_entry =      tk.OptionMenu(mid_frame,p1_arch_type,*arch_options)
-    p1_subarch_label =   tk.Label(mid_frame,text="P1_Subarch:")
-    p1_subarch_entry =   tk.Entry(mid_frame)
-    p2_label =           tk.Label(mid_frame,text="P2:")
-    p2_entry =           tk.Label(mid_frame,text=values[modo.header("Matches").index("P2")])
-    p2_arch_label =      tk.Label(mid_frame,text="P2_Arch:")
-    p2_arch_entry =      tk.OptionMenu(mid_frame,p2_arch_type,*arch_options)
-    p2_subarch_label =   tk.Label(mid_frame,text="P2_Subarch:")
-    p2_subarch_entry =   tk.Entry(mid_frame)
-    p1_roll_label =      tk.Label(mid_frame,text="P1_Roll:")
-    p1_roll_entry =      tk.Label(mid_frame,text=values[modo.header("Matches").index("P1_Roll")])
-    p2_roll_label =      tk.Label(mid_frame,text="P2_Roll:")
-    p2_roll_entry =      tk.Label(mid_frame,text=values[modo.header("Matches").index("P2_Roll")])
-    roll_winner_label =  tk.Label(mid_frame,text="Roll_Winner:")
-    roll_winner_entry =  tk.Label(mid_frame,text=values[modo.header("Matches").index("Roll_Winner")])
-    p1_wins_label =      tk.Label(mid_frame,text="P1_Wins:")
-    p1_wins_entry =      tk.Label(mid_frame,text=values[modo.header("Matches").index("P1_Wins")])
-    p2_wins_label =      tk.Label(mid_frame,text="P2_Wins:")
-    p2_wins_entry =      tk.Label(mid_frame,text=values[modo.header("Matches").index("P2_Wins")])
-    match_winner_label = tk.Label(mid_frame,text="Match_Winner:")
-    match_winner_entry = tk.Label(mid_frame,text=values[modo.header("Matches").index("Match_Winner")])
-    format_label =       tk.Label(mid_frame,text="Format:")
-    format_entry =       tk.OptionMenu(mid_frame,match_format,*format_options)
-    draft_type_label =   tk.Label(mid_frame,text="Limited_Format:")
-    draft_type_entry =   tk.OptionMenu(mid_frame,limited_format,*limited_options)
-    match_type_label =   tk.Label(mid_frame,text="Match_Type:")
-    match_type_entry =   tk.OptionMenu(mid_frame,match_type,*match_options)
-    date_label =         tk.Label(mid_frame,text="Date:")
-    date_entry =         tk.Label(mid_frame,text=values[modo.header("Matches").index("Date")])
-
-    p1_subarch_entry.insert(0,values[modo.header("Matches").index("P1_Subarch")])
-    p2_subarch_entry.insert(0,values[modo.header("Matches").index("P2_Subarch")])
-
-    button3 = tk.Button(bot_frame,text="Apply Changes",
-                        command=lambda : close_revise_window())
-    button4 = tk.Button(bot_frame,text="Cancel",
-                        command=lambda : close_without_saving())
-
-    p1_label.grid(row=1,column=0,padx=10,pady=10,sticky="w")
-    p1_entry.grid(row=1,column=1,pady=10,sticky="w")
-    p1_arch_label.grid(row=1,column=2,pady=10,sticky="w")
-    p1_arch_entry.grid(row=1,column=3,pady=10,sticky="w")
-    p1_subarch_label.grid(row=1,column=4,pady=10,sticky="w")
-    p1_subarch_entry.grid(row=1,column=5,pady=10,sticky="w")
-    p2_label.grid(row=2,column=0,padx=10,pady=10,sticky="w")
-    p2_entry.grid(row=2,column=1,pady=10,sticky="w")
-    p2_arch_label.grid(row=2,column=2,pady=10,sticky="w")
-    p2_arch_entry.grid(row=2,column=3,pady=10,sticky="w")
-    p2_subarch_label.grid(row=2,column=4,pady=10,sticky="w")
-    p2_subarch_entry.grid(row=2,column=5,pady=10,sticky="w")
-    p1_roll_label.grid(row=3,column=0,padx=10,pady=10,sticky="w")
-    p1_roll_entry.grid(row=3,column=1,pady=10,sticky="w")
-    p2_roll_label.grid(row=3,column=2,pady=10,sticky="w")
-    p2_roll_entry.grid(row=3,column=3,pady=10,sticky="w")
-    roll_winner_label.grid(row=3,column=4,pady=10,sticky="w")
-    roll_winner_entry.grid(row=3,column=5,pady=10,sticky="w")
-    p1_wins_label.grid(row=4,column=0,padx=10,pady=10,sticky="w")
-    p1_wins_entry.grid(row=4,column=1,pady=10,sticky="w")
-    p2_wins_label.grid(row=4,column=2,pady=10,sticky="w")
-    p2_wins_entry.grid(row=4,column=3,pady=10,sticky="w")
-    match_winner_label.grid(row=4,column=4,pady=10,sticky="w")
-    match_winner_entry.grid(row=4,column=5,pady=10,sticky="w")
-    format_label.grid(row=5,column=0,padx=10,pady=10,sticky="w")
-    format_entry.grid(row=5,column=1,pady=10,sticky="w")
-    draft_type_label.grid(row=5,column=2,pady=10,sticky="w")
-    draft_type_entry.grid(row=5,column=3,pady=10,sticky="w")
-    match_type_label.grid(row=5,column=4,pady=10,sticky="w")
-    match_type_entry.grid(row=5,column=5,pady=10,sticky="w")
-    date_label.grid(row=6,column=0,padx=10,pady=10,sticky="w")
-    date_entry.grid(row=6,column=1,pady=10,sticky="w")
-
-    button3.grid(row=0,column=0,padx=10,pady=10)
-    button4.grid(row=0,column=1,padx=10,pady=10)
-
-    mid_frame["text"] = "Match_ID: " + values[0]
-    if match_format.get() not in INPUT_OPTIONS["Limited Formats"]:
-        draft_type_entry["state"] = tk.DISABLED
-
-    match_format.trace("w",update_arch)
-
-    revise_window.protocol("WM_DELETE_WINDOW", lambda : close_without_saving())
 def revise_record_multi():
     if tree1.focus() == "":
         return
@@ -2978,8 +2670,6 @@ def revise_method_select():
         revise_record_multi()
     elif (display == "Matches"):
         revise_record2()
-    # elif (display == "Drafts"):
-    #     revise_record3()
 def import_window():
     height = 200
     width =  350
@@ -3028,23 +2718,35 @@ def import_window():
         global FILEPATH_LOGS
         global FILEPATH_DRAFTS
         global HERO
+        global CONN
 
         FILEPATH_DRAFTS = label1["text"]
         FILEPATH_LOGS = label2["text"]
 
+        cursor = CONN.cursor()
+
         if overwrite == True:
             h = HERO
             date_index = modo.header("Matches").index("Date")
-            date_dict = {}
-            match_dict = user_inputs(type="Matches")
-            game_dict = user_inputs(type="Games")
+            matches_user_inputs = cursor.execute('''
+            SELECT Match_ID, Draft_ID, P1, P1_Arch, P1_Subarch, P2, P2_Arch, P2_Subarch, Format, Limited_Format, Match_Type FROM
+            Matches
+            ''').fetchall()
+            games_user_inputs = cursor.execute('''
+            SELECT Match_ID, Game_Num, P1, P2, Game_Winner FROM
+            Games
+            ''').fetchall()
             clear_loaded(importingCopies=True)
             get_all_data(fp_logs=FILEPATH_LOGS_COPY,fp_drafts=FILEPATH_DRAFTS_COPY,copy=False)
+            for row in matches_user_inputs:
+                cursor.execute(f'''
+                UPDATE Matches
+                SET
+                    Game_Num = "{row[0]}"
+                WHERE
+                    Match_ID = "{row[0]}"
+                ''') # !FIXTHIS! still need to finish
             for i in ALL_DATA[0]:
-                if i[date_index] not in date_dict:
-                    date_dict[i[date_index]] = [0,[]]
-                date_dict[i[date_index]][0] += 1
-                date_dict[i[date_index]][1].append(i[0])
                 try:
                     if match_dict[i[date_index]][0] > 1:
                         pass
@@ -5312,6 +5014,9 @@ def remove_select():
     
     remove_select.protocol("WM_DELETE_WINDOW", lambda : close_window())
 def user_inputs(type):
+    global CONN
+
+    cursor = CONN.cursor()
     match_dict = {}
     game_dict = {}
     player_dict = {}
