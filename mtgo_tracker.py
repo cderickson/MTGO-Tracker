@@ -20,6 +20,8 @@ import sqlite3
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 pd.options.mode.chained_assignment = None
 
+# !FIXTHIS! add cursor.close() to all my cursor functions.
+
 # Saved data:
 ALL_DATA =          [[],[],[],{}]
 ALL_DATA_INVERTED = [[],[],[],{}]
