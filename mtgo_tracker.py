@@ -2710,11 +2710,6 @@ def import_window():
             button3["state"] = tk.NORMAL
 
     def import_data(overwrite):
-        global ALL_DATA
-        global ALL_DATA_INVERTED
-        global DRAFTS_TABLE
-        global PARSED_FILE_DICT
-        global PARSED_DRAFT_DICT
         global FILEPATH_LOGS
         global FILEPATH_DRAFTS
         global HERO
@@ -2726,7 +2721,6 @@ def import_window():
         cursor = CONN.cursor()
 
         if overwrite == True:
-            date_index = modo.header("Matches").index("Date")
             matches_user_inputs = cursor.execute('''
             SELECT Match_ID, Draft_ID, P1, P1_Arch, P1_Subarch, P2, P2_Arch, P2_Subarch, Format, Limited_Format, Match_Type FROM
             Matches
@@ -2771,20 +2765,58 @@ def import_window():
                     Match_ID = "{row[0]}" AND Game_Num = {row[1]};
                 ''')
             
+            cursor.execute('''
+            UPDATE Matches
+            SET
+                P1_Wins = (
+                    SELECT COUNT(*)
+                    FROM Games
+                    WHERE Games.Match_ID = Matches.Match_ID AND Games.Game_Winner = 'P1'
+                ),
+                P2_Wins = (
+                    SELECT COUNT(*)
+                    FROM Games
+                    WHERE Games.Match_ID = Matches.Match_ID AND Games.Game_Winner = 'P2'
+                );
+            ''')
+            cursor.execute('''
+            UPDATE Matches
+            SET
+                Match_Winner = CASE
+                    WHEN P1_Wins > P2_Wins THEN 'P1'
+                    WHEN P2_Wins > P1_Wins THEN 'P2'
+                    ELSE 'NA'
+                END
+            ;
+            ''')
+            cursor.execute('''
+            UPDATE Matches
+            SET
+                Match_Winner = CASE
+                    WHEN Timeout.Timed_Out_User = Matches.P2 THEN 'P1'
+                    WHEN Timeout.Timed_Out_User = Matches.P1 THEN 'P2'
+                    ELSE Match_Winner
+                END
+            FROM Timeout
+            WHERE Timeout.Match_ID = Matches.Match_ID;
+            ''')
+            cursor.execute(f'''
+            UPDATE Drafts
+            SET
+                Match_Wins = (
+                    SELECT COUNT(*)
+                    FROM Matches
+                    WHERE Matches.Draft_ID = Drafts.Draft_ID AND Matches.Match_Winner = 'P1' AND Matches.P1 = Drafts.Hero
+                ),
+                Match_Losses = (
+                    SELECT COUNT(*)
+                    FROM Matches
+                    WHERE Matches.Draft_ID = Drafts.Draft_ID AND Matches.Match_Winner = 'P2' AND Matches.P1 = Drafts.Hero
+                );
+            ''')
+
             if HERO != "":
-                stats_button["state"] = tk.NORMAL
-            
-            # !FIXTHIS! update game wins, update drafts table
-            modo.update_game_wins(ALL_DATA,TIMEOUT)
-
-            ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
-
-            df_inverted = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
-            for i in DRAFTS_TABLE:
-                wins = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[modo.header("Drafts").index("Hero")]) & (df_inverted.Match_Winner == "P1")].shape[0]
-                losses = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[modo.header("Drafts").index("Hero")]) & (df_inverted.Match_Winner == "P2")].shape[0]
-                i[modo.header("Drafts").index("Match_Wins")] = wins
-                i[modo.header("Drafts").index("Match_Losses")] = losses
+                stats_button["state"] = tk.NORMAL           
         else:
             get_all_data(fp_logs=FILEPATH_LOGS,fp_drafts=FILEPATH_DRAFTS,copy=True)
         clear_filter(update_status=False,reload_display=False)
@@ -5009,51 +5041,6 @@ def remove_select():
     button_close.grid(row=0,column=2,padx=5,pady=5)
     
     remove_select.protocol("WM_DELETE_WINDOW", lambda : close_window())
-def user_inputs(type):
-    global CONN
-
-    cursor = CONN.cursor()
-    match_dict = {}
-    game_dict = {}
-    player_dict = {}
-
-    draftid_index = modo.header("Matches").index("Draft_ID")
-    p1_index = modo.header("Matches").index("P1")
-    p2_index = modo.header("Matches").index("P2")
-    p1_arch_index = modo.header("Matches").index("P1_Arch")
-    p2_arch_index = modo.header("Matches").index("P2_Arch")
-    p1_sub_index = modo.header("Matches").index("P1_Subarch")
-    p2_sub_index = modo.header("Matches").index("P2_Subarch")
-    format_index = modo.header("Matches").index("Format")
-    lformat_index = modo.header("Matches").index("Limited_Format")
-    match_type_index = modo.header("Matches").index("Match_Type")
-    date_index = modo.header("Matches").index("Date")
-
-    gn_index = modo.header("Games").index("Game_Num")
-    gw_index = modo.header("Games").index("Game_Winner")
-    gw_index = modo.header("Games").index("Game_Winner")
-
-    if type == "Matches":
-        for i in ALL_DATA[0]:
-            if i[date_index] not in match_dict:
-                match_dict[i[date_index]] = [0]
-
-            player_dict = {}
-            player_dict[i[p1_index]] = [i[p1_arch_index],i[p1_sub_index]]
-            player_dict[i[p2_index]] = [i[p2_arch_index],i[p2_sub_index]]
-            match_dict[i[date_index]].append([player_dict,i[draftid_index],i[format_index],i[lformat_index],i[match_type_index]])
-            match_dict[i[date_index]][0] += 1
-        return match_dict
-    elif type == "Games":
-        df = pd.DataFrame(ALL_DATA[0],columns=modo.header("Matches"))
-        for i in ALL_DATA[1]:
-            gdate = df[(df.Match_ID == i[0])]["Date"].tolist()[0]
-            key = f"{gdate}-{i[gn_index]}"
-            if key not in game_dict:
-                match_dict[key] = [0]
-
-            game_dict[key] = [i[modo.header("Games").index("P1")],i[modo.header("Games").index("P2")],i[gw_index]]
-        return game_dict
 def get_associated_draftid(mode):
     global ALL_DATA
     global ALL_DATA_INVERTED
