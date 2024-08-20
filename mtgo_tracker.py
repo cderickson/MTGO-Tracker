@@ -2726,7 +2726,6 @@ def import_window():
         cursor = CONN.cursor()
 
         if overwrite == True:
-            h = HERO
             date_index = modo.header("Matches").index("Date")
             matches_user_inputs = cursor.execute('''
             SELECT Match_ID, Draft_ID, P1, P1_Arch, P1_Subarch, P2, P2_Arch, P2_Subarch, Format, Limited_Format, Match_Type FROM
@@ -2736,49 +2735,46 @@ def import_window():
             SELECT Match_ID, Game_Num, P1, P2, Game_Winner FROM
             Games
             ''').fetchall()
+
             clear_loaded(importingCopies=True)
             get_all_data(fp_logs=FILEPATH_LOGS_COPY,fp_drafts=FILEPATH_DRAFTS_COPY,copy=False)
+
             for row in matches_user_inputs:
                 cursor.execute(f'''
                 UPDATE Matches
-                SET
-                    Game_Num = "{row[0]}"
+                SET 
+                    Draft_ID = "{row[1]}",
+                    P1_Arch = "{row[3]}",
+                    P1_Subarch = "{row[4]}",
+                    P2_Arch = "{row[6]}",
+                    P2_Subarch = "{row[7]}",
+                    Format = "{row[8]}",
+                    Limited_Format = "{row[9]}",
+                    Match_Type = "{row[10]}"
                 WHERE
-                    Match_ID = "{row[0]}"
-                ''') # !FIXTHIS! still need to finish
-            for i in ALL_DATA[0]:
-                try:
-                    if match_dict[i[date_index]][0] > 1:
-                        pass
-                    i[modo.header("Matches").index("Draft_ID")] = match_dict[i[date_index]][1][1]
-                    i[modo.header("Matches").index("P1_Arch")] = match_dict[i[date_index]][1][0][i[modo.header("Matches").index("P1")]][0]
-                    i[modo.header("Matches").index("P1_Subarch")] = match_dict[i[date_index]][1][0][i[modo.header("Matches").index("P1")]][1]
-                    i[modo.header("Matches").index("P2_Arch")] = match_dict[i[date_index]][1][0][i[modo.header("Matches").index("P2")]][0]
-                    i[modo.header("Matches").index("P2_Subarch")] = match_dict[i[date_index]][1][0][i[modo.header("Matches").index("P2")]][1]
-                    i[modo.header("Matches").index("Format")] = match_dict[i[date_index]][1][2]
-                    i[modo.header("Matches").index("Limited_Format")] = match_dict[i[date_index]][1][3]
-                    i[modo.header("Matches").index("Match_Type")] = match_dict[i[date_index]][1][4]
-                # Found new Match for which we don't have user inputs.
-                except KeyError:
-                    pass
-            df_join = pd.merge(pd.DataFrame(ALL_DATA[1],columns=modo.header("Games")),pd.DataFrame(ALL_DATA[0],columns=modo.header("Matches")),on="Match_ID",how="left")
-            for i in ALL_DATA[1]:
-                date = df_join.loc[df_join["Match_ID"] == i[0], "Date"].values[0]
-                key = date + "-" + str(i[modo.header("Games").index("Game_Num")])
-                try:
-                    if (i[modo.header("Games").index("P1")] == game_dict[key][0]):
-                        if (game_dict[key][2]) != "NA":
-                            i[modo.header("Games").index("Game_Winner")] = game_dict[key][2]
-                # Found new Game for which we don't have user inputs.
-                except KeyError:
-                    pass
-                # Delete RawData for Games that have a manually entered Game_Winner.
-                if key in ALL_DATA[3]:
-                    if i[modo.header("Games").index("Game_Winner")] != "NA":
-                        ALL_DATA[3].pop(key)
-            HERO = h
+                    Match_ID = "{row[0]}" AND P1 = "{row[2]}";
+                ''')
+
+            for row in games_user_inputs:
+                if row[4] == 'NA':
+                    continue
+                cursor.execute(f'''
+                UPDATE Games
+                SET
+                    Game_Winner = "{row[4]}"
+                WHERE
+                    Match_ID = "{row[0]}" AND Game_Num = {row[1]} AND P1 = "{row[2]}";
+                ''')
+                cursor.execute(f'''
+                DELETE FROM GameActions
+                WHERE
+                    Match_ID = "{row[0]}" AND Game_Num = {row[1]};
+                ''')
+            
             if HERO != "":
                 stats_button["state"] = tk.NORMAL
+            
+            # !FIXTHIS! update game wins, update drafts table
             modo.update_game_wins(ALL_DATA,TIMEOUT)
 
             ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
