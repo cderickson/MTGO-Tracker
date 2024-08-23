@@ -1062,6 +1062,10 @@ def get_lists():
 def input_missing_data():
     global ALL_DATA
     global ALL_DATA_INVERTED
+    global CONN
+
+    cursor = CONN.cursor()
+    cursor2 = CONN.cursor()
   
     mformat_index = modo.header("Matches").index("Format")
     lformat_index = modo.header("Matches").index("Limited_Format")
@@ -1074,45 +1078,102 @@ def input_missing_data():
     n = 0
     count = 0
     total = len(ALL_DATA[0])
-    for i in ALL_DATA[0]:    # Iterate through matches.
-        n += 1
-        
-        # Match record is missing some data.
-        if (i[p1_arch_index] == "NA") or (i[p1_sub_index] == "NA") or \
-            (i[p2_arch_index] == "NA") or (i[p2_sub_index] == "NA") or \
-            (i[p1_sub_index] == "Unknown") or (i[p2_sub_index] == "Unknown") or \
-            (i[mformat_index] == "NA") or (i[mtype_index] == "NA") or \
-            ((i[mformat_index] in INPUT_OPTIONS["Limited Formats"]) & (i[lformat_index] == "NA")): 
-            count += 1
-            df = pd.DataFrame(ALL_DATA[2],columns=modo.header("Plays"))
-            df = df[(df.Match_ID == i[0])]
-            players = [i[modo.header("Matches").index("P1")],i[modo.header("Matches").index("P2")]]
-            cards1 =  df[(df.Casting_Player == players[0]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
-            cards2 =  df[(df.Casting_Player == players[0]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
-            cards3 =  df[(df.Casting_Player == players[1]) & (df.Action == "Land Drop")].Primary_Card.value_counts().keys().tolist()
-            cards4 =  df[(df.Casting_Player == players[1]) & (df.Action == "Casts")].Primary_Card.value_counts().keys().tolist()
-            cards1 = sorted(cards1,key=str.casefold)
-            cards2 = sorted(cards2,key=str.casefold)
-            cards3 = sorted(cards3,key=str.casefold)
-            cards4 = sorted(cards4,key=str.casefold)
-            revise_entry_window(players,cards1,cards2,cards3,cards4,(n,total),i)
-            if missing_data == "Exit":
-                break
-            elif missing_data == "Skip":
-                continue
-            else:
-                i[p1_arch_index] = missing_data[0]
-                i[p1_sub_index] =  missing_data[1]
-                i[p2_arch_index] = missing_data[2]
-                i[p2_sub_index] =  missing_data[3]
-                i[mformat_index] = missing_data[4]
-                i[lformat_index] = missing_data[5]
-                i[mtype_index] =   missing_data[6]
+    lformat_values = ', '.join(f"'{value}'" for value in INPUT_OPTIONS["Limited Formats"])
 
+    cursor.execute(f'''
+    SELECT * 
+    FROM Matches
+    WHERE (
+        P1_Arch IN ('NA')
+        OR P1_Subarch IN ('NA', 'Unknown')
+        OR P2_Arch IN ('NA')
+        OR P2_Subarch IN ('NA', 'Unknown')
+        OR Format IN ('NA')
+        OR Match_Type IN ('NA')
+    )
+    OR (Format IN ({lformat_values}) AND Limited_Format IN ('NA'));
+    ''')
+    
+    n = cursor2.execute('''
+    SELECT COUNT(DISTINCT Match_ID)
+    FROM Matches
+    WHERE (
+        P1_Arch IN ('NA')
+        OR P1_Subarch IN ('NA', 'Unknown')
+        OR P2_Arch IN ('NA')
+        OR P2_Subarch IN ('NA', 'Unknown')
+        OR Format IN ('NA')
+        OR Match_Type IN ('NA')
+    )
+    OR (Format IN ({lformat_values}) AND Limited_Format IN ('NA'));
+    ''').fetchone()[0]
+
+    row = cursor.fetchone()
+    while row is not None: # Iterate through matches.       
+        # Match record is missing some data.
+        count += 1
+        
+        players = [row[modo.header("Matches").index("P1")],row[modo.header("Matches").index("P2")]]
+        rows = cursor2.execute(f'''
+        SELECT Primary_Card
+        FROM Plays
+        WHERE Casting_Player = '{players[0]}' AND Action = 'Land Drop' AND Match_ID = {row[0]};
+        ''').fetchall()
+        cards1 = [i[0] for i in rows]
+        rows = cursor2.execute(f'''
+        SELECT Primary_Card
+        FROM Plays
+        WHERE Casting_Player = '{players[0]}' AND Action = 'Casts' AND Match_ID = {row[0]};
+        ''').fetchall()
+        cards2 = [i[0] for i in rows]
+        rows = cursor2.execute(f'''
+        SELECT Primary_Card
+        FROM Plays
+        WHERE Casting_Player = '{players[1]}' AND Action = 'Land Drop' AND Match_ID = {row[0]};
+        ''').fetchall()
+        cards3 = [i[0] for i in rows]
+        rows = cursor2.execute(f'''
+        SELECT Primary_Card
+        FROM Plays
+        WHERE Casting_Player = '{players[1]}' AND Action = 'Casts' AND Match_ID = {row[0]};
+        ''').fetchall()
+        cards4 = [i[0] for i in rows]
+        cards1 = sorted(cards1,key=str.casefold)
+        cards2 = sorted(cards2,key=str.casefold)
+        cards3 = sorted(cards3,key=str.casefold)
+        cards4 = sorted(cards4,key=str.casefold)
+        revise_entry_window(players,cards1,cards2,cards3,cards4,(count,n),row)
+        if missing_data == "Exit":
+            break
+        elif missing_data == "Skip":
+            continue
+        else:
+            cursor2.execute(f'''
+            UPDATE Matches 
+            SET P1_Arch = "{missing_data[0]}", 
+                P1_Subarch = "{missing_data[1]}", 
+                P2_Arch = "{missing_data[2]}",
+                P2_Subarch = "{missing_data[3]}",
+                Format = "{missing_data[4]}",
+                Limited_Format = "{missing_data[5]}",
+                Match_Type = "{missing_data[6]}"
+            WHERE Match_ID = "{row[0]}" AND P1 = "{players[0]}"
+            ''')
+            cursor2.execute(f'''
+            UPDATE Matches 
+            SET P1_Arch = "{missing_data[2]}", 
+                P1_Subarch = "{missing_data[3]}", 
+                P2_Arch = "{missing_data[0]}",
+                P2_Subarch = "{missing_data[1]}",
+                Format = "{missing_data[4]}",
+                Limited_Format = "{missing_data[5]}",
+                Match_Type = "{missing_data[6]}"
+            WHERE Match_ID = "{row[0]}" AND P1 = "{players[1]}"
+            ''')
+        row = cursor.fetchone()
     if count == 0:
         update_status_bar(status="No Matches with Missing Data.")
     else:
-        ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
         set_display("Matches",update_status=True,start_index=0,reset=True)
 def deck_data_guess(update_type):
     global ALL_DATA
@@ -1547,108 +1608,6 @@ def revise_entry_window(players,cards1,cards2,card3,cards4,progress,mdata):
     if progress == 0:
         button_skip["state"] = tk.DISABLED
     mformat.trace("w",update_arch)
-
-    subwindow.protocol("WM_DELETE_WINDOW", lambda : close_format_window("Exit"))
-    subwindow.wait_window()
-def revise_draft_window(picks,progress,mdata):
-    def close_format_window(*argv):
-        global missing_data
-        global ask_to_save
-
-        if len(argv) > 0:
-            missing_data = argv[0]
-        else:
-            missing_data = [wins.get(),losses.get()]
-            if missing_data[0] == "Match Wins":
-                missing_data[0] = "0"
-            if missing_data[1] == "Match Losses":
-                missing_data[1] = "0"
-            ask_to_save = True
-        subwindow.grab_release()
-        subwindow.destroy()
-             
-    height = 450
-    width =  650                
-    subwindow = tk.Toplevel(window)
-    if progress == 0:
-        subwindow.title("Revise Entry")
-    else:
-        subwindow.title("Input Missing Data - " + str(progress[0]) + "/" + str(progress[1]) + " Matches.")
-    subwindow.iconbitmap(subwindow,"icon.ico")        
-    subwindow.minsize(width,height)
-    subwindow.resizable(False,False)
-    subwindow.attributes("-topmost",True)
-    subwindow.grab_set()
-    subwindow.focus_force()
-
-    subwindow.geometry("+%d+%d" %
-        (window.winfo_x()+(window.winfo_width()/2)-(width/2),
-        window.winfo_y()+(window.winfo_height()/2)-(height/2)))
-    message = "Date Drafted: " + mdata[modo.header("Drafts").index("Date")]
-
-    string_list = []
-    for i in picks:
-        card_string = ""
-        for index,card in enumerate(i):
-            if index > 0:
-                card_string += "\n"
-            card_string += card
-        string_list.append(card_string)
-
-    top_frame = tk.Frame(subwindow)
-    mid_frame = tk.Frame(subwindow)
-    bot_frame2 = tk.Frame(subwindow)
-    top_frame.grid(row=0,column=0,sticky="")
-    mid_frame.grid(row=1,column=0,sticky="nsew")
-    bot_frame2.grid(row=3,column=0,sticky="")
-    
-    mid_frame1 = tk.LabelFrame(mid_frame,text="Draft Picks")
-    mid_frame1.grid(row=0,column=0,sticky="nsew")
-    
-    subwindow.grid_columnconfigure(0,weight=1)
-    subwindow.rowconfigure(1,minsize=0,weight=1)
-    mid_frame.grid_columnconfigure(0,weight=1)
-    mid_frame.grid_rowconfigure(0,weight=1)
-    mid_frame1.grid_columnconfigure(0,weight=1)
-    mid_frame1.grid_columnconfigure(1,weight=1)
-    mid_frame1.grid_columnconfigure(2,weight=1)
-    mid_frame1.grid_rowconfigure(0,weight=1)
-
-    label_message = tk.Label(top_frame,text=message)
-    label1 = tk.Label(mid_frame1,text=string_list[0],anchor="n",wraplength=width/2,justify="left")
-    label2 = tk.Label(mid_frame1,text=string_list[1],anchor="n",wraplength=width/2,justify="left")
-    label3 = tk.Label(mid_frame1,text=string_list[2],anchor="n",wraplength=width/2,justify="left")
-
-    options_list = [0,1,2,3]
-
-    wins = tk.StringVar()
-    wins.set("Match Wins")
-    losses = tk.StringVar()
-    losses.set("Match Losses")
-
-    wins_menu = tk.OptionMenu(bot_frame2,wins,*options_list)
-    losses_menu = tk.OptionMenu(bot_frame2,losses,*options_list)
-
-    button_skip = tk.Button(top_frame,text="Skip Match",width=10,command=lambda : [close_format_window("Skip")])
-    button_exit = tk.Button(top_frame,text="Exit",width=10,command=lambda : [close_format_window("Exit")])
-    submit_button = tk.Button(bot_frame2,text="Apply",width=10,command=lambda : [close_format_window()])
-    
-    label1.grid(row=0,column=0,sticky="nsew",padx=5,pady=5)
-    label2.grid(row=0,column=1,sticky="nsew",padx=5,pady=5)
-    label3.grid(row=0,column=2,sticky="nsew",padx=5,pady=5)
-  
-    button_skip.grid(row=0,column=0,padx=10,pady=10)
-    label_message.grid(row=0,column=1,padx=10,pady=10)
-    button_exit.grid(row=0,column=2,padx=10,pady=10)
-
-    wins_menu.grid(row=0,column=0,padx=5,pady=5)
-    wins_menu.config(width=15)
-    losses_menu.grid(row=0,column=1,padx=5,pady=5)
-    losses_menu.config(width=15)
-    submit_button.grid(row=0,column=2,padx=5,pady=5)
-
-    if progress == 0:
-        button_skip["state"] = tk.DISABLED
 
     subwindow.protocol("WM_DELETE_WINDOW", lambda : close_format_window("Exit"))
     subwindow.wait_window()
@@ -4945,7 +4904,7 @@ def remove_record(ignore):
         precounts.append(cursor.fetchone()[0])
         cursor.execute(f'DELETE FROM Matches WHERE Match_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)
         cursor.execute(f'DELETE FROM Games WHERE Match_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)
-        cursor.execute(f'DELETE FROM Matches WHERE Match_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)
+        cursor.execute(f'DELETE FROM Plays WHERE Match_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)
         counts = []
         cursor.execute('SELECT COUNT(DISTINCT Match_ID) FROM Matches')
         counts.append(cursor.fetchone()[0])
