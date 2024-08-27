@@ -1176,76 +1176,175 @@ def input_missing_data():
     else:
         set_display("Matches",update_status=True,start_index=0,reset=True)
 def deck_data_guess(update_type):
-    global ALL_DATA
-    global ALL_DATA_INVERTED
+    global CONN
     global ask_to_save
 
-    date_index = modo.header("Matches").index("Date")
-    p1_index = modo.header("Matches").index("P1")
-    p2_index = modo.header("Matches").index("P2")
-    p1_sa_index = modo.header("Matches").index("P1_Subarch")
-    p2_sa_index = modo.header("Matches").index("P2_Subarch")
-    format_index = modo.header("Matches").index("Format")
-    df2 = pd.DataFrame(ALL_DATA[2],columns=modo.header("Plays"))
+    cursor = CONN.cursor()
+    cursor2 = CONN.cursor()
 
-    for i in ALL_DATA[0]:
-        yyyy_mm = i[date_index][0:4] + "-" + i[date_index][5:7]
-        players = [i[p1_index],i[p2_index]]
-
-        # Update P1_Subarch, P2_Subarch for all Limited Matches.
-        if update_type == "Limited":
-            if i[format_index] in INPUT_OPTIONS["Limited Formats"]:
-                ask_to_save = True
-                cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                i[p1_sa_index] = modo.get_limited_subarch(cards1)
-                i[p2_sa_index] = modo.get_limited_subarch(cards2)
-
-        # Update P1_Subarch, P2_Subarch for all Constructed Matches.
-        elif update_type == "Constructed":
-            if i[format_index] in INPUT_OPTIONS["Constructed Formats"]:
-                ask_to_save = True
-                cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                p1_data = modo.closest_list(set(cards1),ALL_DECKS,yyyy_mm)
-                p2_data = modo.closest_list(set(cards2),ALL_DECKS,yyyy_mm)
-                i[p1_sa_index] = p1_data[0]
-                i[p2_sa_index] = p2_data[0]
-
-        # Update P1_Subarch, P2_Subarch for all Matches.
-        elif update_type == "All":
+    # !FIXTHIS! check to make sure i am not double running (checking p1 updates p2, etc.)
+    # Update P1_Subarch, P2_Subarch for all Limited Matches.
+    if update_type == "Limited":
+        values = ', '.join(f"'{value}'" for value in INPUT_OPTIONS["Limited Formats"])
+        cursor.execute(f'''
+        SELECT *
+        FROM Matches
+        WHERE Limited_Format IN ({values});
+        ''')
+        row = cursor.fetchone()
+        while row is not None:
+            players = [row[modo.header("Matches").index("P1")],row[modo.header("Matches").index("P2")]]
+            # !FIXTHIS! make sure all primary_card queries are using distinct, also dbl check all queries have string quotes
+            rows = cursor2.execute(f'''
+            SELECT DISTINCT Primary_Card
+            FROM Plays
+            WHERE Casting_Player = "{players[0]}" AND Match_ID = "{row[0]}";
+            ''').fetchall()
+            cards1 = [i[0] for i in rows]
+            rows = cursor2.execute(f'''
+            SELECT DISTINCT Primary_Card
+            FROM Plays
+            WHERE Casting_Player = "{players[1]}" AND Match_ID = "{row[0]}";
+            ''').fetchall()
+            cards2 = [i[0] for i in rows]
+            
+            p1_sa = modo.get_limited_subarch(cards1)
+            p2_sa = modo.get_limited_subarch(cards2)
+            cursor2.execute(f'''
+            UPDATE Matches
+            SET P1_Subarch = "{p1_sa}",
+                P2_Subarch = "{p2_sa}"
+            WHERE P1 = "{players[0]}" AND Match_ID = "{row[0]}";
+            ''')
+            cursor.execute(f'''
+            UPDATE Matches
+            SET P1_Subarch = "{p2_sa}",
+                P2_Subarch = "{p1_sa}"
+            WHERE P1 = "{players[1]}" AND Match_ID = "{row[0]}";
+            ''')
             ask_to_save = True
-            cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-            cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-            if i[format_index] in INPUT_OPTIONS["Limited Formats"]:
-                i[p1_sa_index] = modo.get_limited_subarch(cards1)
-                i[p2_sa_index] = modo.get_limited_subarch(cards2)
-            else: 
-                p1_data = modo.closest_list(set(cards1),ALL_DECKS,yyyy_mm)
-                p2_data = modo.closest_list(set(cards2),ALL_DECKS,yyyy_mm)
-                i[p1_sa_index] = p1_data[0]
-                i[p2_sa_index] = p2_data[0]
-
-        # Update P1_Subarch, P2_Subarch only if equal to "Unknown" or "NA".
-        elif update_type == "Unknowns":
-            if (i[p1_sa_index] == "Unknown") or (i[p1_sa_index] == "NA"):
-                ask_to_save = True
-                cards1 = df2[(df2.Casting_Player == players[0]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                if i[format_index] in INPUT_OPTIONS["Limited Formats"]:
-                    i[p1_sa_index] = modo.get_limited_subarch(cards1)
-                else:
-                    p1_data = modo.closest_list(set(cards1),ALL_DECKS,yyyy_mm)
-                    i[p1_sa_index] = p1_data[0]
-            if (i[p2_sa_index] == "Unknown") or (i[p2_sa_index] == "NA"):
-                ask_to_save = True
-                cards2 = df2[(df2.Casting_Player == players[1]) & (df2.Match_ID == i[0])].Primary_Card.value_counts().keys().tolist()
-                if i[format_index] in INPUT_OPTIONS["Limited Formats"]:
-                    i[p2_sa_index] = modo.get_limited_subarch(cards2)
-                else:
-                    p2_data = modo.closest_list(set(cards2),ALL_DECKS,yyyy_mm)
-                    i[p2_sa_index] = p2_data[0]
-
-    ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
+            row = cursor.fetchone()
+    # Update P1_Subarch, P2_Subarch for all Constructed Matches.
+    elif update_type == "Constructed":
+        values = ', '.join(f"'{value}'" for value in INPUT_OPTIONS["Constructed Formats"])
+        cursor.execute(f'''
+        SELECT *
+        FROM Matches
+        WHERE Format IN ({values});
+        ''')
+        row = cursor.fetchone()
+        while row is not None:
+            players = [row[modo.header("Matches").index("P1")],row[modo.header("Matches").index("P2")]]
+            yyyy_mm = row[modo.header("Matches").index("Date")][0:4] + "-" + row[modo.header("Matches").index("Date")][5:7]
+            # !FIXTHIS! make sure all primary_card queries are using distinct, also dbl check all queries have string quotes
+            rows = cursor2.execute(f'''
+            SELECT DISTINCT Primary_Card
+            FROM Plays
+            WHERE Casting_Player = "{players[0]}" AND Match_ID = "{row[0]}";
+            ''').fetchall()
+            cards1 = [i[0] for i in rows]
+            rows = cursor2.execute(f'''
+            SELECT DISTINCT Primary_Card
+            FROM Plays
+            WHERE Casting_Player = "{players[1]}" AND Match_ID = "{row[0]}";
+            ''').fetchall()
+            cards2 = [i[0] for i in rows]
+            
+            p1_sa = modo.closest_list(set(cards1),ALL_DECKS,yyyy_mm)[0]
+            p2_sa = modo.closest_list(set(cards2),ALL_DECKS,yyyy_mm)[0]
+            cursor2.execute(f'''
+            UPDATE Matches
+            SET P1_Subarch = "{p1_sa}",
+                P2_Subarch = "{p2_sa}"
+            WHERE P1 = "{players[0]}" AND Match_ID = "{row[0]}";
+            ''')
+            cursor.execute(f'''
+            UPDATE Matches
+            SET P1_Subarch = "{p2_sa}",
+                P2_Subarch = "{p1_sa}"
+            WHERE P1 = "{players[1]}" AND Match_ID = "{row[0]}";
+            ''')
+            ask_to_save = True
+            row = cursor.fetchone()
+    # Update P1_Subarch, P2_Subarch for all Matches.
+    elif update_type == "All":
+        cursor.execute(f'''
+        SELECT *
+        FROM Matches;
+        ''')
+        row = cursor.fetchone()
+        while row is not None:
+            players = [row[modo.header("Matches").index("P1")],row[modo.header("Matches").index("P2")]]
+            yyyy_mm = row[modo.header("Matches").index("Date")][0:4] + "-" + row[modo.header("Matches").index("Date")][5:7]
+            # !FIXTHIS! make sure all primary_card queries are using distinct, also dbl check all queries have string quotes
+            rows = cursor2.execute(f'''
+            SELECT DISTINCT Primary_Card
+            FROM Plays
+            WHERE Casting_Player = "{players[0]}" AND Match_ID = "{row[0]}";
+            ''').fetchall()
+            cards1 = [i[0] for i in rows]
+            rows = cursor2.execute(f'''
+            SELECT DISTINCT Primary_Card
+            FROM Plays
+            WHERE Casting_Player = "{players[1]}" AND Match_ID = "{row[0]}";
+            ''').fetchall()
+            cards2 = [i[0] for i in rows]
+            
+            if row[modo.header("Matches").index("Format")] in INPUT_OPTIONS["Limited Formats"]:
+                p1_sa = modo.get_limited_subarch(cards1)
+                p2_sa = modo.get_limited_subarch(cards2)
+            else:
+                p1_sa = modo.closest_list(set(cards1),ALL_DECKS,yyyy_mm)[0]
+                p2_sa = modo.closest_list(set(cards2),ALL_DECKS,yyyy_mm)[0]
+            cursor2.execute(f'''
+            UPDATE Matches
+            SET P1_Subarch = "{p1_sa}",
+                P2_Subarch = "{p2_sa}"
+            WHERE P1 = "{players[0]}" AND Match_ID = "{row[0]}";
+            ''')
+            cursor.execute(f'''
+            UPDATE Matches
+            SET P1_Subarch = "{p2_sa}",
+                P2_Subarch = "{p1_sa}"
+            WHERE P1 = "{players[1]}" AND Match_ID = "{row[0]}";
+            ''')
+            ask_to_save = True
+            row = cursor.fetchone()
+    # Update P1_Subarch, P2_Subarch only if equal to "Unknown" or "NA".
+    elif update_type == "Unknowns":
+        cursor.execute(f'''
+        SELECT *
+        FROM Matches
+        WHERE P1_Subarch IN ("Unknown", "NA");
+        ''')
+        row = cursor.fetchone()
+        while row is not None:
+            players = [row[modo.header("Matches").index("P1")],row[modo.header("Matches").index("P2")]]
+            yyyy_mm = row[modo.header("Matches").index("Date")][0:4] + "-" + row[modo.header("Matches").index("Date")][5:7]
+            # !FIXTHIS! make sure all primary_card queries are using distinct, also dbl check all queries have string quotes
+            rows = cursor2.execute(f'''
+            SELECT DISTINCT Primary_Card
+            FROM Plays
+            WHERE Casting_Player = "{players[0]}" AND Match_ID = "{row[0]}";
+            ''').fetchall()
+            cards1 = [i[0] for i in rows]
+            
+            if row[modo.header("Matches").index("Format")] in INPUT_OPTIONS["Limited Formats"]:
+                p1_sa = modo.get_limited_subarch(cards1)
+            else:
+                p1_sa = modo.closest_list(set(cards1),ALL_DECKS,yyyy_mm)[0]
+            cursor2.execute(f'''
+            UPDATE Matches
+            SET P1_Subarch = "{p1_sa}"
+            WHERE P1 = "{players[0]}" AND Match_ID = "{row[0]}";
+            ''')
+            cursor.execute(f'''
+            UPDATE Matches
+            SET P2_Subarch = "{p1_sa}"
+            WHERE P2 = "{players[0]}" AND Match_ID = "{row[0]}";
+            ''')
+            ask_to_save = True
+            row = cursor.fetchone()
 def rerun_decks_window():
     height = 200
     width =  400
