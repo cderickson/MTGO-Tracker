@@ -786,7 +786,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
         table_insert(table='Games',data=new_data_inverted[1])
         table_insert(table='Plays',data=new_data_inverted[2])
         for key,value in new_data_inverted[3].items():
-            table_insert(table='GameActions',data=[[key[:-2],int(key[-1]),'\n'.join(value)]])
+            table_insert(table='GameActions',data=[[key[:-2],int(key[-1]),'\n'.join(value[-15:])]])
 
     if (fp_drafts != "No Default DraftLogs Folder"):
         os.chdir(fp_drafts)
@@ -2934,6 +2934,7 @@ def get_winners():
     global ALL_DATA
     global ALL_DATA_INVERTED
     global DRAFTS_TABLE
+    global CONN
     global uaw
     global ask_to_save
 
@@ -2941,37 +2942,140 @@ def get_winners():
     p1_index = modo.header("Games").index("P1")
     p2_index = modo.header("Games").index("P2")
     gn_index = modo.header("Games").index("Game_Num")
+
+    cursor = CONN.cursor()
+    count = 0
     changed = 0
     total = 0
-
+    
     exit = False
     raw_dict_new = {}
-    for count,key in enumerate(ALL_DATA[3]):
-        match_id = key[:-2]
-        game_num = key[-1]
+    revised_rows = []
+    
+    cursor.execute('''
+    SELECT COUNT(*)
+    FROM Games g INNER JOIN GameActions ga
+    ON g.Match_ID = ga.Match_ID AND g.Game_Num = ga.Game_Num;
+    ''')
+    orig_total = cursor.fetchone()[0]
+
+    cursor.execute('''
+    SELECT
+        g.Match_ID,
+        g.Game_Num,
+        g.P1,
+        g.P2,
+        g.PD_Selector,
+        g.PD_Choice,
+        g.On_Play,
+        g.On_Draw,
+        g.P1_Mulls,
+        g.P2_Mulls,
+        g.Turns,
+        g.Game_Winner,
+        ga.Game_Actions
+    FROM Games g INNER JOIN GameActions ga
+    ON g.Match_ID = ga.Match_ID AND g.Game_Num = ga.Game_Num;
+    ''')
+    row = cursor.fetchone()
+    while row is not None: # Iterate through Games.
         if exit == False:
-            for i in ALL_DATA[1]:
-                if (i[0] == match_id) & (str(i[gn_index]) == game_num) & (i[gw_index] == "NA"):
-                    ask_for_winner(ALL_DATA[3][key],i[p1_index],i[p2_index],count+1,len(ALL_DATA[3]))
-                    total += 1
-                    if uaw == "Exit.":
-                        exit = True
-                        raw_dict_new[key] = ALL_DATA[3][key]
-                    elif uaw == "NA":
-                        raw_dict_new[key] = ALL_DATA[3][key]
-                    else:
-                        i[gw_index] = uaw
-                        changed += 1
-                    break
+            if row[11] == 'NA':
+                count += 1
+                ask_for_winner(all_ga=row[12],p1=row[2],p2=row[3],n=count,total=orig_total)
+                total += 1
+                if uaw == "Exit.":
+                    exit = True
+                    # we are keeping this record because we didn't get a winner and didn't update anything
+                    raw_dict_new[key] = ALL_DATA[3][key]
+                elif uaw == "NA":
+                    # we are keeping this record because we didn't get a winner and didn't update anything
+                    raw_dict_new[key] = ALL_DATA[3][key]
+                else:
+                    # update record
+                    if uaw == 'P1':
+                        uaw_opp = 'P2'
+                    elif uaw == 'P2':
+                        uaw_opp = 'P1'
+                    cursor.execute(f'''
+                    UPDATE Games 
+                    SET Game_Winner = "{uaw}"
+                    WHERE Match_ID = "{row[0]}" AND P1 = "{row[2]}"
+                    ''')
+                    cursor.execute(f'''
+                    UPDATE Games 
+                    SET Game_Winner = "{uaw_opp}"
+                    WHERE Match_ID = "{row[0]}" AND P2 = "{row[2]}"
+                    ''')
+                    changed += 1
+                    revised_rows.append(row[0])
         if exit:
+            # we are keeping this record because we didn't get a winner and didn't update anything
             raw_dict_new[key] = ALL_DATA[3][key]
+        row = cursor.fetchone()
 
-    if len(ALL_DATA[3]) > len(raw_dict_new):
-        ALL_DATA[3] = raw_dict_new
-        modo.update_game_wins(ALL_DATA,TIMEOUT)
-        ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
+    #if we got some new game_winners
+    if changed > 0:
+        #update gameactions table
+        match_ids_string = ', '.join(f"'{match_id}'" for match_id in revised_rows)
+        cursor.execute(f'''
+        DELETE FROM GameActions 
+        WHERE Match_ID IN ({match_ids_string});
+        ''')
+        # update p1/p2 game wins columns
+        cursor.execute(f'''
+        UPDATE Matches
+        SET P1_Wins = (
+            SELECT COUNT(*)
+            FROM Games
+            WHERE Games.Match_ID = Matches.Match_ID AND Games.P1 = Matches.P1 AND Games.Game_Winner = "P1");
+        ''')
+        cursor.execute(f'''
+        UPDATE Matches
+        SET P2_Wins = (
+            SELECT COUNT(*)
+            FROM Games
+            WHERE Games.Match_ID = Matches.Match_ID AND Games.P1 = Matches.P1 AND Games.Game_Winner = "P2");
+        ''')
+        cursor.execute(f'''
+        UPDATE Matches
+        SET 
+            Match_Winner = CASE
+                WHEN Matches.P1_Wins > Matches.P2_Wins THEN "P1"
+                WHEN Matches.P1_Wins < Matches.P2_Wins THEN "P2"
+                ELSE "NA"
+            END
+        FROM Timeout
+        WHERE Timeout.Match_ID = Matches.Match_ID;
+        ''')
+        cursor.execute(f'''
+        UPDATE Matches
+        SET 
+            Match_Winner = CASE
+                WHEN Timeout.Timed_Out_User = Matches.P2 THEN "P1"
+                WHEN Timeout.Timed_Out_User = Matches.P1 THEN "P2"
+                ELSE Match_Winner
+            END
+        FROM Timeout
+        WHERE Timeout.Match_ID = Matches.Match_ID;
+        ''')
 
+        cursor.execute(f'''
+        UPDATE Drafts
+        SET Match_Wins = (
+            SELECT COUNT(*)
+            FROM Matches
+            WHERE Games.Match_ID = Matches.Match_ID AND Games.P1 = Matches.P1 AND Games.Game_Winner = "P2");
+        ''')
+        cursor.execute(f'''
+        UPDATE Drafts
+        SET Match_Losses = (
+            SELECT COUNT(*)
+            FROM Matches
+            WHERE Games.Match_ID = Matches.Match_ID AND Games.P1 = Matches.P1 AND Games.Game_Winner = "P2");
+        ''')
         df_inverted = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
+        # update match wins in drafts table
         for i in DRAFTS_TABLE:
             wins = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[1]) & (df_inverted.Match_Winner == "P1")].shape[0]
             losses = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[1]) & (df_inverted.Match_Winner == "P2")].shape[0]
@@ -2987,13 +3091,14 @@ def get_winners():
     else:
         update_status_bar(status=f"Game_Winner updated for {changed} Games.")
     set_display("Matches",update_status=False,start_index=0,reset=True)
-def ask_for_winner(ga_list,p1,p2,n,total):
+def ask_for_winner(all_ga,p1,p2,n,total):
     # List of game actions (Strings)
     # String = P1
     # String = P2
     # Int = Count in cycle
     # Int = Total number of games missing Game_Winner
 
+    # !FIXTHIS! ga_list is a joined list (string)
     def close_gw_window(winner):
         global uaw
         uaw = winner
@@ -3016,9 +3121,6 @@ def ask_for_winner(ga_list,p1,p2,n,total):
                  window.winfo_y()+(window.winfo_height()/2)-(height/2)))
 
     message = "Winner could not be determined.\nPlease select Game Winner."
-    all_ga =  ""
-    for i in ga_list[-15:]:
-        all_ga += i + "\n"
         
     top_frame = tk.Frame(gw)
     mid_frame = tk.LabelFrame(gw,text="Game Actions")
