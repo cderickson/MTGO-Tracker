@@ -2931,17 +2931,9 @@ def import_window():
 
     import_window.protocol("WM_DELETE_WINDOW", lambda : close_import_window())
 def get_winners():
-    global ALL_DATA
-    global ALL_DATA_INVERTED
-    global DRAFTS_TABLE
     global CONN
     global uaw
     global ask_to_save
-
-    gw_index = modo.header("Games").index("Game_Winner")
-    p1_index = modo.header("Games").index("P1")
-    p2_index = modo.header("Games").index("P2")
-    gn_index = modo.header("Games").index("Game_Num")
 
     cursor = CONN.cursor()
     count = 0
@@ -2949,7 +2941,6 @@ def get_winners():
     total = 0
     
     exit = False
-    raw_dict_new = {}
     revised_rows = []
     
     cursor.execute('''
@@ -2987,10 +2978,11 @@ def get_winners():
                 if uaw == "Exit.":
                     exit = True
                     # we are keeping this record because we didn't get a winner and didn't update anything
-                    raw_dict_new[key] = ALL_DATA[3][key]
+                    #raw_dict_new[key] = ALL_DATA[3][key]
                 elif uaw == "NA":
                     # we are keeping this record because we didn't get a winner and didn't update anything
-                    raw_dict_new[key] = ALL_DATA[3][key]
+                    #raw_dict_new[key] = ALL_DATA[3][key]
+                    pass
                 else:
                     # update record
                     if uaw == 'P1':
@@ -3011,18 +3003,16 @@ def get_winners():
                     revised_rows.append(row[0])
         if exit:
             # we are keeping this record because we didn't get a winner and didn't update anything
-            raw_dict_new[key] = ALL_DATA[3][key]
+            #raw_dict_new[key] = ALL_DATA[3][key]
+            break
         row = cursor.fetchone()
 
-    #if we got some new game_winners
     if changed > 0:
-        #update gameactions table
         match_ids_string = ', '.join(f"'{match_id}'" for match_id in revised_rows)
         cursor.execute(f'''
         DELETE FROM GameActions 
         WHERE Match_ID IN ({match_ids_string});
         ''')
-        # update p1/p2 game wins columns
         cursor.execute(f'''
         UPDATE Matches
         SET P1_Wins = (
@@ -3059,29 +3049,20 @@ def get_winners():
         FROM Timeout
         WHERE Timeout.Match_ID = Matches.Match_ID;
         ''')
-
         cursor.execute(f'''
         UPDATE Drafts
         SET Match_Wins = (
             SELECT COUNT(*)
             FROM Matches
-            WHERE Games.Match_ID = Matches.Match_ID AND Games.P1 = Matches.P1 AND Games.Game_Winner = "P2");
+            WHERE Matches.Draft_ID = Drafts.Draft_ID AND Matches.P1 = Drafts.Hero AND Matches.Match_Winner = "P1");
         ''')
         cursor.execute(f'''
         UPDATE Drafts
         SET Match_Losses = (
             SELECT COUNT(*)
             FROM Matches
-            WHERE Games.Match_ID = Matches.Match_ID AND Games.P1 = Matches.P1 AND Games.Game_Winner = "P2");
+            WHERE Matches.Draft_ID = Drafts.Draft_ID AND Matches.P1 = Drafts.Hero AND Matches.Match_Winner = "P2");
         ''')
-        df_inverted = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
-        # update match wins in drafts table
-        for i in DRAFTS_TABLE:
-            wins = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[1]) & (df_inverted.Match_Winner == "P1")].shape[0]
-            losses = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[1]) & (df_inverted.Match_Winner == "P2")].shape[0]
-            i[modo.header("Drafts").index("Match_Wins")] = wins
-            i[modo.header("Drafts").index("Match_Losses")] = losses
-
         ask_to_save = True
 
     if total == 0:
@@ -3092,13 +3073,12 @@ def get_winners():
         update_status_bar(status=f"Game_Winner updated for {changed} Games.")
     set_display("Matches",update_status=False,start_index=0,reset=True)
 def ask_for_winner(all_ga,p1,p2,n,total):
-    # List of game actions (Strings)
+    # String of GameActions
     # String = P1
     # String = P2
     # Int = Count in cycle
     # Int = Total number of games missing Game_Winner
 
-    # !FIXTHIS! ga_list is a joined list (string)
     def close_gw_window(winner):
         global uaw
         uaw = winner
