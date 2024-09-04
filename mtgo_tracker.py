@@ -5459,8 +5459,7 @@ def clear_skipped_files():
     global CONN
 
     cursor = CONN.cursor()
-    cursor.execute('SELECT COUNT(*) FROM Skipped_Files')
-    file_count = cursor.fetchone()[0]
+    file_count = cursor.execute('SELECT COUNT(*) FROM Skipped_Files').fetchone()[0]
 
     cursor.execute('DELETE FROM Skipped_Files')
     ask_to_save = True
@@ -5468,6 +5467,7 @@ def clear_skipped_files():
     update_status_bar(status=f"Made all ignored files scannable ({file_count} GameLogs and/or DraftLogs).")
 def debug():
     os.chdir(FILEPATH_ROOT)
+    x = ''
     with open("DEBUG.txt","w",encoding="utf-8") as txt:
         txt.write(debug_str + '\n')
         txt.write("SETTINGS:\n")
@@ -5482,44 +5482,16 @@ def debug():
         txt.write(f"MAIN_WINDOW_SIZE: {MAIN_WINDOW_SIZE}\n")
         txt.write("\n")
 
-        # txt.write("INPUT_OPTIONS:\n")
-        # for i in INPUT_OPTIONS:
-        #     txt.write(f'{i}:\n')
-        #     for j in INPUT_OPTIONS[i]:
-        #         txt.write(f'{j}\n')
-        #     txt.write('\n')
-        # txt.write("\n")
-
-        txt.write(f"PARSED_FILE_DICT ({str(len(PARSED_FILE_DICT))} files):\n")
-        for i in PARSED_FILE_DICT:
-            txt.write(f"{i}: {PARSED_FILE_DICT[i]}\n")
-        txt.write("\n")
-
-        txt.write(f"PARSED_DRAFT_DICT ({str(len(PARSED_DRAFT_DICT))} files):\n")
-        for i in PARSED_DRAFT_DICT:
-            txt.write(f"{i}: {PARSED_DRAFT_DICT[i]}\n")
-        txt.write("\n")
-
-        txt.write(f"SKIP_FILES ({str(len(SKIP_FILES))} files):\n")
-        for i in SKIP_FILES:
-            txt.write(f"{i}\n")
-        txt.write("\n")
-
-        txt.write(f"SKIP_DRAFTS ({str(len(SKIP_DRAFTS))} files):\n")
-        for i in SKIP_DRAFTS:
-            txt.write(f"{i}\n")
-        txt.write("\n")
-
-        txt.write(f"Matches: {str(len(ALL_DATA[0]))}\n")
-        txt.write(f"Games: {str(len(ALL_DATA[1]))}\n")
-        txt.write(f"Plays: {str(len(ALL_DATA[2]))}\n")
-        txt.write(f"Drafts: {str(len(DRAFTS_TABLE))}\n")
-        txt.write(f"Picks: {str(len(PICKS_TABLE))}\n")
-        txt.write(f"Raw: {str(len(ALL_DATA[3]))}\n")
-        txt.write(f"Matches (Inverse): {str(len(ALL_DATA_INVERTED[0]))} (should be {str(len(ALL_DATA[0])*2)})\n")
-        txt.write(f"Games (Inverse): {str(len(ALL_DATA_INVERTED[1]))} (should be {str(len(ALL_DATA[1])*2)})\n")
-        txt.write(f"Plays (Inverse): {str(len(ALL_DATA_INVERTED[2]))} (should be {str(len(ALL_DATA[2]))})\n")
-        txt.write(f"Raw (Inverse): {str(len(ALL_DATA_INVERTED[3]))}\n")
+        txt.write(f"Matches: {x}\n")
+        txt.write(f"Games: {x}\n")
+        txt.write(f"Plays: {x}\n")
+        txt.write(f"Drafts: {x}\n")
+        txt.write(f"Picks: {x}\n")
+        txt.write(f"Raw: {x}\n")
+        txt.write(f"Matches (Inverse): {x} (should be {x})\n")
+        txt.write(f"Games (Inverse): {x} (should be {x})\n")
+        txt.write(f"Plays (Inverse): {x} (should be {x})\n")
+        txt.write(f"Raw (Inverse): {x}\n")
         txt.write("\n")
 
         txt.write(f"ALL_DECKS: {len(ALL_DECKS)}\n")
@@ -5563,8 +5535,7 @@ def create_tables():
     Format TEXT,
     Date TEXT,
     PRIMARY KEY (Draft_ID, Hero)
-    )
-    '''
+    );'''
     picks_query = '''
     CREATE TABLE IF NOT EXISTS Picks (
     Draft_ID TEXT,
@@ -5588,8 +5559,7 @@ def create_tables():
     AVAIL_14 TEXT,
     PRIMARY KEY (Draft_ID, Pick_Ovr),
     FOREIGN KEY (Draft_ID) REFERENCES Drafts(Draft_ID)
-    )
-    '''
+    );'''
     matches_query = '''
     CREATE TABLE IF NOT EXISTS Matches (
     Match_ID TEXT,
@@ -5611,8 +5581,7 @@ def create_tables():
     Match_Type TEXT,
     Date TEXT,
     PRIMARY KEY (Match_ID, P1)
-    )
-    '''
+    );'''
     games_query = '''
     CREATE TABLE IF NOT EXISTS Games (
     Match_ID TEXT,
@@ -5629,8 +5598,7 @@ def create_tables():
     Game_Winner INTEGER,
     PRIMARY KEY (Match_ID, Game_Num, P1),
     FOREIGN KEY (Match_ID, P1) REFERENCES Matches(Match_ID, P1)
-    )
-    '''
+    );'''
     plays_query = '''
     CREATE TABLE IF NOT EXISTS Plays (
     Match_ID TEXT,
@@ -5650,36 +5618,31 @@ def create_tables():
     Active_Player TEXT,
     Nonactive_Player TEXT,
     PRIMARY KEY (Match_ID, Game_Num, Play_Num)
-    )
-    '''
+    );'''
     gameactions_query = '''
     CREATE TABLE IF NOT EXISTS GameActions (
     Match_ID TEXT,
     Game_Num INTEGER,
     Game_Actions TEXT,
     PRIMARY KEY (Match_ID, Game_Num)
-    )
-    '''
+    );'''
     timeout_query = '''
     CREATE TABLE IF NOT EXISTS Timeout (
     Match_ID TEXT PRIMARY KEY,
     Timed_Out_User TEXT
-    )
-    '''
+    );'''
     parsed_files_query = '''
     CREATE TABLE IF NOT EXISTS Parsed_Files (
     Filename TEXT PRIMARY KEY,
     Record_ID TEXT,
     Proc_DT TEXT
-    )
-    '''
+    );'''
     skip_files_query = '''
     CREATE TABLE IF NOT EXISTS Skipped_Files (
     Record_ID TEXT,
     Reason TEXT,
     Proc_DT TEXT
-    )
-    '''
+    );'''
     
     all_queries = [drafts_query,picks_query,matches_query,games_query,plays_query,
                    gameactions_query,timeout_query,parsed_files_query,skip_files_query]
@@ -5693,48 +5656,39 @@ def table_insert(table,data):
     if table == 'Drafts':
         query = '''
         INSERT OR IGNORE INTO Drafts (Draft_ID, Hero, Player_2, Player_3, Player_4, Player_5, Player_6, Player_7, Player_8, Match_Wins, Match_Losses, Format, Date) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        '''
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
     elif table == 'Picks':
         query = '''
         INSERT OR IGNORE INTO Picks (Pick, Pack_Num, Pick_Num, Pick_Ovr, AVAIL_1, AVAIL_2, AVAIL_3, AVAIL_4, AVAIL_5, AVAIL_6, AVAIL_7, AVAIL_8, AVAIL_9, AVAIL_10, AVAIL_11, AVAIL_12, AVAIL_13, AVAIL_14) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        '''
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
     elif table == 'Matches':
         query = '''
         INSERT OR IGNORE INTO Matches (Match_ID, Draft_ID, P1, P1_Arch, P1_Subarch, P2, P2_Arch, P2_Subarch, P1_Roll, P2_Roll, Roll_Winner, P1_Wins, P2_Wins, Match_Winner, Format, Limited_Format, Match_Type, Date) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        '''
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
     elif table == 'Games':
         query = '''
         INSERT OR IGNORE INTO Games (Match_ID, P1, P2, Game_Num, PD_Selector, PD_Choice, On_Play, On_Draw, P1_Mulls, P2_Mulls, Turns, Game_Winner) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        '''
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
     elif table == 'Plays':
         query = '''
         INSERT OR IGNORE INTO Plays (Match_ID, Game_Num, Play_Num, Turn_Num, Casting_Player, Action, Primary_Card, Target1, Target2, Target3, Opp_Target, Self_Target, Cards_Drawn, Attackers, Active_Player, Nonactive_Player) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        '''
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
     elif table == 'GameActions':
         query = '''
         INSERT OR IGNORE INTO GameActions (Match_ID, Game_Num, Game_Actions) 
-        VALUES (?, ?, ?)
-        '''
+        VALUES (?, ?, ?)'''
     elif table == 'Timeout':
         query = '''
         INSERT OR IGNORE INTO Timeout (Match_ID, Timed_Out_User) 
-        VALUES (?, ?)
-        '''
+        VALUES (?, ?)'''
     elif table == 'Parsed_Files':
         query = '''
         INSERT OR IGNORE INTO Parsed_Files (Filename, Record_ID, Proc_DT) 
-        VALUES (?, ?, ?)
-        '''
+        VALUES (?, ?, ?)'''
     elif table == 'Skipped_Files':
         query = '''
         INSERT OR IGNORE INTO Skipped_Files (Record_ID, Reason, Proc_DT) 
-        VALUES (?, ?, ?)
-        '''
+        VALUES (?, ?, ?)'''
     cursor = CONN.cursor()
     cursor.executemany(query,data)
 def init_db():
@@ -5743,9 +5697,7 @@ def init_db():
 
     CONN = sqlite3.connect('all_data.db')
     cursor = CONN.cursor()
-    cursor.execute('''
-        BEGIN TRANSACTION;
-        ''')
+    cursor.execute('''BEGIN TRANSACTION;''')
     debug_str += 'Database connection initialized.\n'
 def close_db(save):
     global CONN
@@ -5756,9 +5708,7 @@ def close_db(save):
         debug_str += 'Table creation queries committed.\n'
     elif save == False:
         cursor = CONN.cursor()
-        cursor.execute('''
-        ROLLBACK;
-        ''')
+        cursor.execute('''ROLLBACK;''')
         debug_str += 'Database changes rolled back.\n'
     CONN.close()
     CONN = None
