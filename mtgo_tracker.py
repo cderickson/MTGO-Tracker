@@ -894,24 +894,10 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
         df = data
     elif data == 'Empty':
         df = pd.DataFrame([],columns=headers)
-    # elif (HERO != "") & (display == "Matches"):
-    #     df = pd.DataFrame(ALL_DATA_INVERTED[0],columns=headers)
-    #     df = df[(df.P1 == HERO)]
-    # elif (HERO != "") & (display == "Games"):
-    #     df = pd.DataFrame(ALL_DATA_INVERTED[1],columns=headers)
-    #     df = df[(df.P1 == HERO)]
-    # elif (display == "Drafts"):
-    #     df = pd.DataFrame(DRAFTS_TABLE,columns=headers)
-    # elif (display == "Picks"):
-    #     df = pd.DataFrame(PICKS_TABLE,columns=headers)
-    # else:
-    #     df = pd.DataFrame(data,columns=headers)
-    # curr_data = df
 
     filter_list = []
     if apply_filter:
         # Apply existing filters.
-        # filtered_list = []
         for key in filter_dict:
             if key not in headers:
                 continue
@@ -5185,28 +5171,52 @@ def get_associated_draftid(mode):
     global ALL_DATA
     global ALL_DATA_INVERTED
     global DRAFTS_TABLE
+    global CONN
     global ask_to_save
 
     draftid_index = modo.header("Matches").index("Draft_ID")
     hero_index = modo.header("Drafts").index("Hero")
     count = 0
 
+    cursor = CONN.cursor()
+    cursor2 = CONN.cursor()
+
     df_matches = pd.DataFrame(ALL_DATA[0],columns=modo.header("Matches"))
     df_plays = pd.DataFrame(ALL_DATA[2],columns=modo.header("Plays"))
     df_drafts = pd.DataFrame(DRAFTS_TABLE,columns=modo.header("Drafts"))
     df_picks = pd.DataFrame(PICKS_TABLE,columns=modo.header("Picks"))
 
-    all_drafts = df_drafts.Draft_ID.tolist()
     draft_picks_dict = {}
-    for i in all_drafts:
-        hero = df_drafts[(df_drafts.Draft_ID == i)].Hero.tolist()[0]
-        date = df_drafts[(df_drafts.Draft_ID == i)].Date.tolist()[0]
-        draft_picks_dict[i] = (hero,date,set(df_picks[(df_picks.Draft_ID == i)].Card.unique()))
+    cursor.execute('SELECT * FROM Drafts;')
 
-    df_matches = df_matches[df_matches.Limited_Format.isin(INPUT_OPTIONS["Cube Formats"] + INPUT_OPTIONS["Booster Draft Formats"])]
-    if mode == "NA":    
-        df_matches = df_matches[(df_matches.Draft_ID == "NA")]
-    limited_matches = df_matches.Match_ID.tolist()
+    row = cursor.fetchone()
+    while row is not None:
+        result_set = cursor2.execute(f'''SELECT DISTINCT(Card) FROM Drafts WHERE Draft_ID = {row[0]}''').fetchall()
+        cards_set = {item[0] for item in result_set}
+        draft_picks_dict[row[0]] = (row[1],row[-1],cards_set)
+        row = cursor.fetchone()
+
+    # all_drafts = df_drafts.Draft_ID.tolist()
+    # for i in all_drafts:
+    #     hero = df_drafts[(df_drafts.Draft_ID == i)].Hero.tolist()[0]
+    #     date = df_drafts[(df_drafts.Draft_ID == i)].Date.tolist()[0]
+    #     draft_picks_dict[i] = (hero,date,set(df_picks[(df_picks.Draft_ID == i)].Card.unique()))
+
+    lim_formats = ', '.join(f'"{item}"' for item in (INPUT_OPTIONS["Cube Formats"] + INPUT_OPTIONS["Booster Draft Formats"]))
+    if mode == 'NA':
+        result_set = cursor.execute(f'SELECT Match_ID FROM Matches WHERE Limited_Format IN ({lim_formats}) AND Draft_ID = "NA"')
+    else:
+        result_set = cursor.execute(f'SELECT Match_ID FROM Matches WHERE Limited_Format IN ({lim_formats})')
+    limited_matches = [row[0] for row in result_set]
+
+    # df_matches = df_matches[df_matches.Limited_Format.isin(INPUT_OPTIONS["Cube Formats"] + INPUT_OPTIONS["Booster Draft Formats"])]
+    # if mode == "NA":    
+    #     df_matches = df_matches[(df_matches.Draft_ID == "NA")]
+    # limited_matches = df_matches.Match_ID.tolist()
+
+    row = cursor.fetchone()
+    while row is not None:
+        row = cursor.fetchone()
 
     list_to_process = []
     for i in limited_matches:
