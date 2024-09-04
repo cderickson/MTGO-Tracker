@@ -705,14 +705,6 @@ def set_display(d,update_status,start_index,reset):
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def get_all_data(fp_logs,fp_drafts,copy):
-    global ALL_DATA
-    global ALL_DATA_INVERTED
-    global TIMEOUT
-    global DRAFTS_TABLE
-    global PICKS_TABLE
-    global PARSED_DRAFT_DICT
-    global SKIP_FILES
-    global SKIP_DRAFTS
     global CONN
     global data_loaded
     global new_import
@@ -908,41 +900,25 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
                     value = i[2:]
                 if i[0] == "=":
                     if key == "Date":
-                        # filtered_list.append(df[(df[key].str.contains(value[0:10]))])
                         filter_list += f"{key} LIKE %{value}%"
                     else:
                         if isinstance(value, int):
                             filter_list.append(f"{key} = {value}")
                         else:
                             filter_list.append(f"{key} = '{value}'")
-                        # filtered_list.append(df[(df[key] == value)])
                 elif i[0] == ">":
-                    # filtered_list.append(df[(df[key] > value)])
                     if isinstance(value, int):
                         filter_list.append(f"{key} > {value}")
                     else:
                         filter_list.append(f"{key} > '{value}'")
                 elif i[0] == "<":
-                    # filtered_list.append(df[(df[key] < value)])
                     if isinstance(value, int):
                         filter_list.append(f"{key} < {value}")
                     else:
                         filter_list.append(f"{key} < '{value}'")
-            # if len(filtered_list) == 0:
-            #     pass
-            # elif len(filtered_list) == 1:
-            #     df = filtered_list[0]
-            # else:
-            #     index = 1
-            #     df = filtered_list[0]
-            #     while index < (len(filtered_list)):
-            #         df = pd.merge(df,filtered_list[index],how="outer")
-            #         index += 1
-            # filtered_list.clear()
         
         # Apply Default Sorting.
     if display == "Matches":
-        # df = df.sort_values(by=["Date"],ascending=False)
         filter_query = f'SELECT * FROM Matches'
         if HERO != '':
             filter_list.append(f"P1 = '{HERO}'")
@@ -951,8 +927,6 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
             filter_query += ' AND '.join(filter_list)
         filter_query += ' ORDER BY Date ASC'
     elif display == "Games":
-        # df = pd.merge(df, pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))[['Match_ID', 'Date']], on="Match_ID", how="left").drop_duplicates(subset=["Match_ID","Game_Num"])
-        # df = df.sort_values(by=["Match_ID","Game_Num"],ascending=(False,True))
         filter_query = f'SELECT Games.*, Matches.Date FROM Games LEFT JOIN Matches ON Games.Match_ID = Matches.Match_ID'
         if HERO != '':
             filter_list.append(f"P1 = '{HERO}'")
@@ -960,18 +934,13 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
             filter_query += ' WHERE '
             filter_query += ' AND '.join(filter_list)
         filter_query += ' ORDER BY Date DESC, Game_Num ASC'
-        # df = df.drop('Date', axis=1)
     elif display == "Plays":
-        # df = pd.merge(df, pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))[['Match_ID', 'Date']], on="Match_ID", how="left").drop_duplicates(subset=["Match_ID","Game_Num","Play_Num"])
-        # df = df.sort_values(by=["Match_ID","Game_Num","Play_Num"],ascending=(False,True,True))
         filter_query = f'SELECT Plays.*, Matches.Date FROM Plays LEFT JOIN Matches ON Plays.Match_ID = Matches.Match_ID'
         if len(filter_query) > 0:
             filter_query += ' WHERE '
             filter_query += ' AND '.join(filter_list)
         filter_query += ' ORDER BY Date DESC, Game_Num ASC, Play_Num ASC'
-        # df = df.drop('Date', axis=1)
     elif display == "Drafts":
-        # df = df.sort_values(by=["Date"],ascending=False)
         filter_query = f'SELECT * FROM Drafts'
         if HERO != '':
             filter_list.append(f"Hero = '{HERO}'")
@@ -980,7 +949,6 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
             filter_query += ' AND '.join(filter_list)
         filter_query += ' ORDER BY Date DESC'
     elif display == "Picks":
-        # df = df.sort_values(by=["Draft_ID","Pick_Ovr"],ascending=(False,True))
         filter_query = f'SELECT * FROM Picks'
         if len(filter_query) > 0:
             filter_query += ' WHERE '
@@ -1063,7 +1031,7 @@ def input_missing_data():
 
     n = 0
     count = 0
-    total = len(ALL_DATA[0])
+    total = cursor2.execute('''SELECT COUNT(*) FROM Matches''').fetchone()[0]
     lformat_values = ', '.join(f"'{value}'" for value in INPUT_OPTIONS["Limited Formats"])
 
     cursor.execute(f'''
@@ -1897,9 +1865,6 @@ def set_default_hero():
     global CONN
     cursor = CONN.cursor()
 
-    # df0_i = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
-    # hero_options = df0_i.P1.tolist()
-    # hero_options = sorted(list(set(hero_options)),key=str.casefold)
     cursor.execute('SELECT DISTINCT P1 FROM Matches')
     hero_options = [row[0] for row in cursor.fetchall()]
 
@@ -2354,8 +2319,6 @@ def set_filter():
     update_filter_text()
     filter_window.protocol("WM_DELETE_WINDOW", lambda : close_filter_window())
 def revise_record2():
-    global ALL_DATA
-    global ALL_DATA_INVERTED
     global CONN
     global selected
 
@@ -2552,52 +2515,37 @@ def revise_record_multi():
             lim_format_entry["state"] = tk.DISABLED
 
     def close_revise_window():
+        global CONN
         global ask_to_save
         global selected
         ask_to_save = True
+
+        cursor = CONN.cursor()
         for i in selected:
             values = list(tree1.item(i,"values"))
-            for index,j in enumerate(itertools.chain(*[ALL_DATA[0],ALL_DATA_INVERTED[0]])):
-                if values[0] == j[0]:
-                    if field == "P1 Deck":
-                        if values[modo.header("Matches").index("P1")] == j[modo.header("Matches").index("P1")]:
-                            j[modo.header("Matches").index("P1_Arch")] = p1_arch_type.get()
-                            if p1_subarch_entry.get().strip() == "":
-                                j[modo.header("Matches").index("P1_Subarch")] = "NA"
-                            else:
-                                j[modo.header("Matches").index("P1_Subarch")] = p1_subarch_entry.get().strip()
-                        else:
-                            j[modo.header("Matches").index("P2_Arch")] = p1_arch_type.get()
-                            if p1_subarch_entry.get().strip() == "":
-                                j[modo.header("Matches").index("P2_Subarch")] = "NA"
-                            else:
-                                j[modo.header("Matches").index("P2_Subarch")] = p1_subarch_entry.get().strip()                   
-                    elif field == "P2 Deck":
-                        if values[modo.header("Matches").index("P2")] == j[modo.header("Matches").index("P2")]:
-                            j[modo.header("Matches").index("P2_Arch")] = p2_arch_type.get()
-                            if p2_subarch_entry.get().strip() == "":
-                                j[modo.header("Matches").index("P2_Subarch")] = "NA"
-                            else:
-                                j[modo.header("Matches").index("P2_Subarch")] = p2_subarch_entry.get().strip()
-                        else:
-                            j[modo.header("Matches").index("P1_Arch")] = p2_arch_type.get()
-                            if p2_subarch_entry.get().strip() == "":
-                                j[modo.header("Matches").index("P1_Subarch")] = "NA"
-                            else:
-                                j[modo.header("Matches").index("P1_Subarch")] = p2_subarch_entry.get().strip()
-                    elif field == "Format":
-                        j[modo.header("Matches").index("Format")] = match_format.get()
-                        j[modo.header("Matches").index("Limited_Format")] = lim_format.get()
-                        if match_format.get() in INPUT_OPTIONS["Limited Formats"]:
-                            j[modo.header("Matches").index("P1_Arch")] = "Limited"
-                            j[modo.header("Matches").index("P2_Arch")] = "Limited"
-                        elif match_format.get() in INPUT_OPTIONS["Constructed Formats"]:
-                            if j[modo.header("Matches").index("P1_Arch")] == "Limited":
-                                j[modo.header("Matches").index("P1_Arch")] = "NA"
-                            if j[modo.header("Matches").index("P2_Arch")] == "Limited":
-                                j[modo.header("Matches").index("P2_Arch")] = "NA"
-                    elif field == "Match Type":
-                        j[modo.header("Matches").index("Match_Type")] = match_type.get() 
+            if field == "P1 Deck":
+                if p1_subarch_entry.get().strip() == "":
+                    cursor.execute(f'''UPDATE Matches SET P1_Arch = "{p1_arch_type.get()}", P1_Subarch = "NA" WHERE Match_ID = "{values[0]}" AND P1 = "{values[2]}";''')
+                    cursor.execute(f'''UPDATE Matches SET P2_Arch = "{p1_arch_type.get()}", P2_Subarch = "NA" WHERE Match_ID = "{values[0]}" AND P2 = "{values[2]}";''')
+                else:
+                    cursor.execute(f'''UPDATE Matches SET P1_Arch = "{p1_arch_type.get()}", P1_Subarch = "{p1_subarch_entry.get().strip()}" WHERE Match_ID = "{values[0]}" AND P1 = "{values[2]}";''')
+                    cursor.execute(f'''UPDATE Matches SET P2_Arch = "{p1_arch_type.get()}", P1_Subarch = "{p1_subarch_entry.get().strip()}" WHERE Match_ID = "{values[0]}" AND P2 = "{values[2]}";''')
+            elif field == "P2 Deck":
+                if p2_subarch_entry.get().strip() == "":
+                    cursor.execute(f'''UPDATE Matches SET P2_Arch = "{p2_arch_type.get()}", P1_Subarch = "NA" WHERE Match_ID = "{values[0]}" AND P1 = "{values[2]}";''')
+                    cursor.execute(f'''UPDATE Matches SET P1_Arch = "{p2_arch_type.get()}", P2_Subarch = "NA" WHERE Match_ID = "{values[0]}" AND P2 = "{values[2]}";''')
+                else:
+                    cursor.execute(f'''UPDATE Matches SET P2_Arch = "{p2_arch_type.get()}", P1_Subarch = "{p2_subarch_entry.get().strip()}" WHERE Match_ID = "{values[0]}" AND P1 = "{values[2]}";''')
+                    cursor.execute(f'''UPDATE Matches SET P1_Arch = "{p2_arch_type.get()}", P1_Subarch = "{p2_subarch_entry.get().strip()}" WHERE Match_ID = "{values[0]}" AND P2 = "{values[2]}";''')
+            elif field == "Format":
+                if match_format.get() in INPUT_OPTIONS["Limited Formats"]:
+                    cursor.execute(f'''UPDATE Matches SET Format = "{match_format.get()}", Limited_Format = "{lim_format.get()}", P1_Arch = "Limited", P2_Arch = "Limited" WHERE Match_ID = "{values[0]}";''')
+                elif match_format.get() in INPUT_OPTIONS["Constructed Formats"]:
+                    cursor.execute(f'''UPDATE Matches SET Format = "{match_format.get()}", Limited_Format = "{lim_format.get()}" WHERE Match_ID = "{values[0]}";''')
+                    cursor.execute(f'''UPDATE Matches SET P1_Arch = "NA" WHERE Match_ID = "{values[0]}" AND P1_Arch = "Limited";''')
+                    cursor.execute(f'''UPDATE Matches SET P2_Arch = "NA" WHERE Match_ID = "{values[0]}" AND P2_Arch = "Limited";''')
+            elif field == "Match Type":
+                cursor.execute(f'''UPDATE Matches SET Match_Type = "{match_type.get()}" WHERE Match_ID = "{values[0]}";''')
         set_display("Matches",update_status=True,start_index=display_index,reset=False)
         revise_button["state"] = tk.NORMAL
         remove_button["state"] = tk.NORMAL
@@ -5168,23 +5116,14 @@ def remove_select():
     
     remove_select.protocol("WM_DELETE_WINDOW", lambda : close_window())
 def get_associated_draftid(mode):
-    global ALL_DATA
-    global ALL_DATA_INVERTED
-    global DRAFTS_TABLE
     global CONN
+    global missing_data
     global ask_to_save
 
-    draftid_index = modo.header("Matches").index("Draft_ID")
-    hero_index = modo.header("Drafts").index("Hero")
     count = 0
 
     cursor = CONN.cursor()
     cursor2 = CONN.cursor()
-
-    df_matches = pd.DataFrame(ALL_DATA[0],columns=modo.header("Matches"))
-    df_plays = pd.DataFrame(ALL_DATA[2],columns=modo.header("Plays"))
-    df_drafts = pd.DataFrame(DRAFTS_TABLE,columns=modo.header("Drafts"))
-    df_picks = pd.DataFrame(PICKS_TABLE,columns=modo.header("Picks"))
 
     draft_picks_dict = {}
     cursor.execute('SELECT * FROM Drafts;')
@@ -5196,39 +5135,25 @@ def get_associated_draftid(mode):
         draft_picks_dict[row[0]] = (row[1],row[-1],cards_set)
         row = cursor.fetchone()
 
-    # all_drafts = df_drafts.Draft_ID.tolist()
-    # for i in all_drafts:
-    #     hero = df_drafts[(df_drafts.Draft_ID == i)].Hero.tolist()[0]
-    #     date = df_drafts[(df_drafts.Draft_ID == i)].Date.tolist()[0]
-    #     draft_picks_dict[i] = (hero,date,set(df_picks[(df_picks.Draft_ID == i)].Card.unique()))
-
     lim_formats = ', '.join(f'"{item}"' for item in (INPUT_OPTIONS["Cube Formats"] + INPUT_OPTIONS["Booster Draft Formats"]))
     if mode == 'NA':
-        result_set = cursor.execute(f'SELECT Match_ID FROM Matches WHERE Limited_Format IN ({lim_formats}) AND Draft_ID = "NA"')
+        cursor.execute(f'SELECT * FROM Matches WHERE Limited_Format IN ({lim_formats}) AND Draft_ID = "NA"')
     else:
-        result_set = cursor.execute(f'SELECT Match_ID FROM Matches WHERE Limited_Format IN ({lim_formats})')
-    limited_matches = [row[0] for row in result_set]
-
-    # df_matches = df_matches[df_matches.Limited_Format.isin(INPUT_OPTIONS["Cube Formats"] + INPUT_OPTIONS["Booster Draft Formats"])]
-    # if mode == "NA":    
-    #     df_matches = df_matches[(df_matches.Draft_ID == "NA")]
-    # limited_matches = df_matches.Match_ID.tolist()
-
+        cursor.execute(f'SELECT * FROM Matches WHERE Limited_Format IN ({lim_formats})')
     row = cursor.fetchone()
-    while row is not None:
-        row = cursor.fetchone()
 
     list_to_process = []
-    for i in limited_matches:
+    while row is not None:
         acceptable = []
         acceptable2 = []
         cards_dict = {}
-        p1 = df_matches[(df_matches.Match_ID == i)].P1.tolist()[0]
-        p2 = df_matches[(df_matches.Match_ID == i)].P2.tolist()[0]
-        match_date = df_matches[(df_matches.Match_ID == i)].Date.tolist()[0]
-        df = df_plays[(df_plays.Match_ID == i)]
-        cards1 = set(df[(df.Casting_Player == p1) & (df.Action == "Casts")].Primary_Card.unique())
-        cards2 = set(df[(df.Casting_Player == p2) & (df.Action == "Casts")].Primary_Card.unique())
+        p1 = row[2]
+        p2 = row[5]
+        match_date = row[-1]
+        result_set = cursor2.execute(f'''SELECT DISTINCT(Primary_Card) FROM Plays WHERE Match_ID = "{row[0]}" AND Casting_Player = "{p1}" AND Action = "Casts";''').fetchall()
+        cards1 = {item[0] for item in result_set}
+        result_set = cursor2.execute(f'''SELECT DISTINCT(Primary_Card) FROM Plays WHERE Match_ID = "{row[0]}" AND Casting_Player = "{p2}" AND Action = "Casts";''').fetchall()
+        cards2 = {item[0] for item in result_set}
         cards1 = modo.clean_card_set(cards1, MULTIFACED_CARDS)
         cards2 = modo.clean_card_set(cards2, MULTIFACED_CARDS)
         cards_dict[p1] = cards1
@@ -5242,20 +5167,17 @@ def get_associated_draftid(mode):
                 elif match_date > draft_picks_dict[key][1]:
                     acceptable2.append(key)
         if len(acceptable) > 0:
-            list_to_process.append([p1,p2,cards1,cards2,acceptable,i,match_date])
+            list_to_process.append([p1,p2,cards1,cards2,acceptable,row[0],match_date])
         elif len(acceptable2) > 0:
-            list_to_process.append([p1,p2,cards1,cards2,acceptable2,i,match_date])
+            list_to_process.append([p1,p2,cards1,cards2,acceptable2,row[0],match_date])
+        row = cursor.fetchone()
 
     if len(list_to_process) > 0:
         for index,i in enumerate(list_to_process):
             if len(i[4]) == 1:
                 count += 1
-                for match in ALL_DATA[0]:
-                    if match[0] == i[5]:
-                        match[draftid_index] = i[4][0]
-                        break
+                cursor.execute(f'''UPDATE Matches SET Draft_ID = {i[4][0]} WHERE Match_ID = {i[5]}''')
                 ask_to_save = True
-                continue
             associated_draftid_window(i,index=index+1,total=len(list_to_process))
             if (missing_data == "Exit"):
                 break
@@ -5263,18 +5185,23 @@ def get_associated_draftid(mode):
                 continue
             else:
                 count += 1
-                for match in ALL_DATA[0]:
-                    if match[0] == i[5]:
-                        match[draftid_index] = missing_data
-                        break
-        ALL_DATA_INVERTED = modo.invert_join(ALL_DATA)
+                cursor.execute(f'''UPDATE Matches SET Draft_ID = {missing_data} WHERE Match_ID = {i[5]}''')
+                ask_to_save = True
 
-        df_inverted = pd.DataFrame(ALL_DATA_INVERTED[0],columns=modo.header("Matches"))
-        for i in DRAFTS_TABLE:
-            wins = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[hero_index]) & (df_inverted.Match_Winner == "P1")].shape[0]
-            losses = df_inverted[(df_inverted.Draft_ID == i[0]) & (df_inverted.P1 == i[hero_index]) & (df_inverted.Match_Winner == "P2")].shape[0]
-            i[modo.header("Drafts").index("Match_Wins")] = wins
-            i[modo.header("Drafts").index("Match_Losses")] = losses
+        cursor.execute('''
+        UPDATE Drafts
+        SET
+            Match_Wins = (
+                SELECT COUNT(*)
+                FROM Matches
+                WHERE Matches.Draft_ID = Drafts.Draft_ID AND Matches.Match_Winner = 'P1' AND Matches.P1 = Drafts.Hero;
+            ),
+            Match_Losses = (
+                SELECT COUNT(*)
+                FROM Matches
+                WHERE Matches.Draft_ID = Drafts.Draft_ID AND Matches.Match_Winner = 'P2' AND Matches.P1 = Drafts.Hero;
+            );
+        ''')
 
         if count == 1:
             update_status_bar(f"Draft_ID applied to {count} Match.")
