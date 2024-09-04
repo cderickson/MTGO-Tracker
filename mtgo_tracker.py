@@ -2877,12 +2877,11 @@ def get_winners():
     exit = False
     revised_rows = []
     
-    cursor.execute('''
+    orig_total = cursor.execute('''
     SELECT COUNT(*)
     FROM Games g INNER JOIN GameActions ga
     ON g.Match_ID = ga.Match_ID AND g.Game_Num = ga.Game_Num;
-    ''')
-    orig_total = cursor.fetchone()[0]
+    ''').fetchone()[0]
 
     cursor.execute('''
     SELECT
@@ -2903,7 +2902,7 @@ def get_winners():
     ON g.Match_ID = ga.Match_ID AND g.Game_Num = ga.Game_Num;
     ''')
     row = cursor.fetchone()
-    while row is not None: # Iterate through Games.
+    while row is not None:
         if exit == False:
             if row[11] == 'NA':
                 count += 1
@@ -2911,54 +2910,31 @@ def get_winners():
                 total += 1
                 if uaw == "Exit.":
                     exit = True
-                    # we are keeping this record because we didn't get a winner and didn't update anything
-                    #raw_dict_new[key] = ALL_DATA[3][key]
                 elif uaw == "NA":
-                    # we are keeping this record because we didn't get a winner and didn't update anything
-                    #raw_dict_new[key] = ALL_DATA[3][key]
                     pass
                 else:
-                    # update record
                     if uaw == 'P1':
                         uaw_opp = 'P2'
                     elif uaw == 'P2':
                         uaw_opp = 'P1'
-                    cursor.execute(f'''
-                    UPDATE Games 
-                    SET Game_Winner = "{uaw}"
-                    WHERE Match_ID = "{row[0]}" AND P1 = "{row[2]}"
-                    ''')
-                    cursor.execute(f'''
-                    UPDATE Games 
-                    SET Game_Winner = "{uaw_opp}"
-                    WHERE Match_ID = "{row[0]}" AND P2 = "{row[2]}"
-                    ''')
+                    cursor.execute(f'''UPDATE Games SET Game_Winner = "{uaw}" WHERE Match_ID = "{row[0]}" AND P1 = "{row[2]}";''')
+                    cursor.execute(f'''UPDATE Games SET Game_Winner = "{uaw_opp}" WHERE Match_ID = "{row[0]}" AND P2 = "{row[2]}";''')
                     changed += 1
                     revised_rows.append(row[0])
         if exit:
-            # we are keeping this record because we didn't get a winner and didn't update anything
-            #raw_dict_new[key] = ALL_DATA[3][key]
             break
         row = cursor.fetchone()
 
     if changed > 0:
         match_ids_string = ', '.join(f"'{match_id}'" for match_id in revised_rows)
-        cursor.execute(f'''
-        DELETE FROM GameActions 
-        WHERE Match_ID IN ({match_ids_string});
-        ''')
+        cursor.execute(f'''DELETE FROM GameActions WHERE Match_ID IN ({match_ids_string});''')
         cursor.execute(f'''
         UPDATE Matches
         SET P1_Wins = (
-            SELECT COUNT(*)
-            FROM Games
-            WHERE Games.Match_ID = Matches.Match_ID AND Games.P1 = Matches.P1 AND Games.Game_Winner = "P1");
-        ''')
-        cursor.execute(f'''
-        UPDATE Matches
-        SET P2_Wins = (
-            SELECT COUNT(*)
-            FROM Games
+            SELECT COUNT(*) FROM Games
+            WHERE Games.Match_ID = Matches.Match_ID AND Games.P1 = Matches.P1 AND Games.Game_Winner = "P1"),
+            P2_Wins = (
+            SELECT COUNT(*) FROM Games
             WHERE Games.Match_ID = Matches.Match_ID AND Games.P1 = Matches.P1 AND Games.Game_Winner = "P2");
         ''')
         cursor.execute(f'''
@@ -2986,15 +2962,10 @@ def get_winners():
         cursor.execute(f'''
         UPDATE Drafts
         SET Match_Wins = (
-            SELECT COUNT(*)
-            FROM Matches
-            WHERE Matches.Draft_ID = Drafts.Draft_ID AND Matches.P1 = Drafts.Hero AND Matches.Match_Winner = "P1");
-        ''')
-        cursor.execute(f'''
-        UPDATE Drafts
-        SET Match_Losses = (
-            SELECT COUNT(*)
-            FROM Matches
+            SELECT COUNT(*) FROM Matches
+            WHERE Matches.Draft_ID = Drafts.Draft_ID AND Matches.P1 = Drafts.Hero AND Matches.Match_Winner = "P1"),
+            Match_Losses = (
+            SELECT COUNT(*) FROM Matches
             WHERE Matches.Draft_ID = Drafts.Draft_ID AND Matches.P1 = Drafts.Hero AND Matches.Match_Winner = "P2");
         ''')
         ask_to_save = True
