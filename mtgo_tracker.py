@@ -63,6 +63,7 @@ selected =          ()
 display_index =     0
 ln_per_page =       20
 curr_data =         pd.DataFrame()
+sort_type =         None
 debug_str =         'Version 16\n\n'
 
 def save(exit):
@@ -855,6 +856,7 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
     global CONN
     global new_import
     global curr_data
+    global sort_type
     
     cursor = CONN.cursor()
 
@@ -917,7 +919,6 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
                     else:
                         filter_list.append(f"{key} < '{value}'")
         
-        # Apply Default Sorting.
     if display == "Matches":
         filter_query = f'SELECT * FROM Matches'
         if HERO != '':
@@ -925,7 +926,6 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
         if len(filter_query) > 0:
             filter_query += ' WHERE '
             filter_query += ' AND '.join(filter_list)
-        filter_query += ' ORDER BY Date ASC'
     elif display == "Games":
         filter_query = f'SELECT Games.*, Matches.Date FROM Games LEFT JOIN Matches ON Games.Match_ID = Matches.Match_ID'
         if HERO != '':
@@ -933,13 +933,11 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
         if len(filter_query) > 0:
             filter_query += ' WHERE '
             filter_query += ' AND '.join(filter_list)
-        filter_query += ' ORDER BY Date DESC, Game_Num ASC'
     elif display == "Plays":
         filter_query = f'SELECT Plays.*, Matches.Date FROM Plays LEFT JOIN Matches ON Plays.Match_ID = Matches.Match_ID'
         if len(filter_query) > 0:
             filter_query += ' WHERE '
             filter_query += ' AND '.join(filter_list)
-        filter_query += ' ORDER BY Date DESC, Game_Num ASC, Play_Num ASC'
     elif display == "Drafts":
         filter_query = f'SELECT * FROM Drafts'
         if HERO != '':
@@ -947,14 +945,39 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
         if len(filter_query) > 0:
             filter_query += ' WHERE '
             filter_query += ' AND '.join(filter_list)
-        filter_query += ' ORDER BY Date DESC'
     elif display == "Picks":
         filter_query = f'SELECT * FROM Picks'
         if len(filter_query) > 0:
             filter_query += ' WHERE '
             filter_query += ' AND '.join(filter_list)
-        filter_query += ' ORDER BY Draft_ID DESC, Pick_Ovr ASC'
-    # curr_data = df
+    
+    total_rows = cursor.execute(filter_query.replace('SELECT *','SELECT COUNT(*)')).fetchone()[0]
+
+    if display == "Matches":
+        if sort_type is None:
+            filter_query += ' ORDER BY Date DESC'
+        else:
+            filter_query += f' ORDER BY {sort_type[1]} {sort_type[2]}, Date DESC'
+    elif display == "Games":
+        if sort_type is None:
+            filter_query += ' ORDER BY Date DESC, Game_Num ASC'
+        else:
+            filter_query += f' ORDER BY {sort_type[1]} {sort_type[2]}, Date DESC, Game_Num ASC'
+    elif display == "Plays":
+        if sort_type is None:
+            filter_query += ' ORDER BY Date DESC, Game_Num ASC, Play_Num ASC'
+        else:
+            filter_query += f' ORDER BY {sort_type[1]} {sort_type[2]}, Date DESC, Game_Num ASC, Play_Num ASC'
+    elif display == "Drafts":
+        if sort_type is None:
+            filter_query += ' ORDER BY Date DESC'
+        else:
+            filter_query += f' ORDER BY {sort_type[1]} {sort_type[2]}, Date DESC'
+    elif display == "Picks":
+        if sort_type is None:
+            filter_query += ' ORDER BY Draft_ID DESC, Pick_Ovr ASC'
+        else:
+            filter_query += f' ORDER BY {sort_type[1]} {sort_type[2]}, Draft_ID DESC, Pick_Ovr ASC'
 
     end_index = start_index + ln_per_page
     filter_query += f' LIMIT {ln_per_page} OFFSET {start_index};'
@@ -962,8 +985,8 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
     df = pd.read_sql_query(filter_query, CONN)
     df_rows = df.to_numpy().tolist()
 
-    if len(df_rows) <= end_index:
-        end_index = len(df_rows)
+    if total_rows <= end_index:
+        end_index = total_rows
         next_button["state"] = tk.DISABLED
     else:
         next_button["state"] = tk.NORMAL
@@ -1697,7 +1720,6 @@ def back():
     remove_button["state"] = tk.DISABLED
 def next_page():
     global display_index
-    global curr_data
     display_index += ln_per_page
     if (display == "Drafts") or (display == "Picks"):
         print_data(headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
@@ -2042,11 +2064,18 @@ def sort_column2(col,reverse,tree1):
         else:
             return element.str.casefold()
     global curr_data
+    global sort_type
+    
+    if reverse == True:
+        order_dir = 'ASC'
+    else:
+        order_dir = 'DESC'
 
     # Clear existing data in tree
     tree1.delete(*tree1.get_children())
 
     if display == "Matches":
+        sort_type = ('Matches',col,order_dir)
         curr_data.sort_values(by=[col,"Match_ID"],inplace=True,ascending=(reverse,False),key=sort_key)
     elif display == "Games":
         curr_data.sort_values(by=[col,"Match_ID","Game_Num"],inplace=True,ascending=(reverse,False,True),key=sort_key)
