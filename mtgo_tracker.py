@@ -21,6 +21,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 pd.options.mode.chained_assignment = None
 
 # !FIXTHIS! add cursor.close() to all my cursor functions.
+# !FIXTHIS! prev display not referenced.
 
 # Saved data:
 ALL_DATA =          [[],[],[],{}]
@@ -49,7 +50,6 @@ MAIN_WINDOW_SIZE =  ("small",1000,490)
 CONN =              None
 
 test_mode =         False
-resize =            False
 filter_dict =       {}
 display =           ""
 prev_display =      ""
@@ -669,7 +669,7 @@ def set_display(d,update_status,start_index,reset):
 
     text_frame.config(text=display)
     
-    if len(ALL_DATA[0]) > 0:
+    if get_table_len(table='Matches') > 0:
         match_button["state"] = tk.NORMAL
         game_button["state"] = tk.NORMAL
         play_button["state"] = tk.NORMAL
@@ -677,32 +677,15 @@ def set_display(d,update_status,start_index,reset):
         match_button["state"] = tk.DISABLED
         game_button["state"] = tk.DISABLED
         play_button["state"] = tk.DISABLED
-    if len(DRAFTS_TABLE) > 0:
+    if get_table_len(table='Drafts') > 0:
         draft_button["state"] = tk.NORMAL
         pick_button["state"] = tk.NORMAL
     else:
         draft_button["state"] = tk.DISABLED
         pick_button["state"] = tk.DISABLED
 
-    if d == "Matches":
-        if resize:
-            if MAIN_WINDOW_SIZE[0] == "large":
-                window.geometry("1740x" + str(MAIN_WINDOW_SIZE[2]))
-        print_data(headers=modo.header(display),update_status=update_status,start_index=start_index,apply_filter=True)
-    elif d == "Games":
-        if resize:
-            if MAIN_WINDOW_SIZE[0] == "large":
-                window.geometry("1315x" + str(MAIN_WINDOW_SIZE[2]))
-        print_data(headers=modo.header(display),update_status=update_status,start_index=start_index,apply_filter=True)
-    elif d == "Plays":
-        if resize:
-            if MAIN_WINDOW_SIZE[0] == "large":
-                window.geometry("1665x" + str(MAIN_WINDOW_SIZE[2]))
-        print_data(headers=modo.header(display),update_status=update_status,start_index=start_index,apply_filter=True)
-    elif d == "Drafts":
-        print_data(headers=modo.header(display),update_status=update_status,start_index=start_index,apply_filter=True)
-    elif d == "Picks":
-        print_data(headers=modo.header(display),update_status=update_status,start_index=start_index,apply_filter=True)
+    print_data(headers=modo.header(display),update_status=update_status,start_index=start_index,apply_filter=True)
+
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def get_all_data(fp_logs,fp_drafts,copy):
@@ -857,6 +840,7 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
     global new_import
     global curr_data
     global sort_type
+    global display_index
     
     cursor = CONN.cursor()
 
@@ -979,6 +963,7 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
         else:
             filter_query += f' ORDER BY {sort_type[1]} {sort_type[2]}, Draft_ID DESC, Pick_Ovr ASC'
 
+    display_index = start_index
     end_index = start_index + ln_per_page
     filter_query += f' LIMIT {ln_per_page} OFFSET {start_index};'
 
@@ -1712,19 +1697,13 @@ def tree_double(event):
 def back():
     global display_index
     display_index -= ln_per_page
-    if (display == "Drafts") or (display == "Picks"):
-        print_data(headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
-    else:
-        print_data(headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
+    print_data(headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=True)
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def next_page():
     global display_index
     display_index += ln_per_page
-    if (display == "Drafts") or (display == "Picks"):
-        print_data(headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
-    else:
-        print_data(headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=False)
+    print_data(headers=modo.header(display),update_status=True,start_index=display_index,apply_filter=True)
     revise_button["state"] = tk.DISABLED
     remove_button["state"] = tk.DISABLED
 def export2(current=False,matches=False,games=False,plays=False,drafts=False,picks=False,_csv=False,_excel=False,inverted=False,filtered=False):
@@ -2074,34 +2053,8 @@ def sort_column2(col,reverse,tree1):
     # Clear existing data in tree
     tree1.delete(*tree1.get_children())
 
-    if display == "Matches":
-        sort_type = ('Matches',col,order_dir)
-        curr_data.sort_values(by=[col,"Match_ID"],inplace=True,ascending=(reverse,False),key=sort_key)
-    elif display == "Games":
-        curr_data.sort_values(by=[col,"Match_ID","Game_Num"],inplace=True,ascending=(reverse,False,True),key=sort_key)
-    elif display == "Plays":
-        curr_data.sort_values(by=[col,"Match_ID","Game_Num","Play_Num"],inplace=True,ascending=(reverse,False,True,True),key=sort_key)
-    elif display == "Drafts":
-        curr_data.sort_values(by=[col,"Draft_ID"],inplace=True,ascending=(reverse,False),key=sort_key)
-    elif display == "Picks":
-        curr_data.sort_values(by=[col,"Draft_ID","Pick_Ovr"],inplace=True,ascending=(reverse,False,True),key=sort_key)
-
-    df_rows = curr_data.to_numpy().tolist()
-
-    end_index = display_index + ln_per_page
-    if len(df_rows) <= end_index:
-        end_index = len(df_rows)
-        next_button["state"] = tk.DISABLED
-    else:
-        next_button["state"] = tk.NORMAL
-
-    if display_index == 0:
-        back_button["state"] = tk.DISABLED
-    else:
-        back_button["state"] = tk.NORMAL
-
-    for i in range(display_index,end_index):
-        tree1.insert("","end",values=df_rows[i])
+    sort_type = (display,col,order_dir)
+    print_data(headers=modo.header(display),update_status=True,start_index=0,apply_filter=True)
 
     # Reverse sort next time
     tree1.heading(col,text=col,command=lambda _col=col: sort_column2(_col,not reverse,tree1))
@@ -2163,9 +2116,9 @@ def set_filter():
     width =  550
 
     if (display == "Drafts") or (display == "Picks"):
-        print_data(data=None,headers=modo.header(display),update_status=False,start_index=0,apply_filter=False)
+        print_data(data=None,headers=modo.header(display),update_status=False,start_index=0,apply_filter=True)
     else:
-        print_data(data=None,headers=modo.header(display),update_status=False,start_index=0,apply_filter=False)
+        print_data(data=None,headers=modo.header(display),update_status=False,start_index=0,apply_filter=True)
     update_status_bar(status=f"Applying Filters to {display} Table.")
 
     filter_window = tk.Toplevel(window)
@@ -5742,6 +5695,18 @@ def close_db(save):
     CONN.close()
     CONN = None
     debug_str += 'Database connection closed.\n'
+def get_table_len(table):
+    global CONN
+    cursor = CONN.cursor()
+
+    query = f'SELECT COUNT(*) FROM {table}'
+    if (table in ['Matches','Games']) and (HERO != ''):
+        query += f' WHERE P1 = "{HERO}";'
+    elif (table == 'Drafts') and (HERO != ''):
+        query += f' WHERE Hero = "{HERO}";'
+    cursor.execute(f'SELECT COUNT(*) FROM {table}')
+
+    return int(cursor.fetchone()[0])
 
 window = tk.Tk() 
 window.title("MTGO-Tracker")
