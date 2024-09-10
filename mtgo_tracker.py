@@ -3417,17 +3417,17 @@ def get_stats():
 
         query_filter = f' WHERE P1 = "{hero}" AND Date > "{date_range[0]}" AND Date < "{date_range[1]}"'
         if mformat != "All Formats":
-            query_filter += f' AND Format = "{mformat}";'
+            query_filter += f' AND Format = "{mformat}"'
         if lformat != "All Limited Formats":
-            query_filter += f' AND Limited_Format = "{lformat}";'
+            query_filter += f' AND Limited_Format = "{lformat}"'
         if deck != "All Decks":
-            query_filter += f' AND P1_Subarch = "{deck}";'
+            query_filter += f' AND P1_Subarch = "{deck}"'
         if opp_deck != "All Opp. Decks":
-            query_filter += f' AND P2_Subarch = "{opp_deck}";'
+            query_filter += f' AND P2_Subarch = "{opp_deck}"'
 
         filtered_n = cursor.execute(f'SELECT COUNT(*) FROM Matches' + query_filter).fetchone()[0]
         meta_deck_wr = []
-        result_set = cursor.execute(f'SELECT P2_Subarch, COUNT(*) FROM Matches GROUP BY P2_Subarch;').fetchall()
+        result_set = cursor.execute(f'SELECT P2_Subarch, COUNT(*) FROM Matches' + query_filter + 'GROUP BY P2_Subarch;').fetchall()
         meta_decks = [row[0] for row in result_set]
         meta_deck_counts = [row[1] for row in result_set]
         for i in meta_decks:
@@ -3813,44 +3813,38 @@ def get_stats():
         mid_frame3.grid(row=1,column=0,sticky="nsew")
         mid_frame4.grid(row=1,column=1,sticky="nsew")
 
-        df1_i_merge =   pd.merge(df0_i,
-                                 df1_i,
-                                 how="inner",
-                                 left_on=["Match_ID","P1","P2"],
-                                 right_on=["Match_ID","P1","P2"])       
-        df2_merge   =   pd.merge(df0,
-                                 df2,
-                                 how="inner",
-                                 left_on=["Match_ID"],
-                                 right_on=["Match_ID"])
-        df1_i_merge   = df1_i_merge[(df1_i_merge.Date > date_range[0]) & (df1_i_merge.Date < date_range[1])]
-        df2_merge     = df2_merge[(df2_merge.Date > date_range[0]) & (df2_merge.Date < date_range[1])]
+        cursor = CONN.cursor()
+
+        base_query1 = f'SELECT * FROM Matches JOIN Games ON Matches.Match_ID = Games.Match_ID AND Matches.P1 = Games.P1'
+        filter_query1 = f' WHERE Matches.Date > "{date_range[0]}" AND Matches.Date < "{date_range[1]}"'
+        base_query2 = f'SELECT * FROM Matches JOIN Plays ON Matches.Match_ID = Plays.Match_ID'
+        filter_query2 = f' WHERE Matches.Date > "{date_range[0]}" AND Matches.Date < "{date_range[1]}"'
         if mformat != "All Formats":
-            df1_i_merge = df1_i_merge[(df1_i_merge.Format == mformat)]
-            df2_merge = df2_merge[(df2_merge.Format == mformat)]
+            filter_query1 += f' AND Matches.Format = "{mformat}"'
+            filter_query2 += f' AND Matches.Format = "{mformat}"'
         if lformat != "All Limited Formats":
-            df1_i_merge = df1_i_merge[(df1_i_merge.Limited_Format == lformat)]
-            df2_merge = df2_merge[(df2_merge.Limited_Format == lformat)]
-        df2_hero      = df2_merge[(df2_merge.Casting_Player == hero)]
+            filter_query1 += f' AND Matches.Limited_Format = "{lformat}"'
+            filter_query2 += f' AND Matches.Limited_Format = "{lformat}"'
         
-        formats_played = df2_hero.Format.value_counts().keys().tolist()
-        formats =    []
+        result_set = cursor.execute(base_query2.replace(' * ',' DISTINCT Matches.Format ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}";').fetchall()
+        formats_played = [row[0] for row in result_set]
+        formats = []
         index_list = []
         for i in formats_played:
-            hero_n_format = df1_i_merge[(df1_i_merge.P1 == hero) & (df1_i_merge.Format == i)].shape[0]
+            hero_n_format = cursor.execute(base_query1.replace(' * ',' COUNT(*) ') + filter_query1 + f' AND Matches.P1 = "{hero}" AND Matches.Format = "{i}";').fetchone()[0]
             formats.append(i)
             formats.append(str(hero_n_format) + " Games")
             index_list.append("Total")
             index_list.append("Per Game")
         tree1_data = []
         for i in formats_played:
-            hero_n_format = df1_i_merge[(df1_i_merge.P1 == hero) & (df1_i_merge.Format == i)].shape[0]
-            play_count =    df2_hero[(df2_hero.Format == i) & (df2_hero.Action == "Land Drop")].shape[0]
-            cast_count =    df2_hero[(df2_hero.Format == i) & (df2_hero.Action == "Casts")].shape[0]
-            act_count =     df2_hero[(df2_hero.Format == i) & (df2_hero.Action == "Activated Ability")].shape[0]
-            trig_count =    df2_hero[(df2_hero.Format == i) & (df2_hero.Action == "Triggers")].shape[0]
-            attack_count =  df2_hero[(df2_hero.Format == i) & (df2_hero.Action == "Attacks")].Attackers.sum()
-            draw_count =    df2_hero[(df2_hero.Format == i) & (df2_hero.Action == "Draws")].Cards_Drawn.sum()
+            hero_n_format = cursor.execute(base_query1.replace(' * ',' COUNT(*) ') + filter_query1 + f' AND Matches.P1 = "{hero}" AND Matches.Format = "{i}";').fetchone()[0]
+            play_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}" AND Matches.Format = "{i}" AND Plays.Action = "Land Drop";').fetchone()[0]
+            cast_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}" AND Matches.Format = "{i}" AND Plays.Action = "Casts";').fetchone()[0]
+            act_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}" AND Matches.Format = "{i}" AND Plays.Action = "Activated Ability";').fetchone()[0]
+            trig_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}" AND Matches.Format = "{i}" AND Plays.Action = "Triggers";').fetchone()[0]
+            attack_count = cursor.execute(base_query2.replace(' * ',' SUM(CASE WHEN CAST(Plays.Attackers AS INTEGER) IS NOT NULL THEN CAST(Plays.Attackers AS INTEGER) ELSE NULL END) AS Total ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}" AND Matches.Format = "{i}" AND Plays.Action = "Attacks";').fetchone()[0]
+            draw_count = cursor.execute(base_query2.replace(' * ',' SUM(CASE WHEN CAST(Plays.Cards_Drawn AS INTEGER) IS NOT NULL THEN CAST(Plays.Cards_Drawn AS INTEGER) ELSE NULL END) AS Total ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}" AND Matches.Format = "{i}" AND Plays.Action = "Draws";').fetchone()[0]
             tree1_data.append([play_count,
                                cast_count,
                                act_count,
@@ -3864,18 +3858,17 @@ def get_stats():
                                round(attack_count/hero_n_format,1),
                                round(draw_count/hero_n_format,1)])
 
-        df_tree2 = df2_hero
-        turn_list = df_tree2.Turn_Num.value_counts().keys().tolist()
-        turn_list = sorted(turn_list)
+        result_set = cursor.execute(base_query2.replace(' * ',' DISTINCT Plays.Turn_Num ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}" ORDER BY Plays.Turn_Num ASC;').fetchall()
+        turn_list = [row[0] for row in result_set]
         tree2_data =  []
         index_list2 = []
         for i in turn_list:
-            play_count =    df_tree2[(df_tree2.Turn_Num == i) & (df_tree2.Action == "Land Drop")].shape[0]
-            cast_count =    df_tree2[(df_tree2.Turn_Num == i) & (df_tree2.Action == "Casts")].shape[0]
-            act_count =     df_tree2[(df_tree2.Turn_Num == i) & (df_tree2.Action == "Activated Ability")].shape[0]
-            trig_count =    df_tree2[(df_tree2.Turn_Num == i) & (df_tree2.Action == "Triggers")].shape[0]
-            attack_count =  df_tree2[(df_tree2.Turn_Num == i) & (df_tree2.Action == "Attacks")].Attackers.sum()
-            draw_count =    df_tree2[(df_tree2.Turn_Num == i) & (df_tree2.Action == "Draws")].Cards_Drawn.sum()
+            play_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}" AND Plays.Turn_Num = "{i}" AND Plays.Action = "Land Drop";').fetchone()[0]
+            cast_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}" AND Plays.Turn_Num = "{i}" AND Plays.Action = "Casts";').fetchone()[0]
+            act_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}" AND Plays.Turn_Num = "{i}" AND Plays.Action = "Activated Ability";').fetchone()[0]
+            trig_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}" AND Plays.Turn_Num = "{i}" AND Plays.Action = "Triggers";').fetchone()[0]
+            attack_count = cursor.execute(base_query2.replace(' * ',' SUM(CASE WHEN CAST(Plays.Attackers AS INTEGER) IS NOT NULL THEN CAST(Plays.Attackers AS INTEGER) ELSE NULL END) AS Total ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}" AND Plays.Turn_Num = "{i}" AND Plays.Action = "Attacks";').fetchone()[0]
+            draw_count = cursor.execute(base_query2.replace(' * ',' SUM(CASE WHEN CAST(Plays.Cards_Drawn AS INTEGER) IS NOT NULL THEN CAST(Plays.Cards_Drawn AS INTEGER) ELSE NULL END) AS Total ') + filter_query2 + f' AND Plays.Casting_Player = "{hero}" AND Plays.Turn_Num = "{i}" AND Plays.Action = "Draws";').fetchone()[0]
             total_actions = play_count + cast_count + act_count + trig_count + attack_count
             tree2_data.append([play_count,
                                cast_count,
@@ -3885,29 +3878,18 @@ def get_stats():
                                draw_count,
                                total_actions])
             index_list2.append(["Turn "+str(i)])
-
-        df2_i_merge = pd.merge(df0_i,
-                               df2,
-                               how="inner",
-                               left_on=["Match_ID"],
-                               right_on=["Match_ID"])
-        df2_i_merge =  df2_i_merge[(df2_i_merge.Date > date_range[0]) & (df2_i_merge.Date < date_range[1])]
-        if mformat != "All Formats":
-            df2_i_merge = df2_i_merge[(df2_i_merge.Format == mformat)]
-        if lformat != "All Limited Formats":
-            df2_i_merge = df2_i_merge[(df2_i_merge.Limited_Format == lformat)]
-        df2_i_m_hero = df2_i_merge[(df2_i_merge.P1 == hero)]
    
         decks3 =        []
         index_list3 =   []
         tree3_data =    []
-        df_tree3 = df2_i_m_hero[(df2_i_m_hero.Casting_Player == hero)]
+        deck_query = ''
         if deck != "All Decks":
-            df_tree3 = df_tree3[(df_tree3.P1_Subarch == deck)]
-        hero_decks =    df_tree3.P1_Subarch.value_counts().keys().tolist()
+            deck_query += f' AND Matches.P1_Subarch = "{deck}"'
+        result_set = cursor.execute(base_query2.replace(' * ',' DISTINCT P1_Subarch ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query).fetchall()
+        hero_decks = [row[0] for row in result_set]
         hero_decks_n =  []
         for i in hero_decks:
-            games_played = df1_i_merge[(df1_i_merge.P1 == hero) & (df1_i_merge.P1_Subarch == i)].shape[0]
+            games_played = cursor.execute(base_query1.replace(' * ',' COUNT(*) ') + filter_query1 + f' AND Matches.P1 = "{hero}" AND Matches.P1_Subarch = "{i}";').fetchone()[0]
             hero_decks_n.append(games_played)
             index_list3.append("Total")
             index_list3.append("Per Game")
@@ -3919,15 +3901,15 @@ def get_stats():
             decks3.append(str(hero_decks_n[i])+" Games")
         for i in hero_decks:
             if mformat != "All Formats":
-                games_played = df1_i_merge[(df1_i_merge.P1 == hero) & (df1_i_merge.Format == mformat) & (df1_i_merge.P1_Subarch == i)].shape[0]
+                games_played = cursor.execute(base_query1.replace(' * ',' COUNT(*) ') + filter_query1 + f' AND Matches.P1 = "{hero}" AND Matches.Format = "{mformat}" AND Matches.P1_Subarch = "{i}";').fetchone()[0]
             else:
-                games_played = df1_i_merge[(df1_i_merge.P1 == hero) & (df1_i_merge.P1_Subarch == i)].shape[0]
-            play_count = df_tree3[(df_tree3.P1_Subarch == i) & (df_tree3.Action == "Land Drop")].shape[0]
-            cast_count = df_tree3[(df_tree3.P1_Subarch == i) & (df_tree3.Action == "Casts")].shape[0]
-            act_count = df_tree3[(df_tree3.P1_Subarch == i) & (df_tree3.Action == "Activated Ability")].shape[0]
-            trig_count = df_tree3[(df_tree3.P1_Subarch == i) & (df_tree3.Action == "Triggers")].shape[0]
-            attack_count = df_tree3[(df_tree3.P1_Subarch == i) & (df_tree3.Action == "Attacks")].Attackers.sum()
-            draw_count = df_tree3[(df_tree3.P1_Subarch == i) & (df_tree3.Action == "Draws")].Cards_Drawn.sum()
+                games_played = cursor.execute(base_query1.replace(' * ',' COUNT(*) ') + filter_query1 + f' AND Matches.P1 = "{hero}" AND Matches.P1_Subarch = "{i}";').fetchone()[0]
+            play_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query + ' AND Matches.P1_Subarch = "{i}" AND Plays.Action = "Land Drop"').fetchone()[0]
+            cast_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query + ' AND Matches.P1_Subarch = "{i}" AND Plays.Action = "Casts"').fetchone()[0]
+            act_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query + ' AND Matches.P1_Subarch = "{i}" AND Plays.Action = "Activated Ability"').fetchone()[0]
+            trig_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query + ' AND Matches.P1_Subarch = "{i}" AND Plays.Action = "Triggers"').fetchone()[0]
+            attack_count = cursor.execute(base_query2.replace(' * ',' SUM(CASE WHEN CAST(Plays.Attackers AS INTEGER) IS NOT NULL THEN CAST(Plays.Attackers AS INTEGER) ELSE NULL END) AS Total ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query + ' AND Matches.P1_Subarch = "{i}" AND Plays.Action = "Attacks"').fetchone()[0]
+            draw_count = cursor.execute(base_query2.replace(' * ',' SUM(CASE WHEN CAST(Plays.Cards_Drawn AS INTEGER) IS NOT NULL THEN CAST(Plays.Cards_Drawn AS INTEGER) ELSE NULL END) AS Total ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query + ' AND Matches.P1_Subarch = "{i}" AND Plays.Action = "Draws"').fetchone()[0]
             tree3_data.append([play_count,
                                cast_count,
                                act_count,
@@ -3947,13 +3929,14 @@ def get_stats():
         decks4 = []
         index_list4 = []
         tree4_data = []
-        df_tree4 = df2_i_m_hero[(df2_i_m_hero.Casting_Player != hero)]
+        deck_query = ''
         if opp_deck != "All Opp. Decks":
-            df_tree4 = df_tree4[(df_tree4.P2_Subarch == opp_deck)]
-        opp_decks = df_tree4.P2_Subarch.value_counts().keys().tolist()
+            deck_query += f' AND Matches.P2_Subarch = "{opp_deck}"'
+        result_set = cursor.execute(base_query2.replace(' * ',' DISTINCT P2_Subarch ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query).fetchall()
+        opp_decks = [row[0] for row in result_set]
         opp_decks_n = []
         for i in opp_decks:
-            games_played = df1_i_merge[(df1_i_merge.P1 == hero) & (df1_i_merge.P2_Subarch == i)].shape[0]
+            games_played = cursor.execute(base_query1.replace(' * ',' COUNT(*) ') + filter_query1 + f' AND Matches.P1 = "{hero}" AND Matches.P2_Subarch = "{i}";').fetchone()[0]
             opp_decks_n.append(games_played)
             index_list4.append("Total")
             index_list4.append("Per Game")
@@ -3965,15 +3948,15 @@ def get_stats():
             decks4.append(str(opp_decks_n[i])+" Games")
         for i in opp_decks:
             if mformat != "All Formats":
-                games_played = df1_i_merge[(df1_i_merge.P1 == hero) & (df1_i_merge.Format == mformat) & (df1_i_merge.P2_Subarch == i)].shape[0]
+                games_played = cursor.execute(base_query1.replace(' * ',' COUNT(*) ') + filter_query1 + f' AND Matches.P1 = "{hero}" AND Matches.Format = "{mformat}" AND Matches.P2_Subarch = "{i}";').fetchone()[0]
             else:
-                games_played = df1_i_merge[(df1_i_merge.P1 == hero) & (df1_i_merge.P2_Subarch == i)].shape[0]
-            play_count = df_tree4[(df_tree4.P2_Subarch == i) & (df_tree4.Action == "Land Drop")].shape[0]
-            cast_count = df_tree4[(df_tree4.P2_Subarch == i) & (df_tree4.Action == "Casts")].shape[0]
-            act_count = df_tree4[(df_tree4.P2_Subarch == i) & (df_tree4.Action == "Activated Ability")].shape[0]
-            trig_count = df_tree4[(df_tree4.P2_Subarch == i) & (df_tree4.Action == "Triggers")].shape[0]
-            attack_count = df_tree4[(df_tree4.P2_Subarch == i) & (df_tree4.Action == "Attacks")].Attackers.sum()
-            draw_count = df_tree4[(df_tree4.P2_Subarch == i) & (df_tree4.Action == "Draws")].Cards_Drawn.sum()
+                games_played = cursor.execute(base_query1.replace(' * ',' COUNT(*) ') + filter_query1 + f' AND Matches.P1 = "{hero}" AND Matches.P2_Subarch = "{i}";').fetchone()[0]
+            play_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query + ' AND Matches.P2_Subarch = "{i}" AND Plays.Action = "Land Drop"').fetchone()[0]
+            cast_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query + ' AND Matches.P2_Subarch = "{i}" AND Plays.Action = "Casts"').fetchone()[0]
+            act_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query + ' AND Matches.P2_Subarch = "{i}" AND Plays.Action = "Activated Ability"').fetchone()[0]
+            trig_count = cursor.execute(base_query2.replace(' * ',' COUNT(*) ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query + ' AND Matches.P2_Subarch = "{i}" AND Plays.Action = "Triggers"').fetchone()[0]
+            attack_count = cursor.execute(base_query2.replace(' * ',' SUM(CASE WHEN CAST(Plays.Attackers AS INTEGER) IS NOT NULL THEN CAST(Plays.Attackers AS INTEGER) ELSE NULL END) AS Total ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query + ' AND Matches.P2_Subarch = "{i}" AND Plays.Action = "Attacks"').fetchone()[0]
+            draw_count = cursor.execute(base_query2.replace(' * ',' SUM(CASE WHEN CAST(Plays.Cards_Drawn AS INTEGER) IS NOT NULL THEN CAST(Plays.Cards_Drawn AS INTEGER) ELSE NULL END) AS Total ') + filter_query2 + ' AND Matches.P1 = "{hero}"' + deck_query + ' AND Matches.P2_Subarch = "{i}" AND Plays.Action = "Draws"').fetchone()[0]
             tree4_data.append([play_count,
                                cast_count,
                                act_count,
@@ -4125,14 +4108,25 @@ def get_stats():
         mid_frame3.grid(row=1,column=0,sticky="nsew")
         mid_frame4.grid(row=1,column=1,sticky="nsew")
 
-        df0_i_f        = df0_i[(df0_i.P1 == hero) & (df0_i.P2 == opp)]
-        df0_i_f.sort_values(by="Date",ascending=False,inplace=True)
-        tree1_dates    = df0_i_f.Date.tolist()
-        tree1_decks    = df0_i_f.P1_Subarch.tolist()
-        tree1_oppdecks = df0_i_f.P2_Subarch.tolist()
-        tree1_wins     = df0_i_f.P1_Wins.tolist()
-        tree1_losses   = df0_i_f.P2_Wins.tolist()
-        tree1_result   = df0_i_f.Match_Winner.tolist()
+        cursor = CONN.cursor()
+
+        base_query = f'SELECT * FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}" ORDER BY Date DESC'
+
+        result_set = cursor.query(base_query.replace(' * ',' Date, P1_Subarch, P2_Subarch, P1_Wins, P2_Wins, Match_Winner ')).fetchall()
+        tree1_dates = []
+        tree1_decks = []
+        tree1_oppdecks = []
+        tree1_wins = []
+        tree1_losses = []
+        tree1_result = []
+        for row in result_set:
+            tree1_dates.append(row[0])
+            tree1_decks.append(row[1])
+            tree1_oppdecks.append(row[2])
+            tree1_wins.append(row[3])
+            tree1_losses.append(row[4])
+            tree1_result.append(row[5])
+
         for index,i in enumerate(tree1_result):
             if i == "P1":
                 tree1_result[index] = "Win "
@@ -4142,57 +4136,45 @@ def get_stats():
                 tree1_result[index] = "NA "
             tree1_result[index] += str(tree1_wins[index]) + "-" + str(tree1_losses[index])
 
-        df1_i_merge     = pd.merge(df0_i,
-                                   df1_i,
-                                   how="inner",
-                                   left_on=["Match_ID","P1","P2"],
-                                   right_on=["Match_ID","P1","P2"])
-        df1_i_hero      = df1_i_merge[(df1_i_merge.P1 == hero) & (df1_i_merge.P2 == opp)]
-        df1_i_hero_p    = df1_i_hero[df1_i_hero.On_Play == "P1"]
-        df1_i_hero_d    = df1_i_hero[df1_i_hero.On_Play == "P2"]
-        
-        df1_i_hero_g1   = df1_i_hero[df1_i_hero.Game_Num == 1]
-        df1_i_hero_g1_p = df1_i_hero_g1[df1_i_hero_g1.On_Play == "P1"]
-        df1_i_hero_g1_d = df1_i_hero_g1[df1_i_hero_g1.On_Play == "P2"]
-        
-        df1_i_hero_g2   = df1_i_hero[df1_i_hero.Game_Num == 2]
-        df1_i_hero_g2_p = df1_i_hero_g2[df1_i_hero_g2.On_Play == "P1"]
-        df1_i_hero_g2_d = df1_i_hero_g2[df1_i_hero_g2.On_Play == "P2"]
-        
-        df1_i_hero_g3   = df1_i_hero[df1_i_hero.Game_Num == 3]
-        df1_i_hero_g3_p = df1_i_hero_g3[df1_i_hero_g3.On_Play == "P1"]
-        df1_i_hero_g3_d = df1_i_hero_g3[df1_i_hero_g3.On_Play == "P2"]
+        base_query = f'SELECT * FROM Matches JOIN Games ON Matches.Match_ID = Games.Match_ID AND Matches.P1 = Games.P1 WHERE Matches.P1 = "{hero}" AND Matches.P2 = "{opp}"'
 
-        df_list = [df1_i_hero,
-                   df1_i_hero_p,
-                   df1_i_hero_d,
-                   df1_i_hero_g1,
-                   df1_i_hero_g1_p,
-                   df1_i_hero_g1_d,
-                   df1_i_hero_g2,
-                   df1_i_hero_g2_p,
-                   df1_i_hero_g2_d,
-                   df1_i_hero_g3,
-                   df1_i_hero_g3_p,
-                   df1_i_hero_g3_d]
+        query_play = base_query + ' AND Games.On_Play = "P1";'
+        query_draw = base_query + ' AND Games.On_Play = "P2";'
+
+        query_g1 = base_query + ' AND Games.Game_Num = 1;'
+        query_g1_play = base_query + ' AND Games.Game_Num = 1 AND Games.On_Play = "P1";'
+        query_g1_draw = base_query + ' AND Games.Game_Num = 1 AND Games.On_Play = "P2";'
+
+        query_g2 = base_query + ' AND Games.Game_Num = 2;'
+        query_g2_play = base_query + ' AND Games.Game_Num = 2 AND Games.On_Play = "P1";'
+        query_g2_draw = base_query + ' AND Games.Game_Num = 2 AND Games.On_Play = "P2";'
+
+        query_g3 = base_query + ' AND Games.Game_Num = 3;'
+        query_g3_play = base_query + ' AND Games.Game_Num = 3 AND Games.On_Play = "P1";'
+        query_g3_draw = base_query + ' AND Games.Game_Num = 3 AND Games.On_Play = "P2";'
+
+        df_list = [query_play,query_draw,query_g1,query_g1_play,query_g1_draw,query_g2,query_g2_play,query_g2_draw,query_g3,query_g3_play,query_g3_draw]
 
         tree3data =    []
         for i in df_list:
-            total_n = i.shape[0]
-            wins =    i[(i.Game_Winner == "P1")].shape[0]
-            losses =  i[(i.Game_Winner == "P2")].shape[0]
+            total_n = cursor.execute(i.replace(' * ',' COUNT(*) ')).fetchone()[0]
+            wins = cursor.execute(i.replace(' * ',' COUNT(*) ')).replace(';',' AND Games.Game_Winner = "P1";') .fetchone()[0]
+            losses = cursor.execute(i.replace(' * ',' COUNT(*) ')).replace(';',' AND Games.Game_Winner = "P2";') .fetchone()[0]
             if (wins+losses) == 0:
                 win_rate = "0.0"
             else:
                 win_rate = to_percent(wins/(wins+losses),1)
             if total_n == 0:
-                hero_mull_rate =0.0
+                hero_mull_rate = 0.0
                 opp_mull_rate = 0.0
-                turn_rate =     0.0
+                turn_rate = 0.0
             else:
-                hero_mull_rate =round((i.P1_Mulls.sum()/total_n),2)
-                opp_mull_rate = round((i.P2_Mulls.sum()/total_n),2)
-                turn_rate =     round((i.Turns.sum()/total_n),2)     
+                hero_mulls = cursor.execute(i.replace(' * ',' SUM(Games.P1_Mulls) ')).fetchone()[0]
+                opp_mulls = cursor.execute(i.replace(' * ',' SUM(Games.P2_Mulls) ')).fetchone()[0]
+                turns  = cursor.execute(i.replace(' * ',' SUM(Games.Turns) ')).fetchone()[0]
+                hero_mull_rate = round((hero_mulls/total_n),2)
+                opp_mull_rate = round((opp_mulls/total_n),2)
+                turn_rate = round((turns/total_n),2)     
             tree3data.append([wins,
                               losses,
                               win_rate,
@@ -4200,17 +4182,18 @@ def get_stats():
                               opp_mull_rate,
                               turn_rate])
 
-        formats_played = df0_i_f.Format.value_counts().keys().tolist()
-        format_wins =    [df0_i_f[(df0_i_f.Match_Winner == "P1")].shape[0]] #adding overall in L[0]
-        format_losses =  [df0_i_f[(df0_i_f.Match_Winner == "P2")].shape[0]] #adding overall in L[0]
+        result_set = cursor.execute(f'SELECT DISTINCT Format FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}";').fetchall()
+        formats_played = [row[0] for row in result_set]
+        format_wins = [cursor.execute(f'SELECT COUNT(*) FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}" AND Match_Winner = "P1";').fetchone()[0]] #adding overall in L[0]
+        format_losses = [cursor.execute(f'SELECT COUNT(*) FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}" AND Match_Winner = "P2";').fetchone()[0]] #adding overall in L[0]
         if (format_wins[0] + format_losses[0]) == 0:
             format_wr = ["0.0%"]
         else:
-            format_wr = [to_percent(format_wins[0]/(format_wins[0]+format_losses[0]),1) + "%"]    #adding overall in L[0]
+            format_wr = [to_percent(format_wins[0]/(format_wins[0]+format_losses[0]),1) + "%"] #adding overall in L[0]
 
         for i in formats_played:
-            wins  =  df0_i_f[(df0_i_f.Format == i) & (df0_i_f.Match_Winner == "P1")].shape[0]
-            losses = df0_i_f[(df0_i_f.Format == i) & (df0_i_f.Match_Winner == "P2")].shape[0]
+            wins = cursor.execute(f'SELECT COUNT(*) FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}" AND Match_Winner = "P1" AND Format = "{i}";').fetchone()[0]
+            losses = cursor.execute(f'SELECT COUNT(*) FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}" AND Match_Winner = "P2" AND Format = "{i}";').fetchone()[0]
             format_wins.append(str(wins))
             format_losses.append(str(losses))
             if (wins + losses) == 0:
@@ -4224,10 +4207,11 @@ def get_stats():
         format_losses.extend(["",format_losses[0]])
         format_wr.extend(["",format_wr[0]])
 
-        matchtypes_played = df0_i_f.Match_Type.value_counts().keys().tolist()
+        result_set = cursor.execute(f'SELECT DISTINCT Match_Type FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}";').fetchall()
+        matchtypes_played = [row[0] for row in result_set]
         for i in matchtypes_played:
-            mt_wins  =  df0_i_f[(df0_i_f.Match_Type == i) & (df0_i_f.Match_Winner == "P1")].shape[0]
-            mt_losses = df0_i_f[(df0_i_f.Match_Type == i) & (df0_i_f.Match_Winner == "P2")].shape[0]
+            mt_wins = cursor.execute(f'SELECT COUNT(*) FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}" AND Match_Winner = "P1" AND Match_Type = "{i}";').fetchone()[0]
+            mt_losses = cursor.execute(f'SELECT COUNT(*) FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}" AND Match_Winner = "P2" AND Match_Type = "{i}";').fetchone()[0]
             formats_played.append(i)
             format_wins.append(mt_wins)
             format_losses.append(mt_losses)
@@ -4236,14 +4220,15 @@ def get_stats():
             else:
                 format_wr.append(to_percent(mt_wins/(mt_wins+mt_losses),1) + "%")
 
-        filtered_n =        df0_i_f.shape[0] 
-        meta_deck_wr =      []
-        meta_decks =        df0_i_f.P2_Subarch.value_counts().keys().tolist()
-        meta_deck_counts =  df0_i_f.P2_Subarch.value_counts().tolist()
+        filtered_n = cursor.execute(f'SELECT COUNT(*) FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}";').fetchone()[0]
+        meta_deck_wr = []
+        result_set = cursor.execute(f'SELECT P2_Subarch, COUNT(*) FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}" GROUP BY P2_Subarch;').fetchone()[0]
+        meta_decks = [row[0] for row in result_set]
+        meta_deck_counts = [row[1] for row in result_set]
         for i in meta_decks:
-            wins  = df0_i_f[(df0_i_f.P2_Subarch == i) & (df0_i_f.Match_Winner == "P1")].shape[0]
-            losses= df0_i_f[(df0_i_f.P2_Subarch == i) & (df0_i_f.Match_Winner == "P2")].shape[0]
-            total = df0_i_f[(df0_i_f.P2_Subarch == i)].shape[0]
+            wins = cursor.execute(f'SELECT COUNT(*) FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}" AND P2_Subarch = "{i}" AND Match_Winner = "P1";').fetchone()[0]
+            losses = cursor.execute(f'SELECT COUNT(*) FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}" AND P2_Subarch = "{i}" AND Match_Winner = "P2";').fetchone()[0]
+            total = cursor.execute(f'SELECT COUNT(*) FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}" AND P2_Subarch = "{i}";').fetchone()[0]
             if total == 0:
                 meta_deck_wr.append([wins,losses,"0"])
             else:
@@ -4357,121 +4342,121 @@ def get_stats():
                                               meta_deck_wr[i][1],
                                               (meta_deck_wr[i][2]+"%")])
 
-    def time_stats(hero,opp,mformat,lformat,deck,opp_deck,date_range,s_type):
-        stats_window.title("Statistics - Time Data: " + hero)
-        clear_frames()
-        mid_frame.grid_rowconfigure(0,weight=1)
-        mid_frame.grid_rowconfigure(1,weight=0)
-        mid_frame.grid_columnconfigure(0,weight=1)
-        mid_frame.grid_columnconfigure(1,weight=1)
-        mid_frame5.grid_rowconfigure(0,weight=1)
-        mid_frame5.grid_columnconfigure(0,weight=1)
-        mid_frame6.grid_rowconfigure(0,weight=1)
-        mid_frame6.grid_columnconfigure(0,weight=1)
-        mid_frame5.grid(row=0,column=0,sticky="nsew")
-        mid_frame6.grid(row=0,column=1,sticky="nsew")
+    # def time_stats(hero,opp,mformat,lformat,deck,opp_deck,date_range,s_type):
+    #     stats_window.title("Statistics - Time Data: " + hero)
+    #     clear_frames()
+    #     mid_frame.grid_rowconfigure(0,weight=1)
+    #     mid_frame.grid_rowconfigure(1,weight=0)
+    #     mid_frame.grid_columnconfigure(0,weight=1)
+    #     mid_frame.grid_columnconfigure(1,weight=1)
+    #     mid_frame5.grid_rowconfigure(0,weight=1)
+    #     mid_frame5.grid_columnconfigure(0,weight=1)
+    #     mid_frame6.grid_rowconfigure(0,weight=1)
+    #     mid_frame6.grid_columnconfigure(0,weight=1)
+    #     mid_frame5.grid(row=0,column=0,sticky="nsew")
+    #     mid_frame6.grid(row=0,column=1,sticky="nsew")
 
-        mid_frame5.grid_propagate(0)
-        mid_frame6.grid_propagate(0)
+    #     mid_frame5.grid_propagate(0)
+    #     mid_frame6.grid_propagate(0)
 
-        def get_wr_over_time(df,start_index):
-            match_winners = df.Match_Winner.tolist()
-            x = []
-            wr_over_time = []
-            p1_count = 0
-            for index,i in enumerate(match_winners,1):
-                if i == "P1":
-                    p1_count += 1
-                wr_over_time.append(round(p1_count/index,3)*100)
-                x.append(index)
-            if start_index < len(wr_over_time):
-                x = x[start_index:]
-                wr_over_time = wr_over_time[start_index:]
-            return [x,wr_over_time]
+    #     def get_wr_over_time(df,start_index):
+    #         match_winners = df.Match_Winner.tolist()
+    #         x = []
+    #         wr_over_time = []
+    #         p1_count = 0
+    #         for index,i in enumerate(match_winners,1):
+    #             if i == "P1":
+    #                 p1_count += 1
+    #             wr_over_time.append(round(p1_count/index,3)*100)
+    #             x.append(index)
+    #         if start_index < len(wr_over_time):
+    #             x = x[start_index:]
+    #             wr_over_time = wr_over_time[start_index:]
+    #         return [x,wr_over_time]
 
-        def get_pm_over_time(df,start_index):
-            match_winners = df.Match_Winner.tolist()
-            x = []
-            last = 0
-            pm_over_time = []
-            for index,i in enumerate(match_winners):
-                if i == "P1":
-                    pm_over_time.append(last + 1)
-                    x.append(index)
-                elif i == "P2":
-                    pm_over_time.append(last - 1)
-                    x.append(index)
-                last = pm_over_time[-1]
-            if start_index < len(pm_over_time):
-                x = x[start_index:]
-                pm_over_time = pm_over_time[start_index:]
-            return [x,pm_over_time]
+    #     def get_pm_over_time(df,start_index):
+    #         match_winners = df.Match_Winner.tolist()
+    #         x = []
+    #         last = 0
+    #         pm_over_time = []
+    #         for index,i in enumerate(match_winners):
+    #             if i == "P1":
+    #                 pm_over_time.append(last + 1)
+    #                 x.append(index)
+    #             elif i == "P2":
+    #                 pm_over_time.append(last - 1)
+    #                 x.append(index)
+    #             last = pm_over_time[-1]
+    #         if start_index < len(pm_over_time):
+    #             x = x[start_index:]
+    #             pm_over_time = pm_over_time[start_index:]
+    #         return [x,pm_over_time]
 
-        chart_type = "plusminus"
+    #     chart_type = "plusminus"
 
-        df_time = df0_i[(df0_i.P1 == hero)]
-        if mformat != "All Formats":
-            df_time = df_time[(df_time.Format == mformat)]
-        if lformat != "All Limited Formats":
-            df_time = df_time[(df_time.Limited_Format == lformat)]
-        df_time = df_time.sort_values(by=["Date"])
-        df_time = df_time[(df_time.Date.between(date_range[0],date_range[1]))]
+    #     df_time = df0_i[(df0_i.P1 == hero)]
+    #     if mformat != "All Formats":
+    #         df_time = df_time[(df_time.Format == mformat)]
+    #     if lformat != "All Limited Formats":
+    #         df_time = df_time[(df_time.Limited_Format == lformat)]
+    #     df_time = df_time.sort_values(by=["Date"])
+    #     df_time = df_time[(df_time.Date.between(date_range[0],date_range[1]))]
         
-        if chart_type == "winrate":
-            g1_list = get_wr_over_time(df_time,0)
-        elif chart_type == "plusminus":
-            g1_list = get_pm_over_time(df_time,0)
+    #     if chart_type == "winrate":
+    #         g1_list = get_wr_over_time(df_time,0)
+    #     elif chart_type == "plusminus":
+    #         g1_list = get_pm_over_time(df_time,0)
 
-        fig = plt.figure(figsize=(7,5),dpi=100)
-        plt.plot(g1_list[0],g1_list[1])
-        plt.xlabel("Matches Played")
+    #     fig = plt.figure(figsize=(7,5),dpi=100)
+    #     plt.plot(g1_list[0],g1_list[1])
+    #     plt.xlabel("Matches Played")
 
-        if chart_type == "winrate":
-            if lformat == "All Limited Formats":
-                plt.title("Win Rate Over Time:\n" + mformat)
-            else:
-                plt.title("Win Rate Over Time:\n" + mformat + " - " + lformat)
-            plt.ylabel("Winning Percentage")
-        elif chart_type == "plusminus":
-            if lformat == "All Limited Formats":
-                plt.title("Match Wins Over .500:\n" + mformat)
-            else:
-                plt.title("Match Wins Over .500:\n" + mformat + " - " + lformat)
-            plt.ylabel("Match Wins Over .500")
+    #     if chart_type == "winrate":
+    #         if lformat == "All Limited Formats":
+    #             plt.title("Win Rate Over Time:\n" + mformat)
+    #         else:
+    #             plt.title("Win Rate Over Time:\n" + mformat + " - " + lformat)
+    #         plt.ylabel("Winning Percentage")
+    #     elif chart_type == "plusminus":
+    #         if lformat == "All Limited Formats":
+    #             plt.title("Match Wins Over .500:\n" + mformat)
+    #         else:
+    #             plt.title("Match Wins Over .500:\n" + mformat + " - " + lformat)
+    #         plt.ylabel("Match Wins Over .500")
 
-        canvas = FigureCanvasTkAgg(fig,mid_frame5)
-        canvas.draw()
-        canvas.get_tk_widget().grid(row=0,column=0,sticky="")
+    #     canvas = FigureCanvasTkAgg(fig,mid_frame5)
+    #     canvas.draw()
+    #     canvas.get_tk_widget().grid(row=0,column=0,sticky="")
 
-        if deck != "All Decks":
-            df_time_d = df_time[(df_time.P1_Subarch == deck)]
-            df_time_d = df_time_d.sort_values(by=["Date"])     
+    #     if deck != "All Decks":
+    #         df_time_d = df_time[(df_time.P1_Subarch == deck)]
+    #         df_time_d = df_time_d.sort_values(by=["Date"])     
             
-            if chart_type == "winrate":
-                g2_list = get_wr_over_time(df_time_d,0)
-            elif chart_type == "plusminus":
-                g2_list = get_pm_over_time(df_time_d,0)
+    #         if chart_type == "winrate":
+    #             g2_list = get_wr_over_time(df_time_d,0)
+    #         elif chart_type == "plusminus":
+    #             g2_list = get_pm_over_time(df_time_d,0)
 
-            fig = plt.figure(figsize=(7,5),dpi=100)
-            plt.plot(g2_list[0],g2_list[1])
-            plt.xlabel("Matches Played")
+    #         fig = plt.figure(figsize=(7,5),dpi=100)
+    #         plt.plot(g2_list[0],g2_list[1])
+    #         plt.xlabel("Matches Played")
 
-            if chart_type == "winrate":
-                if lformat == "All Limited Formats":
-                    plt.title("Win Rate Over Time:\n" + mformat + ": " + deck)
-                else:
-                    plt.title("Win Rate Over Time:\n" + mformat + " - " + lformat + ": " + deck)
-                plt.ylabel("Winning Percentage")
-            elif chart_type == "plusminus":
-                if lformat == "All Limited Formats":
-                    plt.title("Match Wins Over .500:\n" + mformat + ": " + deck)
-                else:
-                    plt.title("Match Wins Over .500:\n" + mformat + " - " + lformat + ": " + deck)
-                plt.ylabel("Match Wins Over .500")
+    #         if chart_type == "winrate":
+    #             if lformat == "All Limited Formats":
+    #                 plt.title("Win Rate Over Time:\n" + mformat + ": " + deck)
+    #             else:
+    #                 plt.title("Win Rate Over Time:\n" + mformat + " - " + lformat + ": " + deck)
+    #             plt.ylabel("Winning Percentage")
+    #         elif chart_type == "plusminus":
+    #             if lformat == "All Limited Formats":
+    #                 plt.title("Match Wins Over .500:\n" + mformat + ": " + deck)
+    #             else:
+    #                 plt.title("Match Wins Over .500:\n" + mformat + " - " + lformat + ": " + deck)
+    #             plt.ylabel("Match Wins Over .500")
 
-            canvas2 = FigureCanvasTkAgg(fig,mid_frame6)
-            canvas2.draw()
-            canvas2.get_tk_widget().grid(row=0,column=0,sticky="")
+    #         canvas2 = FigureCanvasTkAgg(fig,mid_frame6)
+    #         canvas2.draw()
+    #         canvas2.get_tk_widget().grid(row=0,column=0,sticky="")
 
     def card_stats(hero,opp,mformat,lformat,deck,opp_deck,date_range,s_type,opponents,lands):
         stats_window.title("Statistics - Card Data: " + hero)
