@@ -3599,44 +3599,31 @@ def get_stats():
         mid_frame3.grid(row=1,column=0,sticky="nsew")
         mid_frame4.grid(row=1,column=1,sticky="nsew")
 
-        df1_i_merge     = pd.merge(df0_i,
-                                   df1_i,
-                                   how="inner",
-                                   left_on=["Match_ID","P1","P2"],
-                                   right_on=["Match_ID","P1","P2"])
-        if mformat != "All Formats":
-            df1_i_merge = df1_i_merge[(df1_i_merge.Format == mformat)]
-        if lformat != "All Limited Formats":
-            df1_i_merge = df1_i_merge[(df1_i_merge.Limited_Format == lformat)]
-        df1_i_merge     = df1_i_merge[(df1_i_merge.Date > date_range[0]) & (df1_i_merge.Date < date_range[1])]
-        df1_i_hero      = df1_i_merge[df1_i_merge.P1 == hero]
-        df1_i_hero_p    = df1_i_hero[df1_i_hero.On_Play == "P1"]
-        df1_i_hero_d    = df1_i_hero[df1_i_hero.On_Play == "P2"]
-        
-        df1_i_hero_g1   = df1_i_hero[df1_i_hero.Game_Num == 1]
-        df1_i_hero_g1_p = df1_i_hero_g1[df1_i_hero_g1.On_Play == "P1"]
-        df1_i_hero_g1_d = df1_i_hero_g1[df1_i_hero_g1.On_Play == "P2"]
-        
-        df1_i_hero_g2   = df1_i_hero[df1_i_hero.Game_Num == 2]
-        df1_i_hero_g2_p = df1_i_hero_g2[df1_i_hero_g2.On_Play == "P1"]
-        df1_i_hero_g2_d = df1_i_hero_g2[df1_i_hero_g2.On_Play == "P2"]
-        
-        df1_i_hero_g3   = df1_i_hero[df1_i_hero.Game_Num == 3]
-        df1_i_hero_g3_p = df1_i_hero_g3[df1_i_hero_g3.On_Play == "P1"]
-        df1_i_hero_g3_d = df1_i_hero_g3[df1_i_hero_g3.On_Play == "P2"]
+        cursor = CONN.cursor()
 
-        df_list = [df1_i_hero,
-                   df1_i_hero_p,
-                   df1_i_hero_d,
-                   df1_i_hero_g1,
-                   df1_i_hero_g1_p,
-                   df1_i_hero_g1_d,
-                   df1_i_hero_g2,
-                   df1_i_hero_g2_p,
-                   df1_i_hero_g2_d,
-                   df1_i_hero_g3,
-                   df1_i_hero_g3_p,
-                   df1_i_hero_g3_d]
+        base_query = f'SELECT * FROM Matches JOIN Games ON Matches.Match_ID = Games.Match_ID AND Matches.P1 = Games.P1'
+        filter_query = f' WHERE Matches.P1 = "{hero}" AND Matches.Date > "{date_range[0]}" AND Matches.Date < "{date_range[1]}"'
+        if mformat != "All Formats":
+            filter_query += f' AND Format = "{mformat}"'
+        if lformat != "All Limited Formats":
+            filter_query += f' AND Limited_Format = "{lformat}"'
+
+        query_play = base_query + filter_query + ' AND Games.On_Play = "P1";'
+        query_draw = base_query + filter_query + ' AND Games.On_Play = "P2";'
+
+        query_g1 = base_query + filter_query + ' AND Games.Game_Num = 1;'
+        query_g1_play = base_query + filter_query + ' AND Games.Game_Num = 1 AND Games.On_Play = "P1";'
+        query_g1_draw = base_query + filter_query + ' AND Games.Game_Num = 1 AND Games.On_Play = "P2";'
+
+        query_g2 = base_query + filter_query + ' AND Games.Game_Num = 2;'
+        query_g2_play = base_query + filter_query + ' AND Games.Game_Num = 2 AND Games.On_Play = "P1";'
+        query_g2_draw = base_query + filter_query + ' AND Games.Game_Num = 2 AND Games.On_Play = "P2";'
+
+        query_g3 = base_query + filter_query + ' AND Games.Game_Num = 3;'
+        query_g3_play = base_query + filter_query + ' AND Games.Game_Num = 2 AND Games.On_Play = "P1";'
+        query_g3_draw = base_query + filter_query + ' AND Games.Game_Num = 2 AND Games.On_Play = "P2";'
+
+        query_list = [query_play,query_draw,query_g1,query_g1_play,query_g1_draw,query_g2,query_g2_play,query_g2_draw,query_g3,query_g3_play,query_g3_draw]
 
         frame_labels = ["Game Data: " + mformat,
                         "Matchup Data",
@@ -3644,23 +3631,26 @@ def get_stats():
                         "Choose an Opposing Deck"]
         if lformat != "All Limited Formats":
             frame_labels[0] += " - " + lformat
-        tree1data =    []
-        for i in df_list:
-            total_n = i.shape[0]
-            wins =    i[(i.Game_Winner == "P1")].shape[0]
-            losses =  i[(i.Game_Winner == "P2")].shape[0]
+        tree1data = []
+        for i in query_list:
+            total_n = cursor.execute(i.replace(' * ',' COUNT(*) ')).fetchone()[0]
+            wins = cursor.execute(i.replace(' * ',' COUNT(*) ').replace(';',' AND Games.Game_Winner = "P1";')).fetchone()[0]
+            losses = cursor.execute(i.replace(' * ',' COUNT(*) ').replace(';',' AND Games.Game_Winner = "P2";')).fetchone()[0]
             if (wins+losses) == 0:
                 win_rate = "0.0"
             else:
                 win_rate = to_percent(wins/(wins+losses),1)
             if total_n == 0:
-                hero_mull_rate =0.0
+                hero_mull_rate = 0.0
                 opp_mull_rate = 0.0
-                turn_rate =     0.0
+                turn_rate = 0.0
             else:
-                hero_mull_rate =round((pd.to_numeric(i.P1_Mulls, errors='coerce').sum()/total_n),2)
-                opp_mull_rate = round((pd.to_numeric(i.P2_Mulls, errors='coerce').sum()/total_n),2)
-                turn_rate =     round((pd.to_numeric(i.Turns, errors='coerce').sum()/total_n),2)     
+                hero_mulls = cursor.execute(i.replace(' * ',' SUM(CASE WHEN CAST(Games.P1_Mulls AS INTEGER) IS NOT NULL THEN CAST(Games.P1_Mulls AS INTEGER) ELSE NULL END) AS Mulls ')).fetchone()[0]
+                hero_mull_rate = round((hero_mulls/total_n),2)
+                opp_mulls = cursor.execute(i.replace(' * ',' SUM(CASE WHEN CAST(Games.P2_Mulls AS INTEGER) IS NOT NULL THEN CAST(Games.P2_Mulls AS INTEGER) ELSE NULL END) AS Mulls ')).fetchone()[0]
+                opp_mull_rate = round((opp_mulls/total_n),2)
+                turns = cursor.execute(i.replace(' * ',' SUM(CASE WHEN CAST(Games.Turns AS INTEGER) IS NOT NULL THEN CAST(Games.Turns AS INTEGER) ELSE NULL END) AS Total ')).fetchone()[0]
+                turn_rate = round((turns/total_n),2)     
             tree1data.append([wins,
                               losses,
                               win_rate,
@@ -3674,22 +3664,25 @@ def get_stats():
                 frame_labels[1] = ("Matchup Data: " + mformat + " - " + lformat + ", " + deck + " vs. " + opp_deck)
             else:
                 frame_labels[1] = ("Matchup Data: " + mformat + ", " + deck + " vs. " + opp_deck)
-            for i in df_list:
-                total_n = i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck)].shape[0]
-                wins =    i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck) & (i.Game_Winner == "P1")].shape[0]
-                losses =  i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck) & (i.Game_Winner == "P2")].shape[0]
+            for i in query_list:
+                total_n = cursor.execute(i.replace(' * ',' COUNT(*) ').replace(';',f' AND Matches.P1_Subarch = "{deck}" AND Matches.P2_Subarch = "{opp_deck}";')).fetchone()[0]
+                wins = cursor.execute(i.replace(' * ',' COUNT(*) ').replace(';',f' AND Matches.P1_Subarch = "{deck}" AND Matches.P2_Subarch = "{opp_deck}" AND Games.Game_Winner = "P1";')).fetchone()[0]
+                losses = cursor.execute(i.replace(' * ',' COUNT(*) ').replace(';',f' AND Matches.P1_Subarch = "{deck}" AND Matches.P2_Subarch = "{opp_deck}" AND Games.Game_Winner = "P2";')).fetchone()[0]
                 if (wins+losses) == 0:
                     win_rate = "0.0"
                 else:
                     win_rate = to_percent(wins/(wins+losses),1)
                 if total_n == 0:
-                    hero_mull_rate =0.0
+                    hero_mull_rate = 0.0
                     opp_mull_rate = 0.0
-                    turn_rate =     0.0
+                    turn_rate = 0.0
                 else:
-                    hero_mull_rate =round((pd.to_numeric(i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck)].P1_Mulls, errors='coerce').sum()/total_n),2)
-                    opp_mull_rate = round((pd.to_numeric(i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck)].P2_Mulls, errors='coerce').sum()/total_n),2)
-                    turn_rate =     round((pd.to_numeric(i[(i.P1_Subarch == deck) & (i.P2_Subarch == opp_deck)].Turns, errors='coerce').sum()/total_n),2)     
+                    hero_mulls = cursor.execute(i.replace(' * ',' SUM(CASE WHEN CAST(Games.P1_Mulls AS INTEGER) IS NOT NULL THEN CAST(Games.P1_Mulls AS INTEGER) ELSE NULL END) AS Mulls ').replace(';',f' AND Matches.P1_Subarch = "{deck}" AND Matches.P2_Subarch = "{opp_deck}";')).fetchone()[0]
+                    hero_mull_rate = round((hero_mulls/total_n),2)
+                    opp_mulls = cursor.execute(i.replace(' * ',' SUM(CASE WHEN CAST(Games.P2_Mulls AS INTEGER) IS NOT NULL THEN CAST(Games.P2_Mulls AS INTEGER) ELSE NULL END) AS Mulls ').replace(';',f' AND Matches.P1_Subarch = "{deck}" AND Matches.P2_Subarch = "{opp_deck}";')).fetchone()[0]
+                    opp_mull_rate = round((opp_mulls/total_n),2)
+                    turns = cursor.execute(i.replace(' * ',' SUM(CASE WHEN CAST(Games.Turns AS INTEGER) IS NOT NULL THEN CAST(Games.Turns AS INTEGER) ELSE NULL END) AS Total ').replace(';',f' AND Matches.P1_Subarch = "{deck}" AND Matches.P2_Subarch = "{opp_deck}";')).fetchone()[0]
+                    turn_rate = round((turns/total_n),2)     
                 tree2data.append([wins,
                                   losses,
                                   win_rate,
@@ -3703,22 +3696,25 @@ def get_stats():
                 frame_labels[2] = (mformat + " - " + lformat + ": " + deck + " vs. All Opp. Decks")
             else:
                 frame_labels[2] = (mformat + ": " + deck + " vs. All Opp. Decks")
-            for i in df_list:
-                total_n = i[(i.P1_Subarch == deck)].shape[0]
-                wins =    i[(i.P1_Subarch == deck) & (i.Game_Winner == "P1")].shape[0]
-                losses =  i[(i.P1_Subarch == deck) & (i.Game_Winner == "P2")].shape[0]
+            for i in query_list:
+                total_n = cursor.execute(i.replace(' * ',' COUNT(*) ').replace(';',f' AND Matches.P1_Subarch = "{deck}";')).fetchone()[0]
+                wins = cursor.execute(i.replace(' * ',' COUNT(*) ').replace(';',f' AND Matches.P1_Subarch = "{deck}" AND Games.Game_Winner = "P1";')).fetchone()[0]
+                losses = cursor.execute(i.replace(' * ',' COUNT(*) ').replace(';',f' AND Matches.P1_Subarch = "{deck}" AND Games.Game_Winner = "P2";')).fetchone()[0]
                 if (wins+losses) == 0:
                     win_rate = "0.0"
                 else:
                     win_rate = to_percent(wins/(wins+losses),1)
                 if total_n == 0:
-                    hero_mull_rate =0.0
+                    hero_mull_rate = 0.0
                     opp_mull_rate = 0.0
-                    turn_rate =     0.0
+                    turn_rate = 0.0
                 else:
-                    hero_mull_rate =round((pd.to_numeric(i[(i.P1_Subarch == deck)].P1_Mulls, errors='coerce').sum()/total_n),2)
-                    opp_mull_rate = round((pd.to_numeric(i[(i.P1_Subarch == deck)].P2_Mulls, errors='coerce').sum()/total_n),2)
-                    turn_rate =     round((pd.to_numeric(i[(i.P1_Subarch == deck)].Turns, errors='coerce').sum()/total_n),2)     
+                    hero_mulls = cursor.execute(i.replace(' * ',' SUM(CASE WHEN CAST(Games.P1_Mulls AS INTEGER) IS NOT NULL THEN CAST(Games.P1_Mulls AS INTEGER) ELSE NULL END) AS Mulls ').replace(';',f' AND Matches.P1_Subarch = "{deck}";')).fetchone()[0]
+                    hero_mull_rate = round((hero_mulls/total_n),2)
+                    opp_mulls = cursor.execute(i.replace(' * ',' SUM(CASE WHEN CAST(Games.P2_Mulls AS INTEGER) IS NOT NULL THEN CAST(Games.P2_Mulls AS INTEGER) ELSE NULL END) AS Mulls ').replace(';',f' AND Matches.P1_Subarch = "{deck}";')).fetchone()[0]
+                    opp_mull_rate = round((opp_mulls/total_n),2)
+                    turns = cursor.execute(i.replace(' * ',' SUM(CASE WHEN CAST(Games.Turns AS INTEGER) IS NOT NULL THEN CAST(Games.Turns AS INTEGER) ELSE NULL END) AS Total ').replace(';',f' AND Matches.P1_Subarch = "{deck}";')).fetchone()[0]
+                    turn_rate = round((turns/total_n),2)   
                 tree3data.append([wins,
                                   losses,
                                   win_rate,
@@ -3732,22 +3728,25 @@ def get_stats():
                 frame_labels[3] = (mformat + " - " + lformat + ": All Decks vs. " + opp_deck)
             else:
                 frame_labels[3] = (mformat + ": All Decks vs. " + opp_deck)
-            for i in df_list:
-                total_n = i[(i.P2_Subarch == opp_deck)].shape[0]
-                wins =    i[(i.P2_Subarch == opp_deck) & (i.Game_Winner == "P1")].shape[0]
-                losses =  i[(i.P2_Subarch == opp_deck) & (i.Game_Winner == "P2")].shape[0]
+            for i in query_list:
+                total_n = cursor.execute(i.replace(' * ',' COUNT(*) ').replace(';',f' AND Matches.P2_Subarch = "{opp_deck}";')).fetchone()[0]
+                wins = cursor.execute(i.replace(' * ',' COUNT(*) ').replace(';',f' AND Matches.P2_Subarch = "{opp_deck}" AND Games.Game_Winner = "P1";')).fetchone()[0]
+                losses = cursor.execute(i.replace(' * ',' COUNT(*) ').replace(';',f' AND Matches.P2_Subarch = "{opp_deck}" AND Games.Game_Winner = "P2";')).fetchone()[0]
                 if (wins+losses) == 0:
                     win_rate = "0.0"
                 else:
                     win_rate = to_percent(wins/(wins+losses),1)
                 if total_n == 0:
-                    hero_mull_rate =0.0
+                    hero_mull_rate = 0.0
                     opp_mull_rate = 0.0
-                    turn_rate =     0.0
+                    turn_rate = 0.0
                 else:
-                    hero_mull_rate =round((pd.to_numeric(i[(i.P2_Subarch == opp_deck)].P1_Mulls, errors='coerce').sum()/total_n),2)
-                    opp_mull_rate = round((pd.to_numeric(i[(i.P2_Subarch == opp_deck)].P2_Mulls, errors='coerce').sum()/total_n),2)
-                    turn_rate =     round((pd.to_numeric(i[(i.P2_Subarch == opp_deck)].Turns, errors='coerce').sum()/total_n),2)     
+                    hero_mulls = cursor.execute(i.replace(' * ',' SUM(CASE WHEN CAST(Games.P1_Mulls AS INTEGER) IS NOT NULL THEN CAST(Games.P1_Mulls AS INTEGER) ELSE NULL END) AS Mulls ').replace(';',f' AND Matches.P2_Subarch = "{opp_deck}";')).fetchone()[0]
+                    hero_mull_rate = round((hero_mulls/total_n),2)
+                    opp_mulls = cursor.execute(i.replace(' * ',' SUM(CASE WHEN CAST(Games.P2_Mulls AS INTEGER) IS NOT NULL THEN CAST(Games.P2_Mulls AS INTEGER) ELSE NULL END) AS Mulls ').replace(';',f' AND Matches.P2_Subarch = "{opp_deck}";')).fetchone()[0]
+                    opp_mull_rate = round((opp_mulls/total_n),2)
+                    turns = cursor.execute(i.replace(' * ',' SUM(CASE WHEN CAST(Games.Turns AS INTEGER) IS NOT NULL THEN CAST(Games.Turns AS INTEGER) ELSE NULL END) AS Total ').replace(';',f' AND Matches.P2_Subarch = "{opp_deck}";')).fetchone()[0]
+                    turn_rate = round((turns/total_n),2)
                 tree4data.append([wins,
                                   losses,
                                   win_rate,
@@ -3755,8 +3754,8 @@ def get_stats():
                                   opp_mull_rate,
                                   turn_rate])
         
-        tree_data =     [tree1data,tree2data,tree3data,tree4data]
-        frames =        [mid_frame1,mid_frame2,mid_frame3,mid_frame4]
+        tree_data = [tree1data,tree2data,tree3data,tree4data]
+        frames = [mid_frame1,mid_frame2,mid_frame3,mid_frame4]
         for index,tree in enumerate([tree1,tree2,tree3,tree4]):
             frames[index]["text"] = frame_labels[index]
             tree.tag_configure("colored",background="#cccccc")
