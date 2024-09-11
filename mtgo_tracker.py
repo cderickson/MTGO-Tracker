@@ -4421,16 +4421,7 @@ def get_stats():
         #                     right_on=["Match_ID","P1","P2"])
         # df_merge = df_merge[(df_merge.Game_Winner != "NA") & (df_merge.Date > date_range[0]) & (df_merge.Date < date_range[1]) & (df_merge.Primary_Card != "NA")]
 
-        base_query = f'''
-        SELECT *
-        FROM Games G LEFT JOIN Plays P
-        ON G.Match_ID = P.Match_ID AND G.Game_Num = P.Game_Num
-        JOIN Matches M
-        ON G.Match_ID = M.Match_ID AND G.P1 = M.P1
-        WHERE G.Game_Winner != "NA" AND M.Date > "{date_range[0]}" AND M.Date < "{date_range[1]}" AND P.Primary_Card != "NA"
-        '''
         filter_query = ''
-
         if mformat != "All Formats":
             filter_query += f' AND M.Format = "{mformat}"'
         if lformat != "All Limited Formats":
@@ -4497,22 +4488,50 @@ def get_stats():
         elif lands == False:
             filter_query += f' AND P.Action IN ("Plays", "Casts")'
 
-        df_merge_pre.drop(df_merge_pre.columns.difference(["Game_ID","Game_Num","P1_Subarch","P2_Subarch","Primary_Card","Won_Game"]),axis=1,inplace=True)
-        df_merge_pre.drop_duplicates(inplace=True)
+        # df_merge_pre.drop(df_merge_pre.columns.difference(["Game_ID","Game_Num","P1_Subarch","P2_Subarch","Primary_Card","Won_Game"]),axis=1,inplace=True)
+        # df_merge_pre.drop_duplicates(inplace=True)
 
-        df_merge_post.drop(df_merge_post.columns.difference(["Game_ID","Game_Num","P1_Subarch","P2_Subarch","Primary_Card","Won_Game"]),axis=1,inplace=True)
-        df_merge_post.drop_duplicates(inplace=True)
+        # df_merge_post.drop(df_merge_post.columns.difference(["Game_ID","Game_Num","P1_Subarch","P2_Subarch","Primary_Card","Won_Game"]),axis=1,inplace=True)
+        # df_merge_post.drop_duplicates(inplace=True)
 
-        cards_played_pre = list(df_merge_pre.groupby(["Primary_Card"]).groups.keys())
-        games_played_pre = df_merge_pre.groupby(["Primary_Card"]).Game_ID.size().tolist()
-        games_won_pre =    df_merge_pre.groupby(["Primary_Card"]).Won_Game.sum().tolist()
+        result_set = cursor.execute(f'''
+        SELECT P.Primary_Card, COUNT(CASE WHEN G.Game_Winner != "NA" THEN 1 END) as Games_Played, COUNT(CASE WHEN G.Game_Winner = "P1" THEN 1 END) as Games_Won 
+        FROM Games G LEFT JOIN Plays P
+        ON G.Match_ID = P.Match_ID AND G.Game_Num = P.Game_Num
+        JOIN Matches M
+        ON G.Match_ID = M.Match_ID AND G.P1 = M.P1
+        WHERE G.Game_Winner != "NA" AND M.Date > "{date_range[0]}" AND M.Date < "{date_range[1]}" AND P.Primary_Card != "NA" AND G.Game_Num = 1
+        ''' + filter_query + ' GROUP BY P.Primary_Card').fetchall()
+
+        cards_played_pre = []
+        games_played_pre = []
+        games_won_pre = []
+        for row in result_set:
+            cards_played_pre.append(row[0])
+            games_played_pre.append(row[1])
+            games_won_pre.append(row[2])
+
         games_wr_pre = []
         for i in range(len(games_played_pre)):
             games_wr_pre.append(round((int(games_won_pre[i])/int(games_played_pre[i]))*100,1))
 
-        cards_played_post = list(df_merge_post.groupby(["Primary_Card"]).groups.keys())
-        games_played_post = df_merge_post.groupby(["Primary_Card"]).Game_ID.size().tolist()
-        games_won_post =    df_merge_post.groupby(["Primary_Card"]).Won_Game.sum().tolist()
+        result_set = cursor.execute(f'''
+        SELECT P.Primary_Card, COUNT(CASE WHEN G.Game_Winner != "NA" THEN 1 END) as Games_Played, COUNT(CASE WHEN G.Game_Winner = "P1" THEN 1 END) as Games_Won 
+        FROM Games G LEFT JOIN Plays P
+        ON G.Match_ID = P.Match_ID AND G.Game_Num = P.Game_Num
+        JOIN Matches M
+        ON G.Match_ID = M.Match_ID AND G.P1 = M.P1
+        WHERE G.Game_Winner != "NA" AND M.Date > "{date_range[0]}" AND M.Date < "{date_range[1]}" AND P.Primary_Card != "NA" AND G.Game_Num != 1
+        ''' + filter_query + ' GROUP BY P.Primary_Card').fetchall()
+
+        cards_played_post = []
+        games_played_post = []
+        games_won_post = []
+        for row in result_set:
+            cards_played_post.append(row[0])
+            games_played_post.append(row[1])
+            games_won_post.append(row[2])
+       
         games_wr_post = []
         for i in range(len(games_played_post)):
             games_wr_post.append(round((int(games_won_post[i])/int(games_played_post[i]))*100,1))
@@ -4597,18 +4616,6 @@ def get_stats():
         menu_2["values"] = format_options
         mformat.set(format_options[0]) 
 
-    # def update_hero(*argv):
-    #     HERO = player.get()
-    #     update_format_menu()
-    #     update_deck_menu()
-    #     update_opp_deck_menu()
-    #     update_opp_menu()
-       
-    #     menu_2["state"]   = "readonly"
-    #     menu_4["state"]   = "readonly"
-    #     menu_5["state"]   = "readonly"
-    #     menu_6["state"]   = tk.NORMAL
-
     def update_opp_menu(*argv):
         df = df0_i[(df0_i.P1 == player.get())]
 
@@ -4670,6 +4677,7 @@ def get_stats():
         deck.set(decks_played[0])
 
     def update_opp_deck_menu(*argv):
+        qu
         if mformat.get() == "All Formats":
             df = df0_i[(df0_i.P1 == player.get())]
         elif mformat.get() in INPUT_OPTIONS["Constructed Formats"]:
@@ -4738,8 +4746,6 @@ def get_stats():
             play_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())
         elif s_type.get() == "Opponent Stats":
             opp_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())
-        elif s_type.get() == "Time Data":
-            time_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get())
         elif s_type.get() == "Spells - Win Rate":
             card_stats(player.get(),opponent.get(),mformat.get(),lim_format.get(),deck.get(),opp_deck.get(),dr,s_type.get(),opponents=False,lands=False)
         elif s_type.get() == "Spells - Win Rate Against":
