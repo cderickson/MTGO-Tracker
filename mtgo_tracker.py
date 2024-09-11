@@ -4537,10 +4537,10 @@ def get_stats():
             games_wr_post.append(round((int(games_won_post[i])/int(games_played_post[i]))*100,1))
 
         # Create lists of data to be inserted into trees.
-        list_pre =  np.array([cards_played_pre,games_played_pre,games_won_pre,games_wr_pre]).T.tolist()
+        list_pre = np.array([cards_played_pre,games_played_pre,games_won_pre,games_wr_pre]).T.tolist()
         list_post = np.array([cards_played_post,games_played_post,games_won_post,games_wr_post]).T.tolist()
 
-        list_pre =  sorted(list_pre,key=lambda x: -int(x[1]))
+        list_pre = sorted(list_pre,key=lambda x: -int(x[1]))
         list_post = sorted(list_post,key=lambda x: -int(x[1]))
 
         mid_frame7["text"] = "Pre-Sideboard - " + str(n_pre) + " Games: " + mformat
@@ -4610,17 +4610,19 @@ def get_stats():
             return str(round(fl*100,n))
 
     def update_format_menu(*argv):
-        format_options = df0_i[(df0_i.P1 == player.get())].Format.value_counts().keys().tolist()
+        cursor = CONN.cursor()
+        result_set = cursor.execute(f'SELECT DISTINCT Format FROM Matches WHERE P1 = "{player.get()}" ORDER BY Format ASC;').fetchall()
+        format_options = [row[0] for row in result_set]
         format_options.insert(0,"All Formats")
 
         menu_2["values"] = format_options
         mformat.set(format_options[0]) 
 
     def update_opp_menu(*argv):
-        df = df0_i[(df0_i.P1 == player.get())]
+        cursor = CONN.cursor()
+        result_set = cursor.execute(f'SELECT DISTINCT P2 FROM Matches WHERE P1 = "{player.get()}" ORDER BY P2 ASC;').fetchall()
+        opponents = [row[0] for row in result_set]
 
-        opponents = df.P2.value_counts().keys().tolist()
-        opponents.sort(reverse=False,key=str.casefold)
         if s_type.get() != "Opponent Stats":
             opponents.insert(0,"Opponent")
 
@@ -4645,53 +4647,55 @@ def get_stats():
         update_opp_deck_menu()
 
     def update_lim_menu(*argv):
-        lim_formats_played = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())].Limited_Format.value_counts().keys().tolist()
+        cursor = CONN.cursor()
+        result_set = cursor.execute(f'SELECT DISTINCT Limited_Format FROM Matches WHERE P1 = "{player.get()}" AND Format = "{mformat.get()}" ORDER BY Limited_Format ASC;').fetchall()
+        lim_formats_played = [row[0] for row in result_set]
         lim_formats_played.insert(0,"All Limited Formats")
 
         menu_3["values"] = lim_formats_played
         lim_format.set(lim_formats_played[0])
 
     def update_deck_menu(*argv):
+        cursor = CONN.cursor()
+
+        base_query = f'SELECT DISTINCT P1_Subarch FROM Matches WHERE P1 = "{player.get()}"'
         if mformat.get() == "All Formats":
-            df = df0_i[(df0_i.P1 == player.get())]
+            pass
         elif mformat.get() in INPUT_OPTIONS["Constructed Formats"]:
-            df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())]
+            base_query += f' AND Format = "{mformat.get()}";'
         elif (mformat.get() in INPUT_OPTIONS["Limited Formats"]) & (lim_format.get() == "All Limited Formats"):
-            df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())]
+            base_query += f' AND Format = "{mformat.get()}";'
         elif (mformat.get() in INPUT_OPTIONS["Limited Formats"]) & (lim_format.get() != "All Limited Formats"):
-            df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get()) & (df0_i.Limited_Format == lim_format.get())]
+            base_query += f' AND Format = "{mformat.get()}" AND Limited_Format = "{lim_format.get()}";'
         else:
-            df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())]
+            base_query += f' AND Format = "{mformat.get()}";'
         
-        decks_played = df.P1_Subarch.value_counts().keys().tolist()
-        if s_type.get() == "Time Data":
-            deck_counts  = df0_i[(df0_i.P1 == player.get())].P1_Subarch.value_counts().tolist()
-            for index,i in enumerate(deck_counts):
-                if i < 20:
-                    del decks_played[index:]
-                    del deck_counts[index:]
-                    break
+        result_set = cursor.execute(base_query).fetchall()
+        decks_played = [row[0] for row in result_set]
         decks_played.insert(0,"All Decks")
 
         menu_4["values"] = decks_played
         deck.set(decks_played[0])
 
     def update_opp_deck_menu(*argv):
-        qu
+        cursor = CONN.cursor()
+
+        base_query = f'SELECT DISTINCT P2_Subarch FROM Matches WHERE P1 = "{player.get()}"'
         if mformat.get() == "All Formats":
-            df = df0_i[(df0_i.P1 == player.get())]
+            pass
         elif mformat.get() in INPUT_OPTIONS["Constructed Formats"]:
-            df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())]
+            base_query += f' AND Format = "{mformat.get()}";'
         elif (mformat.get() in INPUT_OPTIONS["Limited Formats"]) & (lim_format.get() == "All Limited Formats"):
-            df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())]
+            base_query += f' AND Format = "{mformat.get()}";'
         elif (mformat.get() in INPUT_OPTIONS["Limited Formats"]) & (lim_format.get() != "All Limited Formats"):
-            df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get()) & (df0_i.Limited_Format == lim_format.get())]
+            base_query += f' AND Format = "{mformat.get()}" AND Limited_Format = "{lim_format.get()}";'
         else:
-            df = df0_i[(df0_i.P1 == player.get()) & (df0_i.Format == mformat.get())]
+            base_query += f' AND Format = "{mformat.get()}";'
 
-        opp_decks_played = df.P2_Subarch.value_counts().keys().tolist()
+        result_set = cursor.execute(base_query).fetchall()
+        opp_decks_played = [row[0] for row in result_set]
         opp_decks_played.insert(0,"All Opp. Decks")
-
+        
         menu_5["values"] = opp_decks_played
         opp_deck.set(opp_decks_played[0])
 
@@ -4707,13 +4711,6 @@ def get_stats():
             menu_5["state"] = tk.DISABLED
             date_entry_1["state"] = tk.DISABLED
             date_entry_2["state"] = tk.DISABLED
-        elif s_type.get() == "Time Data":
-            menu_1["state"] = tk.DISABLED
-            menu_2["state"] = "readonly"
-            menu_4["state"] = "readonly"
-            menu_5["state"] = tk.DISABLED
-            date_entry_1["state"] = "readonly"
-            date_entry_2["state"] = "readonly"
         elif s_type.get() == "Opponent Stats":
             menu_1["state"] = "readonly"
             menu_2["state"] = tk.DISABLED
@@ -4760,8 +4757,7 @@ def get_stats():
     def close_stats_window():
         window.deiconify()
         stats_window.destroy()
-        
-    
+
     date_min = df0.Date.min()
     today = datetime.date.today()
 
