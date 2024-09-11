@@ -4342,122 +4342,6 @@ def get_stats():
                                               meta_deck_wr[i][1],
                                               (meta_deck_wr[i][2]+"%")])
 
-    # def time_stats(hero,opp,mformat,lformat,deck,opp_deck,date_range,s_type):
-    #     stats_window.title("Statistics - Time Data: " + hero)
-    #     clear_frames()
-    #     mid_frame.grid_rowconfigure(0,weight=1)
-    #     mid_frame.grid_rowconfigure(1,weight=0)
-    #     mid_frame.grid_columnconfigure(0,weight=1)
-    #     mid_frame.grid_columnconfigure(1,weight=1)
-    #     mid_frame5.grid_rowconfigure(0,weight=1)
-    #     mid_frame5.grid_columnconfigure(0,weight=1)
-    #     mid_frame6.grid_rowconfigure(0,weight=1)
-    #     mid_frame6.grid_columnconfigure(0,weight=1)
-    #     mid_frame5.grid(row=0,column=0,sticky="nsew")
-    #     mid_frame6.grid(row=0,column=1,sticky="nsew")
-
-    #     mid_frame5.grid_propagate(0)
-    #     mid_frame6.grid_propagate(0)
-
-    #     def get_wr_over_time(df,start_index):
-    #         match_winners = df.Match_Winner.tolist()
-    #         x = []
-    #         wr_over_time = []
-    #         p1_count = 0
-    #         for index,i in enumerate(match_winners,1):
-    #             if i == "P1":
-    #                 p1_count += 1
-    #             wr_over_time.append(round(p1_count/index,3)*100)
-    #             x.append(index)
-    #         if start_index < len(wr_over_time):
-    #             x = x[start_index:]
-    #             wr_over_time = wr_over_time[start_index:]
-    #         return [x,wr_over_time]
-
-    #     def get_pm_over_time(df,start_index):
-    #         match_winners = df.Match_Winner.tolist()
-    #         x = []
-    #         last = 0
-    #         pm_over_time = []
-    #         for index,i in enumerate(match_winners):
-    #             if i == "P1":
-    #                 pm_over_time.append(last + 1)
-    #                 x.append(index)
-    #             elif i == "P2":
-    #                 pm_over_time.append(last - 1)
-    #                 x.append(index)
-    #             last = pm_over_time[-1]
-    #         if start_index < len(pm_over_time):
-    #             x = x[start_index:]
-    #             pm_over_time = pm_over_time[start_index:]
-    #         return [x,pm_over_time]
-
-    #     chart_type = "plusminus"
-
-    #     df_time = df0_i[(df0_i.P1 == hero)]
-    #     if mformat != "All Formats":
-    #         df_time = df_time[(df_time.Format == mformat)]
-    #     if lformat != "All Limited Formats":
-    #         df_time = df_time[(df_time.Limited_Format == lformat)]
-    #     df_time = df_time.sort_values(by=["Date"])
-    #     df_time = df_time[(df_time.Date.between(date_range[0],date_range[1]))]
-        
-    #     if chart_type == "winrate":
-    #         g1_list = get_wr_over_time(df_time,0)
-    #     elif chart_type == "plusminus":
-    #         g1_list = get_pm_over_time(df_time,0)
-
-    #     fig = plt.figure(figsize=(7,5),dpi=100)
-    #     plt.plot(g1_list[0],g1_list[1])
-    #     plt.xlabel("Matches Played")
-
-    #     if chart_type == "winrate":
-    #         if lformat == "All Limited Formats":
-    #             plt.title("Win Rate Over Time:\n" + mformat)
-    #         else:
-    #             plt.title("Win Rate Over Time:\n" + mformat + " - " + lformat)
-    #         plt.ylabel("Winning Percentage")
-    #     elif chart_type == "plusminus":
-    #         if lformat == "All Limited Formats":
-    #             plt.title("Match Wins Over .500:\n" + mformat)
-    #         else:
-    #             plt.title("Match Wins Over .500:\n" + mformat + " - " + lformat)
-    #         plt.ylabel("Match Wins Over .500")
-
-    #     canvas = FigureCanvasTkAgg(fig,mid_frame5)
-    #     canvas.draw()
-    #     canvas.get_tk_widget().grid(row=0,column=0,sticky="")
-
-    #     if deck != "All Decks":
-    #         df_time_d = df_time[(df_time.P1_Subarch == deck)]
-    #         df_time_d = df_time_d.sort_values(by=["Date"])     
-            
-    #         if chart_type == "winrate":
-    #             g2_list = get_wr_over_time(df_time_d,0)
-    #         elif chart_type == "plusminus":
-    #             g2_list = get_pm_over_time(df_time_d,0)
-
-    #         fig = plt.figure(figsize=(7,5),dpi=100)
-    #         plt.plot(g2_list[0],g2_list[1])
-    #         plt.xlabel("Matches Played")
-
-    #         if chart_type == "winrate":
-    #             if lformat == "All Limited Formats":
-    #                 plt.title("Win Rate Over Time:\n" + mformat + ": " + deck)
-    #             else:
-    #                 plt.title("Win Rate Over Time:\n" + mformat + " - " + lformat + ": " + deck)
-    #             plt.ylabel("Winning Percentage")
-    #         elif chart_type == "plusminus":
-    #             if lformat == "All Limited Formats":
-    #                 plt.title("Match Wins Over .500:\n" + mformat + ": " + deck)
-    #             else:
-    #                 plt.title("Match Wins Over .500:\n" + mformat + " - " + lformat + ": " + deck)
-    #             plt.ylabel("Match Wins Over .500")
-
-    #         canvas2 = FigureCanvasTkAgg(fig,mid_frame6)
-    #         canvas2.draw()
-    #         canvas2.get_tk_widget().grid(row=0,column=0,sticky="")
-
     def card_stats(hero,opp,mformat,lformat,deck,opp_deck,date_range,s_type,opponents,lands):
         stats_window.title("Statistics - Card Data: " + hero)
         clear_frames()
@@ -4522,38 +4406,79 @@ def get_stats():
         mid_frame7.grid_propagate(0)
         mid_frame8.grid_propagate(0)
 
+        cursor = CONN.cursor()
+
         # Use Left Join because we want to keep Games where 0 Plays occurred.
-        df_merge = pd.merge(df1_i,
-                            df2_i,
-                            how="left",
-                            left_on=["Match_ID","Game_Num"],
-                            right_on=["Match_ID","Game_Num"])
-        df_merge = pd.merge(df0_i,
-                            df_merge,
-                            how="inner",
-                            left_on=["Match_ID","P1","P2"],
-                            right_on=["Match_ID","P1","P2"])
-        df_merge = df_merge[(df_merge.Game_Winner != "NA") & (df_merge.Date > date_range[0]) & (df_merge.Date < date_range[1]) & (df_merge.Primary_Card != "NA")]
+        # df_merge = pd.merge(df1_i,
+        #                     df2_i,
+        #                     how="left",
+        #                     left_on=["Match_ID","Game_Num"],
+        #                     right_on=["Match_ID","Game_Num"])
+        # df_merge = pd.merge(df0_i,
+        #                     df_merge,
+        #                     how="inner",
+        #                     left_on=["Match_ID","P1","P2"],
+        #                     right_on=["Match_ID","P1","P2"])
+        # df_merge = df_merge[(df_merge.Game_Winner != "NA") & (df_merge.Date > date_range[0]) & (df_merge.Date < date_range[1]) & (df_merge.Primary_Card != "NA")]
+
+        base_query = f'''
+        SELECT *
+        FROM Games G LEFT JOIN Plays P
+        ON G.Match_ID = P.Match_ID AND G.Game_Num = P.Game_Num
+        JOIN Matches M
+        ON G.Match_ID = M.Match_ID AND G.P1 = M.P1
+        WHERE G.Game_Winner != "NA" AND M.Date > "{date_range[0]}" AND M.Date < "{date_range[1]}" AND P.Primary_Card != "NA"
+        '''
+        filter_query = ''
+
         if mformat != "All Formats":
-            df_merge = df_merge[(df_merge.Format == mformat)]
+            filter_query += f' AND M.Format = "{mformat}"'
         if lformat != "All Limited Formats":
-            df_merge = df_merge[(df_merge.Limited_Format == lformat)]
+            filter_query += f' AND M.Limited_Format = "{lformat}"'
         if deck != "All Decks":
-            df_merge = df_merge[(df_merge.P1_Subarch == deck)]
+            filter_query += f' AND M.P1_Subarch = "{deck}"'
         if opp_deck != "All Opp. Decks":
-            df_merge = df_merge[(df_merge.P2_Subarch == opp_deck)]
+            filter_query += f' AND M.P2_Subarch = "{opp_deck}"'
         if hero != "All Players":
-            df_merge = df_merge[(df_merge.P1 == hero)]
-        df_merge["Game_ID"]  = df_merge.Match_ID + "_G" + df_merge.Game_Num.astype(str)
-        df_merge["Won_Game"] = np.where(df_merge["Game_Winner"] == "P1",1,0)
+            filter_query += f' AND M.P1 = "{hero}"'
+        # df_merge["Game_ID"]  = df_merge.Match_ID + "_G" + df_merge.Game_Num.astype(str)
+        # df_merge["Won_Game"] = np.where(df_merge["Game_Winner"] == "P1",1,0)
 
-        df_merge_pre  = df_merge[(df_merge.Game_Num == 1)]
-        df_merge_post = df_merge[(df_merge.Game_Num != 1)]
+        # df_merge_pre = df_merge[(df_merge.Game_Num == 1)]
+        # df_merge_post = df_merge[(df_merge.Game_Num != 1)]
 
-        n_pre  = len(list(df_merge_pre.Game_ID.value_counts()))
-        n_post = len(list(df_merge_post.Game_ID.value_counts()))
-        wins_pre =  df_merge_pre.drop_duplicates("Game_ID").Won_Game.sum()
-        wins_post = df_merge_post.drop_duplicates("Game_ID").Won_Game.sum()
+        n_pre = cursor.execute(f'''
+        SELECT COUNT(DISTINCT M.Match_ID, G.Game_Num) as Game_ID 
+        FROM Games G LEFT JOIN Plays P
+        ON G.Match_ID = P.Match_ID AND G.Game_Num = P.Game_Num
+        JOIN Matches M
+        ON G.Match_ID = M.Match_ID AND G.P1 = M.P1
+        WHERE G.Game_Winner != "NA" AND M.Date > "{date_range[0]}" AND M.Date < "{date_range[1]}" AND P.Primary_Card != "NA" AND G.Game_Num = 1
+        ''' + filter_query).fetchone()[0]
+        n_post = cursor.execute(f'''
+        SELECT COUNT(DISTINCT M.Match_ID, G.Game_Num) as Game_ID 
+        FROM Games G LEFT JOIN Plays P
+        ON G.Match_ID = P.Match_ID AND G.Game_Num = P.Game_Num
+        JOIN Matches M
+        ON G.Match_ID = M.Match_ID AND G.P1 = M.P1
+        WHERE G.Game_Winner != "NA" AND M.Date > "{date_range[0]}" AND M.Date < "{date_range[1]}" AND P.Primary_Card != "NA" AND G.Game_Num != 1
+        ''' + filter_query).fetchone()[0]
+        wins_pre = cursor.execute(f'''
+        SELECT COUNT(DISTINCT M.Match_ID, G.Game_Num) as Game_ID 
+        FROM Games G LEFT JOIN Plays P
+        ON G.Match_ID = P.Match_ID AND G.Game_Num = P.Game_Num
+        JOIN Matches M
+        ON G.Match_ID = M.Match_ID AND G.P1 = M.P1
+        WHERE G.Game_Winner = "P1" AND M.Date > "{date_range[0]}" AND M.Date < "{date_range[1]}" AND P.Primary_Card != "NA" AND G.Game_Num = 1
+        ''' + filter_query).fetchone()[0]
+        wins_post = cursor.execute(f'''
+        SELECT COUNT(DISTINCT M.Match_ID, G.Game_Num) as Game_ID 
+        FROM Games G LEFT JOIN Plays P
+        ON G.Match_ID = P.Match_ID AND G.Game_Num = P.Game_Num
+        JOIN Matches M
+        ON G.Match_ID = M.Match_ID AND G.P1 = M.P1
+        WHERE G.Game_Winner = "P1" AND M.Date > "{date_range[0]}" AND M.Date < "{date_range[1]}" AND P.Primary_Card != "NA" AND G.Game_Num != 1
+        ''' + filter_query).fetchone()[0]
         if n_pre == 0:
             wr_pre = 0.0
         else:
@@ -4564,18 +4489,13 @@ def get_stats():
             wr_post = round((wins_post/n_post)*100,1).item()
 
         if opponents == True:
-            df_merge_pre = df_merge_pre[(df_merge_pre.Casting_Player != hero)]
-            df_merge_post = df_merge_post[(df_merge_post.Casting_Player != hero)]
+            filter_query += f' AND P.Casting_Player != "{hero}"'
         elif opponents == False:
-            df_merge_pre = df_merge_pre[(df_merge_pre.Casting_Player == hero)]
-            df_merge_post = df_merge_post[(df_merge_post.Casting_Player == hero)]
-
+            filter_query += f' AND P.Casting_Player = "{hero}"'
         if lands == True:
-            df_merge_pre = df_merge_pre[(df_merge_pre.Action.isin(["Land Drop"]))]
-            df_merge_post = df_merge_post[(df_merge_post.Action.isin(["Land Drop"]))]
+            filter_query += f' AND P.Action = "Land Drop"'
         elif lands == False:
-            df_merge_pre = df_merge_pre[(df_merge_pre.Action.isin(["Plays","Casts"]))]
-            df_merge_post = df_merge_post[(df_merge_post.Action.isin(["Plays","Casts"]))]
+            filter_query += f' AND P.Action IN ("Plays", "Casts")'
 
         df_merge_pre.drop(df_merge_pre.columns.difference(["Game_ID","Game_Num","P1_Subarch","P2_Subarch","Primary_Card","Won_Game"]),axis=1,inplace=True)
         df_merge_pre.drop_duplicates(inplace=True)
