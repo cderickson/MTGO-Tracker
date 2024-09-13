@@ -20,9 +20,6 @@ import sqlite3
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 pd.options.mode.chained_assignment = None
 
-# !FIXTHIS! add cursor.close() to all my cursor functions.
-# !FIXTHIS! prev display not referenced.
-
 # Saved data:
 ALL_DATA =          [[],[],[],{}]
 ALL_DATA_INVERTED = [[],[],[],{}]
@@ -52,7 +49,6 @@ CONN =              None
 test_mode =         False
 filter_dict =       {}
 display =           ""
-prev_display =      ""
 uaw =               "NA"
 field =             ""
 new_import =        False
@@ -222,7 +218,6 @@ def clear_loaded(importingCopies):
     global display
     global data_loaded
     global filter_changed
-    global prev_display
     global uaw
     global new_import
     global ask_to_save
@@ -236,7 +231,6 @@ def clear_loaded(importingCopies):
     HERO =              ""
     filter_dict.clear()
     display =           ""
-    prev_display =      ""
     uaw =               "NA"
     data_loaded =       False
     filter_changed =    False
@@ -654,14 +648,12 @@ def save_settings():
     os.chdir(FILEPATH_ROOT)
 def set_display(d,update_status,start_index,reset):
     global display
-    global prev_display
     global display_index
 
     if data_loaded == False:
         return
 
     if display != d:
-        prev_display = display
         display = d
     
     if reset:
@@ -700,7 +692,6 @@ def get_all_data(fp_logs,fp_drafts,copy):
     draft_count = 0
     skip_dict = {}
 
-    # init_db()
     cursor = CONN.cursor()
     cursor.execute('SELECT Filename FROM Parsed_Files')
     parsed_files = {row[0] for row in cursor.fetchall()}
@@ -835,6 +826,7 @@ def get_all_data(fp_logs,fp_drafts,copy):
         clear_button["state"] = tk.NORMAL
         data_loaded = True
     os.chdir(FILEPATH_ROOT)
+    cursor.close()
 def print_data(headers,update_status,start_index,apply_filter,data=None):
     global CONN
     global new_import
@@ -935,7 +927,7 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
             filter_query += ' WHERE '
             filter_query += ' AND '.join(filter_list)
     
-    total_rows = cursor.execute(filter_query.replace('SELECT *','SELECT COUNT(*)')).fetchone()[0]
+    total_rows = cursor.execute(filter_query.replace(' * ',' COUNT(*) ')).fetchone()[0]
 
     if display == "Matches":
         if sort_type is None:
@@ -984,6 +976,7 @@ def print_data(headers,update_status,start_index,apply_filter,data=None):
     for i in df_rows:
         tree1.insert("","end",values=i)
 
+    cursor.close()
     if new_import == True:
         new_import = False
     elif update_status == True:
@@ -1028,14 +1021,6 @@ def input_missing_data():
 
     cursor = CONN.cursor()
     cursor2 = CONN.cursor()
-  
-    mformat_index = modo.header("Matches").index("Format")
-    lformat_index = modo.header("Matches").index("Limited_Format")
-    mtype_index =   modo.header("Matches").index("Match_Type")
-    p1_arch_index = modo.header("Matches").index("P1_Arch")
-    p1_sub_index =  modo.header("Matches").index("P1_Subarch")
-    p2_arch_index = modo.header("Matches").index("P2_Arch")
-    p2_sub_index =  modo.header("Matches").index("P2_Subarch")
 
     n = 0
     count = 0
@@ -1133,6 +1118,9 @@ def input_missing_data():
             WHERE Match_ID = "{row[0]}" AND P1 = "{players[1]}"
             ''')
         row = cursor.fetchone()
+    
+    cursor.close()
+    cursor2.close()
     if count == 0:
         update_status_bar(status="No Matches with Missing Data.")
     else:
@@ -1307,6 +1295,8 @@ def deck_data_guess(update_type):
             ''')
             ask_to_save = True
             row = cursor.fetchone()
+    cursor.close()
+    cursor2.close()
 def rerun_decks_window():
     height = 200
     width =  400
@@ -1719,7 +1709,6 @@ def export2(current=False,matches=False,games=False,plays=False,drafts=False,pic
     file_names = []
     header_list = []
     data_to_write = []
-    cursor = CONN.cursor()
 
     if current:
         file_names.append("Current")
@@ -1896,6 +1885,7 @@ def set_default_hero():
     button2.grid(row=4,column=1,padx=5,pady=5)
     button3.grid(row=4,column=2,padx=5,pady=5)
 
+    cursor.close()
     hero_window.protocol("WM_DELETE_WINDOW", lambda : close_hero_window())
 def set_default_export():
     height = 150
@@ -2301,7 +2291,6 @@ def set_filter():
     update_filter_text()
     filter_window.protocol("WM_DELETE_WINDOW", lambda : close_filter_window())
 def revise_record2():
-    global CONN
     global selected
 
     if tree1.focus() == "":
@@ -2310,7 +2299,6 @@ def revise_record2():
     selected = tree1.focus()
     values = list(tree1.item(selected,"values"))
     sel_matchid = values[0]
-
     cursor = CONN.cursor()
 
     p1_index = modo.header("Matches").index("P1")
@@ -2369,6 +2357,7 @@ def revise_record2():
             tree1.focus(i)
             selected = i
             break
+    cursor.close()
 def revise_record_multi():
     if tree1.focus() == "":
         return
@@ -2497,7 +2486,6 @@ def revise_record_multi():
             lim_format_entry["state"] = tk.DISABLED
 
     def close_revise_window():
-        global CONN
         global ask_to_save
         global selected
         ask_to_save = True
@@ -2539,6 +2527,7 @@ def revise_record_multi():
         tree1.selection_set(sel_tuple)
         tree1.focus(list(sel_tuple)[0])
         selected = sel_tuple
+        cursor.close()
 
     def close_without_saving():
         revise_window.grab_release()
@@ -2686,12 +2675,9 @@ def import_window():
     def import_data(overwrite):
         global FILEPATH_LOGS
         global FILEPATH_DRAFTS
-        global HERO
-        global CONN
 
         FILEPATH_DRAFTS = label1["text"]
         FILEPATH_LOGS = label2["text"]
-
         cursor = CONN.cursor()
 
         if overwrite == True:
@@ -2803,6 +2789,7 @@ def import_window():
             data_menu.entryconfig("Apply Best Guess for Deck Names",state=tk.NORMAL)
             data_menu.entryconfig("Apply Associated Draft_IDs to Limited Matches",state=tk.NORMAL)
         #save_settings()
+        cursor.close()
         set_display("Matches",update_status=False,start_index=0,reset=True)
         close_import_window()
 
@@ -2847,7 +2834,6 @@ def import_window():
 
     import_window.protocol("WM_DELETE_WINDOW", lambda : close_import_window())
 def get_winners():
-    global CONN
     global uaw
     global ask_to_save
 
@@ -2952,6 +2938,7 @@ def get_winners():
         ''')
         ask_to_save = True
 
+    cursor.close()
     if total == 0:
         update_status_bar(status=f"No Applicable Games found.")
     elif changed == 1:
@@ -3250,6 +3237,7 @@ def get_stats():
             elif i == "NA":
                 tree2_result[index] = "NA "
             tree2_result[index] += str(tree2_wins[index]) + "-" + str(tree2_losses[index])
+        cursor.close()
 
         mid_frame9["text"] = "Match History: " + hero
         tree1.tag_configure("win",background="#a3ffb1")
@@ -3452,6 +3440,7 @@ def get_stats():
             else:
                 hero_deck_wr.append([wins,losses,to_percent(wins/total,1)])        
 
+        cursor.close()
         mid_frame1["text"] = "Die Rolls"
         tree1.tag_configure("colored",background="#cccccc")
         tree1.delete(*tree1.get_children())
@@ -3754,6 +3743,7 @@ def get_stats():
                                   opp_mull_rate,
                                   turn_rate])
         
+        cursor.close()
         tree_data = [tree1data,tree2data,tree3data,tree4data]
         frames = [mid_frame1,mid_frame2,mid_frame3,mid_frame4]
         for index,tree in enumerate([tree1,tree2,tree3,tree4]):
@@ -3983,6 +3973,7 @@ def get_stats():
             frame_labels[2] = "Play Data: " + mformat + " - " + lformat + ", " + deck
             frame_labels[3] = "Opposing Play Data: " + mformat + " - " + lformat + ", " + deck
 
+        cursor.close()
         mid_frame1["text"] = frame_labels[0]
         tree1.tag_configure("colored",background="#cccccc")   
         tree1.delete(*tree1.get_children())
@@ -4109,7 +4100,6 @@ def get_stats():
         mid_frame4.grid(row=1,column=1,sticky="nsew")
 
         cursor = CONN.cursor()
-
         base_query = f'SELECT * FROM Matches WHERE P1 = "{hero}" AND P2 = "{opp}" ORDER BY Date DESC'
 
         result_set = cursor.query(base_query.replace(' * ',' Date, P1_Subarch, P2_Subarch, P1_Wins, P2_Wins, Match_Winner ')).fetchall()
@@ -4234,6 +4224,7 @@ def get_stats():
             else:
                 meta_deck_wr.append([wins,losses,to_percent(wins/total,1)])
 
+        cursor.close()
         mid_frame1["text"] = "Match History: vs. " + opp
         tree1.tag_configure("win",background="#a3ffb1")
         tree1.tag_configure("lose",background="#ffa3a3")
@@ -4408,19 +4399,6 @@ def get_stats():
 
         cursor = CONN.cursor()
 
-        # Use Left Join because we want to keep Games where 0 Plays occurred.
-        # df_merge = pd.merge(df1_i,
-        #                     df2_i,
-        #                     how="left",
-        #                     left_on=["Match_ID","Game_Num"],
-        #                     right_on=["Match_ID","Game_Num"])
-        # df_merge = pd.merge(df0_i,
-        #                     df_merge,
-        #                     how="inner",
-        #                     left_on=["Match_ID","P1","P2"],
-        #                     right_on=["Match_ID","P1","P2"])
-        # df_merge = df_merge[(df_merge.Game_Winner != "NA") & (df_merge.Date > date_range[0]) & (df_merge.Date < date_range[1]) & (df_merge.Primary_Card != "NA")]
-
         filter_query = ''
         if mformat != "All Formats":
             filter_query += f' AND M.Format = "{mformat}"'
@@ -4432,12 +4410,8 @@ def get_stats():
             filter_query += f' AND M.P2_Subarch = "{opp_deck}"'
         if hero != "All Players":
             filter_query += f' AND M.P1 = "{hero}"'
-        # df_merge["Game_ID"]  = df_merge.Match_ID + "_G" + df_merge.Game_Num.astype(str)
-        # df_merge["Won_Game"] = np.where(df_merge["Game_Winner"] == "P1",1,0)
 
-        # df_merge_pre = df_merge[(df_merge.Game_Num == 1)]
-        # df_merge_post = df_merge[(df_merge.Game_Num != 1)]
-
+        # Use Left Join because we want to keep Games where 0 Plays occurred.
         n_pre = cursor.execute(f'''
         SELECT COUNT(DISTINCT M.Match_ID, G.Game_Num) as Game_ID 
         FROM Games G LEFT JOIN Plays P
@@ -4487,12 +4461,6 @@ def get_stats():
             filter_query += f' AND P.Action = "Land Drop"'
         elif lands == False:
             filter_query += f' AND P.Action IN ("Plays", "Casts")'
-
-        # df_merge_pre.drop(df_merge_pre.columns.difference(["Game_ID","Game_Num","P1_Subarch","P2_Subarch","Primary_Card","Won_Game"]),axis=1,inplace=True)
-        # df_merge_pre.drop_duplicates(inplace=True)
-
-        # df_merge_post.drop(df_merge_post.columns.difference(["Game_ID","Game_Num","P1_Subarch","P2_Subarch","Primary_Card","Won_Game"]),axis=1,inplace=True)
-        # df_merge_post.drop_duplicates(inplace=True)
 
         result_set = cursor.execute(f'''
         SELECT P.Primary_Card, COUNT(CASE WHEN G.Game_Winner != "NA" THEN 1 END) as Games_Played, COUNT(CASE WHEN G.Game_Winner = "P1" THEN 1 END) as Games_Won 
@@ -4566,6 +4534,7 @@ def get_stats():
                                           i[3],
                                           round(float(i[3])-wr_pre,1)])
 
+        cursor.close()
         mid_frame8["text"] = "Post-Sideboard - " + str(n_post) + " Games: " + mformat
         if lformat != "All Limited Formats":
             mid_frame7["text"] += " - " + lformat
@@ -4617,6 +4586,7 @@ def get_stats():
 
         menu_2["values"] = format_options
         mformat.set(format_options[0]) 
+        cursor.close()
 
     def update_opp_menu(*argv):
         cursor = CONN.cursor()
@@ -4628,6 +4598,7 @@ def get_stats():
 
         menu_1["values"] = opponents
         opponent.set(opponents[0])
+        cursor.close()
 
     def update_format(*argv):
         if mformat.get() in INPUT_OPTIONS["Limited Formats"]:
@@ -4676,6 +4647,7 @@ def get_stats():
 
         menu_4["values"] = decks_played
         deck.set(decks_played[0])
+        cursor.close()
 
     def update_opp_deck_menu(*argv):
         cursor = CONN.cursor()
@@ -4698,6 +4670,7 @@ def get_stats():
         
         menu_5["values"] = opp_decks_played
         opp_deck.set(opp_decks_played[0])
+        cursor.close()
 
     def update_s_type(*argv):
         update_opp_menu()
@@ -4869,7 +4842,6 @@ def update_status_bar(status):
     debug_str += f'{status}\n'
     print(status)
 def remove_record(ignore):
-    global CONN
     global ask_to_save
     global selected
 
@@ -4930,6 +4902,7 @@ def remove_record(ignore):
         cursor.execute(f'DELETE FROM Skipped_Files WHERE Record_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)
         cursor.execute(f'DELETE FROM Parsed_Files WHERE Record_ID IN ({",".join("?" * len(sel_matchid_tuple))})', sel_matchid_tuple)     
 
+    cursor.close()
     ask_to_save = True
     set_display(display,update_status=False,start_index=0,reset=True)
     if display == "Matches":
@@ -4996,7 +4969,6 @@ def remove_select():
     
     remove_select.protocol("WM_DELETE_WINDOW", lambda : close_window())
 def get_associated_draftid(mode):
-    global CONN
     global missing_data
     global ask_to_save
 
@@ -5090,6 +5062,8 @@ def get_associated_draftid(mode):
         set_display("Matches",update_status=False,start_index=0,reset=True)
     else:
         update_status_bar(f"No Matches with Applicable Draft_IDs found.")
+    cursor.close()
+    cursor2.close()
 def get_associated_draftid_pre():
     height = 115
     width =  315
@@ -5365,7 +5339,6 @@ def update_auxiliary():
     update_window.protocol("WM_DELETE_WINDOW", lambda : close_update_window())
 def clear_skipped_files():
     global ask_to_save
-    global CONN
 
     cursor = CONN.cursor()
     file_count = cursor.execute('SELECT COUNT(*) FROM Skipped_Files').fetchone()[0]
@@ -5373,6 +5346,7 @@ def clear_skipped_files():
     cursor.execute('DELETE FROM Skipped_Files')
     ask_to_save = True
 
+    cursor.close()
     update_status_bar(status=f"Made all ignored files scannable ({file_count} GameLogs and/or DraftLogs).")
 def debug():
     os.chdir(FILEPATH_ROOT)
@@ -5408,7 +5382,6 @@ def debug():
 
         txt.write("Other Variables:\n")
         txt.write(f"    display: {display}\n")
-        txt.write(f"    prev_display: {prev_display}\n")
         txt.write(f"    uaw: {uaw}\n")
         txt.write(f"    field: {field}\n")
         txt.write(f"    new_import: {new_import}\n")
@@ -5558,8 +5531,8 @@ def create_tables():
     cursor = CONN.cursor()
     for i in all_queries:
         cursor.execute(i)
+    cursor.close()
 def table_insert(table,data):
-    global CONN
     global debug_str
 
     if table == 'Drafts':
@@ -5600,13 +5573,14 @@ def table_insert(table,data):
         VALUES (?, ?, ?)'''
     cursor = CONN.cursor()
     cursor.executemany(query,data)
+    cursor.close()
 def init_db():
-    global CONN
     global debug_str
 
     CONN = sqlite3.connect('all_data.db')
     cursor = CONN.cursor()
     cursor.execute('''BEGIN TRANSACTION;''')
+    cursor.close()
     debug_str += 'Database connection initialized.\n'
 def close_db(save):
     global CONN
@@ -5614,16 +5588,16 @@ def close_db(save):
 
     if save == True:
         CONN.commit()
-        debug_str += 'Table creation queries committed.\n'
+        debug_str += 'Database changes committed.\n'
     elif save == False:
         cursor = CONN.cursor()
         cursor.execute('''ROLLBACK;''')
         debug_str += 'Database changes rolled back.\n'
+        cursor.close()
     CONN.close()
     CONN = None
     debug_str += 'Database connection closed.\n'
 def get_table_len(table):
-    global CONN
     cursor = CONN.cursor()
 
     query = f'SELECT COUNT(*) FROM {table}'
@@ -5632,7 +5606,7 @@ def get_table_len(table):
     elif (table == 'Drafts') and (HERO != ''):
         query += f' WHERE Hero = "{HERO}";'
     cursor.execute(f'SELECT COUNT(*) FROM {table}')
-
+    cursor.close()
     return int(cursor.fetchone()[0])
 
 window = tk.Tk() 
