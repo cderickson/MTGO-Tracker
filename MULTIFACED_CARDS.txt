@@ -7,11 +7,14 @@ Assure // Assemble
 Beck // Call
 Bedeck // Bedazzle
 Boom // Bust
+Bottomless Pool // Locker Room
 Bound // Determined
 Breaking // Entering
 Carnival // Carnage
 Catch // Release
 Cease // Desist
+Central Elevator // Promising Stairs
+Charred Foyer // Warped Space
 Claim // Fame
 Collision // Colossus
 Commit // Memory
@@ -19,16 +22,23 @@ Connive // Concoct
 Consecrate // Consume
 Consign // Oblivion
 Coward // Killer
+Cramped Vents // Access Maze
 Crime // Punishment
+Crude Abattoir // Unsavory Kitchen
 Cut // Ribbons
+Dazzling Theater // Prop Room
 Dead // Gone
+Defiled Crypt // Cadaver Lab
 Depose // Deploy
+Derelict Attic // Widow's Walk
 Destined // Lead
 Discovery // Dispersal
+Dollmaker's Shop // Porcelain Gallery
 Down // Dirty
 Driven // Despair
 Dusk // Dawn
 Expansion // Explosion
+Experimental Lab // Staff Room
 Failure // Comply
 Far // Away
 Farm // Market
@@ -38,9 +48,13 @@ Fire // Ice
 Flesh // Blood
 Flotsam // Jetsam
 Flower // Flourish
+Funeral Room // Awakening Hall
 Fuss // Bother
 Gallifrey Falls // No More
 Give // Take
+Glassworks // Shattered Yard
+Grand Entryway // Elegant Rotunda
+Greenhouse // Rickety Gazebo
 Grind // Dust
 Heaven // Earth
 Hide // Seek
@@ -54,6 +68,9 @@ Integrity // Intervention
 Invert // Invent
 Leave // Chance
 Life // Death
+Meat Locker // Drowned Diner
+Mirror Room // Fractured Realm
+Moldering Gym // Weight Room
 Mouth // Feed
 Never // Return
 Night // Day
@@ -61,6 +78,8 @@ Odds // Ends
 Onward // Victory
 Order // Chaos
 Pain // Suffering
+Painter's Studio // Defaced Gallery
+Polluted Cistern // Dim Oubliette
 Prepare // Fight
 Profit // Loss
 Protect // Serve
@@ -74,11 +93,17 @@ Refuse // Cooperate
 Repudiate // Replicate
 Research // Development
 Response // Resurgence
+Restricted Office // Lecture Hall
 Revival // Revenge
 Rise // Fall
 Road // Ruin
+Roaring Furnace // Steaming Sauna
 Rough // Tumble
 Said // Done
+Secret Arcade // Dusty Parlor
+Smoky Lounge // Misty Salon
+Solitary Study // Endless Corridor
+Spiked Corridor // Torture Pit
 Spite // Malice
 Spring // Mind
 Stand // Deliver
@@ -86,10 +111,15 @@ Start // Finish
 Status // Statue
 Struggle // Survive
 Supply // Demand
+Surgical Suite // Hospital Room
 Thrash // Threat
+Ticket Booth // Tunnel of Hate
 Toil // Trouble
 Trial // Error
 Turn // Burn
+Underwater Tunnel // Slimy Aquarium
+Unholy Annex // Ritual Chamber
+Walk-In Closet // Forgotten Cellar
 Warrant // Warden
 Wax // Wane
 Wear // Tear
@@ -147,7 +177,9 @@ Brine Comber // Brinebound Gift
 Brutal Cathar // Moonrage Brute
 Burly Breaker // Dire-Strain Demolisher
 Captive Weird // Compleated Conjurer
+Casal, Lurkwood Pathfinder // Casal, Pathbreaker Owlbear
 Catapult Fodder // Catapult Captain
+Cecil, Dark Knight // Cecil, Redeemed Paladin
 Chalice of Life // Chalice of Death
 Chandra, Fire of Kaladesh // Chandra, Roaring Flame
 Chaplain of Alms // Chapel Shieldgeist
@@ -176,7 +208,6 @@ Devoted Grafkeeper // Departed Soulkeeper
 Dire Flail // Dire Blunderbuss
 Distracting Geist // Clever Distraction
 Docent of Perfection // Final Iteration
-Doric, Nature's Warden // Doric, Owlbear Avenger
 Dormant Grove // Gnarled Grovestrider
 Dorothea, Vengeful Victim // Dorothea's Retribution
 Dowsing Dagger // Lost Vale
@@ -188,6 +219,7 @@ Edgar, Charmed Groom // Edgar Markov's Coffin
 Elbrus, the Binding Blade // Withengar Unbound
 Elesh Norn // The Argent Etchings
 Elusive Tormentor // Insidious Mist
+Emet-Selch, Unsundered // Hades, Sorcerer of Eld
 Enduring Angel // Angelic Enforcer
 Era of Enlightenment // Hand of Enlightenment
 Etali, Primal Conqueror // Etali, Primal Sickness
@@ -201,6 +233,7 @@ Flame Channeler // Embodiment of Flame
 Flamewar, Brash Veteran // Flamewar, Streetwise Operative
 Foreboding Statue // Forsaken Thresher
 Galedrifter // Waildrifter
+Garland, Knight of Cornelia // Chaos, the Endless
 Garruk Relentless // Garruk, the Veil-Cursed
 Gatstaf Arsonists // Gatstaf Ravagers
 Gatstaf Shepherd // Gatstaf Howler
@@ -370,6 +403,7 @@ Seraph of New Capenna // Seraph of New Phyrexia
 Shady Traveler // Stalking Predator
 Sheoldred // The True Scriptures
 Shrill Howler // Howling Chorus
+Sidequest: Catch a Fish // Cooking Campsite
 Skin Invasion // Skin Shedder
 Skyclave Aerialist // Skyclave Invader
 Slicer, Hired Muscle // Slicer, High-Speed Antagonist
@@ -538,7 +572,9 @@ Brutal Cathar // Moonrage Brute
 Burly Breaker // Dire-Strain Demolisher
 Captive Weird // Compleated Conjurer
 Careful Study (minigame) // Careful Study (cont'd)
+Casal, Lurkwood Pathfinder // Casal, Pathbreaker Owlbear
 Catapult Fodder // Catapult Captain
+Cecil, Dark Knight // Cecil, Redeemed Paladin
 Chalice of Life // Chalice of Death
 Chandra, Fire of Kaladesh // Chandra, Roaring Flame
 Chaplain of Alms // Chapel Shieldgeist
@@ -580,7 +616,6 @@ Disciple of Freyalise // Garden of Freyalise
 Distracting Geist // Clever Distraction
 Docent of Perfection // Final Iteration
 Dominarioes // Dominarioes (cont'd)
-Doric, Nature's Warden // Doric, Owlbear Avenger
 Dormant Grove // Gnarled Grovestrider
 Dorothea, Vengeful Victim // Dorothea's Retribution
 Dowsing Dagger // Lost Vale
@@ -596,6 +631,7 @@ Elemental // Centaur
 Elesh Norn // The Argent Etchings
 Elusive Tormentor // Insidious Mist
 Emeria's Call // Emeria, Shattered Skyclave
+Emet-Selch, Unsundered // Hades, Sorcerer of Eld
 Enduring Angel // Angelic Enforcer
 Era of Enlightenment // Hand of Enlightenment
 Esika, God of the Tree // The Prismatic Bridge
@@ -608,6 +644,7 @@ Faithbound Judge // Sinner's Judgment
 Fangblade Brigand // Fangblade Eviscerator
 Fearful Villager // Fearsome Werewolf
 Fell the Profane // Fell Mire
+Find the Assassin // Find the Assassin (cont'd)
 Fish // Kraken
 Flame Channeler // Embodiment of Flame
 Flamescroll Celebrant // Revel in Silence
@@ -615,6 +652,7 @@ Flamewar, Brash Veteran // Flamewar, Streetwise Operative
 Foraging Squirrels // Foraging Squirrels (cont'd)
 Foreboding Statue // Forsaken Thresher
 Galedrifter // Waildrifter
+Garland, Knight of Cornelia // Chaos, the Endless
 Garruk Relentless // Garruk, the Veil-Cursed
 Gatstaf Arsonists // Gatstaf Ravagers
 Gatstaf Shepherd // Gatstaf Howler
@@ -669,6 +707,7 @@ Incubator // Phyrexian
 Infestation Expert // Infested Werewolf
 Innocent Traveler // Malicious Invader
 Instigator Gang // Wildblood Pack
+Into the Story: Assassin Edition // Story Beats
 Into the Story: Horror Edition // Into the Story (cont'd)
 Invasion of Alara // Awaken the Maelstrom
 Invasion of Amonkhet // Lazotep Convert
@@ -744,6 +783,7 @@ Legion Leadership // Legion Stronghold
 Legion's Landing // Adanto, the First Fort
 Life of Toshiro Umezawa // Memory of Toshiro
 Liliana, Heretical Healer // Liliana, Defiant Necromancer
+Liliana's Other Contract // Liliana's Undead Minion
 Loathsome Troll // Troll
 Lodestone Needle // Guidestone Compass
 Lone Rider // It That Rides as One
@@ -768,6 +808,7 @@ Mimic Match // Mimic Match (cont'd)
 Mini-Master // Mini-Master (cont'd)
 Minion of the Mighty // Kobold
 Mirrorhall Mimic // Ghastly Mimicry
+Mirror Room // Fractured Realm
 Mischievous Catgeist // Catlike Curiosity
 Mishra's Manufactory // Mishra's Manufactory (cont'd)
 Mondronen Shaman // Tovolar's Magehunter
@@ -802,6 +843,7 @@ Pestilent Cauldron // Restorative Burst
 Pinnacle Monk // Mystic Peak
 Pious Evangel // Wayward Disciple
 Pirate // Treasure
+Plant a Sapling // Fully-Grown Treefolk
 Plargg, Dean of Chaos // Augusta, Dean of Order
 Polukranos Reborn // Polukranos, Engine of Ruin
 Poppet Stitcher // Poppet Factory
@@ -824,6 +866,7 @@ Restless Bloodseeker // Bloodsoaked Reveler
 Revitalizing Repast // Old-Growth Grove
 Rimeshield Frost Giant // Frost Giant
 Riverglide Pathway // Lavaglide Pathway
+Roaring Furnace // Steaming Sauna
 Roil Royale // Roil Royale (cont'd)
 Roll for Initiative // Roll for Initiative (cont'd)
 Rona, Herald of Invasion // Rona, Tolarian Obliterator
@@ -846,6 +889,7 @@ Shaile, Dean of Radiance // Embrose, Dean of Shadow
 Shatterskull Smashing // Shatterskull, the Hammer Pass
 Sheoldred // The True Scriptures
 Shrill Howler // Howling Chorus
+Sidequest: Catch a Fish // Cooking Campsite
 Silundi Vision // Silundi Isle
 Sink into Stupor // Soporific Springs
 Skin Invasion // Skin Shedder
@@ -867,6 +911,7 @@ Spikefield Hazard // Spikefield Cave
 Spring-Loaded Sawblades // Bladewheel Chariot
 Starscream, Power Hungry // Starscream, Seeker Leader
 Startled Awake // Persistent Nightmare
+Start Your Engines! // Max Speed
 Storm the Vault // Vault of Catlacan
 Strength of the Harvest // Haven of the Harvest
 Strictly Better // Strictly Better (cont'd)
@@ -889,6 +934,7 @@ Telepathic Transmission // Telepathic Transmission (cont'd)
 Tergrid, God of Fright // Tergrid's Lantern
 Tetzin, Gnome Champion // The Golden-Gear Colossus
 Thaumatic Compass // Spires of Orazca
+The Battle of Dragon Brothers // Fate Reforged
 The Dragon-Kami Reborn // Dragon-Kami's Egg
 The Enigma Jewel // Locus of Enlightenment
 The Everflowing Well // The Myriad Pools
@@ -1082,6 +1128,7 @@ Blessed Hippogriff // Tyr's Blessing
 Bonecrusher Giant // Stomp
 Bramble Familiar // Fetch Quest
 Brazen Borrower // Petty Theft
+Brightcap Badger // Fungus Frolic
 Callous Sell-Sword // Burn Together
 Cheeky House-Mouse // Squeak By
 Colossal Badger // Dig Deep
