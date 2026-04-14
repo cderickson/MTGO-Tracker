@@ -1,4 +1,4 @@
-# This project has been retired. 
+# This project has been retired and is no longer supported. 
 
 ### Please use [Mox-Data.com](https://github.com/cderickson/Mox-Data.com).
 
