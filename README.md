@@ -1,3 +1,7 @@
+# This project has been retired. 
+
+### Please use [Mox-Data.com](https://github.com/cderickson/Mox-Data.com).
+
 # MTGO-Tracker
 MTGO-Tracker is an analytics tool used to process raw data for Magic: the Gathering Online. Players can import and parse log files created during online play and store resulting information into a local database for self-analysis.
 
