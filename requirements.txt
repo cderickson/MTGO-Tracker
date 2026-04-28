@@ -1,5 +1,5 @@
 matplotlib==3.7.1
 numpy==1.24.3
 pandas==2.0.1
-Requests==2.32.4
+Requests==2.33.1
 tkcalendar==1.6.1
