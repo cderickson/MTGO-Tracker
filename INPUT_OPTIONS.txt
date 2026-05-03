@@ -76,6 +76,13 @@ Modern Cube
 # Matches.Limited_Format Options
 # Booster Draft Formats:
 -----------------------------
+MH3MH3MH3
+OTJOTJOTJ
+MKMMKMMKM
+LCILCILCI
+WOEWOEWOE
+LTRLTRLTR
+MOMMOMMOM
 ONEONEONE
 BROBROBRO
 DMUDMUDMU
@@ -118,6 +125,13 @@ Other Draft
 # Matches.Limited_Format Options
 # Sealed Formats:
 -----------------------------
+MH3 x6
+OTJ x6
+MKM x6
+LCI x6
+WOE x6
+LTR x6
+MOM x6
 ONE x6
 BRO x6
 DMU x6
